@@ -1,4 +1,4 @@
-﻿=== Merchantech Online Orders ===
+﻿=== Clover Online Orders ===
 Contributors: elbanyaoui
 Donate link: http://example.com/
 Tags: clover,online orders for clover,merchantech online orders
