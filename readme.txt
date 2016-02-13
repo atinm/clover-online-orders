@@ -1,5 +1,4 @@
-Il y a actuellement 72 extensions dans la file de validation, dont 35 attendent une première vérification.	Nous vous remercions de votre patience
-=== Clover Online Orders ===
+﻿=== Merchantech Online Orders ===
 Contributors: elbanyaoui
 Donate link: http://example.com/
 Tags: clover,online orders for clover,merchantech online orders
