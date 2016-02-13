@@ -1,0 +1,284 @@
+/**
+ * All of the CSS for your admin-specific functionality should be
+ * included in this file.
+ */
+.moo_option_description
+{
+    font-size: 20px;
+    background-color: #ffffff;
+    padding: 20px;
+    text-align: center;
+}
+.moo_option_description_key
+{
+    font-size: 20px;
+    background-color: #dddddd;
+    width: 80%;
+    margin-top: 20px;
+
+}
+.moo_option_right
+{
+   // float: right;
+    padding-top: inherit;
+    margin-top: 16px;
+}
+
+/* Order Table */
+
+#instructions
+{
+    width: 200px;
+}
+/*
+#paid,#taxAmount,#amount
+{
+    width: 30px;
+}
+#taxAmount
+{
+    width: 80px;
+}
+#amount
+{
+    width: 80px;
+}
+#p_name,#p_email
+{
+    width: 250px;
+}
+*/
+.item-hidden
+{
+    background-color: #faebcc !important;
+}
+#price,#price_type,#unit_name,#sku,#code
+{
+    width: 100px;
+
+}
+
+/* The Panel CSS */
+#MooPanel
+{
+    width: 810px;
+    margin: 45px auto 10px;
+    direction: ltr;
+    text-align: left;
+    position: relative;
+}
+#MooPanel_header
+{
+    position: relative;
+    float: left;
+    width: 100%;
+    margin-bottom: 5px;
+    text-align: left;
+    border-bottom: 3px solid #0073aa;
+    clear: both;
+}
+#MooPanel_sidebar
+{
+    width: 176px;
+    min-height: 673px;
+    float: left;
+    background: #a0a5aa;
+    text-shadow: 1px 1px #54595d;
+    color: #ffffff;
+    position: absolute;
+    left: 0;
+    top: 62px;
+    z-index: 1;
+}
+#MooPanel_main
+{
+    background: #FAFAFA;
+    padding: 20px 20px 50px;
+    float: right;
+    width: 593px;
+    border: 1px solid #e5e5e5;
+    -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    min-height: 602px;
+    position: relative;
+    overflow: hidden;
+}
+#MooPanel_sidebar ul
+{
+    list-style: none;
+    margin: 0;
+
+}#MooPanel_sidebar ul>li
+{
+     padding: 10px;
+     display: block;
+     color: #ffffff;
+     cursor: pointer;
+     border: 0;
+     outline: none;
+     text-decoration: none;
+    border-bottom: 1px solid ;
+    margin: 0;
+
+}
+#MooPanel_sidebar ul>li:hover
+{
+     background-color: #0073cc;
+}
+#MooPanel_tabContent2,#MooPanel_tabContent3,#MooPanel_tabContent4,#MooPanel_tabContent5
+{
+    display: none;
+}
+.MooPanel_Selected
+{
+    position: relative;
+    border:0 none;
+    background: #0074a2;
+    color: #fff;
+}
+
+.MooPanel_Selected:after
+{
+     right: 0;
+     border: solid 8px transparent;
+     content: " ";
+     height: 0;
+     width: 0;
+     position: absolute;
+     pointer-events: none;
+     border-right-color: #FAFAFA;
+     top: 50%;
+     margin-top: -8px;
+}
+#MooPanel_main h2
+{
+    margin-top: 5px;
+    margin-bottom: 35px;
+    font-size: 23px;
+    font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",sans-serif;
+    float: left;
+    font-weight: normal;
+}
+#MooPanel_main .MooPanelSubmit
+{
+    float: right;
+}
+#MooPanel_main .MooPanelItem
+{
+    border: 1px solid #e5e5e5;
+    -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    margin: 10px 0 20px;
+    background: #FFF;
+    clear: both;
+    position: relative;
+}
+#MooPanel_main .MooPanelItem .label
+{
+    width: 220px;
+    display: inline-block;
+    float: left;
+    padding-top: 4px;
+}
+#MooPanel_main .MooPanelItem h3
+{
+    border-bottom: 1px solid #eee;
+    margin: 0 0 10px;
+    padding: 8px 10px;
+    cursor: default !important;
+    font-size: 14px;
+}
+#MooPanel_main .MooPanelItem .Moo_option-item
+{
+    clear: both;
+    padding: 8px 10px;
+    overflow: hidden;
+    position: relative;
+    border-bottom: 1px solid #F8F8F8;
+}
+#MooPanel_main .MooPanelItem .Moo_option-item .Moo_on_off:hover
+{
+   cursor: pointer;
+}
+#MooPanelSectionImport
+{
+    text-align: center;
+    margin-bottom: 20px;
+}
+#MooPanel_main .stats
+{
+   display: table;
+   width:100%;
+}
+#MooPanel_main .stats .stat
+{
+    width: 25%;
+    height: 105px;
+    text-align: center;
+    display: table-cell;
+    padding: 0;
+    position: relative;
+    border-right: 1px solid #F8F8F8;
+}
+#MooPanel_main .stats .stat:last-child
+{
+    border-right: none;
+}
+#MooPanel_main .stats .stat .value
+{
+     font-size: 45px;
+     font-weight: 100;
+     color: #000;
+     line-height: 1em;
+}
+#MooPanel_main .stats .stat .type
+{
+    border-right: none;
+}
+.onoffswitch {
+    position: relative; width: 60px;
+    display: inline-block;
+    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+}
+.onoffswitch-checkbox {
+    display: none !important;
+}
+.onoffswitch-label {
+    display: block; overflow: hidden; cursor: pointer;
+    border: 2px solid #999999; border-radius: 50px;
+}
+.onoffswitch-inner {
+    display: block; width: 200%; margin-left: -100%;
+    transition: margin 0.3s ease-in 0s;
+}
+.onoffswitch-inner:before, .onoffswitch-inner:after {
+    display: block; float: left; width: 50%; height: 10px; padding: 0; line-height: 10px;
+    font-size: 14px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+    box-sizing: border-box;
+}
+.onoffswitch-inner:before {
+    content: "";
+    padding-left: 10px;
+    background-color: #EEEEEE; color: #FFFFFF;
+}
+.onoffswitch-inner:after {
+    content: "";
+    padding-right: 10px;
+    background-color: #EEEEEE; color: #999999;
+    text-align: right;
+}
+.onoffswitch-switch {
+    display: block; width: 20px; margin: -5px;
+    background: #A1A1A1;
+    position: absolute; top: 0; bottom: 0;
+    right: 46px;
+    border: 2px solid #999999; border-radius: 50px;
+    transition: all 0.3s ease-in 0s;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+    margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+    right: 0px;
+    background-color: #27A1CA;
+}

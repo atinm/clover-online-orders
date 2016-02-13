@@ -1,0 +1,408 @@
+<?php
+
+/**
+ * The admin-specific functionality of the plugin.
+ *
+ * @link       http://example.com
+ * @since      1.0.0
+ *
+ * @package    Plugin_Name
+ * @subpackage Plugin_Name/admin
+ */
+
+/**
+ * The admin-specific functionality of the plugin.
+ *
+ * Defines the plugin name, version, and two examples hooks for how to
+ * enqueue the admin-specific stylesheet and JavaScript.
+ *
+ * @package    Plugin_Name
+ * @subpackage Plugin_Name/admin
+ * @author     Your Name <email@example.com>
+ */
+class moo_OnlineOrders_Admin {
+
+	/**
+	 * The ID of this plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string    $plugin_name    The ID of this plugin.
+	 */
+	private $plugin_name;
+
+	/**
+	 * The version of this plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string    $version    The current version of this plugin.
+	 */
+	private $version;
+    private $model;
+
+	/**
+	 * Initialize the class and set its properties.
+	 *
+	 * @since    1.0.0
+	 * @param      string    $plugin_name       The name of this plugin.
+	 * @param      string    $version    The version of this plugin.
+	 */
+	public function __construct( $plugin_name, $version ) {
+
+        require_once plugin_dir_path( dirname(__FILE__))."admin/model/class-moo-OnlineOrders-model-admin.php";
+		$this->plugin_name = $plugin_name;
+		$this->version = $version;
+
+        add_action('admin_menu', array($this, 'add_admin_menu'));
+        add_action( 'admin_init',  array($this, 'register_mysettings' ));
+
+
+        $this->model = new moo_OnlineOrders_Admin_Model();
+
+	}
+
+  public function page_products()
+    {
+        require_once "includes/class-moo-products-list.php";
+        $products = new Products_List_Moo();
+        $products->prepare_items();
+
+    ?>
+        <div class="wrap">
+            <h2>List of products</h2>
+            <div id="poststuff">
+                <div id="post-body" class="metabox-holder">
+                    <div id="post-body-content">
+                        <div class="meta-box-sortables ui-sortable">
+                            <!-- Search Form -->
+                            <form method="post">
+                                <input type="hidden" name="page" value="moo_products" />
+                                <?php $products->search_box('search', 'search_id'); ?>
+                            </form>
+
+                            <form method="post">
+
+                                <?php $products->display(); ?>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <br class="clear">
+            </div>
+        </div>
+
+    <?php
+    }
+
+    public function page_orders()
+    {
+        require_once "includes/class-moo-orders-list.php";
+        $orders = new Orders_List_Moo();
+        $orders->prepare_items();
+
+    ?>
+        <div class="wrap">
+            <h2>List of orders</h2>
+            <div id="poststuff">
+                <div id="post-body" class="metabox-holder">
+                    <div id="post-body-content">
+                        <div class="meta-box-sortables ui-sortable">
+
+                            <form method="post">
+                                <?php $orders->display(); ?>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <br class="clear">
+            </div>
+        </div>
+
+    <?php
+    }
+
+    public function page_products_screen_options()
+    {
+        $option = 'per_page';
+        $args   = [
+            'label'   => 'Items',
+            'default' => 20,
+            'option'  => 'moo_items_per_page'
+        ];
+        add_screen_option( $option, $args );
+    }
+
+    public function panel_settings()
+    {
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'models/moo-OnlineOrders-CallAPI.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'models/moo-OnlineOrders-Model.php';
+
+        $api   = new  moo_OnlineOrders_CallAPI();
+        $model = new  moo_OnlineOrders_Model();
+
+        $errorToken=false;
+
+        //default options
+        $MooOptions = (array)get_option('moo_settings');
+
+        $FirstUse = get_option('moo_first_use');
+
+        $token = $MooOptions["api_key"];
+
+        if($token != '' && $FirstUse)
+        {
+            $this->model->setToken($token);
+            $result = $this->model->checkToken();
+            if($result == 'Forbidden') $errorToken="( Token invalid )";
+            else {
+                if(isset(json_decode($result)->status) && json_decode($result)->status =='success') {
+                    $newvalue = get_option( 'moo_store_page');
+                    $api->updateWebsite(esc_url( get_permalink($newvalue) ));
+                    $errorToken="( Token valid )";
+                    update_option("moo_first_use", "false");
+                }
+            }
+        }
+        $ordertypes = $model->getOrderTypes();
+
+        ?>
+        <div id="MooPanel">
+            <div id="MooPanel_header">
+                <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/header.png" ?>" alt=""/>
+            </div>
+            <div id="MooPanel_sidebar">
+                <ul>
+                    <li class="MooPanel_Selected" id="MooPanel_tab1" onclick="tab_clicked(1)">Key settings</li>
+                    <li id="MooPanel_tab2" onclick="tab_clicked(2)">Import Items</li>
+                    <li id="MooPanel_tab3" onclick="tab_clicked(3)">Orders Types</li>
+                    <li id="MooPanel_tab4" onclick="tab_clicked(4)">Styles</li>
+                    <li id="MooPanel_tab5" onclick="tab_clicked(5)">Feedback</li>
+                </ul>
+            </div>
+            <div id="MooPanel_main">
+                <form method="post" action="options.php">
+                    <?php settings_fields('moo_settings') ?>
+
+                <div id="MooPanel_tabContent1">
+                    <h2>Key settings</h2>
+                    <div class="MooPanelSubmit">
+                        <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
+                    </div>
+                    <div class="MooPanelItem">
+                        <h3>API key</h3>
+                        <div class="Moo_option-item">
+                            <div class="label">Your key</div>
+                            <input type="text" size="60" name="moo_settings[api_key]" value="<?php echo $MooOptions['api_key']?>"/>
+                            <?php echo $errorToken;?>
+                        </div>
+                    </div>
+                </div>
+                <div id="MooPanel_tabContent2">
+                    <h2>Import Items</h2>
+                    <div class="MooPanelSubmit">
+                        <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
+                    </div>
+                    <div class="MooPanelItem">
+                        <h3>Import your data</h3>
+                        <div class="Moo_option-item">
+                            <div id="MooPanelSectionImport"></div>
+                            <a href="#" onclick="MooPanel_ImportItems(event)" class="button button-secondary"
+                               style="margin-bottom: 35px;" >Import your data</a>
+                        </div>
+                    </div>
+                    <div class="MooPanelItem">
+                        <h3>Statistics</h3>
+                        <div class="Moo_option-item">
+                            <div class="stats">
+                                <div class="stat">
+                                    <div class="value" id="MooPanelStats_Cats">0</div>
+                                    <div class="type" >Categories</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="value" id="MooPanelStats_Products">0</div>
+                                    <div class="type">Products</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="value" id="MooPanelStats_Labels">0</div>
+                                    <div class="type">Labels</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="value" id="MooPanelStats_Taxes">0</div>
+                                    <div class="type">Taxes rates</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div id="MooPanel_tabContent3">
+                    <h2>Orders Types</h2>
+                    <div class="MooPanelSubmit">
+                        <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
+                    </div>
+                    <div class="MooPanelItem">
+                        <h3>Choose the defaults order types</h3>
+
+                            <?php
+                            if(count($ordertypes)>0)
+                                foreach($ordertypes as $ot)
+                                {
+
+                                    echo '<div class="Moo_option-item">';
+                                    echo "<div class='label'>".($ot->label)."</div>";
+
+                                   ?>
+                                    <div class="onoffswitch" onchange="MooChangeOT_Status('<?php echo $ot->ot_uuid ?>')">
+                                        <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_<?php echo $ot->ot_uuid ?>" <?php echo ($ot->status==1)?"checked":"";?> >
+                                        <label class="onoffswitch-label" for="myonoffswitch_<?php echo $ot->ot_uuid ?>">
+                                            <span class="onoffswitch-inner"></span>
+                                            <span class="onoffswitch-switch"></span>
+                                        </label>
+                                    </div>
+
+                                 <?php
+                                    echo ' </div>';
+                                }
+                            else
+                                echo "<div style='text-align: center'>You don't have any OrderTypes,<br/> please click on refresh button or refresh the page if you just imported your data</div>";
+                            ?>
+                              <div style="text-align: center; padding: 20px;">
+                                  <a class="button button-primary" href="#" onclick="MooPanelRefrechOT(event)">Refresh</a>
+                              </div>
+
+                    </div>
+                    <div class="MooPanelItem">
+                        <h3>Add new order type</h3>
+                        <div class="Moo_option-item">
+                            Instructions for add an new order type
+                        </div>
+                    </div>
+                 </div>
+                <div id="MooPanel_tabContent4">
+                    <h2>Styles</h2>
+                    <div class="MooPanelSubmit">
+                        <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
+                    </div>
+                    <div class="MooPanelItem">
+                        <h3>Default style</h3>
+                        <div class="Moo_option-item">
+                            <div style="float:left; width: 295px;">
+                                <label style="display:block; margin-bottom:8px;">
+                                    <input name="moo_settings[default_style]" id="MooDefaultStyle" type="radio" value="style1" <?php echo ($MooOptions["default_style"]=="style1")?"checked":""; ?> >
+                                    <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/style1.jpg" ?>" align="middle" />
+                                </label>
+                                <label style="display:block; margin-bottom:8px;">
+                                    <input name="moo_settings[default_style]" id="MooDefaultStyle" type="radio" value="style2" <?php echo ($MooOptions["default_style"]=="style2")?"checked":""; ?> >
+                                    <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/style2.jpg" ?>" align="middle" />
+                                </label>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="MooPanel_tabContent5">
+                    <h2>Feedback</h2>
+                    <div class="MooPanelSubmit">
+                        <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
+                    </div>
+                    <div class="MooPanelItem">
+                        <h3>Send us your feedback</h3>
+                        <div class="Moo_option-item">
+                            <textarea name="MooFeedBack" id="Moofeedback" cols="10" rows="10" style="width: 100%"></textarea>
+                            <div style="text-align: right;">
+                                <a class="button button-primary" href="#" onclick="MooSendFeedBack(event)">Send</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </form>
+            </div>
+        </div>
+        <?php
+    }
+    public function add_admin_menu()
+    {
+        add_menu_page('Settings page', 'Online Orders', 'manage_options', 'moo_index', array($this, 'panel_settings'));
+        add_submenu_page('moo_index', 'Settings', 'Settings', 'manage_options', 'moo_index', array($this, 'panel_settings'));
+        add_submenu_page('moo_index', 'Products', 'Products', 'manage_options', 'moo_products', array($this, 'page_products'));
+        add_submenu_page('moo_index', 'Orders', 'Orders', 'manage_options', 'moo_orders', array($this, 'page_orders'));
+
+       // add_action("load-$moo_products_page", array($this, 'page_products_screen_options'));
+
+
+    }
+	/**
+	 * Register the options.
+	 *
+	 * @since    1.0.0
+	 */
+    public function register_mysettings()
+    {
+        register_setting('moo_settings', 'moo_settings');
+    }
+    /**
+	 * Register the stylesheets for the admin area.
+	 *
+	 * @since    1.0.0
+	 */
+	public function enqueue_styles() {
+
+		/**
+		 * This function is provided for demonstration purposes only.
+		 *
+		 * An instance of this class should be passed to the run() function
+		 * defined in Plugin_Name_Loader as all of the hooks are defined
+		 * in that particular class.
+		 *
+		 * The Plugin_Name_Loader will then create the relationship
+		 * between the defined hooks and the functions defined in this
+		 * class.
+		 */
+
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/moo-OnlineOrders-admin.css', array(), $this->version, 'all' );
+		//wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/jquery.steps.css', array(), $this->version, 'all' );
+
+       // wp_register_style( 'jquery.steps',plugins_url( 'css/jquery.steps.css', __FILE__ ));
+       // wp_enqueue_style( 'jquery.steps' );
+
+	}
+
+	/**
+	 * Register the JavaScript for the admin area.
+	 *
+	 * @since    1.0.0
+	 */
+	public function enqueue_scripts() {
+
+		/**
+		 * This function is provided for demonstration purposes only.
+		 *
+		 * An instance of this class should be passed to the run() function
+		 * defined in Plugin_Name_Loader as all of the hooks are defined
+		 * in that particular class.
+		 *
+		 * The Plugin_Name_Loader will then create the relationship
+		 * between the defined hooks and the functions defined in this
+		 * class.
+		 */
+        $params = array(
+            'ajaxurl' => admin_url( 'admin-ajax.php', isset( $_SERVER['HTTPS'] ) ? 'https://' : 'http://' ),
+        );
+
+        wp_enqueue_script('jquery');
+
+		//wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/moo-OnlineOrders-admin.js', array( 'jquery' ), $this->version, false );
+
+        wp_register_script('moo-publicAdmin-js', plugins_url( 'js/moo-OnlineOrders-admin.js', __FILE__ ));
+        wp_enqueue_script('moo-publicAdmin-js',array('jquery'));
+
+      //  wp_register_script('jquery-steps', plugins_url( 'js/jquery.steps.js', __FILE__ ));
+      //  wp_enqueue_script('jquery-steps',array('jquery'));
+
+      //  wp_register_script('custom-script-admin-import', plugins_url( 'js/moo_admin_import.js', __FILE__ ));
+
+        wp_localize_script("moo-publicAdmin-js", "moo_params",$params);
+	}
+
+}
