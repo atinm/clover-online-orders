@@ -28,6 +28,8 @@ Demo : http://test.merchantech.us
 
 == Installation ==
 
+PS : It's only a beta version ( we are awaiting for approval from Clover )
+
 How to install the plugin and get it working:
 
 
