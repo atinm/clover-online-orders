@@ -249,6 +249,14 @@ class moo_OnlineOrders {
         $this->loader->add_action( 'wp_ajax_moo_get_stats', $plugin_public, 'moo_GetStats');
         //Change the status of an OrderType
         $this->loader->add_action( 'wp_ajax_moo_update_ot_status', $plugin_public, 'moo_UpdateOrdertypesStatus');
+        //Get list of saved OrderTypes
+        $this->loader->add_action( 'wp_ajax_moo_getAllOrderTypes', $plugin_public, 'moo_getAllOrderTypes');
+
+		//Add new Order type
+		$this->loader->add_action( 'wp_ajax_moo_add_ot', $plugin_public, 'moo_AddOrderType');
+
+		//Delete a Order type
+		$this->loader->add_action( 'wp_ajax_moo_delete_ot', $plugin_public, 'moo_DeleteOrderType');
 
         // Send the feedback
         $this->loader->add_action( 'wp_ajax_moo_send_feedback', $plugin_public, 'moo_SendFeedBack');

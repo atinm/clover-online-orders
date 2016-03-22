@@ -14,10 +14,9 @@ function moo_updateCart()
         if(data.status=="success")
         {
             // console.log(data.data);
-
             for(item in data.data)
             {
-                if(item =="") continue;
+                if(item == "") continue;
 
                 var product = data.data[item];
                 var price = (product.item.price*product.quantity/100);
@@ -46,10 +45,11 @@ function moo_updateCart()
                         html +='<td>$'+modifierPrice+'</td>';
                         html +='<td style="text-align: left;"><i class="fa fa-close" style="cursor: pointer;" onclick="moo_cart_DeleteItemModifier(\''+uuid+'\',\''+item+'\')"></i></td>';
                         html +="</tr>";
+
                         subtotal += modifierPrice*product.quantity;
                     }
-                   //  tax =Math.round(tax*100)/100;
-                   //  var total = Math.round((subtotal+tax)*100)/100;
+                     tax = Math.ceil(tax*100)/100;
+                     total = Math.ceil((subtotal+tax)*100)/100;
 
                     html +='<tr class="warning MooLineModifier4_'+item+'" ><td colspan="2"></td>';
                     html +='<td id="moo_itemsubtotal_'+item+'">$'+subtotal.toFixed(2)+'</td>'; //Sub total
@@ -62,8 +62,9 @@ function moo_updateCart()
                 }
                 else
                 {
-                    tax =Math.round(tax*100)/100;
-                    var total = Math.round((subtotal+tax)*100)/100;
+
+                    tax = Math.ceil(tax*100)/100;
+                    total = Math.ceil((subtotal+tax)*100)/100;
 
                     html +="<tr id='moo_cart_line_"+item+"' >";
                     html +="<td onclick=\"ChangeQuantity('"+item+"')\" style='cursor:pointer;'><strong>"+product.item.name+"</strong></td>"; //The name of the item
@@ -71,6 +72,7 @@ function moo_updateCart()
                     html +='<td id="moo_itemsubtotal_'+item+'">$'+subtotal.toFixed(2)+'</td>'; //Sub total  ( price + taxes )
                     html +='<td><i class="fa fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item+'\')"></i></td>'; //Controlles Btn
                     html +="</tr>";
+
                 }
 
                 //Add the item to Our JS Cart
@@ -80,7 +82,9 @@ function moo_updateCart()
 
             html += "</tbody></table>"
             jQuery(".moo_cart .CartContent").html(html);
-            moo_updateCartTotal();
+
+           moo_updateCartTotal();
+
 
         }
         else
@@ -248,4 +252,10 @@ function abortAJAXCalls()
         MOO_AJAX_REQS[index].abort();
        delete(MOO_AJAX_REQS[index]);
     });
+}
+
+function moo_addItemWithModifiersToCart(event,item_uuid,item_name,item_price)
+{
+    if(moo_addModifiers(item_name) == false ) moo_addToCart(event,item_uuid,item_name,item_price);
+    jQuery.magnificPopup.close()
 }

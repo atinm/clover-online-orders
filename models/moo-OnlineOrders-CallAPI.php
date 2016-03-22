@@ -11,7 +11,7 @@ class moo_OnlineOrders_CallAPI {
         $MooSettings = (array) get_option("moo_settings");
         $this->Token = $MooSettings['api_key'];
 		//Put the API URL here and don't forget the last slash
-        $this->url_api = "http://api.merchantech.us/";
+        $this->url_api = "http://api.smartonlineorders.com/";
 
     }
     /*
@@ -147,7 +147,6 @@ class moo_OnlineOrders_CallAPI {
         }
         else
             $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType);
-
         return $res;
     }
     //create the order
@@ -182,6 +181,10 @@ class moo_OnlineOrders_CallAPI {
     {
         return $this->callApi("order_types",$this->Token);
     }
+	function addOrderType($label,$taxable)
+	{
+		return $this->callApi_Post("order_types",$this->Token,'label='.$label.'&taxable='.$taxable);
+	}
     //Updtae the website for the merchant
     function updateWebsite($url)
     {
@@ -432,17 +435,27 @@ class moo_OnlineOrders_CallAPI {
         $count=0;
         foreach (json_decode($obj)->elements as $ot)
         {
-
             $res = $wpdb->insert("{$wpdb->prefix}moo_order_types",array(
                                                 'ot_uuid' => $ot->id,
                                                 'label' => $ot->label,
                                                 'taxable' => $ot->taxable,
-                                                'status' => 0
+                                                'status' => ($ot->label=='Delivery' || $ot->label == 'Pickup')?1:0
                 ));
 
             if($res == 1) $count++;
         }
         return $count;
+    }
+	public function save_One_orderType($ot)
+    {
+        global $wpdb;
+        $res = $wpdb->insert("{$wpdb->prefix}moo_order_types",array(
+                                            'ot_uuid' => $ot->id,
+                                            'label' => $ot->label,
+                                            'taxable' => $ot->taxable,
+                                            'status' => 0
+            ));
+        return $res;
     }
     private function callApi($url,$accesstoken)
     {
@@ -467,7 +480,8 @@ class moo_OnlineOrders_CallAPI {
         }
         $info = curl_getinfo($crl);
         curl_close($crl);
-     //   var_dump($reply);
+	  //  echo 'GET : '.$url;
+       // var_dump($reply);
         if($info['http_code']==200)return $reply;
         return false;
     }
@@ -497,7 +511,8 @@ class moo_OnlineOrders_CallAPI {
 
         $info = curl_getinfo($crl);
         curl_close($crl);
-        //var_dump($reply);
+	 //   echo $url." ---- ";
+     //   var_dump($reply);
         if($info['http_code']==200)return $reply;
         return false;
     }

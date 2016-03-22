@@ -17,7 +17,7 @@ class moo_OnlineOrders_Admin_Model {
     {
         global $wpdb;
         $this->db = $wpdb;
-        $this->url_api = "http://api.merchantech.us/";
+        $this->url_api = "http://api.smartonlineorders.com/";
     }
 
     /**

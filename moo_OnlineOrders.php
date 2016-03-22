@@ -13,9 +13,9 @@
  * @package           Wordpress_Integration
  *
  * @wordpress-plugin
- * Plugin Name:       Merchantech Online Orders
+ * Plugin Name:       Clover Online Orders
  * Plugin URI:        http://www.merchantech.us
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
+ * Description:       Start taking orders from your Wordpress website and have theme sent to your Clover Station
  * Version:           1.0.0
  * Author:            Merchantech
  * Author URI:        http://www.merchantech.us

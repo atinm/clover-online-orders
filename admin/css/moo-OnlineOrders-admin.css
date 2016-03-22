@@ -66,6 +66,7 @@
     direction: ltr;
     text-align: left;
     position: relative;
+
 }
 #MooPanel_header
 {
@@ -76,6 +77,10 @@
     text-align: left;
     border-bottom: 3px solid #0073aa;
     clear: both;
+    background-color: #a0a5aa;
+    color: #FFFFFF;
+    padding-left: 20px;
+    box-sizing: border-box
 }
 #MooPanel_sidebar
 {
@@ -87,8 +92,22 @@
     color: #ffffff;
     position: absolute;
     left: 0;
-    top: 62px;
     z-index: 1;
+}
+#Moopanel_logo
+{
+    min-height: 100px;
+    text-align: center;
+}
+#Moopanel_logo p
+{
+    font-size: 20px;
+    color: #FFFFFF;
+    margin-top: 0;
+}
+#Moopanel_logo img
+{
+  margin-top: 10px;
 }
 #MooPanel_main
 {

@@ -27,7 +27,7 @@ class Moo_OnlineOrders_Activator {
 	 */
 	public static function activate() {
         // Add option to db
-        update_option("moo_onlineorders_key", "");
+
         update_option("moo_first_use", "true");
         // Install DB
         global $wpdb;
@@ -413,7 +413,7 @@ class Moo_OnlineOrders_Activator {
             'post_date' => date('Y-m-d H:i:s'),
             'post_name' => 'Store',
             'post_status' => 'publish' ,
-            'post_title' => 'Online Store',
+            'post_title' => 'Order Online',
             'post_type' => 'page',
             'post_content' => '[moo_all_items]'
         );

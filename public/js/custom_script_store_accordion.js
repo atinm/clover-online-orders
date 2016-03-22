@@ -4,6 +4,11 @@ jQuery(document).ready(function() {
     //accordion
 
     jQuery('.moo_accordion').accordion();
+    jQuery('.popup-text').magnificPopup({
+        type: 'inline',
+        closeBtnInside: true,
+        midClick: true
+    });
 /*
     var cart_offset = jQuery('.moo_cart').offset();
     var cart_width = jQuery('.moo_cart').outerWidth();
@@ -88,29 +93,16 @@ function addLineToHtmlCart(item_name,item_price,item_uuid)
 function ItemHasModifiers(element,event,item_uuid,item_name,item_price)
 {
     event.preventDefault();
-    var tempo = jQuery(element).attr("onclick");
-    jQuery(element).attr("onclick","");
-
-    setTimeout(function(){
-        jQuery(element).attr("onclick",tempo);
-    },3000);
+    jQuery('#Moo_ItemWithModifierContainer').html('Loading ...');
     var html = "<h4>Sorry there is no Modifier</h4>";
 
     jQuery.post(moo_params.ajaxurl,{'action':'moo_getitemmodifiers',"item_uuid":item_uuid}, function (data) {
         if(data)
         {
             html = data;
+            jQuery('#Moo_ItemWithModifierContainer').html(html);
         }
-    }).done(function(e){
-        jQuery.fn.SimpleModal({"hideHeader":true,btn_close:false,btn_ok: 'DONE',"model":"confirm",
-            "callback": function(){
-                if(moo_addModifiers(item_name) == false) moo_addToCart(event,item_uuid,item_name,item_price);
-            }, contents: html})
-            .showModal();
-        jQuery(element).attr("onclick",tempo);
     });
-   // jQuery(element).show();
-
 }
 function ChangeQuantity(item_uuid)
 {
@@ -134,7 +126,8 @@ function ChangeQuantity(item_uuid)
 }
 function clickLineInModifiersTab(target)
 {
-        jQuery("td:first input",target).each(function() {
+        var tr_table = jQuery(target).parent();
+        jQuery("td:first input",tr_table).each(function() {
             jQuery(this).prop("checked", !jQuery(this).prop("checked"));
         });
 

@@ -23,6 +23,8 @@
 class Moo_OnlineOrders_Shortcodes {
 
     /**
+     * This ShortCode display the store using the second style
+     *
      * @since    1.0.0
      */
     public static function AllItems($atts, $content)
@@ -194,7 +196,11 @@ class Moo_OnlineOrders_Shortcodes {
             }
 
     }
-    public static function AllItemsAcordion($atts, $content)
+	/**
+	 * This ShortCode display the store using the first style
+	 * @since    1.0.0
+	 */
+	public static function AllItemsAcordion($atts, $content)
     {
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-Model.php";
         $model = new moo_OnlineOrders_Model();
@@ -206,9 +212,11 @@ class Moo_OnlineOrders_Shortcodes {
         wp_enqueue_script( 'custom-script-accordion');
         wp_enqueue_script( 'jquery-accordion',array( 'jquery' ));
         wp_enqueue_script( 'simple-modal',array( 'jquery' ));
+        wp_enqueue_script( 'magnific-modal', array( 'jquery' ) );
 
         wp_enqueue_style ( 'custom-style-accordion' );
         wp_enqueue_style ( 'simple-modal' );
+        wp_enqueue_style ( 'magnific-popup' );
                 ?>
                 <div class="col-xs-12 hidden-md hidden-lg hidden-sm MooGoToCart">
                     <a href="#ViewShoppingCart">VIEW SHOPPING CART</a>
@@ -217,10 +225,13 @@ class Moo_OnlineOrders_Shortcodes {
                 <div class="col-md-7" style="margin-bottom: 20px;">
                 <?php
                     foreach ( $model->getCategories() as $category ){
+
+	                    // I verify if there is some itmes in the category
+	                    // and the length of the name then I cut if it more than 30 characters
                         if(strlen ($category->items)< 1 ) continue;
                         if(strlen ($category->name) > 30)$category_name = substr($category->name, 0, 30)."...";
                         else  $category_name = $category->name;
-            ?>
+                ?>
 
                         <div class="moo_category">
                             <div class="moo_accordion" id="MooCat_<?php echo $category->uuid?>">
@@ -242,7 +253,7 @@ class Moo_OnlineOrders_Shortcodes {
                                             if($item->visible == 0 || $item->hidden == 1 || $item->price_type=='VARIABLE' || $item->price == 0) continue;
                                             echo '<li>';
                                             if(($model->itemHasModifiers($item->uuid)->total) != "0")
-                                                echo '<a href="#" onclick="ItemHasModifiers(this,event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')">';
+                                                echo '<a class="popup-text" href="#Moo_ItemWithModifier" onclick="ItemHasModifiers(this,event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')">';
                                             else
                                                 echo '<a href="#" onclick="moo_addToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')">';
                                             echo '  <div class="detail">'.$item->name.'</div>';
@@ -292,9 +303,19 @@ class Moo_OnlineOrders_Shortcodes {
                                 </div>
                             </div>
                         </div>
+	    <div id="Moo_ItemWithModifier" class="white-popup mfp-hide">
+			<p id="Moo_ItemWithModifierContainer">
+				Loading ...
+			</p>
+	    </div>
                 <?php
     }
-    private static function GetColors()
+    /*
+     * It's a private function for internal use in the function
+     *  public static function AllItems($atts, $content)
+     * This function return a list of colors that we use in Style 2
+     */
+	private static function GetColors()
     {
         return array(
             0=>"#1abc9c",1=>"#33B5E5",2=>"#676fb4",3=>"#1e5429",4=>"#c5a22d",5=>"#000088",6=>"#b75555",7=>"#666666",8=>"#0099CC",
@@ -307,6 +328,17 @@ class Moo_OnlineOrders_Shortcodes {
                     );
         */
     }
+
+	/*
+	 * This function for getting items from the database based on filters
+	 * Used in AJAX responses of the style 2
+	 * @param $category : The category of itemes
+	 * @param $filterBy : The predicate of filters PRICE or NAME
+	 * @param $orderBy  : The order
+	 * @param $search   : a string if we want search an item
+	 * @return List of ITEMS (HTML)
+	 * @since 1.0.0
+	 */
 
     public static function getItemsHtml($category,$filterBy,$orderBy,$search)
     {
@@ -498,6 +530,8 @@ class Moo_OnlineOrders_Shortcodes {
                                         <option value="2022">2022</option>
                                         <option value="2023">2023</option>
                                         <option value="2024">2024</option>
+                                        <option value="2024">2025</option>
+                                        <option value="2024">2026</option>
                                     </select>
                                 </div>
                             </div>
@@ -597,6 +631,7 @@ class Moo_OnlineOrders_Shortcodes {
             $model = new moo_OnlineOrders_Model();
             $item_uuid = esc_sql($item_uuid);
             $modifiersgroup = $model->getModifiersGroup($item_uuid);
+	        $item = $model->getItem($item_uuid);
             ?>
             <div id="moo_modifiers">
                 <!-- Nav tabs -->
@@ -604,6 +639,7 @@ class Moo_OnlineOrders_Shortcodes {
                     <?php
                     $flag=true;
                     foreach ($modifiersgroup as $mg) {
+	                    if(count($model->getModifiers($mg->uuid))==0) continue;
                         if($flag)
                             echo '<li role="presentation" class="active"><a href="#tab_'.$mg->uuid.'" aria-controls="home" role="tab" data-toggle="tab">'.$mg->name.'</a></li>';
                         else
@@ -620,7 +656,9 @@ class Moo_OnlineOrders_Shortcodes {
                                 <?php
                                 $flag=true;
                                 foreach ($modifiersgroup as $mg) {
-                                    if($flag)
+	                               if(count($model->getModifiers($mg->uuid))==0) continue;
+
+	                                if($flag)
                                         echo '<div role="tabpanel" class="tab-pane active" id="tab_'.$mg->uuid.'">';
                                     else
                                         echo '<div role="tabpanel" class="tab-pane" id="tab_'.$mg->uuid.'">';
@@ -639,10 +677,10 @@ class Moo_OnlineOrders_Shortcodes {
                                             <tbody>
                                             <?php
                                             foreach ($model->getModifiers($mg->uuid) as $modifier) {
-                                                echo '<tr onclick="clickLineInModifiersTab(this)" style="cursor:pointer;">';
+                                                echo '<tr style="cursor:pointer;">';
                                                 echo '<td style="width: 50px;text-align: center;"><input type="checkbox" name="moo_modifiers[\''.$item_uuid.'\',\''.$mg->uuid.'\',\''.$modifier->uuid.'\']" style="width: 25px;height: 25px;"/></td>';
-                                                echo '<td>'.$modifier->name.'</td>';
-                                                echo '<td>$'.($modifier->price/100).'</td>';
+                                                echo '<td onclick="clickLineInModifiersTab(this)">'.$modifier->name.'</td>';
+                                                echo '<td onclick="clickLineInModifiersTab(this)">$'.($modifier->price/100).'</td>';
                                                 echo '</tr>';
                                             }
                                             ?>
@@ -657,6 +695,9 @@ class Moo_OnlineOrders_Shortcodes {
                                 ?>
                             </div>
                         </form>
+	                    <div style="text-align: center;padding: 10px">
+		                   <?php echo '<div class="btn btn-primary" onclick=" moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')">ADD TO YOUR CART</div>'; ?>
+	                    </div>
                     </div>
                 </div>
             </div>
@@ -673,7 +714,7 @@ class Moo_OnlineOrders_Shortcodes {
             self::AllItems($atts, $content);
             ?>
             <div class="row Moo_Copyright">
-                Powered by <a href="http://smartonlineorders.com" target="_blank">smartonlineorders.com</a>
+                Powered by <a href="http://merchantech.us" target="_blank">Merchantech</a>
             </div>
             <?php
     }

@@ -1,7 +1,10 @@
 (function( $ ) {
 	'use strict';
     window.moo_loading = '<svg xmlns="http://www.w3.org/2000/svg" width="44px" height="44px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="uil-default"><rect x="0" y="0" width="100" height="100" fill="none" class="bk"></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(0 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(30 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.08333333333333333s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(60 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.16666666666666666s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(90 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.25s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(120 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.3333333333333333s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(150 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.4166666666666667s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(180 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(210 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5833333333333334s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(240 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.6666666666666666s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(270 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.75s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(300 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.8333333333333334s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(330 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.9166666666666666s" repeatCount="indefinite"></animate></rect></svg>';
+   // Moo_ImportCategories();
     moo_Update_stats();
+    Moo_GetOrderTypes();
+
 
 })( jQuery );
 function tab_clicked(tab)
@@ -78,6 +81,39 @@ function Moo_ImportItems()
     ).done(function () {
             jQuery('#MooPanelSectionImport').html("All of your data was successfully imported from Clover POS"+'<br/> ');
             moo_Update_stats();
+            Moo_GetOrderTypes();
+        });
+}
+function Moo_GetOrderTypes()
+    {
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_getAllOrderTypes'}, function (data) {
+            console.log(data);
+            if(data.status == 'success')
+            {
+               var orderTypes = JSON.parse(data.data);
+                var html='';
+                if(orderTypes.length>0)
+                    for(var i=0;i<orderTypes.length;i++) {
+                        var $ot = orderTypes[i];
+                        html +='<div class="Moo_option-item">';
+                        html +="<div class='label'>"+($ot.label)+"</div>";
+                        html +='<div class="onoffswitch" onchange="MooChangeOT_Status(\''+$ot.ot_uuid +'\')">';
+                        html +='<input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_'+$ot.ot_uuid+'"'+(($ot.status==1)?"checked":"")+'>';
+                        html +='<label class="onoffswitch-label" for="myonoffswitch_'+$ot.ot_uuid +'">';
+                        html +='<span class="onoffswitch-inner"></span> <span class="onoffswitch-switch"></span></label></div>';
+                        html +='<div style="float: right"><a href="#" onclick="Moo_deleteOrderType(event,\''+$ot.ot_uuid+'\')">DELETE</a></div></div>';
+                    }
+                else
+                  html = "<div style='text-align: center'>You don't have any OrderTypes,<br/> please import your data by clicking on <b>Import Items</b></div>";
+
+               document.querySelector('#MooOrderTypesContent').innerHTML = html;
+            }
+            else
+                document.querySelector('#MooOrderTypesContent').innerHTML  ="<div style='text-align: center'>Please verify your API Key<br/></div>";
+
+        }
+    ).done(function () {
+            console.log('Order Types Imported');
     });
 }
 
@@ -108,9 +144,7 @@ function moo_Update_stats()
             }
 
         }
-    ).done(function () {
-            console.log("DONE")
-        });
+    );
 }
 
 function MooChangeOT_Status(uuid)
@@ -125,12 +159,37 @@ function MooChangeOT_Status(uuid)
 function MooPanelRefrechOT(e)
 {
     e.preventDefault();
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_import_ordertypes'}, function (data) {
-        if(data.status == "Success"){
-            location.reload();
-        }
+    Moo_GetOrderTypes();
+}
+function moo_addordertype(e)
+{
+    e.preventDefault();
+
+    var label   = document.querySelector('#Moo_AddOT_label').value;
+    var taxable = document.querySelector('#Moo_AddOT_taxable_oui').checked ;
+    if(label == "") alert("Please enter a label for your order Type")
+    else
+    {
+        jQuery('#Moo_AddOT_loading').html(window.moo_loading);
+        jQuery('#Moo_AddOT_btn').hide();
+
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_add_ot',"label":label,"taxable":taxable}, function (data) {
+                Moo_GetOrderTypes();
+                jQuery('#Moo_AddOT_loading').html('');
+                jQuery('#Moo_AddOT_btn').show();
+
+            }
+        );
     }
-);
+
+}
+function Moo_deleteOrderType(e,uuid)
+{
+    e.preventDefault();
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_delete_ot',"uuid":uuid}, function (data) {
+            Moo_GetOrderTypes();
+        }
+    );
 }
 
 function MooSendFeedBack(e)

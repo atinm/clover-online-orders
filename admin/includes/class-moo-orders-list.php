@@ -62,19 +62,7 @@ class Orders_List_Moo extends WP_List_Table_MOO {
     }
     /** Delete Order */
     public function show_order( $uuid ) {
-        global $wpdb;
-        //print_r($uuid);
-        $html = file_get_contents("https://www.clover.com/r/".$uuid);
-        var_dump($html);
-        exit;
-       /* $wpdb->update(
-            "{$wpdb->prefix}moo_item",
-            array(
-                'visible' => '1'
-            ),
-            array( 'uuid' => $id )
-        );
-       */
+       //For future use if we want display the Order here
     }
     /**
      * Returns the count of records in the database.
@@ -104,7 +92,7 @@ class Orders_List_Moo extends WP_List_Table_MOO {
         $title = '<strong>' . $item['p_name'] . '</strong>';
             $actions = [
                 'Delete' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s">Delete Order</a>', esc_attr( $_REQUEST['page'] ), 'delete',$item['uuid'], $delete_nonce ),
-                'Show' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s">Show Order</a>', esc_attr( $_REQUEST['page'] ), 'show',$item['uuid'], $show_nonce ),
+                'Show' => sprintf( '<a href="https://www.clover.com/r/%s" target="_blank">Show Order</a>',$item['uuid']),
                 ];
 
         return

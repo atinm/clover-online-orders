@@ -29,6 +29,7 @@ class Moo_OnlineOrders_Deactivator {
         global $wpdb;
         $store_page_id = get_option('moo_store_page');
         $checkout_page_id = get_option('moo_checkout_page');
+
         if($store_page_id) wp_delete_post($store_page_id,true);
         if($checkout_page_id) wp_delete_post($checkout_page_id,true);
 

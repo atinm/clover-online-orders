@@ -119,6 +119,13 @@ class moo_OnlineOrders_Model {
                             array( 'ot_uuid' => $uuid )
     );
 }
+	function moo_DeleteOrderType($uuid)
+{
+    $uuid = esc_sql($uuid);
+    return $this->db->delete("{$this->db->prefix}moo_order_types",
+                            array( 'ot_uuid' => $uuid )
+    );
+}
 
     function addOrder($uuid,$tax,$total,$name,$address, $city,$zipcode,$phone,$email,$instructions,$ordertype)
     {
