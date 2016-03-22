@@ -798,7 +798,6 @@ class Moo_OnlineOrders_Public {
 
         $key = $this->api->getPayKey();
         $key = json_decode($key);
-	    var_dump($key);
         if(isset($key->modulus) && isset($key->exponent) && isset($key->prefix) && !empty($key->modulus)&& !empty($key->exponent)&& !empty($key->prefix) ){
             $rsa = new Crypt_RSA();
             $rsa->loadKey(array('n' => new Math_BigInteger($key->modulus), 'e' => new Math_BigInteger($key->exponent) ));
@@ -978,7 +977,7 @@ public function moo_AddOrderType()
        $labels   = $this->model->NbLabels();
        $taxes    = $this->model->NbTaxes();
        $products = $this->model->NbProducts();
-       //var_dump($cats);
+
        $response = array(
            'status'	 => 'Success',
            'cats'    => $cats[0]->nb?:0,
