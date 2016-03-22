@@ -1,5 +1,5 @@
-=== Clover Online Orders ===
-Contributors: elbanyaoui
+﻿=== Clover Online Orders ===
+Contributors: merchantechapps, elbanyaoui
 Donate link: http://merchantech.us/
 Tags: clover,online orders for clover,merchantech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover
 Requires at least: 3.0.1
