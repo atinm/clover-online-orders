@@ -150,27 +150,34 @@ class moo_OnlineOrders_Admin {
 
         $token = $MooOptions["api_key"];
 
+
         if($token != '')
         {
             $this->model->setToken($token);
             $result = $this->model->checkToken();
+
             if($result == 'Forbidden') $errorToken="( Token invalid )";
             else {
                 if(isset(json_decode($result)->status) && json_decode($result)->status =='success') {
                     $newvalue = get_option( 'moo_store_page');
                     $api->updateWebsite(esc_url( get_permalink($newvalue) ));
                     $errorToken="( Token valid )";
-                    update_option("moo_first_use", "false");
                 }
+                else
+                    $errorToken="( Token expired )";
+
             }
         }
+        else
+            $errorToken="( Required )";
+
         $ordertypes = $model->getOrderTypes();
 
         ?>
         <div id="MooPanel">
             <div id="MooPanel_sidebar">
                 <div id="Moopanel_logo">
-                    <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/WordpressOR-logo-beta-2_1_100x100.png";?>" alt=""/>
+                    <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/woo_100x100.png";?>" alt=""/>
                     <p>Online orders for Clover</p>
                 </div>
                 <ul>

@@ -299,8 +299,8 @@ class Moo_OnlineOrders_Shortcodes {
                                     <div style="text-align: center">
                                         <a href="<?php echo esc_url($checkout_page_url);?>" class="btn btn-danger BtnCheckout">CHECKOUT</a>
                                     </div>
-
                                 </div>
+
                             </div>
                         </div>
 	    <div id="Moo_ItemWithModifier" class="white-popup mfp-hide">
@@ -635,19 +635,19 @@ class Moo_OnlineOrders_Shortcodes {
             ?>
             <div id="moo_modifiers">
                 <!-- Nav tabs -->
-                <ul class="nav nav-tabs" role="tablist" style="margin: 0px;border-bottom-left-radius: 4px;border-bottom-right-radius: 4px;">
+<!--                <ul class="nav nav-tabs" role="tablist" style="margin: 0px;border-bottom-left-radius: 4px;border-bottom-right-radius: 4px;">-->
                     <?php
-                    $flag=true;
-                    foreach ($modifiersgroup as $mg) {
-	                    if(count($model->getModifiers($mg->uuid))==0) continue;
-                        if($flag)
-                            echo '<li role="presentation" class="active"><a href="#tab_'.$mg->uuid.'" aria-controls="home" role="tab" data-toggle="tab">'.$mg->name.'</a></li>';
-                        else
-                            echo '<li role="presentation"><a href="#tab_'.$mg->uuid.'" aria-controls="home" role="tab" data-toggle="tab">'.$mg->name.'</a></li>';
-                        $flag = false;
-                    }
+//                    $flag=true;
+//                    foreach ($modifiersgroup as $mg) {
+//	                    if(count($model->getModifiers($mg->uuid))==0) continue;
+//                        if($flag)
+//                            echo '<li role="presentation" class="active"><a href="#tab_'.$mg->uuid.'" aria-controls="home" role="tab" data-toggle="tab">'.$mg->name.'</a></li>';
+//                        else
+//                            echo '<li role="presentation"><a href="#tab_'.$mg->uuid.'" aria-controls="home" role="tab" data-toggle="tab">'.$mg->name.'</a></li>';
+//                        $flag = false;
+//                    }
                     ?>
-                </ul>
+<!--                </ul>-->
                 <div class="panel panel-default" style="border-top: 0px">
                     <div class="panel-body">
                         <!-- Tab panes -->
@@ -656,37 +656,39 @@ class Moo_OnlineOrders_Shortcodes {
                                 <?php
                                 $flag=true;
                                 foreach ($modifiersgroup as $mg) {
-	                               if(count($model->getModifiers($mg->uuid))==0) continue;
-
+	                               if( count($model->getModifiers($mg->uuid))==0 ) continue;
+/*
 	                                if($flag)
                                         echo '<div role="tabpanel" class="tab-pane active" id="tab_'.$mg->uuid.'">';
                                     else
                                         echo '<div role="tabpanel" class="tab-pane" id="tab_'.$mg->uuid.'">';
                                     $flag = false;
+*/
                                     ?>
-
-                                    <div  class="table-responsive" style="height: 235px;">
+                                   <h1 style="padding: 10px;"><?php echo $mg->name; ?></h1>
+                                    <div  class="table-responsive" >
                                         <table class="table table-striped">
-                                            <thead>
-                                            <tr >
-                                                <th style="width: 50px;text-align: center;">Select</th>
-                                                <th>Name</th>
-                                                <th>Price</th>
-                                            </tr>
-                                            </thead>
+<!--                                            <thead>-->
+<!--                                            <tr >-->
+<!--                                                <th style="width: 50px;text-align: center;">Select</th>-->
+<!--                                                <th>Name</th>-->
+<!--                                                <th>Price</th>-->
+<!--                                            </tr>-->
+<!--                                            </thead>-->
                                             <tbody>
                                             <?php
                                             foreach ($model->getModifiers($mg->uuid) as $modifier) {
+                                                if(strlen($modifier->name)>17 ) $name = substr($modifier->name,0,17).'...';
+                                                else $name = $modifier->name;
                                                 echo '<tr style="cursor:pointer;">';
                                                 echo '<td style="width: 50px;text-align: center;"><input type="checkbox" name="moo_modifiers[\''.$item_uuid.'\',\''.$mg->uuid.'\',\''.$modifier->uuid.'\']" style="width: 25px;height: 25px;"/></td>';
-                                                echo '<td onclick="clickLineInModifiersTab(this)">'.$modifier->name.'</td>';
+                                                echo '<td onclick="clickLineInModifiersTab(this)">'.$name.'</td>';
                                                 echo '<td onclick="clickLineInModifiersTab(this)">$'.($modifier->price/100).'</td>';
                                                 echo '</tr>';
                                             }
                                             ?>
                                             </tbody>
                                         </table>
-
                                     </div>
 
                                     <?php

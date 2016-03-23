@@ -7,7 +7,8 @@ jQuery(document).ready(function() {
     jQuery('.popup-text').magnificPopup({
         type: 'inline',
         closeBtnInside: true,
-        midClick: true
+        midClick: true,
+        overflowY:'scroll'
     });
 /*
     var cart_offset = jQuery('.moo_cart').offset();

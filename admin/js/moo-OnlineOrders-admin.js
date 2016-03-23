@@ -87,7 +87,6 @@ function Moo_ImportItems()
 function Moo_GetOrderTypes()
     {
     jQuery.post(moo_params.ajaxurl,{'action':'moo_getAllOrderTypes'}, function (data) {
-            console.log(data);
             if(data.status == 'success')
             {
                var orderTypes = JSON.parse(data.data);
@@ -95,6 +94,7 @@ function Moo_GetOrderTypes()
                 if(orderTypes.length>0)
                     for(var i=0;i<orderTypes.length;i++) {
                         var $ot = orderTypes[i];
+                        if($ot.label == "") continue;
                         html +='<div class="Moo_option-item">';
                         html +="<div class='label'>"+($ot.label)+"</div>";
                         html +='<div class="onoffswitch" onchange="MooChangeOT_Status(\''+$ot.ot_uuid +'\')">';
@@ -174,9 +174,19 @@ function moo_addordertype(e)
         jQuery('#Moo_AddOT_btn').hide();
 
         jQuery.post(moo_params.ajaxurl,{'action':'moo_add_ot',"label":label,"taxable":taxable}, function (data) {
-                Moo_GetOrderTypes();
-                jQuery('#Moo_AddOT_loading').html('');
-                jQuery('#Moo_AddOT_btn').show();
+            console.log(data);
+            if(data.status=='success')
+            {
+                if(data.message == '401 Unauthorized') jQuery('#Moo_AddOT_loading').html('Verify your API key');
+                else
+                {
+                    Moo_GetOrderTypes();
+                    jQuery('#Moo_AddOT_loading').html('');
+                    jQuery('#Moo_AddOT_btn').show();
+                }
+
+            }
+
 
             }
         );
