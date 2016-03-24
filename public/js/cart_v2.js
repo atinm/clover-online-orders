@@ -151,6 +151,7 @@ function moo_cart_DeleteItem(item)
     else
     {
         jQuery(".moo_cart .CartContent>table>tbody").html('<tr><td colspan="4">Your Cart is empty !!</td></tr>');
+        moo_updateCartTotal();
     }
 
 }
@@ -257,5 +258,5 @@ function abortAJAXCalls()
 function moo_addItemWithModifiersToCart(event,item_uuid,item_name,item_price)
 {
     if(moo_addModifiers(item_name) == false ) moo_addToCart(event,item_uuid,item_name,item_price);
-    jQuery.magnificPopup.close()
+    history.back();
 }

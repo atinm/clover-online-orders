@@ -97,6 +97,10 @@
     font-family: serif;
     color:#000000;
 }
+#moo_form_address .error
+{
+    color:red;
+}
 #Moo_FileterContainer
 {
     background-color: #ecf0f1;

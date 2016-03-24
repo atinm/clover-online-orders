@@ -493,7 +493,7 @@ class Moo_OnlineOrders_Public {
                     foreach ($item['modifiers'] as $m) {
                         $m_price = $item['quantity'] * $m['price'];
                         $sub_total += $m_price/100;
-                        $total_of_taxes += $item['tax_rate'] * $m_price / 1000;
+                        $total_of_taxes += $item['tax_rate'] * $m_price / 10000;
                     }
                 }
             }
@@ -536,7 +536,7 @@ class Moo_OnlineOrders_Public {
                     foreach ($item['modifiers'] as $m) {
                         $m_price = $item['quantity'] * $m['price'];
                         $sub_total += $m_price/100;
-                        $total_of_taxes += $item['tax_rate'] * $m_price / 1000;
+                        $total_of_taxes += $item['tax_rate'] * $m_price / 10000;
                     }
                 }
             }
@@ -715,7 +715,7 @@ class Moo_OnlineOrders_Public {
                 {
                     $response = array(
                         'status'	=> 'Error',
-                        'message'	=> 'Internal Error : code 100'
+                        'message'	=> 'Internal Error, please contact us, if you\'re the site owner verify your API Key'
                     );
                     wp_send_json($response);
                 }

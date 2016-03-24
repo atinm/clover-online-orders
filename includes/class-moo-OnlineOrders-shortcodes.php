@@ -209,6 +209,7 @@ class Moo_OnlineOrders_Shortcodes {
         global $wpdb;
         //$wpdb->show_errors();
 
+
         wp_enqueue_script( 'custom-script-accordion');
         wp_enqueue_script( 'jquery-accordion',array( 'jquery' ));
         wp_enqueue_script( 'simple-modal',array( 'jquery' ));
@@ -217,6 +218,56 @@ class Moo_OnlineOrders_Shortcodes {
         wp_enqueue_style ( 'custom-style-accordion' );
         wp_enqueue_style ( 'simple-modal' );
         wp_enqueue_style ( 'magnific-popup' );
+
+        if(isset($_GET['addmodifiers']))
+        {
+            $model = new moo_OnlineOrders_Model();
+
+            $item_uuid = sanitize_text_field($_GET['addmodifiers']);
+            $item_uuid = esc_sql($item_uuid);
+            $modifiersgroup = $model->getModifiersGroup($item_uuid);
+            $item = $model->getItem($item_uuid);
+            echo "<h1>$item->name</h1>";
+            ?>
+            <div class="row">
+                <div class="col-md-9 col-sm-9 col-xs-12">
+                    <form id="moo_form_modifiers" method="post">
+                        <?php foreach ($modifiersgroup as $mg) {
+                              $modifiers = $model->getModifiers($mg->uuid);
+                              if( count($modifiers)==0) continue;
+                         ?>
+                        <div class="moo_modifier-box">
+                            <div class="moo_title"><?php echo $mg->name; ?></div>
+                            <ul>
+                                <?php  foreach ( $modifiers as $m) { ?>
+                                <li>
+                                    <span class="moo_checkbox"><input type="checkbox" name="<?php echo 'moo_modifiers[\''.$item_uuid.'\',\''.$mg->uuid.'\',\''.$m->uuid.'\']' ?>" id="moo_checkbox_<?php echo $m->uuid ?>"> </span>
+                                    <p class="moo_label"><?php echo $m->name ?></p>
+                                    <span class="moo_price">$<?php echo $m->price/100 ?></span>
+                                    <span class="moo_label_onclick" onclick="moo_check('<?php echo $m->uuid ?>')"></span>
+                                </li>
+                                <?php } ?>
+
+                            </ul>
+                        </div>
+                        <?php } ?>
+                        <div style='text-align: center'>
+                            <?php echo '<div class="btn btn-primary btn-lg hidden-xs" onclick="moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')"  >ADD TO YOUR CART</div>'; ?>
+                            <div class="btn btn-warning btn-lg hidden-xs" onclick="javascript:window.history.back()">Back</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-3 col-sm-3 hidden-xs" style="margin-top:50px ; text-align: center">
+                    <?php echo '<div class="btn btn-primary btn-lg" onclick="moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')" id="moo_BtnAddInModifiers">ADD TO CART</div>'; ?>
+                    <div class="btn btn-warning btn-lg hidden-xs" onclick="javascript:window.history.back()" style="margin-top: 5px">Back</div>
+                </div>
+                <div class="col-xs-12 hidden-md hidden-lg hidden-sm MooGoToCart">
+                    <a href="#" onclick="<?php echo 'moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')'?>">Add to cart</a>
+                </div>
+            </div>
+         <?php
+        }
+        else {
                 ?>
                 <div class="col-xs-12 hidden-md hidden-lg hidden-sm MooGoToCart">
                     <a href="#ViewShoppingCart">VIEW SHOPPING CART</a>
@@ -253,7 +304,7 @@ class Moo_OnlineOrders_Shortcodes {
                                             if($item->visible == 0 || $item->hidden == 1 || $item->price_type=='VARIABLE' || $item->price == 0) continue;
                                             echo '<li>';
                                             if(($model->itemHasModifiers($item->uuid)->total) != "0")
-                                                echo '<a class="popup-text" href="#Moo_ItemWithModifier" onclick="ItemHasModifiers(this,event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')">';
+                                                echo '<a  href="'.(esc_url(add_query_arg('addmodifiers', $item->uuid,(get_page_link(get_option('moo_store_page')))))).'" >';
                                             else
                                                 echo '<a href="#" onclick="moo_addToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')">';
                                             echo '  <div class="detail">'.$item->name.'</div>';
@@ -309,6 +360,7 @@ class Moo_OnlineOrders_Shortcodes {
 			</p>
 	    </div>
                 <?php
+        }
     }
     /*
      * It's a private function for internal use in the function
@@ -698,7 +750,7 @@ class Moo_OnlineOrders_Shortcodes {
                             </div>
                         </form>
 	                    <div style="text-align: center;padding: 10px">
-		                   <?php echo '<div class="btn btn-primary" onclick=" moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')">ADD TO YOUR CART</div>'; ?>
+		                   <?php echo '<div class="btn btn-primary" onclick="moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')">ADD TO YOUR CART</div>'; ?>
 	                    </div>
                     </div>
                 </div>

@@ -88,6 +88,9 @@ jQuery("#moo_form_address").validate({
                 jQuery('#moo_btn_submit_order').show();
                 html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>'+data.message+'</div>'
                 jQuery(".entry-content").prepend(html);
+                jQuery("html, body").animate({
+                    scrollTop: 0
+                }, 600);
             }
 
         });
