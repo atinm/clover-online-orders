@@ -229,8 +229,8 @@ class Moo_OnlineOrders_Shortcodes {
             $item = $model->getItem($item_uuid);
             echo "<h1>$item->name</h1>";
             ?>
-            <div class="row">
-                <div class="col-md-9 col-sm-9 col-xs-12">
+            <div class="row MooStyleAccorfion">
+                <div class="col-md-9 col-sm-12 col-xs-12">
                     <form id="moo_form_modifiers" method="post">
                         <?php foreach ($modifiersgroup as $mg) {
                               $modifiers = $model->getModifiers($mg->uuid);
@@ -257,11 +257,11 @@ class Moo_OnlineOrders_Shortcodes {
                         </div>
                     </form>
                 </div>
-                <div class="col-md-3 col-sm-3 hidden-xs" style="margin-top:50px ; text-align: center">
+                <div class="col-md-3 col-sm-3 hidden-xs hidden-sm" style="margin-top:50px ; text-align: center">
                     <?php echo '<div class="btn btn-primary btn-lg" onclick="moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')" id="moo_BtnAddInModifiers">ADD TO CART</div>'; ?>
                     <div class="btn btn-warning btn-lg hidden-xs" onclick="javascript:window.history.back()" style="margin-top: 5px">Back</div>
                 </div>
-                <div class="col-xs-12 hidden-md hidden-lg hidden-sm MooGoToCart">
+                <div class="col-xs-12 col-sm-12 hidden-md hidden-lg MooGoToCart">
                     <a href="#" onclick="<?php echo 'moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')'?>">Add to cart</a>
                 </div>
             </div>
@@ -269,7 +269,7 @@ class Moo_OnlineOrders_Shortcodes {
         }
         else {
                 ?>
-                <div class="col-xs-12 hidden-md hidden-lg hidden-sm MooGoToCart">
+                <div class="col-xs-12 col-sm-12 hidden-lg MooGoToCart">
                     <a href="#ViewShoppingCart">VIEW SHOPPING CART</a>
                 </div>
                 <div class="row MooStyleAccorfion">

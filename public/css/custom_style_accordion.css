@@ -3,6 +3,7 @@
     border: solid 1px #e7e7e7;
     border-radius: 3px;
     margin: 15px 0 0 0;
+    background-color: #ffffff;
 }
 .moo_category_title
 {
@@ -93,6 +94,7 @@
     border-radius: 4px;
     width: 100%;
     color: #ffffff;
+    border: solid 1px;
 }
 .moo_cart table
 {
@@ -184,7 +186,7 @@
 }
 .MooStyleAccorfion
 {
-    background-color: #ffffff;
+   /* background-color: #ffffff; */
     padding: 5px;
 }
 #ViewShoppingCart
@@ -213,7 +215,6 @@
 .moo_modifier-box
 {
     color: #000000;
-    background-color: #ffffff;
     margin: 10px;
 }
 .moo_modifier-box .moo_title
@@ -262,6 +263,8 @@
     list-style: none;
     margin: 0px;
     border: solid 1px #000000;
+    padding: 0px;
+    background-color: #ffffff;
 }
 .moo_modifier-box ul li
 {

@@ -58,11 +58,10 @@ jQuery(document).ready(function() {
             jQuery('#moo_BtnAddInModifiers').css('width','100%');
         }
     }
-    jQuery( window ).resize(function() {
-        jQuery('.moo_cart').css('left','');
-        jQuery('.moo_cart').css('width','100%');
-        cart_offset = jQuery('.moo_cart').offset();
-        cart_width = jQuery('.moo_cart').outerWidth();
+    jQuery( window ).resize(function()
+    {
+        btn_offset = jQuery('#moo_BtnAddInModifiers').offset();
+        btn_width =  jQuery('#moo_BtnAddInModifiers').outerWidth();
     });
 });
 function moo_addToCart(e,item_uuid,name,price)

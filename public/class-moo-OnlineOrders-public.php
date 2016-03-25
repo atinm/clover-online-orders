@@ -502,11 +502,14 @@ class Moo_OnlineOrders_Public {
             $total_of_taxes = $total_of_taxes/100; // Conversion to dollar
 		 */
 
+            $FinalSubTotal = round($sub_total,2,PHP_ROUND_HALF_UP);
+            $FinalTaxTotal = $this->round_up($total_of_taxes,2);
+
             $response = array(
                 'status'	        => 'success',
-                'sub_total'      	=> round($sub_total,2,PHP_ROUND_HALF_UP),
-                'total_of_taxes'	=> $this->round_up($total_of_taxes,2),
-                'total'	            => round(($total_of_taxes+$sub_total),2,PHP_ROUND_HALF_UP)
+                'sub_total'      	=> $FinalSubTotal,
+                'total_of_taxes'	=> $FinalTaxTotal,
+                'total'	            => ($FinalSubTotal+$FinalTaxTotal)
             );
             wp_send_json($response);
 
@@ -544,11 +547,14 @@ class Moo_OnlineOrders_Public {
             $sub_total = $sub_total/100; // Conversion to dollar
             $total_of_taxes = $total_of_taxes/100; // Conversion to dollar
 				*/
+            $FinalSubTotal = round($sub_total,2,PHP_ROUND_HALF_UP);
+            $FinalTaxTotal = self::round_up($total_of_taxes,2);
+
             $response = array(
-                'status'	=> 'success',
-                'sub_total'      	=> round($sub_total,2,PHP_ROUND_HALF_UP),
-                'total_of_taxes'	=> self::round_up($total_of_taxes,2),
-                'total'             => round(($total_of_taxes+$sub_total),2,PHP_ROUND_HALF_UP)
+                'status'	        => 'success',
+                'sub_total'      	=> $FinalSubTotal,
+                'total_of_taxes'	=> $FinalTaxTotal,
+                'total'	            => ($FinalSubTotal+$FinalTaxTotal)
             );
             return $response;
 
