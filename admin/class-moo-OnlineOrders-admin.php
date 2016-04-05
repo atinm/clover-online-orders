@@ -161,6 +161,7 @@ class moo_OnlineOrders_Admin {
                 if(isset(json_decode($result)->status) && json_decode($result)->status =='success') {
                     $newvalue = get_option( 'moo_store_page');
                     $api->updateWebsite(esc_url( get_permalink($newvalue) ));
+                    $api->CreateOrdersTypes();
                     $errorToken="( Token valid )";
                 }
                 else
@@ -170,9 +171,7 @@ class moo_OnlineOrders_Admin {
         }
         else
             $errorToken="( Required )";
-
-        $ordertypes = $model->getOrderTypes();
-
+        $modifier_groups = $model->getAllModifiersGroup();
         ?>
         <div id="MooPanel">
             <div id="MooPanel_sidebar">
@@ -184,35 +183,33 @@ class moo_OnlineOrders_Admin {
                     <li class="MooPanel_Selected" id="MooPanel_tab1" onclick="tab_clicked(1)">API Key settings</li>
                     <li id="MooPanel_tab2" onclick="tab_clicked(2)">Import Items</li>
                     <li id="MooPanel_tab3" onclick="tab_clicked(3)">Orders Types</li>
-                    <li id="MooPanel_tab4" onclick="tab_clicked(4)">Styles</li>
-                    <li id="MooPanel_tab5" onclick="tab_clicked(5)">Feedback</li>
+                    <li id="MooPanel_tab4" onclick="tab_clicked(4)">Store interface</li>
+                    <li id="MooPanel_tab5" onclick="tab_clicked(5)">Modifiers</li>
+                    <li id="MooPanel_tab6" onclick="tab_clicked(6)">Feedback</li>
                 </ul>
             </div>
             <div id="MooPanel_main">
+
                 <form method="post" action="options.php">
                     <?php settings_fields('moo_settings') ?>
-
                 <div id="MooPanel_tabContent1">
-                    <h2>Key settings</h2>
-<!--                    <div class="MooPanelSubmit">-->
-<!--                        <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">-->
-<!--                    </div>-->
-                    <div class="MooPanelItem">
-                        <h3>API key</h3>
-                        <div class="Moo_option-item">
-                            <div class="label">Your key : </div>
-                            <input type="text" size="60" name="moo_settings[api_key]" value="<?php echo $MooOptions['api_key']?>"/>
-                            <?php echo $errorToken;?>
-                        </div>
-                        <div style="padding: 20px">
-                            You don't have a key ?
-                            <a href="http://api.smartonlineorders.com/oauth" target="_blank">Get your key</a>
-                        </div>
-	                    <div style="text-align: center; margin-bottom: 20px;">
-		                    <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
-	                    </div>
+                        <h2>Key settings</h2>
+                        <div class="MooPanelItem">
+                            <h3>API key</h3>
+                            <div class="Moo_option-item">
+                                <div class="label">Your key : </div>
+                                <input type="text" size="60" name="moo_settings[api_key]" value="<?php echo $MooOptions['api_key']?>"/>
+                                <?php echo $errorToken;?>
+                            </div>
+                            <div style="padding: 20px">
+                                You don't have a key ?
+                                <a href="http://api.smartonlineorders.com/oauth" target="_blank">Get your key</a>
+                            </div>
+                            <div style="text-align: center; margin-bottom: 20px;">
+                                <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
+                            </div>
 
-                    </div>
+                        </div>
                 </div>
                 <div id="MooPanel_tabContent2">
                     <h2>Import Items</h2>
@@ -254,33 +251,7 @@ class moo_OnlineOrders_Admin {
                     <div class="MooPanelItem" >
                         <h3>Choose the defaults order types</h3>
 							<div id="MooOrderTypesContent" style="margin-bottom: 10px">
-                            <?php
-	    /*
-                            if(count($ordertypes)>0)
-                                foreach($ordertypes as $ot)
-                                {
-                                    echo '<div class="Moo_option-item">';
-                                    echo "<div class='label'>".($ot->label)."</div>";
-		*/
-                            ?>
-                                  <!--   <div class="onoffswitch" onchange="MooChangeOT_Status('<?php /*echo $ot->ot_uuid */?>')"> -->
-                                  <!--      <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_<?php /* echo $ot->ot_uuid.'"'; echo ($ot->status==1)?"checked":""; */ ?> > -->
-	                              <!--     <label class="onoffswitch-label" for="myonoffswitch_<?php /* echo $ot->ot_uuid */ ?>"> -->
-<!--                                            <span class="onoffswitch-inner"></span>-->
-<!--                                            <span class="onoffswitch-switch"></span>-->
-<!--                                        </label>-->
-<!--                                    </div>-->
-<!--	                                </div>-->
-                                 <?php /*
-                                }
-                            else
-                                echo "<div style='text-align: center'>You don't have any OrderTypes,<br/> please click on refresh button or refresh the page if you just imported your data</div>";
-                            */ ?>
 							</div>
-<!--		                    <div style="text-align: center; padding: 20px;">-->
-<!--			                    <a class="button button-primary" href="#" onclick="MooPanelRefrechOT(event)">Refresh</a>-->
-<!--		                    </div>-->
-
                     </div>
                     <div class="MooPanelItem">
                         <h3>Add new order type</h3>
@@ -289,15 +260,15 @@ class moo_OnlineOrders_Admin {
 		                        </div>
 		                        <input type="text" size="60" value="" id="Moo_AddOT_label"/>
 								 <div class="label">taxable :<br />
-									 <input type="radio" name="taxable" value="oui" id="Moo_AddOT_taxable_oui" checked> Yes<br>
-									 <input type="radio" name="taxable" value="non" id="Moo_AddOT_taxable_non"> No<br><br>
-									 <input type="button" value="Add" onclick="moo_addordertype(event)" id="Moo_AddOT_btn"><div id="Moo_AddOT_loading"></div>
+									 <input type="radio" name="taxable" value="oui" id="Moo_AddOT_taxable_oui" style="margin: 10px" checked> Yes<br>
+									 <input type="radio" name="taxable" value="non" id="Moo_AddOT_taxable_non" style="margin-left: 10px;margin-right: 10px" > No<br><br>
+									 <div class="button button-primary"  onclick="moo_addordertype(event)" id="Moo_AddOT_btn">Add</div><div id="Moo_AddOT_loading"></div>
 								 </div>
                         </div>
                     </div>
                  </div>
                 <div id="MooPanel_tabContent4">
-                    <h2>Styles</h2>
+                    <h2>Store interface</h2>
                     <div class="MooPanelItem">
                         <h3>Default style</h3>
                         <div class="Moo_option-item">
@@ -317,13 +288,40 @@ class moo_OnlineOrders_Admin {
 	                    <div style="text-align: center; margin-bottom: 20px;">
 		                    <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
 	                    </div>
+
                     </div>
                 </div>
+            </form>
                 <div id="MooPanel_tabContent5">
-                    <h2>Feedback</h2>
-                    <div class="MooPanelSubmit">
-<!--                        <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">-->
+                    <h2>Modifiers</h2>
+                    <div class="MooPanelItem">
+                        <h3>Update your modifier names so they are easy to understand.</h3>
+                        <?php
+                        if(count($modifier_groups)==0) echo "<div style=\"text-align: center;margin-bottom: 10px;\">You don't have any Modifier Group,<br> please import your data by clicking on <b>Import Items</b></div>";
+
+                        foreach ($modifier_groups as $mg) {
+                            //var_dump($mg);
+                            ?>
+
+                            <div class="Moo_option-item">
+                                <div class="label"><?php echo $mg->name?></div>
+                                <div class="onoffswitch" onchange="MooChangeModifier_Status('<?php echo $mg->uuid?>')">
+                                    <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_<?php echo $mg->uuid?>" <?php echo ($mg->show_by_default)?'checked':''?>>
+                                    <label class="onoffswitch-label" for="myonoffswitch_<?php echo $mg->uuid?>"><span class="onoffswitch-inner"></span>
+                                        <span class="onoffswitch-switch"></span>
+                                    </label>
+                                </div>
+                                <div style="float: right">
+                                    <input type="text" value="<?php echo $mg->alternate_name?>" id="Moo_ModifierGroupNewName_<?php echo $mg->uuid?>">
+                                    <div class="button button-primary" onclick="Moo_changeModifierGroupName('<?php echo $mg->uuid?>')">Save</div>
+                                    <div id="Moo_ModifierGroupSaveName_<?php echo $mg->uuid?>" style="color: #008000;display: none">Saved</div>
+                                </div>
+                            </div>
+                        <?php }?>
                     </div>
+                </div>
+                <div id="MooPanel_tabContent6">
+                    <h2>Feedback</h2>
                     <div class="MooPanelItem">
                         <h3>Send us your feedback</h3>
                         <div class="Moo_option-item">
@@ -334,7 +332,6 @@ class moo_OnlineOrders_Admin {
                         </div>
                     </div>
                 </div>
-                </form>
             </div>
         </div>
         <?php

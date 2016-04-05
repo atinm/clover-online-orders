@@ -77,6 +77,7 @@ class Moo_OnlineOrders_Deactivator {
 
         /* -- Table `modifier_group` -- */
         $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_modifier_group` ;");
+            
         /* -- Table `order_types -- */
         $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_order_types` ;");
 

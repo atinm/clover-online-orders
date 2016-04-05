@@ -99,7 +99,7 @@ class moo_OnlineOrders_Admin_Model {
 
         $info = curl_getinfo($crl);
         curl_close($crl);
-        var_dump($reply);
+       // var_dump($reply);
 
         if($info['http_code']==200)return $reply;
         return false;

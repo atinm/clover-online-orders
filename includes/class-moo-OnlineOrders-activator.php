@@ -439,7 +439,8 @@ class Moo_OnlineOrders_Activator {
 
         $defaultOptions = array (
                   'api_key' => '',
-                  'default_style' => 'style1');
+                  'default_style' => 'style1',
+                  'payment'=>array('cc'=>true,'cash'=>false));
 
         update_option( 'moo_settings', $defaultOptions );
 

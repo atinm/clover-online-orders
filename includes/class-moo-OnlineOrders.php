@@ -69,7 +69,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.0.4';
+		$this->version = '1.0.5';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -257,6 +257,12 @@ class moo_OnlineOrders {
 
 		//Delete a Order type
 		$this->loader->add_action( 'wp_ajax_moo_delete_ot', $plugin_public, 'moo_DeleteOrderType');
+
+		/* Manage modifiers */
+        //Change modifier name
+		$this->loader->add_action( 'wp_ajax_moo_change_modifiergroup_name', $plugin_public, 'moo_ChangeModifierGroupName');
+        //update modifier status
+		$this->loader->add_action( 'wp_ajax_moo_update_modifiergroup_status', $plugin_public, 'moo_UpdateModifierGroupStatus');
 
         // Send the feedback
         $this->loader->add_action( 'wp_ajax_moo_send_feedback', $plugin_public, 'moo_SendFeedBack');

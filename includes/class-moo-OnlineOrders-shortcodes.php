@@ -218,56 +218,6 @@ class Moo_OnlineOrders_Shortcodes {
         wp_enqueue_style ( 'custom-style-accordion' );
         wp_enqueue_style ( 'simple-modal' );
         wp_enqueue_style ( 'magnific-popup' );
-
-        if(isset($_GET['addmodifiers']))
-        {
-            $model = new moo_OnlineOrders_Model();
-
-            $item_uuid = sanitize_text_field($_GET['addmodifiers']);
-            $item_uuid = esc_sql($item_uuid);
-            $modifiersgroup = $model->getModifiersGroup($item_uuid);
-            $item = $model->getItem($item_uuid);
-            echo "<h1>$item->name</h1>";
-            ?>
-            <div class="row MooStyleAccorfion">
-                <div class="col-md-9 col-sm-12 col-xs-12">
-                    <form id="moo_form_modifiers" method="post">
-                        <?php foreach ($modifiersgroup as $mg) {
-                              $modifiers = $model->getModifiers($mg->uuid);
-                              if( count($modifiers)==0) continue;
-                         ?>
-                        <div class="moo_modifier-box">
-                            <div class="moo_title"><?php echo $mg->name; ?></div>
-                            <ul>
-                                <?php  foreach ( $modifiers as $m) { ?>
-                                <li>
-                                    <span class="moo_checkbox"><input type="checkbox" name="<?php echo 'moo_modifiers[\''.$item_uuid.'\',\''.$mg->uuid.'\',\''.$m->uuid.'\']' ?>" id="moo_checkbox_<?php echo $m->uuid ?>"> </span>
-                                    <p class="moo_label"><?php echo $m->name ?></p>
-                                    <span class="moo_price">$<?php echo $m->price/100 ?></span>
-                                    <span class="moo_label_onclick" onclick="moo_check('<?php echo $m->uuid ?>')"></span>
-                                </li>
-                                <?php } ?>
-
-                            </ul>
-                        </div>
-                        <?php } ?>
-                        <div style='text-align: center'>
-                            <?php echo '<div class="btn btn-primary btn-lg hidden-xs" onclick="moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')"  >ADD TO YOUR CART</div>'; ?>
-                            <div class="btn btn-warning btn-lg hidden-xs" onclick="javascript:window.history.back()">Back</div>
-                        </div>
-                    </form>
-                </div>
-                <div class="col-md-3 col-sm-3 hidden-xs hidden-sm" style="margin-top:50px ; text-align: center">
-                    <?php echo '<div class="btn btn-primary btn-lg" onclick="moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')" id="moo_BtnAddInModifiers">ADD TO CART</div>'; ?>
-                    <div class="btn btn-warning btn-lg hidden-xs" onclick="javascript:window.history.back()" style="margin-top: 5px">Back</div>
-                </div>
-                <div class="col-xs-12 col-sm-12 hidden-md hidden-lg MooGoToCart">
-                    <a href="#" onclick="<?php echo 'moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')'?>">Add to cart</a>
-                </div>
-            </div>
-         <?php
-        }
-        else {
                 ?>
                 <div class="col-xs-12 col-sm-12 hidden-lg MooGoToCart">
                     <a href="#ViewShoppingCart">VIEW SHOPPING CART</a>
@@ -276,7 +226,6 @@ class Moo_OnlineOrders_Shortcodes {
                 <div class="col-md-7" style="margin-bottom: 20px;">
                 <?php
                     foreach ( $model->getCategories() as $category ){
-
 	                    // I verify if there is some itmes in the category
 	                    // and the length of the name then I cut if it more than 30 characters
                         if(strlen ($category->items)< 1 ) continue;
@@ -297,20 +246,68 @@ class Moo_OnlineOrders_Shortcodes {
                                     $items = explode(',',$category->items);
                                     foreach($items as $uuid_item)
                                     {
-                                        if($uuid_item =="") continue;
+                                        if($uuid_item == "") continue;
                                         $item = $model->getItem($uuid_item);
                                         if($item)
                                         {
-                                            if($item->visible == 0 || $item->hidden == 1 || $item->price_type=='VARIABLE' || $item->price == 0) continue;
+                                            if($item->visible == 0 || $item->hidden == 1 || $item->price_type=='VARIABLE') continue;
                                             echo '<li>';
                                             if(($model->itemHasModifiers($item->uuid)->total) != "0")
-                                                echo '<a  href="'.(esc_url(add_query_arg('addmodifiers', $item->uuid,(get_page_link(get_option('moo_store_page')))))).'" >';
+                                                echo '<a class="popup-text" href="#Modifiers_for_'.$item->uuid.'" onclick="moo_openFirstModifierG(\'MooModifierGroup_default_'.$item->uuid.'\')">';
                                             else
                                                 echo '<a href="#" onclick="moo_addToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')">';
                                             echo '  <div class="detail">'.$item->name.'</div>';
                                             echo '  <div class="price">$'.(number_format(($item->price/100),2,'.','')).'</div>';
                                             echo '</a>';
                                             echo '</li>';
+                                            ?>
+                                            <div class="row white-popup mfp-hide" id="Modifiers_for_<?php echo $item->uuid?>">
+                                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                                    <form id="moo_form_modifiers" method="post">
+                                                        <?php
+                                                        $modifiersgroup = $model->getModifiersGroup($item->uuid);
+                                                        $nb_mg=0;
+                                                        foreach ($modifiersgroup as $mg) {
+                                                            $modifiers = $model->getModifiers($mg->uuid);
+                                                            if( count($modifiers) == 0) continue;
+                                                            $nb_mg++;
+                                                         ?>
+                                                            <div class="moo_category">
+                                                                <div class="moo_accordion accordion-open" id="<?php echo ($nb_mg == 1)?'MooModifierGroup_default_'.$item->uuid:'MooModifierGroup_'.$mg->uuid?>">
+                                                                    <div class="moo_category_title">
+                                                                        <div class="title"><?php echo ($mg->alternate_name=="")?$mg->name:$mg->alternate_name; ?></div>
+                                                                        <span></span>
+                                                                    </div>
+                                                                 </div>
+                                                                <div class="moo_accordion_content moo_modifier-box2" style="display: none;">
+                                                                    <ul>
+                                                                        <?php  foreach ( $modifiers as $m) { ?>
+                                                                            <li>
+                                                                                <a href="#" onclick="moo_check(event,'<?php echo $m->uuid ?>')">
+                                                                                    <div class="detail">
+                                                                                        <span class="moo_checkbox">
+                                                                                            <input type="checkbox" name="<?php echo 'moo_modifiers[\''.$item->uuid.'\',\''.$mg->uuid.'\',\''.$m->uuid.'\']' ?>" id="moo_checkbox_<?php echo $m->uuid ?>"">
+                                                                                        </span>
+                                                                                        <p class="moo_label" ><?php echo $m->name ?></p>
+                                                                                    </div>
+                                                                                    <div class="price">
+                                                                                        $<?php echo number_format(($m->price/100), 2) ?>
+                                                                                    </div>
+                                                                                </a>
+                                                                            </li>
+                                                                        <?php } ?>
+                                                                    </ul>
+                                                                </div>
+                                                             </div>
+                                                        <?php } ?>
+                                                        <div style='text-align: center;margin-top: 10px;'>
+                                                            <?php echo '<div class="btn btn-danger" onclick="moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')"  >ADD TO YOUR CART</div>'; ?>
+                                                            <div class="btn btn-info" onclick="javascript:jQuery.magnificPopup.close()">Close</div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <?php
                                         }
                                     }
                                     ?>
@@ -354,13 +351,7 @@ class Moo_OnlineOrders_Shortcodes {
 
                             </div>
                         </div>
-	    <div id="Moo_ItemWithModifier" class="white-popup mfp-hide">
-			<p id="Moo_ItemWithModifierContainer">
-				Loading ...
-			</p>
-	    </div>
-                <?php
-        }
+  <?php
     }
     /*
      * It's a private function for internal use in the function
@@ -480,26 +471,37 @@ class Moo_OnlineOrders_Shortcodes {
     public static function checkoutPage($atts, $content)
     {
         wp_enqueue_script( 'custom-script-checkout' );
+        wp_enqueue_script( 'forge' );
 
         $model = new moo_OnlineOrders_Model();
+        $api   = new moo_OnlineOrders_CallAPI();
+
         $orderTypes = $model->getVisibleOrderTypes();
         $total =   Moo_OnlineOrders_Public::moo_cart_getTotal_IQ();
         $firstTotal = $total['total'];
 
-       if($total === false){
-           echo 'Your Cart is empty';
-           return;
-       };
+        if($total === false){
 
+           echo '<div class="moo_emptycart"><p>Your cart is empty</p><span><a href="'.get_page_link(get_option('moo_store_page')).'">Browse the store</a></span></div>';
+           return;
+        };
+        if($total['total'] == 0){
+            echo '<div class="moo_emptycart"><p>Your cart is empty</p><span><a href="'.get_page_link(get_option('moo_store_page')).'">Browse the store</a></span></div>';
+            return;
+        };
+        $key = $api->getPayKey();
+        $key = json_decode($key);
         wp_localize_script("custom-script-checkout", "moo_OrderTypes",$orderTypes);
         wp_localize_script("custom-script-checkout", "moo_Total",$total);
+        wp_localize_script("custom-script-checkout", "moo_Key",(array)$key);
         ?>
+
         <form id="moo_form_address" method="post" action="#" novalidate="novalidate">
             <div class="row">
                 <div class="col-md-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <p style="font-size: 16px !important; margin:0;">Personal infos</p>
+                            <p style="font-size: 16px !important; margin:0;">Customer Information</p>
                         </div>
                         <div class="panel-body">
                             <div class="col-md-6">
@@ -557,18 +559,18 @@ class Moo_OnlineOrders_Shortcodes {
                             <div class="form-group row">
 
                                 <div class="col-md-6 col-xs-7 col-sm-7"><select name="expiredDateMonth" id="expiredDate" class="form-control">
-                                        <option value="1">January</option>
-                                        <option value="2">February</option>
-                                        <option value="3">March</option>
-                                        <option value="4">April</option>
-                                        <option value="5">May</option>
-                                        <option value="6">June</option>
-                                        <option value="7">July</option>
-                                        <option value="8">August</option>
-                                        <option value="9">September</option>
-                                        <option value="10">October</option>
-                                        <option value="11">November</option>
-                                        <option value="12">December</option>
+                                        <option value="1">January (01)</option>
+                                        <option value="2">February (02)</option>
+                                        <option value="3">March (03)</option>
+                                        <option value="4">April(04)</option>
+                                        <option value="5">May (05)</option>
+                                        <option value="6">June (06)</option>
+                                        <option value="7">July (07)</option>
+                                        <option value="8">August (08)</option>
+                                        <option value="9">September (09)</option>
+                                        <option value="10">October (10)</option>
+                                        <option value="11">November (11)</option>
+                                        <option value="12">December (12)</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6  col-xs-5 col-sm-5">
@@ -582,8 +584,10 @@ class Moo_OnlineOrders_Shortcodes {
                                         <option value="2022">2022</option>
                                         <option value="2023">2023</option>
                                         <option value="2024">2024</option>
-                                        <option value="2024">2025</option>
-                                        <option value="2024">2026</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2026">2026</option>
+                                        <option value="2027">2028</option>
+                                        <option value="2028">2029</option>
                                     </select>
                                 </div>
                             </div>
@@ -599,6 +603,12 @@ class Moo_OnlineOrders_Shortcodes {
                         <div class="col-md-4 col-sm-4 col-xs-4">
                             <h1 style="font-size: 20px !important;" id="moo_Total_inCheckout">$<?php echo $firstTotal?></h1>
                         </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p style="text-align: left; font-size: 20px !important;"><a href="<?php echo get_page_link(get_option('moo_store_page'))?>">Continue shopping</a></p>
+                        </div>
+
                     </div>
                 </div>
             </div>

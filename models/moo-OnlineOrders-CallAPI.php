@@ -167,9 +167,9 @@ class moo_OnlineOrders_CallAPI {
             '&cvv='.$cvv.'&last4='.$last4.'&first6='.$first6.'&expYear='.$expYear.'&cardEncrypted='.$cardEncrypted);
     }
     //Send Notification to the merchant when a new order is registered
-    function NotifyMerchant($oid)
+    function NotifyMerchant($oid,$instructions)
     {
-        return $this->callApi_Post("notify",$this->Token,'orderId='.$oid);
+        return $this->callApi_Post("notify",$this->Token,'orderId='.$oid.'&instructions='.$instructions);
     }
     // OrderTypes
     function GetOneOrdersTypes($uuid)
@@ -488,7 +488,6 @@ class moo_OnlineOrders_CallAPI {
 
     private function callApi_Post($url,$accesstoken,$fields_string)
     {
-
         $headr = array();
         $headr[] = 'Accept: application/json';
         $headr[] = 'X-Authorization: '.$accesstoken;
@@ -511,8 +510,8 @@ class moo_OnlineOrders_CallAPI {
 
         $info = curl_getinfo($crl);
         curl_close($crl);
-	 //   echo $url." ---- ";
-     //   var_dump($reply);
+	  // echo $url." ---- ";
+      // var_dump($reply);
         if($info['http_code']==200)return $reply;
         return false;
     }

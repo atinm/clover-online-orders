@@ -144,7 +144,8 @@
 {
      background-color: #0073cc;
 }
-#MooPanel_tabContent2,#MooPanel_tabContent3,#MooPanel_tabContent4,#MooPanel_tabContent5
+#MooPanel_tabContent2,#MooPanel_tabContent3,#MooPanel_tabContent4,#MooPanel_tabContent5, #MooPanel_tabContent6,
+#MooPanel_tabContent7,#MooPanel_tabContent8,#MooPanel_tabContent9,#MooPanel_tabContent10,#MooPanel_tabContent11
 {
     display: none;
 }

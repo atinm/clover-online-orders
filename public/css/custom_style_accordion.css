@@ -279,6 +279,35 @@ cursor: pointer;
 border-bottom: none;
 }
 
+ /*  Modifer UI Accordion style  */
+
+.moo_modifier-box2 .moo_checkbox
+{
+    float: left;
+    margin-right: 10px;
+}
+.moo_modifier-box2 .moo_checkbox input
+{
+    width: 24px;
+    height: 24px;
+}
+.moo_modifier-box2 .moo_label
+{
+    float: left;
+    margin: 0px;
+    line-height: 31px;
+    padding: 0px;
+}
+.moo_modifier-box2 .moo_label_onclick
+{
+    width: 100%;
+    position: relative;
+    height: 100%;
+    display: block;
+}
+
+
+
 @media only screen and (max-width: 767px) {
     .moo_modifier-box .moo_checkbox input
     {

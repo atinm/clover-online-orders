@@ -1,6 +1,7 @@
 (function( $ ) {
     'use strict';
 })( jQuery );
+
 jQuery("#moo_form_address").validate({
     rules: {
         name: {
@@ -70,6 +71,7 @@ jQuery("#moo_form_address").validate({
         var DataObject = {};
 
         for(i in DataArray) DataObject[DataArray[i]['name']] = DataArray[i]['value'] ;
+        DataObject['cardEncrypted'] = cryptCardNumber(DataObject.cardNumber);
 
         jQuery.post(moo_params.ajaxurl,{'action':'moo_checkout','form':DataObject}, function (data) {
             if(data.status == 'APPROVED'){
@@ -80,14 +82,14 @@ jQuery("#moo_form_address").validate({
                     scrollTop: 0
                 }, 600);
             }
-
             else
             {
                 //Hide Loading Icon and Show the button if there is an error
                 jQuery('#moo_checkout_loading').hide();
                 jQuery('#moo_btn_submit_order').show();
-                html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>'+data.message+'</div>'
-                jQuery(".entry-content").prepend(html);
+                html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>Payment card was declined. Check card info or try another card.</div>';
+                console.log(data.message);
+                jQuery("#moo_form_address").prepend(html);
                 jQuery("html, body").animate({
                     scrollTop: 0
                 }, 600);
@@ -115,4 +117,19 @@ function moo_OrderTypeChanged(obj)
                document.getElementById('moo_Total_inCheckout').innerText = '$'+(moo_Total.sub_total);
         }
     }
+}
+function cryptCardNumber(ccn)
+{
+    var rsa = forge.pki.rsa;
+
+    var modulus = moo_Key.modulus;
+    var exponent = moo_Key.exponent;
+    var prefix = moo_Key.prefix;
+    var text = prefix + ccn;
+    modulus = new forge.jsbn.BigInteger(modulus);
+    exponent = new forge.jsbn.BigInteger(exponent);
+    text = text.split(' ').join('');
+    var publicKey = rsa.setPublicKey(modulus, exponent);
+    var encryptedData = publicKey.encrypt(text, 'RSA-OAEP');
+    return forge.util.encode64(encryptedData);
 }

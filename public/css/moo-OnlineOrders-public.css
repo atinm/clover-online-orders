@@ -183,3 +183,20 @@
 {
     color: #000;
 }
+.moo_emptycart p
+{
+    text-align: center;
+    font-size: 20px;
+    color: #000;
+}
+.moo_emptycart span
+{
+    text-align: center;
+    font-size: 16px;
+    display: block;
+    color: #000;
+}
+.moo_emptycart span a,.moo_emptycart span a:visited
+{
+   color: blue;
+}

@@ -75,15 +75,20 @@ class moo_OnlineOrders_Model {
     {
         return $this->db->get_results("SELECT mg.*
                                     FROM `{$this->db->prefix}moo_item_modifier_group` img,  `{$this->db->prefix}moo_modifier_group` mg
-                                    WHERE mg.uuid=img.group_id
+                                    WHERE mg.uuid=img.group_id AND mg.show_by_default='1'
                                     AND img.item_id = '{$item}'
                                     ");
+    }
+    function getAllModifiersGroup()
+    {
+        return $this->db->get_results("SELECT *
+                                    FROM `{$this->db->prefix}moo_modifier_group`");
     }
     function itemHasModifiers($item)
     {
         return $this->db->get_row("SELECT count(*) as total
-                                    FROM `{$this->db->prefix}moo_item_modifier_group` img
-                                    WHERE img.item_id = '{$item}'
+                                    FROM `{$this->db->prefix}moo_item_modifier_group` img, `{$this->db->prefix}moo_modifier_group` mg, `{$this->db->prefix}moo_modifier` m
+                                    WHERE img.group_id = mg.uuid AND img.item_id = '{$item}' AND mg.uuid=m.group_id AND mg.show_by_default='1'
                                     ");
     }
     function getModifiersGroupLimits($uuid)
@@ -108,17 +113,44 @@ class moo_OnlineOrders_Model {
 {
     return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_order_types where status=1");
 }
+
     function updateOrderTypes($uuid,$status)
-{
-    $uuid = esc_sql($uuid);
-    $st = ($status == "true")? 1:0;
-    return $this->db->update("{$this->db->prefix}moo_order_types",
-                            array(
-                                'status' => $st
-                            ),
-                            array( 'ot_uuid' => $uuid )
-    );
-}
+    {
+        $uuid = esc_sql($uuid);
+        $st = ($status == "true")? 1:0;
+        return $this->db->update("{$this->db->prefix}moo_order_types",
+                                array(
+                                    'status' => $st
+                                ),
+                                array( 'ot_uuid' => $uuid )
+        );
+    }
+
+    function ChangeModifierGroupName($mg_uuid,$name)
+    {
+        $uuid = esc_sql($mg_uuid);
+        $name = esc_sql($name);
+        return $this->db->update("{$this->db->prefix}moo_modifier_group",
+                                array(
+                                    'alternate_name' => $name
+                                ),
+                                array( 'uuid' => $uuid )
+        );
+        
+    } 
+    function UpdateModifierGroupStatus($mg_uuid,$status)
+    {
+        $uuid = esc_sql($mg_uuid);
+        $st = ($status == "true")? 1:0;
+
+        return $this->db->update("{$this->db->prefix}moo_modifier_group",
+                                array(
+                                    'show_by_default' => $st
+                                ),
+                                array( 'uuid' => $uuid )
+        );
+        
+    }
 	function moo_DeleteOrderType($uuid)
 {
     $uuid = esc_sql($uuid);

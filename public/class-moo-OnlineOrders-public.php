@@ -146,6 +146,7 @@ class Moo_OnlineOrders_Public {
             wp_enqueue_script('toastr-js',array('jquery'));
 
             wp_register_script('custom-script-checkout', plugins_url( '/js/moo_checkout.js', __FILE__ ));
+            wp_register_script('forge', plugins_url( '/js/forge.min.js', __FILE__ ));
 
             wp_register_script('moo_public_js',  plugins_url( 'js/moo-OnlineOrders-public.js', __FILE__ ));
 		    wp_enqueue_script('moo_public_js', array( 'jquery' ), $this->version, false);
@@ -552,9 +553,9 @@ class Moo_OnlineOrders_Public {
 
             $response = array(
                 'status'	        => 'success',
-                'sub_total'      	=> $FinalSubTotal,
-                'total_of_taxes'	=> $FinalTaxTotal,
-                'total'	            => ($FinalSubTotal+$FinalTaxTotal)
+                'sub_total'      	=> number_format($FinalSubTotal, 2),
+                'total_of_taxes'	=> number_format($FinalTaxTotal, 2),
+                'total'	            => number_format(($FinalSubTotal+$FinalTaxTotal), 2)
             );
             return $response;
 
@@ -690,22 +691,37 @@ class Moo_OnlineOrders_Public {
                         && !empty($_POST['form']['expiredDateYear']) && !empty($_POST['form']['zipcode']))
                     {
                         if($orderCreated['taxable'])
-                            $paid = $this->moo_PayOrder($_POST['form']['cardNumber'],$_POST['form']['cvv'],$_POST['form']['expiredDateMonth'],$_POST['form']['expiredDateYear'],
+                            $paid = $this->moo_PayOrder($_POST['form']['cardEncrypted'],$_POST['form']['cardNumber'],$_POST['form']['cvv'],$_POST['form']['expiredDateMonth'],$_POST['form']['expiredDateYear'],
                             $orderCreated['OrderId'],$orderCreated['amount'],$orderCreated['taxamount'],$_POST['form']['zipcode']);
                         else
-                            $paid = $this->moo_PayOrder($_POST['form']['cardNumber'],$_POST['form']['cvv'],$_POST['form']['expiredDateMonth'],$_POST['form']['expiredDateYear'],
+                            $paid = $this->moo_PayOrder($_POST['form']['cardEncrypted'],$_POST['form']['cardNumber'],$_POST['form']['cvv'],$_POST['form']['expiredDateMonth'],$_POST['form']['expiredDateYear'],
                             $orderCreated['OrderId'],$orderCreated['sub_total'],'0',$_POST['form']['zipcode']);
                         $response = array(
                             'status'	=> json_decode($paid)->result,
                             'order'	=> $orderCreated['OrderId']
                         );
                         if($response['status'] == 'APPROVED'){
+
                             $this->model->updateOrder($orderCreated['OrderId'],json_decode($paid)->paymentId);
-                            $this->api->NotifyMerchant($orderCreated['OrderId']);
+                            $this->api->NotifyMerchant($orderCreated['OrderId'],$_POST['form']['instructions']);
+                              $this->sendEmail($_POST['form']['email'],$_POST['form']['name'],$orderCreated['OrderId']);
 
                             unset($_SESSION['items']);
 
                             wp_send_json($response);
+                        }
+                        else {
+                            if(json_decode($paid)->failureMessage == null)
+                                $response = array(
+                                    'status'	=> 'Error',
+                                    'message'	=> $paid
+                                );
+                            else
+                              $response = array(
+                                                        'status'	=> json_decode($paid)->result,
+                                                        'message'	=> json_decode($paid)->failureMessage
+                                                    );
+                         wp_send_json($response);
                         }
 
                     }
@@ -786,10 +802,11 @@ class Moo_OnlineOrders_Public {
         //
 
     }
-    private function moo_PayOrder($card_number,$cvv,$expMonth,$expYear,$orderId,$amount,$taxAmount,$zip)
+    private function moo_PayOrder($cardEncrypted,$card_number,$cvv,$expMonth,$expYear,$orderId,$amount,$taxAmount,$zip)
     {
-
+       // var_dump($cardEncrypted);
         $card_number = str_replace(' ','',trim($card_number));
+
         $cvv       = intval($cvv);
         $expMonth  = intval($expMonth);
         $expYear   = intval($expYear);
@@ -798,6 +815,9 @@ class Moo_OnlineOrders_Public {
         $taxAmount = floatval($taxAmount);
         $zip = intval($zip);
 
+        $last4  = substr($card_number,-4);
+        $first6 = substr($card_number,0,6);
+        /*
         //Include rsa files
         require_once plugin_dir_path( dirname(__FILE__))."includes/phpseclib/Crypt/RSA.php";
         require_once plugin_dir_path( dirname(__FILE__))."includes/phpseclib/Math/BigInteger.php";
@@ -805,17 +825,24 @@ class Moo_OnlineOrders_Public {
         $key = $this->api->getPayKey();
         $key = json_decode($key);
         if(isset($key->modulus) && isset($key->exponent) && isset($key->prefix) && !empty($key->modulus)&& !empty($key->exponent)&& !empty($key->prefix) ){
-            $rsa = new Crypt_RSA();
-            $rsa->loadKey(array('n' => new Math_BigInteger($key->modulus), 'e' => new Math_BigInteger($key->exponent) ));
-            $rsa->setPublicKey();
-            $ciphertext = $rsa->encrypt($key->prefix.$card_number);
-            $cardEncrypted = base64_encode($ciphertext);
 
+            $e = new Math_BigInteger($key->exponent);
+            $m = new Math_BigInteger($key->modulus);
+            $card = $key->prefix.$card_number;
+            $rsa = new Crypt_RSA();
+            $rsa->setHash('sha1');
+            $rsa->setMGFHash('sha1');
+            $rsa->setEncryptionMode(CRYPT_RSA_ENCRYPTION_OAEP);
+            $rsa->loadKey(array('n' =>$m, 'e' => $e ));
+
+            $ciphertext = $rsa->encrypt($card);
+
+            $cardEncrypted =base64_encode($ciphertext);
             $last4  = substr($card_number,-4);
             $first6 = substr($card_number,0,6);
-
             $res = $this->api->payOrder($orderId,$taxAmount,$amount,$zip,$expMonth,$cvv,$last4,$expYear,$first6,$cardEncrypted);
             return $res;
+
         }
         else
         {
@@ -825,7 +852,12 @@ class Moo_OnlineOrders_Public {
             );
             wp_send_json($response);
         }
+        */
 
+
+
+        $res = $this->api->payOrder($orderId,$taxAmount,$amount,$zip,$expMonth,$cvv,$last4,$expYear,$first6,$cardEncrypted);
+        return $res;
 
     }
 
@@ -1044,9 +1076,43 @@ public function moo_AddOrderType()
        echo $html;
        die();
    }
+    /* Manage Modifiers */
+
+    function moo_ChangeModifierGroupName()
+    {
+        $mg_uuid  = sanitize_text_field($_POST['mg_uuid']);
+        $name     = sanitize_text_field($_POST['mg_name']);
+        $res = $this->model->ChangeModifierGroupName($mg_uuid,$name);
+
+        $response = array(
+            'status'	 => 'Success',
+            'data'=>$res
+        );
+        wp_send_json($response);
+
+    }
+    function moo_UpdateModifierGroupStatus()
+    {
+        $mg_uuid  = sanitize_text_field($_POST['mg_uuid']);
+        $status   = sanitize_text_field($_POST['mg_status']);
+        $res = $this->model->UpdateModifierGroupStatus($mg_uuid,$status);
+        $response = array(
+            'status'	 => 'Success',
+            'data'=>$res
+        );
+        wp_send_json($response);
+
+    }
 
 	private function round_up ( $value, $precision ) {
 		$pow = pow ( 10, $precision );
 		return ( ceil ( $pow * $value ) + ceil ( $pow * $value - ceil ( $pow * $value ) ) ) / $pow;
 	}
+    private function sendEmail($email,$name,$orderID)
+    {
+        $message    =  'Dear '.$name;
+        $message   .=  '<br/>Thank you for placing your order with us ';
+        $message   .=  '<br/><b><a href="https://www.clover.com/r/'.$orderID.'" target="_blanck">Order details</a></b>';
+        wp_mail($email, 'Thank you for your order', $message);
+    }
 }

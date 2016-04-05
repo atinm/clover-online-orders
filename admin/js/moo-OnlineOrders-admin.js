@@ -9,7 +9,7 @@
 })( jQuery );
 function tab_clicked(tab)
 {
-    var Nb_Tabs=5; // Number for tabs
+    var Nb_Tabs=7; // Number for tabs
     for(var i=1;i<=Nb_Tabs;i++) {
         jQuery('#MooPanel_tabContent'+i).hide();
         jQuery('#MooPanel_tab'+i).removeClass("MooPanel_Selected");
@@ -141,6 +141,12 @@ function moo_Update_stats()
                     easing:'swing',
                     step: function() {jQuery('#MooPanelStats_Taxes').html(Math.round(this.someValue));}
                 });
+                setTimeout(function(){
+                    jQuery('#MooPanelStats_Products').html(data.products);
+                    jQuery('#MooPanelStats_Cats').html(data.cats);
+                    jQuery('#MooPanelStats_Labels').html(data.labels);
+                    jQuery('#MooPanelStats_Taxes').html(data.taxes);
+                },5000);
             }
 
         }
@@ -213,4 +219,28 @@ function MooSendFeedBack(e)
         }
     }
 );
+}
+/* Modifiers Panel */
+
+function Moo_changeModifierGroupName(uuid)
+{
+    var mg_name = jQuery('#Moo_ModifierGroupNewName_'+uuid).val();
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_change_modifiergroup_name',"mg_uuid":uuid,"mg_name":mg_name}, function (data) {
+           jQuery('#Moo_ModifierGroupSaveName_'+uuid).show();
+        }
+    );
+    setTimeout(function () {
+        jQuery('#Moo_ModifierGroupSaveName_'+uuid).hide();
+    }, 5000);
+
+
+}
+function MooChangeModifier_Status(uuid)
+{
+    var mg_status = jQuery('#myonoffswitch_'+uuid).prop('checked');
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_modifiergroup_status',"mg_uuid":uuid,"mg_status":mg_status}, function (data) {
+            console.log(data);
+        }
+    );
+
 }

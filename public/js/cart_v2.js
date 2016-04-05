@@ -2,26 +2,28 @@ function moo_updateCart()
 {
     jQuery(".moo_cart .CartContent").html('<img src="'+moo_params.plugin_img+'/loading.gif" style="text-align: center;margin: 15px auto 0px;display: block;width: 50px;" />');
     jQuery.post(moo_params.ajaxurl,{'action':'moo_get_cart'}, function (data) {
-        //console.log(data);
         var html = ''+
                     '<table class="table"><thead>'+
                     '<tr>'+
-                    '<th>Product</th>'+
+                    '<th>Item</th>'+
                     '<th>Qty</th>'+
                     '<th colspan="2">Sub-total</th>'+
                     '</tr>'+
                     '</thead><tbody>';
         if(data.status=="success")
         {
+            var nb_items=0;
             // console.log(data.data);
             for(item in data.data)
             {
                 if(item == "") continue;
-
                 var product = data.data[item];
+                if(product.item == null ) continue;
+
                 var price = (product.item.price*product.quantity/100);
                 var tax = price*product.tax_rate/100;
                 var subtotal = price;
+                nb_items++;
 
                 if(Object.keys(product.modifiers).length>0){
 
@@ -29,7 +31,7 @@ function moo_updateCart()
                     html +="<tr class='warning' id='moo_cart_line_"+item+"'>";
                     html +="<td  style='cursor: pointer' onclick=\"ChangeQuantity('"+item+"')\" ><strong>"+product.item.name+"</strong></td>"; //The name of the item
                     html +='<td>'+product.quantity+'</td>'; //qty
-                    html +='<td>$'+subtotal+'</td>'; //Sub total  ( price + taxes )
+                    html +='<td>$'+subtotal.toFixed(2)+'</td>'; //Sub total  ( price + taxes )
                     html +='<td></td>'; //Controlles Btn
                     html +='</tr>'; //Controlles Btn
                     // the Modifiers
@@ -42,7 +44,7 @@ function moo_updateCart()
                         html +='<tr id="moo_cart_modifier_'+uuid+'" class="warning MooLineModifier4_'+item+'" style="font-size: 0.8em;text-align: right;">';
                         html +='<td style="text-align: right;">'+modifier.name+'</td>';
                         html +='<td></td>';
-                        html +='<td>$'+modifierPrice+'</td>';
+                        html +='<td>$'+modifierPrice.toFixed(2)+'</td>';
                         html +='<td style="text-align: left;"><i class="fa fa-close" style="cursor: pointer;" onclick="moo_cart_DeleteItemModifier(\''+uuid+'\',\''+item+'\')"></i></td>';
                         html +="</tr>";
 
@@ -80,16 +82,25 @@ function moo_updateCart()
 
             }
 
-            html += "</tbody></table>"
-            jQuery(".moo_cart .CartContent").html(html);
+            if(nb_items>0)
+            {
+                html += "</tbody></table>"
+                jQuery(".moo_cart .CartContent").html(html);
+                moo_updateCartTotal();
+            }
+            else
+            {
+                html += "<tr><td colspan='4' style='text-align: center'>Your cart is empty</td></tr>";
+                html += "</tbody></table>"
+                jQuery(".moo_cart .CartContent").html(html);
+            }
 
-           moo_updateCartTotal();
 
 
         }
         else
         {
-            html += "<tr><td colspan='4'>"+data.message+"</td></tr>";
+            html += "<tr><td colspan='4' style='text-align: center'>"+data.message+"</td></tr>";
             html += "</tbody></table>";
             jQuery(".moo_cart .CartContent").html(html);
         }
@@ -97,37 +108,39 @@ function moo_updateCart()
 }
 function moo_updateCartTotal()
 {
+        jQuery(".moo_cart_total > td:last").html("Calculating...");
 
-    jQuery(".moo_cart_total > td:last").html("Calculating...");
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_cart_getTotal'}, function (data) {
+                if(data.status=="success")
+                {
+                    if(data.total == 0 || Object.keys(MOO_CART).length == 0 ){
+                        jQuery(".moo_cart_total").remove();
+                        return;
+                    }
+                    html ="<tr class='moo_cart_total'>";
+                    html +="<td colspan='1' style='text-align: right;'>Subtotal:</td>";
+                    html +="<td colspan='3'>$"+data.sub_total.toFixed(2)+"</td>";
+                    html +="</tr>";
 
-    abortAJAXCalls();
+                    html +="<tr  class='moo_cart_total'>";
+                    html +="<td colspan='1' style='text-align: right;'>Tax:</td>";
+                    html +="<td colspan='3'>$"+data.total_of_taxes.toFixed(2)+"</td>";
+                    html +="</tr>";
 
-    MOO_AJAX_REQS.push(jQuery.post(moo_params.ajaxurl,{'action':'moo_cart_getTotal'}, function (data) {
-            if(data.status=="success")
-            {
-                html ="<tr class='moo_cart_total'>";
-                html +="<td colspan='1' style='text-align: right;'>Subtotal:</td>";
-                html +="<td colspan='3'>$"+data.sub_total.toFixed(2)+"</td>";
-                html +="</tr>";
+                    html +="<tr  class='moo_cart_total'>";
+                    html +="<td colspan='1' style='text-align: right;'>Total:</td>";
+                    html +="<td colspan='3'>$"+data.total.toFixed(2)+"</td>";
+                    html +="</tr>";
 
-                html +="<tr  class='moo_cart_total'>";
-                html +="<td colspan='1' style='text-align: right;'>Tax:</td>";
-                html +="<td colspan='3'>$"+data.total_of_taxes.toFixed(2)+"</td>";
-                html +="</tr>";
+                    jQuery(".moo_cart_total").remove();
+                    jQuery(".moo_cart .CartContent>table").append(html);
+                }
+                else
+                {
+                    moo_updateCart();
+                }
+        });
 
-                html +="<tr  class='moo_cart_total'>";
-                html +="<td colspan='1' style='text-align: right;'>Total:</td>";
-                html +="<td colspan='3'>$"+data.total.toFixed(2)+"</td>";
-                html +="</tr>";
-
-                jQuery(".moo_cart_total").remove();
-                jQuery(".moo_cart .CartContent>table").append(html);
-            }
-            else
-            {
-                moo_updateCart();
-            }
-    }));
 }
 
 function moo_cart_DeleteItem(item)
@@ -151,8 +164,9 @@ function moo_cart_DeleteItem(item)
     else
     {
         jQuery(".moo_cart .CartContent>table>tbody").html('<tr><td colspan="4">Your Cart is empty !!</td></tr>');
-        moo_updateCartTotal();
+        jQuery(".moo_cart_total").remove();
     }
+
 
 }
 function moo_cart_DeleteItemModifier(uuid,item)
@@ -172,7 +186,7 @@ function moo_emptyCart()
     //send delete query to server
     jQuery.post(moo_params.ajaxurl,{'action':'moo_emptycart'}, function (data) {
         if(data.status == "success"){
-            console.log(data);
+
             moo_updateCart();
         };
     });
@@ -200,6 +214,7 @@ function moo_addModifiers(item_name)
             var modif = string[2].substr(1);
             modif = modif.substr(0,modif.length-2);
 
+            if(item == '' || modifierGroup == '' || modif == '') continue;
 
             if(typeof Mgroups[modifierGroup] === 'undefined') Mgroups[modifierGroup] = 1;
             else Mgroups[modifierGroup] +=1;
@@ -216,47 +231,71 @@ function moo_addModifiers(item_name)
     if(Object.keys(Mgroups).length==0) {
         return false;
     }
+    /* verify the min and max in modifier Group for the next version inchae allah */
+    
+    // for(mg in Mgroups){
+    //     jQuery.post(moo_params.ajaxurl,{'action':'moo_modifiergroup_getlimits',"modifierGroup":mg}, function (data) {
+    //
+    //         if(data.status == 'success' )
+    //         {
+    //             if(data.min != 0 && Mgroups[mg] < data.min) {
+    //                 //TODO
+    //                // alert("Minimum number of modifiers required is "+data.min);
+    //                 flag=true;
+    //             }
+    //             // Message not atteind the min_required
+    //             if(data.max != 0 && Mgroups[mg] > data.max) {
+    //               //  alert("Maximum number of modifiers allowed is "+ data.max);
+    //                 flag=true;
+    //             }
+    //             // Message max_allowed
+    //         }
+    //     }).done(function () {
+    //         if(!flag)
+    //         {
+    //             //send the request to the server
+    //             jQuery.post(moo_params.ajaxurl,{'action':'moo_modifier_add',"modifiers":Modifiers}, function (data) {
+    //                 if(data.status == 'success' )
+    //                 {
+    //                     toastr.success(item_name +' added to cart');
+    //                     moo_updateCart();
+    //                     return true;
+    //                 }
+    //             })
+    //
+    //         }
+    //         else
+    //         {
+    //             return 'error';
+    //         }
+    //     })
+    // }
 
-    for(mg in Mgroups){
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_modifiergroup_getlimits',"modifierGroup":mg}, function (data) {
-            if(data.status == 'success' )
-            {
-                if(data.min!=0 && Mgroups[mg] < data.min) {
-                    //TODO
-                   // alert("Minimum required is "+data.min);
-                    flag=true;
-                } // Message not atteind the min_required
-                if(data.max!=0 && Mgroups[mg] > data.max) {
-                  //  alert("Max allowed is "+ data.max);
-                    flag=true;
-                } // Message max_allowed
-            }
-        })
-    }
-    if(!flag)
-    {
-        //send the request to the server
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_modifier_add',"modifiers":Modifiers}, function (data) {
-            if(data.status == 'success' )
-            {
-                toastr.success(item_name +' added to cart');
-                moo_updateCart();
-                return true;
-            }
-        })
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_modifier_add',"modifiers":Modifiers}, function (data) {
+        if(data.status == 'success' )
+        {
+            toastr.success(item_name +' added to cart');
+            moo_updateCart();
+            return true;
+        }
+    })
 
-    }
+
 }
-function abortAJAXCalls()
-{
-    MOO_AJAX_REQS.forEach(function(element, index, array) {
-        MOO_AJAX_REQS[index].abort();
-       delete(MOO_AJAX_REQS[index]);
-    });
-}
-
 function moo_addItemWithModifiersToCart(event,item_uuid,item_name,item_price)
 {
-    if(moo_addModifiers(item_name) == false ) moo_addToCart(event,item_uuid,item_name,item_price);
-    history.back();
+    if(moo_addModifiers(item_name)== false ){
+        if(item_price==0)
+        {
+            toastr.error('Please choose a modifier');
+        }
+            else
+        {
+            moo_addToCart(event,item_uuid,item_name,item_price);
+            jQuery.magnificPopup.close();
+        }
+
+    }
+    else
+       jQuery.magnificPopup.close();
 }

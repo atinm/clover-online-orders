@@ -1,15 +1,19 @@
 var MOO_CART = [];
 var MOO_AJAX_REQS = [];
 jQuery(document).ready(function() {
-    //accordion
 
-    jQuery('.moo_accordion').accordion();
+    //accordion
+    jQuery('.moo_accordion').accordion({defaultOpen: 'MooModifierGroup_default'});
     jQuery('.popup-text').magnificPopup({
         type: 'inline',
         closeBtnInside: true,
         midClick: true,
         overflowY:'scroll'
     });
+    jQuery('.ajax-popup-link').magnificPopup({
+        type: 'ajax'
+    });
+
 /*
     var cart_offset = jQuery('.moo_cart').offset();
     var cart_width = jQuery('.moo_cart').outerWidth();
@@ -154,11 +158,22 @@ function clickLineInModifiersTab(target)
         });
 
 }
-function moo_check(id)
+function moo_check(event,id)
 {
+    event.preventDefault();
+    event.stopPropagation();
+
     var checked =   jQuery('#moo_checkbox_'+id).prop('checked');
     jQuery('#moo_checkbox_'+id).prop("checked", !checked);
+
+
 }
+function moo_openFirstModifierG(id)
+{
+    jQuery('#'+id).removeClass('accordion-close');
+    jQuery('#'+id).addClass('accordion-open');
+    jQuery('#'+id).next().show();
+};
 moo_updateCart();
 //jQuery('.CartContent>table>tbody').css('max-height',"100px");
 
