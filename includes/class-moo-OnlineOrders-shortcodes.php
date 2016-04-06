@@ -286,7 +286,7 @@ class Moo_OnlineOrders_Shortcodes {
                                                                                 <a href="#" onclick="moo_check(event,'<?php echo $m->uuid ?>')">
                                                                                     <div class="detail">
                                                                                         <span class="moo_checkbox">
-                                                                                            <input type="checkbox" name="<?php echo 'moo_modifiers[\''.$item->uuid.'\',\''.$mg->uuid.'\',\''.$m->uuid.'\']' ?>" id="moo_checkbox_<?php echo $m->uuid ?>"">
+                                                                                            <input onclick="event.stopPropagation();" type="checkbox" name="<?php echo 'moo_modifiers[\''.$item->uuid.'\',\''.$mg->uuid.'\',\''.$m->uuid.'\']' ?>" id="moo_checkbox_<?php echo $m->uuid ?>"">
                                                                                         </span>
                                                                                         <p class="moo_label" ><?php echo $m->name ?></p>
                                                                                     </div>
