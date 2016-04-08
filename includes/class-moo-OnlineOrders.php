@@ -69,7 +69,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.0.5';
+		$this->version = '1.0.6';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -278,6 +278,11 @@ class moo_OnlineOrders {
         // Update the quantity
         $this->loader->add_action( 'wp_ajax_moo_update_qte', $plugin_public, 'moo_UpdateQuantity');
         $this->loader->add_action( 'wp_ajax_nopriv_moo_update_qte', $plugin_public, 'moo_UpdateQuantity');
+		/*
+		 * Suncy handle
+		 */
+		$this->loader->add_action( 'admin_post_moo_sync', $plugin_public, 'moo_SyncHandle');
+		$this->loader->add_action( 'admin_post_nopriv_moo_sync', $plugin_public, 'moo_SyncHandle');
 	}
 
 	/**

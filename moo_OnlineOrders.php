@@ -16,7 +16,7 @@
  * Plugin Name:       Merchantech Online Orders for Clover
  * Plugin URI:        http://www.merchantech.us
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.0.5
+ * Version:           1.0.6
  * Author:            Merchantech
  * Author URI:        http://www.merchantech.us
  * License:           Clover app
@@ -60,8 +60,14 @@ function moo_OnlineOrders_shortcodes_checkoutPage($atts, $content) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
     Moo_OnlineOrders_Shortcodes::checkoutPage($atts, $content);
 }
+
+function moo_OnlineOrders_shortcodes_buybutton($atts, $content) {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
+    return Moo_OnlineOrders_Shortcodes::moo_BuyButton($atts, $content);
+}
 add_shortcode('moo_all_items', 'moo_OnlineOrders_shortcodes_allitems');
 add_shortcode('moo_checkout', 'moo_OnlineOrders_shortcodes_checkoutPage');
+add_shortcode('moo_buy_button', 'moo_OnlineOrders_shortcodes_buybutton');
 /**
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.

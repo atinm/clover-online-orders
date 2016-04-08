@@ -225,7 +225,9 @@ class Moo_OnlineOrders_Shortcodes {
                 <div class="row MooStyleAccorfion">
                 <div class="col-md-7" style="margin-bottom: 20px;">
                 <?php
-                    foreach ( $model->getCategories() as $category ){
+                    $categories = $model->getCategories();
+                    if(count($categories)==0) echo "<h1>You don't have any Item, please import your Items from Clover</h1>";
+                    foreach (  $categories as $category ){
 	                    // I verify if there is some itmes in the category
 	                    // and the length of the name then I cut if it more than 30 characters
                         if(strlen ($category->items)< 1 ) continue;
@@ -281,14 +283,16 @@ class Moo_OnlineOrders_Shortcodes {
                                                                  </div>
                                                                 <div class="moo_accordion_content moo_modifier-box2" style="display: none;">
                                                                     <ul>
-                                                                        <?php  foreach ( $modifiers as $m) { ?>
+                                                                        <?php  foreach ( $modifiers as $m) {
+                                                                            /*onclick="moo_check(event,'<?php echo $m->uuid ?>')"*/
+                                                                            ?>
                                                                             <li>
                                                                                 <a href="#" onclick="moo_check(event,'<?php echo $m->uuid ?>')">
-                                                                                    <div class="detail">
-                                                                                        <span class="moo_checkbox">
-                                                                                            <input onclick="event.stopPropagation();" type="checkbox" name="<?php echo 'moo_modifiers[\''.$item->uuid.'\',\''.$mg->uuid.'\',\''.$m->uuid.'\']' ?>" id="moo_checkbox_<?php echo $m->uuid ?>"">
+                                                                                    <div class="detail" >
+                                                                                        <span class="moo_checkbox" >
+                                                                                            <input type="checkbox" onclick="event.stopPropagation();" name="<?php echo 'moo_modifiers[\''.$item->uuid.'\',\''.$mg->uuid.'\',\''.$m->uuid.'\']' ?>" id="moo_checkbox_<?php echo $m->uuid ?>" />
                                                                                         </span>
-                                                                                        <p class="moo_label" ><?php echo $m->name ?></p>
+                                                                                        <p class="moo_label"><?php echo $m->name ?></p>
                                                                                     </div>
                                                                                     <div class="price">
                                                                                         $<?php echo number_format(($m->price/100), 2) ?>
@@ -382,7 +386,6 @@ class Moo_OnlineOrders_Shortcodes {
 	 * @return List of ITEMS (HTML)
 	 * @since 1.0.0
 	 */
-
     public static function getItemsHtml($category,$filterBy,$orderBy,$search)
     {
         $model = new moo_OnlineOrders_Model();
@@ -782,6 +785,14 @@ class Moo_OnlineOrders_Shortcodes {
             </div>
             <?php
     }
-
+    /*
+     * This function is the callback of the Shortcode adding buy button,
+     *
+     * @since 1.0.6
+     */
+    public static function moo_BuyButton($atts, $content)
+    {
+        return 'Chi la3ba hna';
+    }
 
 }

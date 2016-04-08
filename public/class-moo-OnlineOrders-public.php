@@ -1103,6 +1103,47 @@ public function moo_AddOrderType()
         wp_send_json($response);
 
     }
+    /*
+     *
+     * Sync with Clover POS handle
+     *
+     */
+    function moo_SyncHandle()
+    {
+      if(isset($_POST['event']))
+      {
+          switch ($_POST['event']){
+              case 'UPDATE_ITEM':
+                  $item_uuid = (isset($_POST['item']) && !empty($_POST['item']))?$_POST['item']:'';
+                  $this->api->getItem($item_uuid);
+                  echo 'OK';
+                  break;
+              case 'CREATE_ITEM':
+                  $item_uuid = (isset($_POST['item']) && !empty($_POST['item']))?$_POST['item']:'';
+                  $this->api->getItem($item_uuid);
+                  echo 'OK';
+                  break;
+              case 'DELETE_ITEM':
+                  $item_uuid = (isset($_POST['item']) && !empty($_POST['item']))?$_POST['item']:'';
+                  $res = $this->api->delete_item($item_uuid);
+                  echo ($res)?'OK':'NOK';
+                  break;
+              case 'UPDATE_TAX_RATES':
+                  $this->api->update_taxes_rates();
+                  echo 'OK';
+                  break;
+              case 'UPDATE_ORDER_TYPES':
+                  $res = $this->api->update_order_types();
+                  echo ($res)?'OK':'NOK';
+                  break;
+              default :
+                  echo 'EVENT NOT FOUND';
+                  break;
+          }
+      }
+      else
+        echo 'NOK';
+    }
 
 	private function round_up ( $value, $precision ) {
 		$pow = pow ( 10, $precision );
@@ -1115,4 +1156,5 @@ public function moo_AddOrderType()
         $message   .=  '<br/><b><a href="https://www.clover.com/r/'.$orderID.'" target="_blanck">Order details</a></b>';
         wp_mail($email, 'Thank you for your order', $message);
     }
+
 }

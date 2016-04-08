@@ -141,6 +141,11 @@ class moo_OnlineOrders_Admin {
         $api   = new  moo_OnlineOrders_CallAPI();
         $model = new  moo_OnlineOrders_Model();
 
+       // $res = $api->save_one_item('{ "id": "6PCJR6XH3GGMC", "hidden": false, "itemGroup": { "id": "241GNJR3G6NPJ" }, "name": "Nhmy Ftjhvg edited", "alternateName": "", "code": "", "sku": "", "price": 4650, "priceType": "FIXED", "defaultTaxRates": true, "unitName": "", "isRevenue": true, "taxRates": { "elements": [ { "id": "NHP2RVD56HPSM", "name": "No Sales Tax", "rate": 0, "isDefault": true }, { "id": "4WMS1B307M9KE", "name": "Ca Tax", "rate": 850000, "isDefault": true }, { "id": "5SCHBDA2W6FNR", "name": "Tracy", "rate": 850000, "isDefault": true }, { "id": "WXMKJRKGQS3W0", "name": "Cal Sales Tax", "rate": 500000, "isDefault": true } ] }, "modifierGroups": { "elements": [] }, "categories": { "elements": [] }, "tags": { "elements": [] }, "modifiedTime": 1460044643000 }');
+
+       // $api->getItem('6PCJR6XH3GGMC');
+      //  $api->delete_item('6PCJR6XH3GGMC');
+      //  $api->update_taxes_rates();
         $errorToken=false;
 
         //default options
@@ -160,8 +165,7 @@ class moo_OnlineOrders_Admin {
             else {
                 if(isset(json_decode($result)->status) && json_decode($result)->status =='success') {
                     $newvalue = get_option( 'moo_store_page');
-                    $api->updateWebsite(esc_url( get_permalink($newvalue) ));
-                    $api->CreateOrdersTypes();
+                    $api->updateWebsite(esc_url( admin_url('admin-post.php') ));
                     $errorToken="( Token valid )";
                 }
                 else

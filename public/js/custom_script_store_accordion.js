@@ -168,6 +168,7 @@ function moo_check(event,id)
 
 
 }
+
 function moo_openFirstModifierG(id)
 {
     jQuery('#'+id).removeClass('accordion-close');
