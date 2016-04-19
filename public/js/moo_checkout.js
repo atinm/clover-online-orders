@@ -1,6 +1,5 @@
 (function( $ ) {
     'use strict';
-    console.log(moo_Key);
 })( jQuery );
 
 jQuery("#moo_form_address").validate({

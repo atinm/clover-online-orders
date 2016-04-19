@@ -68,6 +68,11 @@ function moo_OnlineOrders_shortcodes_buybutton($atts, $content) {
 add_shortcode('moo_all_items', 'moo_OnlineOrders_shortcodes_allitems');
 add_shortcode('moo_checkout', 'moo_OnlineOrders_shortcodes_checkoutPage');
 add_shortcode('moo_buy_button', 'moo_OnlineOrders_shortcodes_buybutton');
+
+add_filter( 'wp_mail_content_type', function( $content_type ) {
+    return 'text/html';
+});
+
 /**
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
