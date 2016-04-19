@@ -16,7 +16,19 @@
         "hideEasing": "linear",
         "showMethod": "fadeIn",
         "hideMethod": "fadeOut"
-    }
+    };
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_store_isopen'}, function (data) {
+
+       if(data.status =='Success' && data.data=='close')
+        {
+            var store_time = JSON.parse(data.infos).store_time;
+            console.log(store_time);
+            var html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '+store_time+'<br/>Currently Not Available - Order in Advance.</div>';
+            jQuery('#moo_OnlineStoreContainer').prepend(html);
+        }
+      //  jQuery('#moo_OnlineStoreContainer').prepend(html);
+    });
+
 
 })( jQuery );
 

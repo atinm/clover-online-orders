@@ -142,7 +142,7 @@
 }
 #MooPanel_sidebar ul>li:hover
 {
-     background-color: #0073cc;
+     background-color: #496F4E;
 }
 #MooPanel_tabContent2,#MooPanel_tabContent3,#MooPanel_tabContent4,#MooPanel_tabContent5, #MooPanel_tabContent6,
 #MooPanel_tabContent7,#MooPanel_tabContent8,#MooPanel_tabContent9,#MooPanel_tabContent10,#MooPanel_tabContent11
@@ -153,7 +153,7 @@
 {
     position: relative;
     border:0 none;
-    background: #0074a2;
+    background: #5E7F62;
     color: #fff;
 }
 
@@ -176,7 +176,7 @@
     margin-bottom: 35px;
     font-size: 23px;
     font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",sans-serif;
-    float: left;
+   /* float: left;*/
     font-weight: normal;
 }
 #MooPanel_main .MooPanelSubmit
@@ -216,6 +216,10 @@
     position: relative;
     border-bottom: 1px solid #F8F8F8;
 }
+#MooPanel_main .MooPanelItem .Moo_option-title{
+    padding: 10px;
+    padding-top: 0px;
+}
 #MooPanel_main .MooPanelItem .Moo_option-item .Moo_on_off:hover
 {
    cursor: pointer;
@@ -254,6 +258,18 @@
 #MooPanel_main .stats .stat .type
 {
     border-right: none;
+}
+
+#MooPanel_main .MooRow
+{
+   /* border: solid 1px #0b0b0b;*/
+    height: 110px;
+    margin: 20px;
+   /* background-color: #ffffff;*/
+}
+#MooPanel_main .MooRowSection
+{
+    padding: 15px;
 }
 .onoffswitch {
     position: relative; width: 60px;
@@ -301,4 +317,58 @@
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
     right: 0px;
     background-color: #27A1CA;
+}
+#moo_map
+{
+    width: 100%;
+    height: 300px;
+}
+/* Tooltip container */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 9999999999;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
+.tooltip .tooltiptext {
+    width: 290px;
+    bottom: 125%;
+    left: 0;
+    margin-left: -125px; /* Use half of the width (120/2 = 60), to center the tooltip */
+}
+.tooltip .tooltiptext::after {
+    content: " ";
+    position: absolute;
+    top: 100%; /* At the bottom of the tooltip */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+}
+.tooltip .tooltiptext {
+    opacity: 0;
+    transition: opacity 1s;
+}
+
+.tooltip:hover .tooltiptext {
+    opacity: 1;
 }

@@ -474,13 +474,16 @@ class Moo_OnlineOrders_Shortcodes {
     public static function checkoutPage($atts, $content)
     {
         wp_enqueue_script( 'custom-script-checkout' );
+        wp_enqueue_script( 'moo-google-map' );
+        wp_enqueue_script( 'display-merchant-map',array('moo-google-map') );
         wp_enqueue_script( 'forge' );
 
         $model = new moo_OnlineOrders_Model();
         $api   = new moo_OnlineOrders_CallAPI();
+        $MooOptions = (array)get_option('moo_settings');
 
         $orderTypes = $model->getVisibleOrderTypes();
-        $total =   Moo_OnlineOrders_Public::moo_cart_getTotal_IQ();
+        $total =   Moo_OnlineOrders_Public::moo_cart_getTotal(true);
         $firstTotal = $total['total'];
 
         if($total === false){
@@ -494,11 +497,18 @@ class Moo_OnlineOrders_Shortcodes {
         };
         $key = $api->getPayKey();
         $key = json_decode($key);
+        if($key==NULL)
+            echo '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>This store cannot accept orders, if you are the owner please verify your API Key</div>';
         wp_localize_script("custom-script-checkout", "moo_OrderTypes",$orderTypes);
         wp_localize_script("custom-script-checkout", "moo_Total",$total);
         wp_localize_script("custom-script-checkout", "moo_Key",(array)$key);
-        ?>
 
+        wp_localize_script("display-merchant-map", "moo_merchantLat",$MooOptions['lat']);
+        wp_localize_script("display-merchant-map", "moo_merchantLng",$MooOptions['lng']);
+        ?>
+        <div id="moo_OnlineStoreContainer">
+        <div id="moo_merchantmap">
+        </div>
         <form id="moo_form_address" method="post" action="#" novalidate="novalidate">
             <div class="row">
                 <div class="col-md-12">
@@ -609,7 +619,7 @@ class Moo_OnlineOrders_Shortcodes {
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <p style="text-align: left; font-size: 20px !important;"><a href="<?php echo get_page_link(get_option('moo_store_page'))?>">Continue shopping</a></p>
+                            <p style="text-align: left; font-size: 30px !important;"><a href="<?php echo get_page_link(get_option('moo_store_page'))?>">View cart</a></p>
                         </div>
 
                     </div>
@@ -689,6 +699,7 @@ class Moo_OnlineOrders_Shortcodes {
                 </div>
             </div>
         </form>
+        </div>
     <?php
     }
     public  static function getItemsModifiers($item_uuid)
@@ -772,6 +783,9 @@ class Moo_OnlineOrders_Shortcodes {
     }
     public static function TheStore($atts, $content)
     {
+        ?>
+        <div id="moo_OnlineStoreContainer">
+        <?php
         $MooOptions = (array)get_option('moo_settings');
         $style = $MooOptions["default_style"];
 
@@ -783,6 +797,7 @@ class Moo_OnlineOrders_Shortcodes {
             <div class="row Moo_Copyright">
                 Powered by <a href="http://merchantech.us" target="_blank">Merchantech</a>
             </div>
+        </div>
             <?php
     }
     /*

@@ -200,3 +200,14 @@
 {
    color: blue;
 }
+.alert-success a
+{
+    color:blue;
+}
+
+#moo_merchantmap
+{
+    width: 100%;
+    height:350px;
+    display: none;
+}

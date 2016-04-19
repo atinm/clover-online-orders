@@ -374,6 +374,7 @@ class Moo_OnlineOrders_Activator {
                           `order_uuid` VARCHAR(100) NOT NULL,
                           `quantity` VARCHAR(100) NOT NULL,
                           `modifiers` VARCHAR(255) NOT NULL,
+                          `special_ins` VARCHAR(255) NOT NULL,
                           PRIMARY KEY (`_id`, `item_uuid`, `order_uuid`),
                           INDEX `fk_order_has_items_idx1` (`order_uuid` ASC) ,
                           INDEX `fk_order_has_items_idx2` (`item_uuid` ASC)  ,
@@ -400,6 +401,7 @@ class Moo_OnlineOrders_Activator {
                           `label` VARCHAR(100) NOT NULL,
                           `taxable` INT(1),
                           `status` INT(1),
+                          `show_sa` INT(1),
                           PRIMARY KEY (`ot_uuid`))
                         ENGINE = InnoDB;");
 
@@ -443,6 +445,8 @@ class Moo_OnlineOrders_Activator {
                   'payment'=>array('cc'=>true,'cash'=>false));
 
         update_option( 'moo_settings', $defaultOptions );
+
+       // exit( wp_redirect( admin_url( 'admin.php?page=moo_index' ) ) );
 
 	}
 

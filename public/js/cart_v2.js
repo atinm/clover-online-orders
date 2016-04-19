@@ -119,17 +119,17 @@ function moo_updateCartTotal()
                     }
                     html ="<tr class='moo_cart_total'>";
                     html +="<td colspan='1' style='text-align: right;'>Subtotal:</td>";
-                    html +="<td colspan='3'>$"+data.sub_total.toFixed(2)+"</td>";
+                    html +="<td colspan='3'>$"+data.sub_total+"</td>";
                     html +="</tr>";
 
                     html +="<tr  class='moo_cart_total'>";
                     html +="<td colspan='1' style='text-align: right;'>Tax:</td>";
-                    html +="<td colspan='3'>$"+data.total_of_taxes.toFixed(2)+"</td>";
+                    html +="<td colspan='3'>$"+data.total_of_taxes+"</td>";
                     html +="</tr>";
 
                     html +="<tr  class='moo_cart_total'>";
                     html +="<td colspan='1' style='text-align: right;'>Total:</td>";
-                    html +="<td colspan='3'>$"+data.total.toFixed(2)+"</td>";
+                    html +="<td colspan='3'>$"+data.total+"</td>";
                     html +="</tr>";
 
                     jQuery(".moo_cart_total").remove();

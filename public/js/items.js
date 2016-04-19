@@ -1,5 +1,7 @@
+var MOO_CART = [];
 (function( $ ) {
     'use strict';
+
     /*
     $('.moo_item_flip').on("mouseenter",function (e) {
        // $(".moo_item_flip_modifiers",e.currentTarget).slideDown();
@@ -49,9 +51,8 @@
 function moo_addToCart(event,item,name)
 {
     toastr.success(name+ ' added to cart');
-
+    MOO_CART[item] = {uuid:item,name:name};
     jQuery.post(moo_params.ajaxurl,{'action':'moo_add_to_cart',"item":item}, function (data) {
-        console.log(data);
         if(data.status != 'success')
         {
             toastr.error('Error, please try again');

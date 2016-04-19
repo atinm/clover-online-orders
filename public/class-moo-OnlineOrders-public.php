@@ -132,10 +132,13 @@ class Moo_OnlineOrders_Public {
 	public function enqueue_scripts() {
 
             wp_enqueue_script( 'jquery' );
+            $MooOptions = (array)get_option('moo_settings');
 
             $params = array(
                 'ajaxurl' => admin_url( 'admin-ajax.php', isset( $_SERVER['HTTPS'] ) ? 'https://' : 'http://' ),
-                'plugin_img' =>  plugins_url( '/img', __FILE__ )
+                'plugin_img' =>  plugins_url( '/img', __FILE__ ),
+                'store_opening_hours' =>  get_option('moo_store_openingHours'),
+                'store_opening' =>  $MooOptions['hours']
             );
             // Register the script like this for a plugin:
 
@@ -146,6 +149,8 @@ class Moo_OnlineOrders_Public {
             wp_enqueue_script('toastr-js',array('jquery'));
 
             wp_register_script('custom-script-checkout', plugins_url( '/js/moo_checkout.js', __FILE__ ));
+            wp_register_script('display-merchant-map', plugins_url( '/js/moo_map.js', __FILE__ ));
+            wp_register_script('moo-google-map', 'https://maps.googleapis.com/maps/api/js');
             wp_register_script('forge', plugins_url( '/js/forge.min.js', __FILE__ ));
 
             wp_register_script('moo_public_js',  plugins_url( 'js/moo-OnlineOrders-public.js', __FILE__ ));
@@ -263,6 +268,7 @@ class Moo_OnlineOrders_Public {
                     $_SESSION['items'][$item_uuid] = array(
                                                             'item'=>$item,
                                                             'quantity'=>1,
+                                                            'special_ins'=>'',
                                                             'tax_rate'=>$this->model->getItemTax_rate( $item_uuid),
                                                             'modifiers'=>array()
                                                         );
@@ -277,7 +283,8 @@ class Moo_OnlineOrders_Public {
                     $_SESSION['items'][$item_key] = array(
                                                             'item'=>$item,
                                                             'quantity'=>1,
-                                                            'tax_rate'=>$this->model->getItemTax_rate( $item_uuid),
+                                                            'special_ins'=>'',
+                                                            'tax_rate'=>$this->model->getItemTax_rate($item_uuid),
                                                             'modifiers'=>array()
                                                           );
                 }
@@ -335,6 +342,60 @@ class Moo_OnlineOrders_Public {
             if( $_SESSION['items'][$item_uuid]['quantity']<1 )  $_SESSION['items'][$item_uuid]['quantity'] = 1;
             $response = array(
                 'status'	=> 'success',
+            );
+            wp_send_json($response);
+        }
+        else
+        {
+            $response = array(
+                'status'	=> 'error',
+                'message'   => 'Item not found'
+            );
+            wp_send_json($response);
+        }
+
+    }
+    /**
+     * Update the Special Instruction for one item
+     * @since    1.0.6
+     */
+    public function moo_UpdateSpecial_ins() {
+
+        $item_uuid   = sanitize_text_field($_POST['item']);
+        $special_ins = sanitize_text_field($_POST['special_ins']);
+
+        if(isset($_SESSION['items'][$item_uuid]) && !empty($_SESSION['items'][$item_uuid])){
+            $_SESSION['items'][$item_uuid]['special_ins'] = $special_ins ;
+            $response = array(
+                'status'	=> 'success',
+            );
+            wp_send_json($response);
+        }
+        else
+        {
+            $response = array(
+                'status'	=> 'error',
+                'message'   => 'Item not found'
+            );
+            wp_send_json($response);
+        }
+
+    }
+    /**
+     * Get More options for an item in the cart
+     * @since    1.0.6
+     */
+    public function moo_GetitemInCartOptions() {
+
+        $item_uuid   = sanitize_text_field($_POST['item']);
+
+        if(isset($_SESSION['items'][$item_uuid]) && !empty($_SESSION['items'][$item_uuid])){
+            $special_ins = $_SESSION['items'][$item_uuid]['special_ins'];
+            $qte = $_SESSION['items'][$item_uuid]['quantity'];
+            $response = array(
+                'status'	=> 'success',
+                'special_ins'	=> $special_ins,
+                'quantity'	=> $qte
             );
             wp_send_json($response);
         }
@@ -478,41 +539,71 @@ class Moo_OnlineOrders_Public {
      * Get the total
      * @since    1.0.0
      */
-    public function moo_cart_getTotal()
+    public static function moo_cart_getTotal($internal)
     {
         if(isset($_SESSION['items']) && !empty($_SESSION['items'])){
             $sub_total = 0;
             $total_of_taxes = 0;
+            $taxe_rates_groupping = [];
+            $allTaxesRates = [];
             foreach ($_SESSION['items'] as $item) {
+                //Grouping taxe rates
+                foreach ($item['tax_rate'] as $tr) {
+                    if(isset($taxe_rates_groupping[$tr->uuid])) array_push($taxe_rates_groupping[$tr->uuid],$item);
+                    else{
+                        $taxe_rates_groupping[$tr->uuid] = array();
+                        array_push($taxe_rates_groupping[$tr->uuid],$item);
+                        $allTaxesRates[$tr->uuid]=$tr->rate;
+                    }
+                }
                 $price = $item['item']->price *  $item['quantity'];
                 $price = $price/100;
                 $sub_total += $price;
-
-                $total_of_taxes += $item['tax_rate'] * $price / 100;
-
                 if(count($item['modifiers'])>0){
                     foreach ($item['modifiers'] as $m) {
                         $m_price = $item['quantity'] * $m['price'];
                         $sub_total += $m_price/100;
-                        $total_of_taxes += $item['tax_rate'] * $m_price / 10000;
                     }
                 }
             }
-         /*
-            $sub_total = $sub_total/100; // Conversion to dollar
-            $total_of_taxes = $total_of_taxes/100; // Conversion to dollar
-		 */
+
+            //calculate taxes
+          //  echo json_encode($taxe_rates_groupping);
+            foreach ($taxe_rates_groupping as $tax_rate_uuid=>$items) {
+                $taxes=0;
+                $tax_rate = $allTaxesRates[$tax_rate_uuid];
+                if($tax_rate == 0) continue;
+                foreach ($items as $item) {
+                        $lineSubtotal = $item['item']->price * $item['quantity'];
+                        if(count($item['modifiers'])>0){
+                            foreach ($item['modifiers'] as $m) {
+                                $m_price = $item['quantity'] * $m['price'];
+                                $lineSubtotal += $m_price;
+                            }
+                        }
+                        $line_taxes = $tax_rate/100000 * $lineSubtotal/10000;
+
+                        $taxes += $line_taxes;
+                }
+               // var_dump($taxes);
+                $total_of_taxes += round($taxes,2,PHP_ROUND_HALF_UP);
+
+            }
 
             $FinalSubTotal = round($sub_total,2,PHP_ROUND_HALF_UP);
-            $FinalTaxTotal = $this->round_up($total_of_taxes,2);
+            $FinalTaxTotal = round($total_of_taxes,2,PHP_ROUND_HALF_UP);
 
             $response = array(
                 'status'	        => 'success',
-                'sub_total'      	=> $FinalSubTotal,
-                'total_of_taxes'	=> $FinalTaxTotal,
-                'total'	            => ($FinalSubTotal+$FinalTaxTotal)
+                'sub_total'      	=> number_format($FinalSubTotal,2),
+                'total_of_taxes'	=> number_format($FinalTaxTotal,2),
+                'total'	            => number_format(($FinalSubTotal+$FinalTaxTotal),2)
             );
-            wp_send_json($response);
+            if(!$internal)
+              wp_send_json($response);
+            else
+                return $response;
+
 
         }
         else
@@ -521,7 +612,11 @@ class Moo_OnlineOrders_Public {
                 'status'	=> 'error',
                 'message'   => 'Not exist'
             );
-            wp_send_json($response);
+
+            if(!$internal)
+                wp_send_json($response);
+            else
+                return false;
         }
 
     }
@@ -530,32 +625,52 @@ class Moo_OnlineOrders_Public {
         if(isset($_SESSION['items']) && !empty($_SESSION['items'])){
             $sub_total = 0;
             $total_of_taxes = 0;
+            $taxe_rates_groupping = [];
             foreach ($_SESSION['items'] as $item) {
+                //Grouping taxe rates
+                foreach ($item['tax_rate'] as $tr) {
+                    if(isset($taxe_rates_groupping[$tr->rate])) array_push($taxe_rates_groupping[$tr->rate],$item);
+                    else{
+                        $taxe_rates_groupping[$tr->rate] = array();
+                        array_push($taxe_rates_groupping[$tr->rate],$item);
+                    }
+                }
                 $price = $item['item']->price *  $item['quantity'];
-                $price =$price/100;
+                $price = $price/100;
                 $sub_total += $price;
-                $total_of_taxes += $item['tax_rate'] * $price / 100;
-
                 if(count($item['modifiers'])>0){
                     foreach ($item['modifiers'] as $m) {
                         $m_price = $item['quantity'] * $m['price'];
                         $sub_total += $m_price/100;
-                        $total_of_taxes += $item['tax_rate'] * $m_price / 10000;
                     }
                 }
             }
-	        /*
-            $sub_total = $sub_total/100; // Conversion to dollar
-            $total_of_taxes = $total_of_taxes/100; // Conversion to dollar
-				*/
+            //calculate taxes
+            foreach ($taxe_rates_groupping as $tax_rate=>$items) {
+                $taxes=0;
+                if($tax_rate == 0) continue;
+                foreach ($items as $item) {
+                    $lineSubtotal = $item['item']->price * $item['quantity'];
+                    if(count($item['modifiers'])>0){
+                        foreach ($item['modifiers'] as $m) {
+                            $m_price = $item['quantity'] * $m['price'];
+                            $lineSubtotal += $m_price;
+                        }
+                    }
+                    $line_taxes = $tax_rate/100000 * $lineSubtotal/10000;
+                    $taxes += self::round_up($line_taxes,2);
+                }
+                $total_of_taxes += $taxes;
+            }
+
             $FinalSubTotal = round($sub_total,2,PHP_ROUND_HALF_UP);
             $FinalTaxTotal = self::round_up($total_of_taxes,2);
 
             $response = array(
                 'status'	        => 'success',
-                'sub_total'      	=> number_format($FinalSubTotal, 2),
-                'total_of_taxes'	=> number_format($FinalTaxTotal, 2),
-                'total'	            => number_format(($FinalSubTotal+$FinalTaxTotal), 2)
+                'sub_total'      	=>  number_format($FinalSubTotal, 2),
+                'total_of_taxes'	=>  number_format($FinalTaxTotal, 2),
+                'total'	            =>  number_format(($FinalSubTotal+$FinalTaxTotal), 2)
             );
             return $response;
 
@@ -704,10 +819,8 @@ class Moo_OnlineOrders_Public {
 
                             $this->model->updateOrder($orderCreated['OrderId'],json_decode($paid)->paymentId);
                             $this->api->NotifyMerchant($orderCreated['OrderId'],$_POST['form']['instructions']);
-                              $this->sendEmail($_POST['form']['email'],$_POST['form']['name'],$orderCreated['OrderId']);
-
+                            $this->sendEmail($_POST['form']['email'],$_POST['form']['name'],$orderCreated['OrderId']);
                             unset($_SESSION['items']);
-
                             wp_send_json($response);
                         }
                         else {
@@ -765,7 +878,7 @@ class Moo_OnlineOrders_Public {
 
     private function moo_CreateOrder($ordertype,$taxable)
     {
-        $total = $this->moo_cart_getTotal_IQ();
+        $total = self::moo_cart_getTotal(true);
         if($total['status']=='success'){
             if($ordertype=='default')
                     $order = ($taxable==true)?$this->api->createOrder($total['total'],'default'):$this->api->createOrder($total['sub_total'],'default');
@@ -783,14 +896,14 @@ class Moo_OnlineOrders_Public {
                     // Create line item
                     if(count($item['modifiers']) > 0) {
                         for($i=0;$i<$item['quantity'];$i++){
-                            $res = $this->api->addlineToOrder($order->id,$item['item']->uuid,'1');
+                            $res = $this->api->addlineToOrder($order->id,$item['item']->uuid,'1',$item['special_ins']);
                             $lineId = json_decode($res)->id;
                             foreach ($item['modifiers'] as $modifier) $this->api->addModifierToLine($order->id,$lineId,$modifier['uuid']);
                         }
                     }
                     else
                     {
-                        $this->api->addlineToOrder($order->id,$item['item']->uuid,$item['quantity']);
+                        $this->api->addlineToOrder($order->id,$item['item']->uuid,$item['quantity'],$item['special_ins']);
                     }
                 }
                 return array("OrderId"=>$order->id,"amount"=>$total['total'],"taxamount"=>$total['total_of_taxes'],"taxable"=>$taxable,"sub_total"=>$total['sub_total']);
@@ -817,44 +930,6 @@ class Moo_OnlineOrders_Public {
 
         $last4  = substr($card_number,-4);
         $first6 = substr($card_number,0,6);
-        /*
-        //Include rsa files
-        require_once plugin_dir_path( dirname(__FILE__))."includes/phpseclib/Crypt/RSA.php";
-        require_once plugin_dir_path( dirname(__FILE__))."includes/phpseclib/Math/BigInteger.php";
-
-        $key = $this->api->getPayKey();
-        $key = json_decode($key);
-        if(isset($key->modulus) && isset($key->exponent) && isset($key->prefix) && !empty($key->modulus)&& !empty($key->exponent)&& !empty($key->prefix) ){
-
-            $e = new Math_BigInteger($key->exponent);
-            $m = new Math_BigInteger($key->modulus);
-            $card = $key->prefix.$card_number;
-            $rsa = new Crypt_RSA();
-            $rsa->setHash('sha1');
-            $rsa->setMGFHash('sha1');
-            $rsa->setEncryptionMode(CRYPT_RSA_ENCRYPTION_OAEP);
-            $rsa->loadKey(array('n' =>$m, 'e' => $e ));
-
-            $ciphertext = $rsa->encrypt($card);
-
-            $cardEncrypted =base64_encode($ciphertext);
-            $last4  = substr($card_number,-4);
-            $first6 = substr($card_number,0,6);
-            $res = $this->api->payOrder($orderId,$taxAmount,$amount,$zip,$expMonth,$cvv,$last4,$expYear,$first6,$cardEncrypted);
-            return $res;
-
-        }
-        else
-        {
-            $response = array(
-                'status'	=> 'Error',
-                'message'	=> 'We have an internal error (To process the payment), please contact us via email'
-            );
-            wp_send_json($response);
-        }
-        */
-
-
 
         $res = $this->api->payOrder($orderId,$taxAmount,$amount,$zip,$expMonth,$cvv,$last4,$expYear,$first6,$cardEncrypted);
         return $res;
@@ -1036,6 +1111,17 @@ public function moo_AddOrderType()
        );
        wp_send_json($response);
    }
+    public function moo_UpdateOrdertypesShowSa()
+   {
+       $ot_uuid  = $_POST['ot_uuid'];
+       $show_sa  = $_POST['show_sa'];
+       $res = $this->model->updateOrderTypesSA($ot_uuid,$show_sa);
+       $response = array(
+           'status'	 => 'Success',
+           'data'    => $res
+       );
+       wp_send_json($response);
+   }
      public function moo_SendFeedBack()
        {
 	       $message   =  sanitize_text_field($_POST['message']);
@@ -1101,6 +1187,31 @@ public function moo_AddOrderType()
             'data'=>$res
         );
         wp_send_json($response);
+
+    }
+    function moo_StoreIsOpen()
+    {
+        $MooOptions = (array)get_option('moo_settings');
+        $style = $MooOptions["default_style"];
+
+        if($MooOptions['hours'] == 'business')
+        {
+            $res = $this->api->getOpeningStatus();
+            $response = array(
+                'status'	 => 'Success',
+                'data'=>'close',
+                'infos'=>$res
+            );
+            wp_send_json($response);
+        }
+        else
+        {
+            $response = array(
+                'status'	 => 'Success',
+                'data'=>'open'
+            );
+            wp_send_json($response);
+        }
 
     }
     /*

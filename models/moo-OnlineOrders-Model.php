@@ -44,22 +44,37 @@ class moo_OnlineOrders_Model {
         $item = $this->getItem($uuid);
 
         if($item->default_taxe_rate){
-            $taxes = $this->db->get_row("SELECT SUM(rate) as taxes
+          /*  $taxes = $this->db->get_row("SELECT SUM(rate) as taxes
                                     FROM {$this->db->prefix}moo_tax_rate t
                                     GROUP by t.is_default
                                     HAVING t.is_default = 1
                                     ");
             return $taxes->taxes/100000;
+          */
+            $taxes = $this->db->get_results("SELECT uuid,rate
+                                    FROM {$this->db->prefix}moo_tax_rate t
+                                    WHERE t.is_default = 1
+                                    ");
+            return $taxes;
         }
         else
         {
-            $taxes = $this->db->get_row("SELECT SUM(rate) as taxes
+            /*
+
+             $taxes = $this->db->get_row("SELECT SUM(rate) as taxes
                                           FROM (SELECT rate FROM {$this->db->prefix}moo_item_tax_rate itr,{$this->db->prefix}moo_tax_rate tr
                                           WHERE itr.tax_rate_uuid=tr.uuid
                                           AND itr.item_uuid='{$uuid}') t
 
                                     ");
             return $taxes->taxes/100000;
+            */
+            $taxes = $this->db->get_results("SELECT uuid,rate FROM {$this->db->prefix}moo_item_tax_rate itr,{$this->db->prefix}moo_tax_rate tr
+                                          WHERE itr.tax_rate_uuid=tr.uuid
+                                          AND itr.item_uuid='{$uuid}'
+
+                                    ");
+            return $taxes;
         }
     }
 
@@ -121,6 +136,17 @@ class moo_OnlineOrders_Model {
         return $this->db->update("{$this->db->prefix}moo_order_types",
                                 array(
                                     'status' => $st
+                                ),
+                                array( 'ot_uuid' => $uuid )
+        );
+    }
+    function updateOrderTypesSA($uuid,$bool)
+    {
+        $uuid = esc_sql($uuid);
+        $st = ($bool == "true")? 1:0;
+        return $this->db->update("{$this->db->prefix}moo_order_types",
+                                array(
+                                    'show_sa' => $st
                                 ),
                                 array( 'ot_uuid' => $uuid )
         );
@@ -199,9 +225,10 @@ class moo_OnlineOrders_Model {
             $string = "";
             if(count($item['modifiers'])) foreach ($item['modifiers'] as $key=>$mod) $string .=$key.",";
 
-            $item_id     = esc_sql($item['item']->uuid);
-            $quantity    = esc_sql($item['quantity']);
-            $string      = esc_sql($string);
+            $item_id        = esc_sql($item['item']->uuid);
+            $quantity       = esc_sql($item['quantity']);
+            $special_ins    = esc_sql($item['special_ins']);
+            $string         = esc_sql($string);
 
             $this->db->insert(
                 "{$this->db->prefix}moo_item_order",
@@ -209,9 +236,11 @@ class moo_OnlineOrders_Model {
                     'item_uuid' => $item_id,
                     'order_uuid' => $order,
                     'quantity' => $quantity,
-                    'modifiers' => $string
+                    'modifiers' => $string,
+                    'special_ins' => $special_ins,
                 ),
                 array(
+                    '%s',
                     '%s',
                     '%s',
                     '%s',

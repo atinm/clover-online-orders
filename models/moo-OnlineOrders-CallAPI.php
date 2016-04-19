@@ -10,6 +10,7 @@ class moo_OnlineOrders_CallAPI {
     {
         $MooSettings = (array) get_option("moo_settings");
         $this->Token = $MooSettings['api_key'];
+
 		//Put the API URL here and don't forget the last slash
         $this->url_api = "http://api.smartonlineorders.com/";
 
@@ -182,9 +183,9 @@ class moo_OnlineOrders_CallAPI {
         return $res;
     }
     //create the order
-    function addlineToOrder($oid,$item_uuid,$qte)
+    function addlineToOrder($oid,$item_uuid,$qte,$special_ins)
     {
-        return $this->callApi_Post("create_line_in_order",$this->Token,'oid='.$oid.'&item='.$item_uuid.'&qte='.$qte);
+        return $this->callApi_Post("create_line_in_order",$this->Token,'oid='.$oid.'&item='.$item_uuid.'&qte='.$qte.'&special_ins='.$special_ins);
     }
     //create the order
     function addModifierToLine($oid,$lineId,$modifer_uuid)
@@ -219,6 +220,22 @@ class moo_OnlineOrders_CallAPI {
     function updateWebsite($url)
     {
         return $this->callApi_Post("addsite",$this->Token,'website='.$url);
+    }
+    function updateWebsiteHooks($url)
+    {
+        return $this->callApi_Post("addsite_webhooks",$this->Token,'website='.$url);
+    }
+    function getMerchantAddress()
+    {
+        return $this->callApi("address",$this->Token);
+    }
+    function getOpeningHours()
+    {
+        return $this->callApi("opening_hours",$this->Token);
+    }
+    function getOpeningStatus()
+    {
+        return $this->callApi("is_open",$this->Token);
     }
     //Create default Orders Types
     function CreateOrdersTypes()
@@ -270,24 +287,59 @@ class moo_OnlineOrders_CallAPI {
      *
      * This Function is for Updating the taxes rate in The  Wordpress Database
      * Is invoked when receiving a webhooks request POST
-     * We start by deleting all actual taxes rates in The db, the we get all the taxex rates
+     * We start by deleting all actual taxes rates in The db, then we get all the taxe rates
      * from clover and save it in the database
-     * if the number of taxe rate saved is more than 0 we commit the changes then we cancel it (ROOLBACK)
      *
      */
     public function update_taxes_rates()
     {
         global $wpdb;
-        $wpdb->show_errors();
+       // $wpdb->show_errors();
         $wpdb->query('START TRANSACTION');
 
-        $wpdb->query("DELETE FROM {$wpdb->prefix}moo_item_tax_rate");
+        //Remove from local Database the removed tax_rates in clover
+        $local_tr  = array(); // tax_rates in our DB
+        $Clover_tr = array(); // tax_rates in Clover DB
+        $tempo = $wpdb->get_results("SELECT uuid FROM {$wpdb->prefix}moo_tax_rate");
+        foreach ($tempo as $l) {
+            array_push($local_tr,$l->uuid);
+        }
 
         $res = $this->callApi("tax_rates",$this->Token);
-        if($res) $saved = $this->save_tax_rates($res);
-        else     $saved = 0;
+        $taxes_rates = json_decode($res)->elements;
+        foreach ($taxes_rates as $l) {
+            array_push($Clover_tr,$l->id);
+        }
 
-        if($saved>0)
+        // delete from the Local database the taxe rate thar are already deleted from Clover
+        foreach (array_diff($local_tr,$Clover_tr) as $uuid) {
+            $wpdb->query("DELETE FROM {$wpdb->prefix}moo_item_tax_rate where tax_rate_uuid='{$uuid}'");
+            $wpdb->query("DELETE FROM {$wpdb->prefix}moo_tax_rate where uuid = '{$uuid}'");
+        }
+
+        $res = $this->callApi("tax_rates",$this->Token);
+        $taxes_rates = json_decode($res)->elements;
+        $count=0;
+        foreach ($taxes_rates as $tax_rate)
+        {
+            if($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_tax_rate where uuid='{$tax_rate->id}'") > 0)
+                $updated = $wpdb->update("{$wpdb->prefix}moo_tax_rate",array(
+                    'name' => $tax_rate->name,
+                    'rate' => $tax_rate->rate,
+                    'is_default' => $tax_rate->isDefault,
+                ),array('uuid'=> $tax_rate->id));
+            else
+                $updated = $wpdb->insert("{$wpdb->prefix}moo_tax_rate",array(
+                    'uuid'=> $tax_rate->id,
+                    'name' => $tax_rate->name,
+                    'rate' => $tax_rate->rate,
+                    'is_default' => $tax_rate->isDefault,
+                ));
+            if( $updated !== false ){
+                $count++;
+            }
+        }
+        if(count($taxes_rates)==$count)
         {
             $wpdb->query('COMMIT'); // if the item Inserted in the DB
         }
@@ -298,9 +350,10 @@ class moo_OnlineOrders_CallAPI {
     }
     public function update_order_types()
     {
+        update_option('moo_store_openingHours',$this->getOpeningHours());
         global $wpdb;
         $result=array();
-        $wpdb->show_errors();
+       // $wpdb->show_errors();
         $wpdb->query('START TRANSACTION');
 
         $res = $this->callApi("order_types",$this->Token);
@@ -310,8 +363,9 @@ class moo_OnlineOrders_CallAPI {
 
         // Get the actual status from the database for example if a merchant is already enable an order type
         // So when importing the order types they will be enabled
-        foreach ( $wpdb->get_results("SELECT ot_uuid,status FROM {$wpdb->prefix}moo_order_types") as $st) {
-            $status[$st->ot_uuid] = $st->status;
+        foreach ( $wpdb->get_results("SELECT ot_uuid,status,show_sa FROM {$wpdb->prefix}moo_order_types") as $st) {
+            $status[$st->ot_uuid]['status']  = $st->status;
+            $status[$st->ot_uuid]['show_sa'] = $st->show_sa;
         };
 
         //Delete all ordertypes from wordpress database
@@ -323,7 +377,8 @@ class moo_OnlineOrders_CallAPI {
                     'ot_uuid' => $ot->id,
                     'label' => $ot->label,
                     'taxable' => $ot->taxable,
-                    'status' => (isset($status[$ot->id]) && $status[$ot->id]==1 )?1:0
+                    'show_sa' => (isset($status[$ot->id]['show_sa']) && $status[$ot->id]['show_sa']==1 )?1:0,
+                    'status' => (isset($status[$ot->id]['status']) && $status[$ot->id]['status']==1 )?1:0
             ));
 
         }
@@ -345,7 +400,7 @@ class moo_OnlineOrders_CallAPI {
         global $wpdb;
         $wpdb->query('START TRANSACTION');
 
-        $wpdb->show_errors();
+       // $wpdb->show_errors();
         $item = json_decode($res);
 
         if(isset($item->message) && !isset($item->id) ) return;
@@ -483,7 +538,6 @@ class moo_OnlineOrders_CallAPI {
             $wpdb->query('ROLLBACK'); // // something went wrong, Rollback
         }
     }
-
 
     private function save_tax_rates($obj)
     {
@@ -721,6 +775,7 @@ class moo_OnlineOrders_CallAPI {
                                                 'ot_uuid' => $ot->id,
                                                 'label' => $ot->label,
                                                 'taxable' => $ot->taxable,
+                                                'show_sa' => ($ot->label=='Delivery')?1:0,
                                                 'status' => ($ot->label=='Delivery' || $ot->label == 'Pickup')?1:0
                 ));
 

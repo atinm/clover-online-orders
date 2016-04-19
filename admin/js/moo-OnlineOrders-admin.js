@@ -4,8 +4,6 @@
    // Moo_ImportCategories();
     moo_Update_stats();
     Moo_GetOrderTypes();
-
-
 })( jQuery );
 function tab_clicked(tab)
 {
@@ -16,6 +14,7 @@ function tab_clicked(tab)
     }
     jQuery('#MooPanel_tabContent'+tab).show();
     jQuery('#MooPanel_tab'+tab).addClass("MooPanel_Selected");
+    jQuery('#MooPanel_sidebar').css('min-height',jQuery('#MooPanel_main').height()+72+'px');
 }
 function MooPanel_ImportItems(event)
 {
@@ -91,18 +90,32 @@ function Moo_GetOrderTypes()
             {
                var orderTypes = JSON.parse(data.data);
                 var html='';
-                if(orderTypes.length>0)
+                html +='<div class="Moo_option-title">'
+
+                if(orderTypes.length>0){
+                    html += '<div class="label"><strong>Name</strong></div><div class="onoffswitch"><strong>Enable/Disable</strong></div>';
+                    html += '<div class="onoffswitch" style="margin-left: 60px;width: 150px;">';
+                    html += '<strong>Show shipping address</strong></div><div style="float: right"><strong>DELETE</strong></div></div>';
+
                     for(var i=0;i<orderTypes.length;i++) {
                         var $ot = orderTypes[i];
                         if($ot.label == "") continue;
                         html +='<div class="Moo_option-item">';
                         html +="<div class='label'>"+($ot.label)+"</div>";
-                        html +='<div class="onoffswitch" onchange="MooChangeOT_Status(\''+$ot.ot_uuid +'\')">';
+                        //enable/disable
+                        html +='<div class="onoffswitch" onchange="MooChangeOT_Status(\''+$ot.ot_uuid +'\')" title="Enable/Disable this order types">';
                         html +='<input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_'+$ot.ot_uuid+'"'+(($ot.status==1)?"checked":"")+'>';
                         html +='<label class="onoffswitch-label" for="myonoffswitch_'+$ot.ot_uuid +'">';
                         html +='<span class="onoffswitch-inner"></span> <span class="onoffswitch-switch"></span></label></div>';
-                        html +='<div style="float: right"><a href="#" onclick="Moo_deleteOrderType(event,\''+$ot.ot_uuid+'\')">DELETE</a></div></div>';
+                        //show shipping adress
+                        html +='<div class="onoffswitch" onchange="MooChangeOT_showSa(\''+$ot.ot_uuid +'\')" style="margin-left: 100px" title="Show/Hide the shipping address for this order types">';
+                        html +='<input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_sa_'+$ot.ot_uuid+'"'+(($ot.show_sa==1)?"checked":"")+'>';
+                        html +='<label class="onoffswitch-label" for="myonoffswitch_sa_'+$ot.ot_uuid +'">';
+                        html +='<span class="onoffswitch-inner"></span> <span class="onoffswitch-switch"></span></label></div>';
+                        //delete
+                        html +='<div  style="float: right"><a href="#" title="Delete this order types from the wordpress Database" onclick="Moo_deleteOrderType(event,\''+$ot.ot_uuid+'\')">DELETE</a></div></div>';
                     }
+                }
                 else
                   html = "<div style='text-align: center'>You don't have any OrderTypes,<br/> please import your data by clicking on <b>Import Items</b></div>";
 
@@ -112,9 +125,7 @@ function Moo_GetOrderTypes()
                 document.querySelector('#MooOrderTypesContent').innerHTML  ="<div style='text-align: center'>Please verify your API Key<br/></div>";
 
         }
-    ).done(function () {
-            console.log('Order Types Imported');
-    });
+    );
 }
 
 function moo_Update_stats()
@@ -161,6 +172,14 @@ function MooChangeOT_Status(uuid)
         }
     );
 };
+function MooChangeOT_showSa(uuid)
+{
+    var ot_showSa = jQuery('#myonoffswitch_sa_'+uuid).prop('checked');
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_ot_showSa',"ot_uuid":uuid,"show_sa":ot_showSa}, function (data) {
+           console.log(data);
+        }
+    );
+};
 
 function MooPanelRefrechOT(e)
 {
@@ -180,7 +199,6 @@ function moo_addordertype(e)
         jQuery('#Moo_AddOT_btn').hide();
 
         jQuery.post(moo_params.ajaxurl,{'action':'moo_add_ot',"label":label,"taxable":taxable}, function (data) {
-            console.log(data);
             if(data.status=='success')
             {
                 if(data.message == '401 Unauthorized') jQuery('#Moo_AddOT_loading').html('Verify your API key');
@@ -191,6 +209,10 @@ function moo_addordertype(e)
                     jQuery('#Moo_AddOT_btn').show();
                 }
 
+            }
+            else
+            {
+                jQuery('#Moo_AddOT_loading').html('Verify your API key');
             }
 
 

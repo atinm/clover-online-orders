@@ -1,5 +1,6 @@
 (function( $ ) {
     'use strict';
+    console.log(moo_Key);
 })( jQuery );
 
 jQuery("#moo_form_address").validate({
@@ -77,7 +78,10 @@ jQuery("#moo_form_address").validate({
             if(data.status == 'APPROVED'){
                 html = '<div align="center" class="alert alert-success" role="alert">Thank you for your order<br> You can see your receipt <a href="https://www.clover.com/r/'+data.order+'" target="_blank">here</a></a> </div>';
                // console.log(html);
-                jQuery("#moo_form_address").parent().html(html);
+                jQuery("#moo_form_address").html('');
+                jQuery("#moo_form_address").parent().prepend(html);
+                jQuery("#moo_merchantmap").show();
+                moo_getLatLong();
                 jQuery("html, body").animate({
                     scrollTop: 0
                 }, 600);
@@ -108,13 +112,21 @@ function moo_OrderTypeChanged(obj)
     var OrderTypeID = jQuery(obj).val();
     for(i in moo_OrderTypes)
     {
-
         if(OrderTypeID == moo_OrderTypes[i].ot_uuid) {
            if( moo_OrderTypes[i].taxable == "1"){
                document.getElementById('moo_Total_inCheckout').innerText = '$'+(moo_Total.total);
            }
             else
                document.getElementById('moo_Total_inCheckout').innerText = '$'+(moo_Total.sub_total);
+            if( moo_OrderTypes[i].show_sa == "0"){
+                jQuery('#city').parent().hide();
+                jQuery('#address').parent().hide();
+            }
+            else
+            {
+                jQuery('#city').parent().show();
+                jQuery('#address').parent().show();
+            }
         }
     }
 }
@@ -133,3 +145,7 @@ function cryptCardNumber(ccn)
     var encryptedData = publicKey.encrypt(text, 'RSA-OAEP');
     return forge.util.encode64(encryptedData);
 }
+
+moo_OrderTypeChanged(jQuery('#OrderType'));
+
+

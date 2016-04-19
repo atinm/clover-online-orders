@@ -1,5 +1,5 @@
 var MOO_CART = [];
-var MOO_AJAX_REQS = [];
+
 jQuery(document).ready(function() {
 
     //accordion
@@ -74,7 +74,7 @@ function moo_addToCart(e,item_uuid,name,price)
 
     if(MOO_CART[item_uuid])
     {
-        if( MOO_CART[item_uuid].quantity<10){
+        if(MOO_CART[item_uuid].quantity<10){
                 MOO_CART[item_uuid].quantity++;
                 toastr.success('The quantity of ' + name+ ' updated');
         }
@@ -132,31 +132,54 @@ function ItemHasModifiers(element,event,item_uuid,item_name,item_price)
 }
 function ChangeQuantity(item_uuid)
 {
-    var html = 'New quantity : <input id="MooQteForChange" class="form-control" type="text"/> '
-    jQuery.fn.SimpleModal({btn_ok: 'Change', title: 'Change the quantity', contents: html,"model":"confirm",
+    var currentQte='';
+    var currentIns='';
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_get_item_options',"item":item_uuid}, function (data) {
+        if(data.status == 'success')
+        {
+            currentQte = data.quantity;
+            currentIns = data.special_ins;
+            jQuery('#MooQteForChange').val(data.quantity);
+            if(data.special_ins != '')
+                jQuery('#MooItemSpecialInstructions').val(data.special_ins)
+
+        }
+    });
+
+    var html  = 'New quantity : <input id="MooQteForChange" class="form-control" type="number"/> <br/> ';
+        html += 'Special Requests : <input id="MooItemSpecialInstructions" class="form-control" type="text" placeholder="Enter any special requests for this item"/> ';
+    jQuery.fn.SimpleModal({btn_ok: 'Change', title: 'More options', contents: html,"model":"confirm",
         "callback": function(){
-           if(jQuery('#MooQteForChange').val()>0 && jQuery('#MooQteForChange').val()<=10 )
-            jQuery.post(moo_params.ajaxurl,{'action':'moo_update_qte',"item":item_uuid,"qte":jQuery('#MooQteForChange').val()}, function (data) {
-                if(data.status == 'success')
-                {
-                    toastr.warning("Updating the quantity...");
-                }
-            }).done(function(e){
-                moo_updateCart();
-                setTimeout(function(){toastr.success("The quantity updated")},2000)
+                                console.log(currentQte);
+                                console.log(currentIns);
+                                var new_qte = jQuery('#MooQteForChange').val();
+                                var new_ins = jQuery('#MooItemSpecialInstructions').val();
 
-            });
-            else
-               toastr.error('The quantity should be between 1 and 10');
-        }}).showModal();
-}
-function clickLineInModifiersTab(target)
-{
-        var tr_table = jQuery(target).parent();
-        jQuery("td:first input",tr_table).each(function() {
-            jQuery(this).prop("checked", !jQuery(this).prop("checked"));
-        });
+                               if(new_qte>0 && new_qte<=10 && new_qte != currentQte )
+                                jQuery.post(moo_params.ajaxurl,{'action':'moo_update_qte',"item":item_uuid,"qte":new_qte}, function (data) {
+                                    if(data.status == 'success')
+                                    {
+                                        toastr.warning("Updating the quantity...");
+                                    }
+                                }).done(function(e){
+                                    moo_updateCart();
+                                    setTimeout(function(){toastr.success("The quantity updated")},2000)
 
+                                });
+                                else
+                                   if(new_qte != currentQte)
+                                       toastr.error('The quantity should be between 1 and 10');
+
+                                if(new_ins != currentIns )
+                                    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_special_ins',"item":item_uuid,"special_ins":new_ins}, function (data) {
+                                        if(data.status == 'success')
+                                        {
+                                            toastr.success("Special Instructions updated");
+                                        }
+                                    });
+
+                               }
+    }).showModal();
 }
 function moo_check(event,id)
 {

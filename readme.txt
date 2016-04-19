@@ -4,7 +4,7 @@ Donate link: http://merchantech.us/
 Tags: clover,online orders for clover,merchantech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover
 Requires at least: 3.0.1
 Tested up to: 3.0
-Stable tag: 1.0.6
+Stable tag: 1.0.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -82,7 +82,25 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 
 == Changelog ==
 
-= 1.0.3 =
+= 1.0.7 =
+= Adding : =
+* Store's hours
+* Business address
+* Show/Hide shipping address for an order type
+* Sync with your Clover POS
+* Item's notes
+= Fixing : =
+* Partially paid
+* Changing the quantify of an item in the cart
+= 1.0.6 =
+Fix issues
+= 1.0.5 =
+= Adding : =
+* Change name of Modifier group
+* Show/hide Modifier group
+= 1.0.4 =
+Fix issues
+= 1.0.2 =
 Change the UI for Modifiers
 = 1.0.1 =
 Update Frequently Asked Questions

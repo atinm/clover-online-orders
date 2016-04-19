@@ -69,7 +69,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.0.6';
+		$this->version = '1.0.7';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -247,8 +247,9 @@ class moo_OnlineOrders {
 
         //Get Statistics
         $this->loader->add_action( 'wp_ajax_moo_get_stats', $plugin_public, 'moo_GetStats');
-        //Change the status of an OrderType
+        //Change the status and show/hide shipping address of an OrderType
         $this->loader->add_action( 'wp_ajax_moo_update_ot_status', $plugin_public, 'moo_UpdateOrdertypesStatus');
+        $this->loader->add_action( 'wp_ajax_moo_update_ot_showSa', $plugin_public, 'moo_UpdateOrdertypesShowSa');
         //Get list of saved OrderTypes
         $this->loader->add_action( 'wp_ajax_moo_getAllOrderTypes', $plugin_public, 'moo_getAllOrderTypes');
 
@@ -278,6 +279,19 @@ class moo_OnlineOrders {
         // Update the quantity
         $this->loader->add_action( 'wp_ajax_moo_update_qte', $plugin_public, 'moo_UpdateQuantity');
         $this->loader->add_action( 'wp_ajax_nopriv_moo_update_qte', $plugin_public, 'moo_UpdateQuantity');
+
+		// Update the Special_ins for one Item
+        $this->loader->add_action( 'wp_ajax_moo_update_special_ins', $plugin_public, 'moo_UpdateSpecial_ins');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_update_special_ins', $plugin_public, 'moo_UpdateSpecial_ins');
+
+		//get the current quantity and the currant Special instruction of an item i the cart
+		$this->loader->add_action( 'wp_ajax_moo_get_item_options', $plugin_public, 'moo_GetitemInCartOptions');
+		$this->loader->add_action( 'wp_ajax_nopriv_moo_get_item_options', $plugin_public, 'moo_GetitemInCartOptions');
+
+		//verify if the store is open according to bussiness hours configured in Clover
+		$this->loader->add_action( 'wp_ajax_moo_store_isopen', $plugin_public, 'moo_StoreIsOpen');
+		$this->loader->add_action( 'wp_ajax_nopriv_moo_store_isopen', $plugin_public, 'moo_StoreIsOpen');
+
 		/*
 		 * Suncy handle
 		 */

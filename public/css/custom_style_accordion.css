@@ -139,13 +139,13 @@
     color:#ffffff !important;
     margin-bottom: 10px;
 }
-#MooQteForChange
+#MooQteForChange,#MooItemSpecialInstructions
 {
     position: relative !important;
     z-index: 2 !important;
     float: left !important;
     width: 100% !important;
-    margin-bottom: 0 !important
+    margin-bottom: 10px !important;
     display: block;
     width: 100%;
     height: 34px;
