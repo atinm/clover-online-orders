@@ -199,9 +199,9 @@ class moo_OnlineOrders_CallAPI {
             '&cvv='.$cvv.'&last4='.$last4.'&first6='.$first6.'&expYear='.$expYear.'&cardEncrypted='.$cardEncrypted);
     }
     //Send Notification to the merchant when a new order is registered
-    function NotifyMerchant($oid,$instructions)
+    function NotifyMerchant($oid,$instructions,$customer)
     {
-        return $this->callApi_Post("notify",$this->Token,'orderId='.$oid.'&instructions='.$instructions);
+        return $this->callApi_Post("notify",$this->Token,'orderId='.$oid.'&instructions='.$instructions.'&customer='.json_encode($customer));
     }
     // OrderTypes
     function GetOneOrdersTypes($uuid)

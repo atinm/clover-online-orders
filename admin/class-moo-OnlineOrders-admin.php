@@ -273,7 +273,7 @@ class moo_OnlineOrders_Admin {
                         <div class="Moo_option-item" style="text-align: center">
                             <div id="MooPanelSectionImport"></div>
                             <a href="#" onclick="MooPanel_ImportItems(event)" class="button button-secondary"
-                               style="margin-bottom: 35px;" >Import your data</a>
+                               style="margin-bottom: 35px;" >Import inventory</a>
                         </div>
                     </div>
                     <div class="MooPanelItem">

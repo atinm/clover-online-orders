@@ -219,9 +219,12 @@ class Moo_OnlineOrders_Shortcodes {
         wp_enqueue_style ( 'simple-modal' );
         wp_enqueue_style ( 'magnific-popup' );
                 ?>
-                <div class="col-xs-12 col-sm-12 hidden-lg MooGoToCart">
-                    <a href="#ViewShoppingCart">VIEW SHOPPING CART</a>
-                </div>
+        <a href="#ViewShoppingCart">
+            <div class="col-xs-12 col-sm-12 hidden-lg hidden-md MooGoToCart">
+                VIEW SHOPPING CART
+            </div>
+           </a>
+
                 <div class="row MooStyleAccorfion">
                 <div class="col-md-7" style="margin-bottom: 20px;">
                 <?php

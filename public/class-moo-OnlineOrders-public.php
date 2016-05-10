@@ -817,8 +817,17 @@ class Moo_OnlineOrders_Public {
                         );
                         if($response['status'] == 'APPROVED'){
 
+                            $customer = array(
+                                "name"    =>(isset($_POST['form']['name']))?$_POST['form']['name']:"",
+                                "address" =>(isset($_POST['form']['address']))?$_POST['form']['address']:"",
+                                "city"    =>(isset($_POST['form']['city']))?$_POST['form']['city']:"",
+                                "zipcode" =>(isset($_POST['form']['zipcode']))?$_POST['form']['zipcode']:"",
+                                "phone"   =>(isset($_POST['form']['phone']))?$_POST['form']['phone']:"",
+                                "email"   =>(isset($_POST['form']['email']))?$_POST['form']['email']:"",
+                            );
+
                             $this->model->updateOrder($orderCreated['OrderId'],json_decode($paid)->paymentId);
-                            $this->api->NotifyMerchant($orderCreated['OrderId'],$_POST['form']['instructions']);
+                            $this->api->NotifyMerchant($orderCreated['OrderId'],$_POST['form']['instructions'],$customer);
                             $this->sendEmail($_POST['form']['email'],$_POST['form']['name'],$orderCreated['OrderId']);
                             unset($_SESSION['items']);
                             wp_send_json($response);
@@ -1192,14 +1201,14 @@ public function moo_AddOrderType()
     function moo_StoreIsOpen()
     {
         $MooOptions = (array)get_option('moo_settings');
-        $style = $MooOptions["default_style"];
 
         if($MooOptions['hours'] == 'business')
         {
             $res = $this->api->getOpeningStatus();
+            $stat = json_decode($res)->status;
             $response = array(
                 'status'	 => 'Success',
-                'data'=>'close',
+                'data'=>$stat,
                 'infos'=>$res
             );
             wp_send_json($response);

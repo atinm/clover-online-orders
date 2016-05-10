@@ -4,7 +4,7 @@ Donate link: http://merchantech.us/
 Tags: clover,online orders for clover,merchantech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover
 Requires at least: 3.0.1
 Tested up to: 3.0
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,6 +45,7 @@ You can add your menu in a new post/page or an existing one using this shortcode
 `[moo_all_items]`
 
 = VIDEO =
+[youtube https://www.youtube.com/watch?v=DHw2oppC6IU]
 
 == Frequently Asked Questions ==
 
@@ -81,7 +82,8 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 5. Example of menu 'style2'
 
 == Changelog ==
-
+= 1.0.8 =
+* Adding a video
 = 1.0.7 =
 = Adding : =
 * Store's hours
