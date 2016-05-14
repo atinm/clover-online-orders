@@ -104,6 +104,7 @@
 {
     color: #ffffff;
     background-color: #2f323b;
+    background-image: none;
 }
 .moo_cart table tbody
 {
@@ -304,6 +305,10 @@ border-bottom: none;
     position: relative;
     height: 100%;
     display: block;
+}
+#moo_form_address
+{
+    margin-bottom:50px;
 }
 
 

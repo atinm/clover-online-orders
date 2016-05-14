@@ -32,13 +32,10 @@ class Moo_OnlineOrders_Shortcodes {
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-Model.php";
         $model = new moo_OnlineOrders_Model();
 
-
-        global $wpdb;
-        //$wpdb->show_errors();
-
         wp_enqueue_script( 'custom-script-items' );
         wp_enqueue_style ( 'custom-style-items' );
 
+        ob_start();
         /*  if(isset($_POST)) echo "yes"; */
 
         if(isset($_GET['category'])){
@@ -90,7 +87,7 @@ class Moo_OnlineOrders_Shortcodes {
             <?php
             echo '<div class="row moo_items" id="Moo_ItemContainer">';
 
-            self::getItemsHtml($category,'name','asc',null);
+            echo self::getItemsHtml($category,'name','asc',null);
 
 
             echo '</div>';
@@ -194,6 +191,7 @@ class Moo_OnlineOrders_Shortcodes {
             <?php
 
             }
+        return ob_get_clean();
 
     }
 	/**
@@ -205,11 +203,6 @@ class Moo_OnlineOrders_Shortcodes {
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-Model.php";
         $model = new moo_OnlineOrders_Model();
 
-
-        global $wpdb;
-        //$wpdb->show_errors();
-
-
         wp_enqueue_script( 'custom-script-accordion');
         wp_enqueue_script( 'jquery-accordion',array( 'jquery' ));
         wp_enqueue_script( 'simple-modal',array( 'jquery' ));
@@ -218,13 +211,14 @@ class Moo_OnlineOrders_Shortcodes {
         wp_enqueue_style ( 'custom-style-accordion' );
         wp_enqueue_style ( 'simple-modal' );
         wp_enqueue_style ( 'magnific-popup' );
+
+        ob_start();
                 ?>
         <a href="#ViewShoppingCart">
             <div class="col-xs-12 col-sm-12 hidden-lg hidden-md MooGoToCart">
                 VIEW SHOPPING CART
             </div>
            </a>
-
                 <div class="row MooStyleAccorfion">
                 <div class="col-md-7" style="margin-bottom: 20px;">
                 <?php
@@ -359,6 +353,7 @@ class Moo_OnlineOrders_Shortcodes {
                             </div>
                         </div>
   <?php
+        return ob_get_clean();
     }
     /*
      * It's a private function for internal use in the function
@@ -371,12 +366,6 @@ class Moo_OnlineOrders_Shortcodes {
             0=>"#1abc9c",1=>"#33B5E5",2=>"#676fb4",3=>"#1e5429",4=>"#c5a22d",5=>"#000088",6=>"#b75555",7=>"#666666",8=>"#0099CC",
             9=>"#34428c",10=>"#0f726f",11=>"#c75827",12=>"#e67e22"
         );
-        /*
-         * return array(
-            0=>"#1abc9c",1=>"#e67e22",2=>"#3498db",3=>"#9b59b6",4=>"#34495e",5=>"#16a085",6=>"#27ae60",7=>"#2980b9",8=>"#8e44ad",
-            9=>"#354b60",10=>"#c0392b",11=>"#2ecc71",12=>"#e74c3c",13=>"#f39c12",14=>"#7f8c8d",15=>"#d35400"
-                    );
-        */
     }
 
 	/*
@@ -391,6 +380,7 @@ class Moo_OnlineOrders_Shortcodes {
 	 */
     public static function getItemsHtml($category,$filterBy,$orderBy,$search)
     {
+        ob_start();
         $model = new moo_OnlineOrders_Model();
 
         if($search!=null)
@@ -473,6 +463,8 @@ class Moo_OnlineOrders_Shortcodes {
                 }
                 if(!next($colors)) reset($colors);
             }
+
+        return ob_get_clean();
     }
     public static function checkoutPage($atts, $content)
     {
@@ -481,6 +473,7 @@ class Moo_OnlineOrders_Shortcodes {
         wp_enqueue_script( 'display-merchant-map',array('moo-google-map') );
         wp_enqueue_script( 'forge' );
 
+        ob_start();
         $model = new moo_OnlineOrders_Model();
         $api   = new moo_OnlineOrders_CallAPI();
         $MooOptions = (array)get_option('moo_settings');
@@ -509,6 +502,7 @@ class Moo_OnlineOrders_Shortcodes {
         wp_localize_script("display-merchant-map", "moo_merchantLat",$MooOptions['lat']);
         wp_localize_script("display-merchant-map", "moo_merchantLng",$MooOptions['lng']);
         ?>
+
         <div id="moo_OnlineStoreContainer">
         <div id="moo_merchantmap">
         </div>
@@ -591,19 +585,12 @@ class Moo_OnlineOrders_Shortcodes {
                                 </div>
                                 <div class="col-md-6  col-xs-5 col-sm-5">
                                     <select name="expiredDateYear" class="form-control">
-                                        <option value="2016">2016</option>
-                                        <option value="2017">2017</option>
-                                        <option value="2018">2018</option>
-                                        <option value="2019">2019</option>
-                                        <option value="2020">2020</option>
-                                        <option value="2021">2021</option>
-                                        <option value="2022">2022</option>
-                                        <option value="2023">2023</option>
-                                        <option value="2024">2024</option>
-                                        <option value="2025">2025</option>
-                                        <option value="2026">2026</option>
-                                        <option value="2027">2028</option>
-                                        <option value="2028">2029</option>
+                                        <?php
+                                        $current_year = date("Y");
+                                        if($current_year < 2016 )$current_year = 2016;
+                                        for($i=$current_year;$i<$current_year+20;$i++)
+                                            echo '<option value="'.$i.'">'.$i.'</option>';
+                                        ?>
                                     </select>
                                 </div>
                             </div>
@@ -704,6 +691,7 @@ class Moo_OnlineOrders_Shortcodes {
         </form>
         </div>
     <?php
+        return ob_get_clean();
     }
     public  static function getItemsModifiers($item_uuid)
     {
@@ -786,19 +774,30 @@ class Moo_OnlineOrders_Shortcodes {
     }
     public static function TheStore($atts, $content)
     {
+        $html_code =  '<div id="moo_OnlineStoreContainer">';
+
+        $MooOptions = (array)get_option('moo_settings');
+        $style = $MooOptions["default_style"];
+        if($style == "style1")
+            $html_code .= self::AllItemsAcordion($atts, $content);
+        else
+            $html_code .= self::AllItems($atts, $content);
+
+        $html_code .=  '<div class="row Moo_Copyright">Powered by <a href="http://merchantech.us" target="_blank">Merchantech apps</a></div>';
+
+        return $html_code;
         ?>
         <div id="moo_OnlineStoreContainer">
         <?php
         $MooOptions = (array)get_option('moo_settings');
         $style = $MooOptions["default_style"];
-
         if($style == "style1")
             self::AllItemsAcordion($atts, $content);
         else
             self::AllItems($atts, $content);
             ?>
             <div class="row Moo_Copyright">
-                Powered by <a href="http://merchantech.us" target="_blank">Merchantech</a>
+                Powered by <a href="http://merchantech.us" target="_blank">Merchantech apps</a>
             </div>
         </div>
             <?php
@@ -810,7 +809,7 @@ class Moo_OnlineOrders_Shortcodes {
      */
     public static function moo_BuyButton($atts, $content)
     {
-        return 'Chi la3ba hna';
+        return 'Dans la prochaine version';
     }
 
 }

@@ -136,12 +136,10 @@ class Moo_OnlineOrders_Public {
 
             $params = array(
                 'ajaxurl' => admin_url( 'admin-ajax.php', isset( $_SERVER['HTTPS'] ) ? 'https://' : 'http://' ),
-                'plugin_img' =>  plugins_url( '/img', __FILE__ ),
-                'store_opening_hours' =>  get_option('moo_store_openingHours'),
-                'store_opening' =>  $MooOptions['hours']
+                'plugin_img' =>  plugins_url( '/img', __FILE__ )
             );
-            // Register the script like this for a plugin:
 
+            // Register the script like this for a plugin:
             wp_register_script('bootstrap-js', plugins_url( '/js/bootstrap.min.js', __FILE__ ));
             wp_enqueue_script('bootstrap-js',array('jquery'));
 
@@ -154,7 +152,7 @@ class Moo_OnlineOrders_Public {
             wp_register_script('forge', plugins_url( '/js/forge.min.js', __FILE__ ));
 
             wp_register_script('moo_public_js',  plugins_url( 'js/moo-OnlineOrders-public.js', __FILE__ ));
-		    wp_enqueue_script('moo_public_js', array( 'jquery' ), $this->version, false);
+		    wp_enqueue_script('moo_public_js', array( 'jquery' ));
 
             if($this->style == "style1"){
                 wp_register_script('custom-script-accordion', plugins_url( '/js/custom_script_store_accordion.js', __FILE__ ));
@@ -174,11 +172,11 @@ class Moo_OnlineOrders_Public {
 
             }
 
-            wp_register_script('moo_validate_forms',  plugins_url( 'js/jquery.validate.js', __FILE__ ));
-		    wp_enqueue_script('moo_validate_forms', array( 'jquery' ), $this->version, false);
+            wp_register_script('moo_validate_forms',  plugins_url( 'js/jquery.validate.min.js', __FILE__ ));
+		    wp_enqueue_script('moo_validate_forms', array( 'jquery' ));
 
             wp_register_script('moo_validate_payment',  plugins_url( 'js/jquery.payment.min.js', __FILE__ ));
-		    wp_enqueue_script('moo_validate_payment', array( 'jquery' ), $this->version, false);
+		    wp_enqueue_script('moo_validate_payment', array( 'jquery' ));
 
             wp_localize_script("moo_public_js", "moo_params",$params);
 	}
@@ -239,7 +237,9 @@ class Moo_OnlineOrders_Public {
         <?php
 	}
   }
+
 // AJAX Responses
+
     /**
      * Add to Cart
      * @since    1.0.0
@@ -247,8 +247,6 @@ class Moo_OnlineOrders_Public {
     public function moo_add_to_cart($item_key) {
 
         //TODO : Security
-
-
         if(isset($_POST['item']) & !empty($_POST['item'])) $item_uuid = $_POST['item'];
         else
         {
@@ -1134,7 +1132,14 @@ public function moo_AddOrderType()
      public function moo_SendFeedBack()
        {
 	       $message   =  sanitize_text_field($_POST['message']);
-           //TODO : Send an email to us, the message is in $_POST['message']
+	       $email     =  sanitize_text_field($_POST['email']);
+
+           $message .='-----------<br/>';
+           $message .='EMAIl : '.$email.'<br/>';
+           $message .='Plugin Version : '.$this->version.'<br/>';
+           $message .='Default Style  : '.$this->style.'<br/>';
+           $message .='Plugin  : '.json_encode(get_plugins());
+
 	       $res = wp_mail("m.elbanyaoui@gmail.com", 'Feedback from Wordpress plugin user', $message);
            $response = array(
                'status'	 => 'Success',

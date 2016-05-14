@@ -233,8 +233,9 @@ function Moo_deleteOrderType(e,uuid)
 function MooSendFeedBack(e)
 {
     e.preventDefault();
-    var msg =  jQuery("#Moofeedback").val()
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_send_feedback','message':msg}, function (data) {
+    var msg =  jQuery("#Moofeedback").val();
+    var email =  jQuery("#MoofeedbackEmail").val();
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_send_feedback','message':msg,'email':email}, function (data) {
         if(data.status == "Success"){
             alert("Thank you for your feedback.");
             jQuery("#Moofeedback").val("");

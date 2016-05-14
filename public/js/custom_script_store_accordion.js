@@ -76,7 +76,7 @@ function moo_addToCart(e,item_uuid,name,price)
     {
         if(MOO_CART[item_uuid].quantity<10){
                 MOO_CART[item_uuid].quantity++;
-                toastr.success('The quantity of ' + name+ ' updated');
+                toastr.success(name+ 'quantity updated');
         }
         else  {
             MOO_CART[item_uuid].quantity=10;
@@ -163,7 +163,7 @@ function ChangeQuantity(item_uuid)
                                     }
                                 }).done(function(e){
                                     moo_updateCart();
-                                    setTimeout(function(){toastr.success("The quantity updated")},2000)
+                                    setTimeout(function(){toastr.success("Quantity updated")},2000)
 
                                 });
                                 else

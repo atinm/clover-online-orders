@@ -199,7 +199,9 @@ class moo_OnlineOrders_Admin {
                     <?php settings_fields('moo_settings') ?>
                     <input type="text"  name="moo_settings[api_key]" value="<?php echo $MooOptions['api_key']?>" hidden/>
                     <input type="text"  name="moo_settings[lat]"     value="<?php echo $MooOptions['lat']?>" hidden />
-                    <input type="text"  name="moo_settings[lng]"     value="<?php echo $MooOptions['lng']?>" hidden/>
+                    <input type="text"  name="moo_settings[lng]"     value="<?php echo $MooOptions['lng']?>" hidden />
+                    <input type="text"  name="moo_settings[hours]"     value="<?php echo $MooOptions['hours']?>" hidden />
+
                     <?php if( $errorToken != "( Token valid )" ) { ?>
                         <div id="MooPanel_tabContent1">
                                 <h2>Key settings</h2>
@@ -379,6 +381,9 @@ class moo_OnlineOrders_Admin {
                     <div class="MooPanelItem">
                         <h3>Send us your feedback</h3>
                         <div class="Moo_option-item">
+                            <label for="MoofeedBackEmail"">Your Email</label>
+                            <input type="text" name=MoofeedBackEmail" id=MoofeedBackEmail" placeholder="Your email" style="width: 100%">
+                            <label for="MoofeedBack"">Your Message *</label>
                             <textarea name="MooFeedBack" id="Moofeedback" cols="10" rows="10" style="width: 100%"></textarea>
                             <div style="text-align: right;">
                                 <a class="button button-primary" href="#" onclick="MooSendFeedBack(event)">Send</a>

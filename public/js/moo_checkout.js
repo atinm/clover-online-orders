@@ -78,7 +78,9 @@ jQuery("#moo_form_address").validate({
                 html = '<div align="center" class="alert alert-success" role="alert">Thank you for your order<br> You can see your receipt <a href="https://www.clover.com/r/'+data.order+'" target="_blank">here</a></a> </div>';
                // console.log(html);
                 jQuery("#moo_form_address").html('');
+                jQuery("#moo_form_address").parent().prepend("<h1>Our Address : </h1>");
                 jQuery("#moo_form_address").parent().prepend(html);
+
                 jQuery("#moo_merchantmap").show();
                 moo_getLatLong();
                 jQuery("html, body").animate({
@@ -90,8 +92,12 @@ jQuery("#moo_form_address").validate({
                 //Hide Loading Icon and Show the button if there is an error
                 jQuery('#moo_checkout_loading').hide();
                 jQuery('#moo_btn_submit_order').show();
-                html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>Payment card was declined. Check card info or try another card.</div>';
+                if(data.message != "Internal Error, please contact us, if you're the site owner verify your API Key")
+                    html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>Payment card was declined. Check card info or try another card.</div>';
+                else
+                    html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg">'+data.message+'</div>';
                 console.log(data.message);
+
                 jQuery("#moo_form_address").prepend(html);
                 jQuery("html, body").animate({
                     scrollTop: 0
