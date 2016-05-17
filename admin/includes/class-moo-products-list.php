@@ -124,13 +124,13 @@ class Products_List_Moo extends WP_List_Table_MOO {
         $title = '<strong>' . $item['name'] . '</strong>';
 
         if($item['visible'])
-            $actions = [
+            $actions = array(
                 'hide' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Hide from the Website</a>', esc_attr( $_REQUEST['page'] ), 'hide',esc_attr($item['uuid']), $hide_nonce,$this->get_pagenum() ),
-            ];
+            );
         else
-            $actions = [
+            $actions = array(
                 'show' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Show in the Website</a>', esc_attr( $_REQUEST['page'] ), 'show',esc_attr($item['uuid']), $show_nonce,$this->get_pagenum() )
-                ];
+            );
 
         return $title . $this->row_actions( $actions );
     }
@@ -174,7 +174,7 @@ class Products_List_Moo extends WP_List_Table_MOO {
      * @return array
      */
     function get_columns() {
-        $columns = [
+        $columns = array(
             'cb'      => '<input type="checkbox" />',
             'name'    => __( 'Name'),
             'price' => __( 'Price'),
@@ -183,7 +183,7 @@ class Products_List_Moo extends WP_List_Table_MOO {
             'sku' => __( 'SKU'),
             'code' => __( 'Code')
 
-        ];
+        );
 
         return $columns;
     }
@@ -206,10 +206,10 @@ class Products_List_Moo extends WP_List_Table_MOO {
      * @return array
      */
     public function get_bulk_actions() {
-        $actions = [
+        $actions = array(
             'bulk-show' => 'Show Items',
             'bulk-hide' => 'Hide Items',
-        ];
+        );
 
         return $actions;
     }

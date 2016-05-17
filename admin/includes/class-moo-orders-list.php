@@ -90,10 +90,10 @@ class Orders_List_Moo extends WP_List_Table_MOO {
         $show_nonce = wp_create_nonce( 'moo_show_order' );
 
         $title = '<strong>' . $item['p_name'] . '</strong>';
-            $actions = [
+            $actions = array(
                 'Delete' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s">Delete Order</a>', esc_attr( $_REQUEST['page'] ), 'delete',$item['uuid'], $delete_nonce ),
                 'Show' => sprintf( '<a href="https://www.clover.com/r/%s" target="_blank">Show Order</a>',$item['uuid']),
-                ];
+            );
 
         return
             sprintf( '<a target="_blank" href="https://www.clover.com/r/%s">%s</a>',$item['uuid'],$title) . $this->row_actions( $actions );
@@ -145,7 +145,7 @@ class Orders_List_Moo extends WP_List_Table_MOO {
      * @return array
      */
     function get_columns() {
-        $columns = [
+        $columns = array(
             'cb'      => '<input type="checkbox" />',
             'p_name'    => __( 'By'),
             'amount' => __( 'Total'),
@@ -158,7 +158,7 @@ class Orders_List_Moo extends WP_List_Table_MOO {
             'p_email' => __( 'Email'),
             'date' => __( 'Date'),
             'instructions' => __( 'Special instructions')
-        ];
+        );
 
         return $columns;
     }
@@ -182,9 +182,9 @@ class Orders_List_Moo extends WP_List_Table_MOO {
      * @return array
      */
     public function get_bulk_actions() {
-        $actions = [
+        $actions = array(
             'bulk-delete' => 'Delete Orders'
-        ];
+        );
 
         return $actions;
     }

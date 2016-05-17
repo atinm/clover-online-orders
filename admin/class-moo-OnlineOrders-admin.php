@@ -127,11 +127,11 @@ class moo_OnlineOrders_Admin {
     public function page_products_screen_options()
     {
         $option = 'per_page';
-        $args   = [
+        $args   = array(
             'label'   => 'Items',
             'default' => 20,
             'option'  => 'moo_items_per_page'
-        ];
+        );
         add_screen_option( $option, $args );
     }
 

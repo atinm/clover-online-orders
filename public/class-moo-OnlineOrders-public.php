@@ -542,8 +542,8 @@ class Moo_OnlineOrders_Public {
         if(isset($_SESSION['items']) && !empty($_SESSION['items'])){
             $sub_total = 0;
             $total_of_taxes = 0;
-            $taxe_rates_groupping = [];
-            $allTaxesRates = [];
+            $taxe_rates_groupping = array();
+            $allTaxesRates = array();
             foreach ($_SESSION['items'] as $item) {
                 //Grouping taxe rates
                 foreach ($item['tax_rate'] as $tr) {
@@ -623,7 +623,7 @@ class Moo_OnlineOrders_Public {
         if(isset($_SESSION['items']) && !empty($_SESSION['items'])){
             $sub_total = 0;
             $total_of_taxes = 0;
-            $taxe_rates_groupping = [];
+            $taxe_rates_groupping = array();
             foreach ($_SESSION['items'] as $item) {
                 //Grouping taxe rates
                 foreach ($item['tax_rate'] as $tr) {
