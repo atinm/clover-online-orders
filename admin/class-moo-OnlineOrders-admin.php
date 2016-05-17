@@ -162,8 +162,8 @@ class moo_OnlineOrders_Admin {
 
                     $merchant_website = get_option( 'moo_store_page');
 
-                    $api->updateWebsiteHooks(esc_url( admin_url('admin-post.php') ));
-                    $api->updateWebsite(esc_url( get_permalink($merchant_website) ));
+                    $api->updateWebsiteHooks(esc_url(admin_url('admin-post.php')));
+                    $api->updateWebsite(esc_url(get_permalink($merchant_website)));
 
                     //update_option('moo_store_openingHours',$api->getOpeningHours());
 
@@ -176,7 +176,9 @@ class moo_OnlineOrders_Admin {
         }
         else
             $errorToken="( Required )";
+        
         $modifier_groups = $model->getAllModifiersGroup();
+        $all_categories  = $model->getCategories();
         ?>
         <div id="MooPanel">
             <div id="MooPanel_sidebar">
@@ -189,8 +191,9 @@ class moo_OnlineOrders_Admin {
                     <li id="MooPanel_tab2" onclick="tab_clicked(2)">Import Items</li>
                     <li id="MooPanel_tab3" onclick="tab_clicked(3)">Orders Types</li>
                     <li id="MooPanel_tab4" onclick="tab_clicked(4)">Store interface</li>
-                    <li id="MooPanel_tab5" onclick="tab_clicked(5)">Modifiers</li>
-                    <li id="MooPanel_tab6" onclick="tab_clicked(6)">Feedback</li>
+                    <li id="MooPanel_tab5" onclick="tab_clicked(5)">Categories</li>
+                    <li id="MooPanel_tab6" onclick="tab_clicked(6)">Modifiers</li>
+                    <li id="MooPanel_tab7" onclick="tab_clicked(7)">Feedback</li>
                 </ul>
             </div>
             <div id="MooPanel_main">
@@ -349,6 +352,34 @@ class moo_OnlineOrders_Admin {
                 </div>
             </form>
                 <div id="MooPanel_tabContent5">
+                    <h2>Categories</h2>
+                    <div class="MooPanelItem">
+                        <h3>Show or hide a category</h3>
+                        <?php
+                        if(count($all_categories)==0) echo "<div style=\"text-align: center;margin-bottom: 10px;\">You don't have any Category,<br> please import your inventory by clicking on <b>Import Items</b> or refresh the page if you just imported your inventory</div>";
+
+                        foreach ($all_categories as $category) {
+                           // var_dump($category);
+                            ?>
+
+                            <div class="Moo_option-item">
+                                <div class="label"><?php echo $category->name?></div>
+                                <div class="onoffswitch" onchange="MooChangeCategory_Status('<?php echo $category->uuid?>')" title="Show/Hide this Category">
+                                    <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_<?php echo $category->uuid?>" <?php echo ($category->sort_order != -1)?'checked':''?>>
+                                    <label class="onoffswitch-label" for="myonoffswitch_<?php echo $category->uuid?>"><span class="onoffswitch-inner"></span>
+                                        <span class="onoffswitch-switch"></span>
+                                    </label>
+                                </div>
+                                <div style="float: right">
+                                    <input type="text" placeholder="The new name" id="Moo_categoryNewName_<?php echo $category->uuid?>">
+                                    <div class="button button-primary" onclick="Moo_changeCategoryName('<?php echo $category->uuid?>')">Save</div>
+                                    <div id="Moo_CategorySaveName_<?php echo $category->uuid?>" style="color: #008000;display: none">Saved</div>
+                                </div>
+                            </div>
+                        <?php }?>
+                    </div>
+                </div>
+                    <div id="MooPanel_tabContent6">
                     <h2>Modifiers</h2>
                     <div class="MooPanelItem">
                         <h3>Update your modifier names so they are easy to understand.</h3>

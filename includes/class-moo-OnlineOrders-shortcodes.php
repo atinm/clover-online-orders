@@ -48,7 +48,7 @@ class Moo_OnlineOrders_Shortcodes {
                     <select id="ListCats" class="form-control" onchange="Moo_CategoryChanged(this)">
                         <?php
                         foreach ( $model->getCategories() as $cat ){
-                            if(strlen($cat->items)<1) continue;
+                            if(strlen($cat->items)<1 || $cat->sort_order == -1 ) continue;
                             if($cat->uuid == $category)
                                 echo '<option value="'.$cat->uuid.'" selected>'.$cat->name.'</option>';
                             else
@@ -173,7 +173,7 @@ class Moo_OnlineOrders_Shortcodes {
                     <?php
                     $colors = self::GetColors();
                     foreach ( $model->getCategories() as $category ){
-                        if(strlen ($category->items)<1 ) continue;
+                        if(strlen($category->items)<1 || $category->sort_order == -1 ) continue;
                         if(strlen ($category->name)> 14)$category_name = substr($category->name, 0, 14)."...";
                         else  $category_name = $category->name;
 
@@ -227,7 +227,7 @@ class Moo_OnlineOrders_Shortcodes {
                     foreach (  $categories as $category ){
 	                    // I verify if there is some itmes in the category
 	                    // and the length of the name then I cut if it more than 30 characters
-                        if(strlen ($category->items)< 1 ) continue;
+                        if(strlen ($category->items)< 1 || $category->sort_order == -1) continue;
                         if(strlen ($category->name) > 30)$category_name = substr($category->name, 0, 30)."...";
                         else  $category_name = $category->name;
                 ?>

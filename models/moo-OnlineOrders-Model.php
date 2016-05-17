@@ -177,6 +177,31 @@ class moo_OnlineOrders_Model {
         );
         
     }
+    function ChangeCategoryName($cat_uuid,$name)
+    {
+        $uuid = esc_sql($cat_uuid);
+        $name = esc_sql($name);
+        return $this->db->update("{$this->db->prefix}moo_category",
+            array(
+                'name' => $name
+            ),
+            array( 'uuid' => $uuid )
+        );
+
+    }
+    function UpdateCategoryStatus($cat_uuid,$status)
+    {
+        $uuid = esc_sql($cat_uuid);
+        $st = ($status == "true")? 0:-1;
+
+        return $this->db->update("{$this->db->prefix}moo_category",
+                                array(
+                                    'sort_order' => $st
+                                ),
+                                array( 'uuid' => $uuid )
+        );
+
+    }
 	function moo_DeleteOrderType($uuid)
 {
     $uuid = esc_sql($uuid);

@@ -177,7 +177,7 @@
     text-align: center;
     color: #000;
     font-size: 17px;
-    background-color: #ffffff;
+    margin-bottom: 20px;
 }
 .Moo_Copyright a
 {
@@ -210,4 +210,8 @@
     width: 100%;
     height:350px;
     display: none;
+}
+select
+{
+    padding: 0px !important;
 }

@@ -120,6 +120,7 @@ class Moo_OnlineOrders_Activator {
                       `uuid` VARCHAR(100) NOT NULL ,
                       `name` VARCHAR(45) NULL ,
                       `sort_order` INT NULL ,
+                      `show_by_default` INT NULL ,
                       `items` TEXT NULL ,
                       PRIMARY KEY (`_id`)  ,
                       UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC)  )

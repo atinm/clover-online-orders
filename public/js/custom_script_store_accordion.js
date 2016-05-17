@@ -76,7 +76,7 @@ function moo_addToCart(e,item_uuid,name,price)
     {
         if(MOO_CART[item_uuid].quantity<10){
                 MOO_CART[item_uuid].quantity++;
-                toastr.success(name+ 'quantity updated');
+                toastr.success(name+ "'s quantity updated");
         }
         else  {
             MOO_CART[item_uuid].quantity=10;
@@ -146,7 +146,7 @@ function ChangeQuantity(item_uuid)
         }
     });
 
-    var html  = 'New quantity : <input id="MooQteForChange" class="form-control" type="number"/> <br/> ';
+    var html  = 'New quantity : <input id="MooQteForChange" class="form-control" type="text"/> <br/> ';
         html += 'Special Requests : <input id="MooItemSpecialInstructions" class="form-control" type="text" placeholder="Enter any special requests for this item"/> ';
     jQuery.fn.SimpleModal({btn_ok: 'Change', title: 'More options', contents: html,"model":"confirm",
         "callback": function(){

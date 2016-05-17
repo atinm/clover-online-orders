@@ -69,7 +69,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.0.9';
+		$this->version = '1.1.0';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -264,6 +264,11 @@ class moo_OnlineOrders {
 		$this->loader->add_action( 'wp_ajax_moo_change_modifiergroup_name', $plugin_public, 'moo_ChangeModifierGroupName');
         //update modifier status
 		$this->loader->add_action( 'wp_ajax_moo_update_modifiergroup_status', $plugin_public, 'moo_UpdateModifierGroupStatus');
+
+		//Change modifier name
+		$this->loader->add_action( 'wp_ajax_moo_change_category_name', $plugin_public, 'moo_ChangeCategoryName');
+		//update category status
+		$this->loader->add_action( 'wp_ajax_moo_update_category_status', $plugin_public, 'moo_UpdateCategoryStatus');
 
         // Send the feedback
         $this->loader->add_action( 'wp_ajax_moo_send_feedback', $plugin_public, 'moo_SendFeedBack');

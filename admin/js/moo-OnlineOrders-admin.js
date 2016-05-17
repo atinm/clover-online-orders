@@ -265,5 +265,26 @@ function MooChangeModifier_Status(uuid)
             console.log(data);
         }
     );
+}
+/* Categories Panel */
+function Moo_changeCategoryName(uuid)
+{
+    var cat_name = jQuery('#Moo_categoryNewName_'+uuid).val();
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_change_category_name',"cat_uuid":uuid,"cat_name":cat_name}, function (data) {
+            jQuery('#Moo_CategorySaveName_'+uuid).show();
+        }
+    );
+    setTimeout(function () {
+        jQuery('#Moo_CategorySaveName_'+uuid).hide();
+    }, 5000);
 
+
+}
+function MooChangeCategory_Status(uuid)
+{
+    var cat_status = jQuery('#myonoffswitch_'+uuid).prop('checked');
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_category_status',"cat_uuid":uuid,"cat_status":cat_status}, function (data) {
+            console.log(data);
+        }
+    );
 }

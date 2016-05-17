@@ -90,9 +90,23 @@ class Products_List_Moo extends WP_List_Table_MOO {
      */
     public static function record_count() {
         global $wpdb;
+        $per_page = 20;
+        $page_number = 1;
 
-        $sql = "SELECT COUNT(*) FROM {$wpdb->prefix}moo_item";
+        if(isset($_POST) && !empty($_POST['s']))
+        {
+            $sql = "SELECT count(*) FROM {$wpdb->prefix}moo_item where name like '%".esc_sql($_POST['s'])."%'";
+        }
+        else
+        {
+            $sql = "SELECT count(*) FROM {$wpdb->prefix}moo_item";
+        }
 
+
+        if ( ! empty( $_REQUEST['orderby'] ) ) {
+            $sql .= ' ORDER BY ' . esc_sql( $_REQUEST['orderby'] );
+            $sql .= ! empty( $_REQUEST['order'] ) ? ' ' . esc_sql( $_REQUEST['order'] ) : ' ASC';
+        }
         return $wpdb->get_var( $sql );
     }
     /**
@@ -111,11 +125,11 @@ class Products_List_Moo extends WP_List_Table_MOO {
 
         if($item['visible'])
             $actions = [
-                'hide' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s">Hide from the Website</a>', esc_attr( $_REQUEST['page'] ), 'hide',esc_attr($item['uuid']), $hide_nonce ),
+                'hide' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Hide from the Website</a>', esc_attr( $_REQUEST['page'] ), 'hide',esc_attr($item['uuid']), $hide_nonce,$this->get_pagenum() ),
             ];
         else
             $actions = [
-                'show' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s">Show in the Website</a>', esc_attr( $_REQUEST['page'] ), 'show',esc_attr($item['uuid']), $show_nonce )
+                'show' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Show in the Website</a>', esc_attr( $_REQUEST['page'] ), 'show',esc_attr($item['uuid']), $show_nonce,$this->get_pagenum() )
                 ];
 
         return $title . $this->row_actions( $actions );
@@ -151,7 +165,7 @@ class Products_List_Moo extends WP_List_Table_MOO {
      */
     function column_cb( $item ) {
         return sprintf(
-            '<input type="checkbox" name="bulk-hide[]" value="%s" />', $item['uuid']
+            '<input type="checkbox" name="bulk-hideOrShow[]" value="%s" />', $item['uuid']
         );
     }
     /**
@@ -193,8 +207,8 @@ class Products_List_Moo extends WP_List_Table_MOO {
      */
     public function get_bulk_actions() {
         $actions = [
-            'bulk-hide' => 'Show Items',
-            'bulk-show' => 'Hide Items',
+            'bulk-show' => 'Show Items',
+            'bulk-hide' => 'Hide Items',
         ];
 
         return $actions;
@@ -226,7 +240,6 @@ class Products_List_Moo extends WP_List_Table_MOO {
         $this->items = self::get_items( $per_page, $current_page );
     }
     public function process_bulk_action() {
-        //var_dump($this->current_action());
         //Detect when a bulk action is being triggered...
         if ( 'hide' === $this->current_action() ) {
 
@@ -238,8 +251,9 @@ class Products_List_Moo extends WP_List_Table_MOO {
             }
             else {
                 self::hide_item($_GET['item']);
-
-                wp_redirect( esc_url(add_query_arg()) ); exit;
+                wp_redirect(admin_url('admin.php?page=moo_items&paged='.$_REQUEST['paged']));
+                //wp_redirect(add_query_arg('paged',$_REQUEST['paged']));
+                exit;
             }
 
         }
@@ -253,8 +267,8 @@ class Products_List_Moo extends WP_List_Table_MOO {
                 }
                 else {
                     self::show_item($_GET['item']);
-
-                    wp_redirect( esc_url( add_query_arg() ) ); exit;
+                    wp_redirect(admin_url('admin.php?page=moo_items&paged='.$_REQUEST['paged']));
+                    exit;
                 }
             }
 
@@ -263,17 +277,13 @@ class Products_List_Moo extends WP_List_Table_MOO {
             || ( isset( $_POST['action2'] ) && $_POST['action2'] == 'bulk-hide' )
         ) {
 
-            $hide_ids = esc_sql( $_POST['bulk-hide'] );
-
+            $hide_ids = esc_sql( $_POST['bulk-hideOrShow'] );
             // loop over the array of record IDs and delete them
             foreach ( $hide_ids as $id ) {
-                $safe_id = intval($id);
-                if($safe_id)
-                    self::hide_item( $id );
-
+               self::hide_item( esc_sql($id) );
             }
-            wp_redirect( esc_url( add_query_arg() ) );
-            exit;
+            wp_redirect(add_query_arg('paged',$_REQUEST['paged']));
+           exit;
         }
         else
         {
@@ -281,16 +291,13 @@ class Products_List_Moo extends WP_List_Table_MOO {
                 || ( isset( $_POST['action2'] ) && $_POST['action2'] == 'bulk-show' )
             ) {
 
-                $show_ids = esc_sql( $_POST['bulk-hide'] );
+                $show_ids = esc_sql( $_POST['bulk-hideOrShow'] );
                 // loop over the array of record IDs and delete them
                 foreach ( $show_ids as $id ) {
-                    $safe_id = intval($id);
-                    if($safe_id)
-                        self::show_item( $id );
-
+                    self::show_item( esc_sql($id) );
                 }
 
-                wp_redirect( esc_url( add_query_arg() ) );
+                wp_redirect(add_query_arg('paged',$_REQUEST['paged']) );
                 exit;
             }
         }

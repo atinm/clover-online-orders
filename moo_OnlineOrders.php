@@ -16,7 +16,7 @@
  * Plugin Name:       Merchantech Online Orders for Clover
  * Plugin URI:        http://www.merchantech.us
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.0.9
+ * Version:           1.1.0
  * Author:            Merchantech
  * Author URI:        http://www.merchantech.us
  * License:           Clover app

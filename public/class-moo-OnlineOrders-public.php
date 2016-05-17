@@ -1201,7 +1201,30 @@ public function moo_AddOrderType()
             'data'=>$res
         );
         wp_send_json($response);
+    }
+    function moo_ChangeCategoryName()
+    {
+        $cat_uuid  = sanitize_text_field($_POST['cat_uuid']);
+        $name     = sanitize_text_field($_POST['cat_name']);
+        $res = $this->model->ChangeCategoryName($cat_uuid,$name);
 
+        $response = array(
+            'status'	 => 'Success',
+            'data'=>$res
+        );
+        wp_send_json($response);
+
+    }
+    function moo_UpdateCategoryStatus()
+    {
+        $cat_uuid  = sanitize_text_field($_POST['cat_uuid']);
+        $status   = sanitize_text_field($_POST['cat_status']);
+        $res = $this->model->UpdateCategoryStatus($cat_uuid,$status);
+        $response = array(
+            'status'	 => 'Success',
+            'data'=>$res
+        );
+        wp_send_json($response);
     }
     function moo_StoreIsOpen()
     {
