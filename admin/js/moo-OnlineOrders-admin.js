@@ -7,7 +7,7 @@
 })( jQuery );
 function tab_clicked(tab)
 {
-    var Nb_Tabs=7; // Number for tabs
+    var Nb_Tabs=8; // Number for tabs
     for(var i=1;i<=Nb_Tabs;i++) {
         jQuery('#MooPanel_tabContent'+i).hide();
         jQuery('#MooPanel_tab'+i).removeClass("MooPanel_Selected");

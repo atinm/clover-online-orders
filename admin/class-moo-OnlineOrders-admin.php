@@ -407,7 +407,7 @@ class moo_OnlineOrders_Admin {
                         <?php }?>
                     </div>
                 </div>
-                <div id="MooPanel_tabContent6">
+                <div id="MooPanel_tabContent7">
                     <h2>Feedback</h2>
                     <div class="MooPanelItem">
                         <h3>Send us your feedback</h3>
