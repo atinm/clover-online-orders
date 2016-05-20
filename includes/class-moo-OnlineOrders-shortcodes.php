@@ -31,13 +31,10 @@ class Moo_OnlineOrders_Shortcodes {
     {
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-Model.php";
         $model = new moo_OnlineOrders_Model();
-
         wp_enqueue_script( 'custom-script-items' );
         wp_enqueue_style ( 'custom-style-items' );
 
-        ob_start();
-        /*  if(isset($_POST)) echo "yes"; */
-
+       ob_start();
         if(isset($_GET['category'])){
             $category = esc_sql($_GET['category']);
             ?>
@@ -98,7 +95,6 @@ class Moo_OnlineOrders_Shortcodes {
                 $item_uuid = esc_sql($_GET['item']);
                 $modifiersgroup = $model->getModifiersGroup($item_uuid);
                 ?>
-
                 <div id="moo_modifiers">
 
                     <!-- Nav tabs -->
@@ -172,20 +168,67 @@ class Moo_OnlineOrders_Shortcodes {
                 <div class="row moo_categories">
                     <?php
                     $colors = self::GetColors();
-                    foreach ( $model->getCategories() as $category ){
-                        if(strlen($category->items)<1 || $category->sort_order == -1 ) continue;
-                        if(strlen ($category->name)> 14)$category_name = substr($category->name, 0, 14)."...";
-                        else  $category_name = $category->name;
+                    $categories = $model->getCategories();
+                    $items = $model->getItems();
+                    if(count($categories)==0 && count($items)==0 )
+                        echo "<h1>You don't have any Item, please import your Items from Clover</h1>";
+                    else
+                    {
 
-                        echo '<div class="col-md-4 col-sm-6 col-xs-12 moo_category_flip" >';
-                        echo "<a href='".(esc_url( add_query_arg( 'category', $category->uuid) ))."'><div class='moo_category_flip_container'>";
-                        echo "<div class='moo_category_flip_title'>".ucfirst(strtolower($category_name))."</div>";
-                        echo "<div class='moo_category_flip_content' style='background-color: ".current($colors)."'></div>";
-                        echo '</div></a>';
+                   if(count($categories)>0)
+                        foreach ( $categories as $category ){
+                            if(strlen($category->items)<1 || $category->sort_order == -1 ) continue;
+                            if(strlen ($category->name)> 14)$category_name = substr($category->name, 0, 14)."...";
+                            else  $category_name = $category->name;
+
+                            echo '<div class="col-md-4 col-sm-6 col-xs-12 moo_category_flip" >';
+                            echo "<a href='".(esc_url( add_query_arg( 'category', $category->uuid) ))."'><div class='moo_category_flip_container'>";
+                            echo "<div class='moo_category_flip_title'>".ucfirst(strtolower($category_name))."</div>";
+                            echo "<div class='moo_category_flip_content' style='background-color: ".current($colors)."'></div>";
+                            echo '</div></a>';
+                            echo '</div>';
+                            if(!next($colors)) reset($colors);
+                        }
+                    else
+                    {
+                        ?>
+                        <div class="row  moo_items" id="Moo_FileterContainer">
+                            <div class="col-md-9 col-sm-9 col-xs-7 ">
+                                <!-- <label for="MooSearch">Search :</label> -->
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Search for..." id="MooSearchFor" onkeypress="Moo_ClickOnGo(event)">
+                              <span class="input-group-btn">
+                                <button id = "MooSearchButton" class="btn btn-default" type="button" onclick="Moo_Search(event)">Go!</button>
+                              </span>
+                                </div><!-- /input-group -->
+
+                            </div>
+                            <div class="col-md-3 col-xs-5 col-sm-3">
+                                <!-- <label for="ListCats">Sort by :</label> -->
+                                <ul class="nav navbar-nav">
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Sort by<span class="caret"></span></a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#" onclick="Moo_SortBy(event,'name','asc')">Name - A to Z</a></li>
+                                            <li><a href="#" onclick="Moo_SortBy(event,'name','desc')">Name - Z to A</a></li>
+                                            <li role="separator" class="divider"></li>
+                                            <li><a href="#" onclick="Moo_SortBy(event,'price','asc')">Price - Low to high</a></li>
+                                            <li><a href="#" onclick="Moo_SortBy(event,'price','desc')">Price - High to low</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+                        <?php
+
+                        echo '<div class="row moo_items" id="Moo_ItemContainer">';
+                        echo self::getItemsHtml('NoCategory','name','asc',null);
                         echo '</div>';
-                        if(!next($colors)) reset($colors);
                     }
 
+
+            }
                     ?>
                 </div>
             <?php
@@ -223,13 +266,30 @@ class Moo_OnlineOrders_Shortcodes {
                 <div class="col-md-7" style="margin-bottom: 20px;">
                 <?php
                     $categories = $model->getCategories();
-                    if(count($categories)==0) echo "<h1>You don't have any Item, please import your Items from Clover</h1>";
-                    foreach (  $categories as $category ){
-	                    // I verify if there is some itmes in the category
-	                    // and the length of the name then I cut if it more than 30 characters
-                        if(strlen ($category->items)< 1 || $category->sort_order == -1) continue;
-                        if(strlen ($category->name) > 30)$category_name = substr($category->name, 0, 30)."...";
-                        else  $category_name = $category->name;
+                    $all_items  = $model->getItems();
+                    if(count($categories)==0 && count($all_items)==0 )
+                        echo "<h1>You don't have any Item, please import your Items from Clover</h1>";
+                    else
+                        if(count($categories)==0)
+                        {
+                            $categories = array((object)array(
+                                "name"=>'All Items',
+                                "uuid"=>'NoCategory'
+                            ));
+                        }
+                    foreach ($categories as $category ){
+
+	                    if($category->uuid == 'NoCategory')
+                        {
+                            $category_name = $category->name;
+                        }
+                        else
+                        {
+                            if(strlen ($category->items)< 1 || $category->sort_order == -1) continue;
+                            if(strlen ($category->name) > 30)$category_name = substr($category->name, 0, 30)."...";
+                            else  $category_name = $category->name;
+                        }
+
                 ?>
 
                         <div class="moo_category">
@@ -242,11 +302,22 @@ class Moo_OnlineOrders_Shortcodes {
                             <div class="moo_accordion_content">
                                 <ul>
                                     <?php
-                                    $items = explode(',',$category->items);
-                                    foreach($items as $uuid_item)
+                                        if($category->uuid == 'NoCategory')
+                                            $items = $model->getItems();
+                                        else
+                                            $items = explode(',',$category->items);
+
+
+                                    foreach($items as $uuid_item_or_item)
                                     {
-                                        if($uuid_item == "") continue;
-                                        $item = $model->getItem($uuid_item);
+                                        if($uuid_item_or_item == "") continue;
+
+                                        if($category->uuid == 'NoCategory')
+                                            $item = $uuid_item_or_item;
+
+                                        else
+                                            $item = $model->getItem($uuid_item_or_item);
+
                                         if($item)
                                         {
                                             if($item->visible == 0 || $item->hidden == 1 || $item->price_type=='VARIABLE') continue;
@@ -259,6 +330,7 @@ class Moo_OnlineOrders_Shortcodes {
                                             echo '  <div class="price">$'.(number_format(($item->price/100),2,'.','')).'</div>';
                                             echo '</a>';
                                             echo '</li>';
+
                                             ?>
                                             <div class="row white-popup mfp-hide" id="Modifiers_for_<?php echo $item->uuid?>">
                                                 <div class="col-md-12 col-sm-12 col-xs-12">
@@ -267,6 +339,7 @@ class Moo_OnlineOrders_Shortcodes {
                                                         $modifiersgroup = $model->getModifiersGroup($item->uuid);
                                                         $nb_mg=0;
                                                         foreach ($modifiersgroup as $mg) {
+                                                            //var_dump($mg);
                                                             $modifiers = $model->getModifiers($mg->uuid);
                                                             if( count($modifiers) == 0) continue;
                                                             $nb_mg++;
@@ -281,7 +354,6 @@ class Moo_OnlineOrders_Shortcodes {
                                                                 <div class="moo_accordion_content moo_modifier-box2" style="display: none;">
                                                                     <ul>
                                                                         <?php  foreach ( $modifiers as $m) {
-                                                                            /*onclick="moo_check(event,'<?php echo $m->uuid ?>')"*/
                                                                             ?>
                                                                             <li>
                                                                                 <a href="#" onclick="moo_check(event,'<?php echo $m->uuid ?>')">
@@ -296,7 +368,18 @@ class Moo_OnlineOrders_Shortcodes {
                                                                                     </div>
                                                                                 </a>
                                                                             </li>
-                                                                        <?php } ?>
+                                                                        <?php
+                                                                        }
+                                                                            if($mg->min_required != null || $mg->max_allowd != null ){
+                                                                                echo '<li class="Moo_modifiergroupMessage">';
+
+                                                                                if($mg->min_required != null ) echo 'You must choice at least '.$mg->min_required. ' Modifiers';
+                                                                                if($mg->max_allowd != null ) echo "<br/> You must choice at max ".$mg->max_allowd.' Modifiers';
+
+                                                                                echo '</li>';
+                                                                            }
+                                                                        ?>
+
                                                                     </ul>
                                                                 </div>
                                                              </div>
@@ -382,24 +465,30 @@ class Moo_OnlineOrders_Shortcodes {
     {
         ob_start();
         $model = new moo_OnlineOrders_Model();
-
-        if($search!=null)
+        if($search != null && $search !="" )
         {
             $search = esc_sql($search);
             $search = sanitize_text_field($search);
-
             $items_tab = $model->getItemsBySearch($search);
         }
         else
         {
-            $cat = $model->getCategory($category);
-            $items = explode(',',$cat->items);
-            $items_tab=array();
-            foreach($items as $uuid_item)
+            if($category == 'NoCategory' || $category == "")
             {
-                if($uuid_item =="") continue;
-                array_push($items_tab,$model->getItem($uuid_item));
+                $items_tab = $model->getItems();
             }
+            else
+            {
+                $cat = $model->getCategory($category);
+                $items = explode(',',$cat->items);
+                $items_tab = array();
+                foreach($items as $uuid_item)
+                {
+                    if($uuid_item == "") continue;
+                    array_push($items_tab,$model->getItem($uuid_item));
+                }
+            }
+
             usort($items_tab, function($a, $b) use ($filterBy,$orderBy)
             {
                 if($orderBy=='asc'){
@@ -419,17 +508,14 @@ class Moo_OnlineOrders_Shortcodes {
         else
             foreach((array)$items_tab as $item)
             {
-
                 // $item = $model->getItem($uuid_item);
-
                 // Verify if the item is visible or not
 
-                if($item->visible == 0 || $item->hidden == 1 || $item->price_type=='VARIABLE' || $item->price == 0) continue;
+                if($item->visible == 0 || $item->hidden == 1 || $item->price_type == 'VARIABLE') continue;
 
                 $nb_modifiers = $model->itemHasModifiers($item->uuid)->total;
 
                 //Cut the name if the lenght > 20 char
-
                 if(strlen ($item->name)> 20) $item_name = substr($item->name, 0, 20)."...";
                 else  $item_name = $item->name;
 

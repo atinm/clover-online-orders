@@ -197,16 +197,14 @@ class moo_OnlineOrders_Admin {
                 </ul>
             </div>
             <div id="MooPanel_main">
-
-                <form method="post" action="options.php">
-                    <?php settings_fields('moo_settings') ?>
-                    <input type="text"  name="moo_settings[api_key]" value="<?php echo $MooOptions['api_key']?>" hidden/>
-                    <input type="text"  name="moo_settings[lat]"     value="<?php echo $MooOptions['lat']?>" hidden />
-                    <input type="text"  name="moo_settings[lng]"     value="<?php echo $MooOptions['lng']?>" hidden />
-                    <input type="text"  name="moo_settings[hours]"     value="<?php echo $MooOptions['hours']?>" hidden />
-
-                    <?php if( $errorToken != "( Token valid )" ) { ?>
-                        <div id="MooPanel_tabContent1">
+                <?php if( $errorToken != "( Token valid )" ) { ?>
+                        <form method="post" action="options.php">
+                            <?php settings_fields('moo_settings') ?>
+                            <input type="text"  name="moo_settings[lat]"     value="<?php echo $MooOptions['lat']?>" hidden />
+                            <input type="text"  name="moo_settings[lng]"     value="<?php echo $MooOptions['lng']?>" hidden />
+                            <input type="text"  name="moo_settings[hours]"     value="<?php echo $MooOptions['hours']?>" hidden />
+                            <input type="text"  name="moo_settings[default_style]"     value="<?php echo $MooOptions['default_style']?>" hidden />
+                            <div id="MooPanel_tabContent1">
                                 <h2>Key settings</h2>
                                 <div class="MooPanelItem">
                                     <h3>API key</h3>
@@ -225,6 +223,7 @@ class moo_OnlineOrders_Admin {
 
                                 </div>
                         </div>
+                        </form>
                 <?php }
                 else
                 if( $MooOptions['lng'] == "" || $MooOptions['lat'] == "") {
@@ -328,6 +327,12 @@ class moo_OnlineOrders_Admin {
                     </div>
                  </div>
                 <div id="MooPanel_tabContent4">
+                    <form method="post" action="options.php">
+                        <?php settings_fields('moo_settings') ?>
+                        <input type="text"  name="moo_settings[api_key]" value="<?php echo $MooOptions['api_key']?>" hidden/>
+                        <input type="text"  name="moo_settings[lat]"     value="<?php echo $MooOptions['lat']?>" hidden />
+                        <input type="text"  name="moo_settings[lng]"     value="<?php echo $MooOptions['lng']?>" hidden />
+                        <input type="text"  name="moo_settings[hours]"     value="<?php echo $MooOptions['hours']?>" hidden />
                     <h2>Store interface</h2>
                     <div class="MooPanelItem">
                         <h3>Default style</h3>
@@ -583,6 +588,7 @@ class moo_OnlineOrders_Admin {
                     <input id="Moo_Lng" type="text" size="15" name="moo_settings[lng]" value="<?php echo $MooOptions['lng']?>" />
                     <div style="text-align: center; margin: 20px;">
                         <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
+                        <a href="<?php echo (esc_url((admin_url('admin.php?page=moo_index')))); ?>" class="button">Cancel</a>
                     </div>
                 </div>
             </div>
@@ -605,8 +611,6 @@ class moo_OnlineOrders_Admin {
         <input type="text"  name="moo_settings[lng]"     value="<?php echo $MooOptions['lng']?>" hidden/>
         <input type="text"  name="moo_settings[default_style]"     value="<?php echo $MooOptions['default_style']?>" hidden/>
         <input type="hidden" name="_wp_http_referer" value="<?php echo (esc_url((admin_url('admin.php?page=moo_index')))); ?>" />
-
-
             <div id="MooPanel_tabContent1">
             <h2>Hours your store is available</h2>
             <div class="MooPanelItem">
@@ -638,6 +642,7 @@ class moo_OnlineOrders_Admin {
                     </div>
                     <div style="text-align: center; margin: 20px;">
                         <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
+                        <a href="<?php echo (esc_url((admin_url('admin.php?page=moo_index')))); ?>" class="button">Cancel</a>
                     </div>
                 </div>
             </div>

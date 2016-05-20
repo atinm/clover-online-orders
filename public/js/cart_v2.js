@@ -195,7 +195,7 @@ function moo_emptyCart()
 function moo_addModifiers(item_name)
 {
     var selected_modifies = jQuery("#moo_form_modifiers").serializeArray();
-
+    console.log(selected_modifies);
     var Mgroups = {};
     var Modifiers = [];
     for(m in selected_modifies)
@@ -228,59 +228,49 @@ function moo_addModifiers(item_name)
         }
     }
     var flag = false;
+
     if(Object.keys(Mgroups).length==0) {
         return false;
     }
-    /* verify the min and max in modifier Group for the next version inchae allah */
-    
-    // for(mg in Mgroups){
-    //     jQuery.post(moo_params.ajaxurl,{'action':'moo_modifiergroup_getlimits',"modifierGroup":mg}, function (data) {
-    //
-    //         if(data.status == 'success' )
-    //         {
-    //             if(data.min != 0 && Mgroups[mg] < data.min) {
-    //                 //TODO
-    //                // alert("Minimum number of modifiers required is "+data.min);
-    //                 flag=true;
-    //             }
-    //             // Message not atteind the min_required
-    //             if(data.max != 0 && Mgroups[mg] > data.max) {
-    //               //  alert("Maximum number of modifiers allowed is "+ data.max);
-    //                 flag=true;
-    //             }
-    //             // Message max_allowed
-    //         }
-    //     }).done(function () {
-    //         if(!flag)
-    //         {
-    //             //send the request to the server
-    //             jQuery.post(moo_params.ajaxurl,{'action':'moo_modifier_add',"modifiers":Modifiers}, function (data) {
-    //                 if(data.status == 'success' )
-    //                 {
-    //                     toastr.success(item_name +' added to cart');
-    //                     moo_updateCart();
-    //                     return true;
-    //                 }
-    //             })
-    //
-    //         }
-    //         else
-    //         {
-    //             return 'error';
-    //         }
-    //     })
-    // }
+    /* verify the min and max in modifier Group */
+    for(mg in Mgroups){
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_modifiergroup_getlimits',"modifierGroup":mg}, function (data) {
+            if(data.status == 'success' )
+            {
+                /* If the min is not null then we display a message if the custmet not choose the minimum */
+                if(data.min != null && data.min != 0 && Mgroups[mg] < data.min) {
+                    toastr.error("Minimum number of modifiers required is "+data.min);
+                    flag=true;
+                }
+                if(data.max!= null && data.max != 0 && Mgroups[mg] > data.max) {
+                    toastr.error("Maximum number of modifiers allowed is "+ data.max);
+                    flag=true;
+                }
+            }
+            else
+            {
+                flag = true;
+            }
+        }).done(function () {
+            if(!flag)
+            {
+                //send the request to the server
+                jQuery.post(moo_params.ajaxurl,{'action':'moo_modifier_add',"modifiers":Modifiers}, function (data) {
+                    if(data.status == 'success' )
+                    {
+                        toastr.success(item_name +' added to cart');
+                        moo_updateCart();
+                        return true;
+                    }
+                })
 
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_modifier_add',"modifiers":Modifiers}, function (data) {
-        if(data.status == 'success' )
-        {
-            toastr.success(item_name +' added to cart');
-            moo_updateCart();
-            return true;
-        }
-    })
-
-
+            }
+            else
+            {
+                return 'error';
+            }
+        })
+    }
 }
 function moo_addItemWithModifiersToCart(event,item_uuid,item_name,item_price)
 {

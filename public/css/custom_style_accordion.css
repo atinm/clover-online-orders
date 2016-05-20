@@ -306,6 +306,11 @@ border-bottom: none;
     height: 100%;
     display: block;
 }
+.Moo_modifiergroupMessage
+{
+    font-size: 10px;
+    color: red;
+}
 #moo_form_address
 {
     margin-bottom:50px;

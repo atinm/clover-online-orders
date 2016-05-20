@@ -732,7 +732,6 @@ class Moo_OnlineOrders_Public {
         $mg_uuid = sanitize_text_field($_POST['modifierGroup']);
 
         $res = $this->model->getModifiersGroupLimits($mg_uuid);
-
         if($res){
             $response = array(
                 'status'	=> 'success',

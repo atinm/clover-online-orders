@@ -14,6 +14,10 @@ class moo_OnlineOrders_Model {
     {
         return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_category ORDER BY 4");
     }
+    function getItems()
+    {
+        return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_item");
+    }
     function getCategory($uuid)
     {
         $uuid = esc_sql($uuid);

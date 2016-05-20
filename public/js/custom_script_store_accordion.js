@@ -3,7 +3,7 @@ var MOO_CART = [];
 jQuery(document).ready(function() {
 
     //accordion
-    jQuery('.moo_accordion').accordion({defaultOpen: 'MooModifierGroup_default'});
+    jQuery('.moo_accordion').accordion({defaultOpen: 'MooCat_NoCategory'});
     jQuery('.popup-text').magnificPopup({
         type: 'inline',
         closeBtnInside: true,
