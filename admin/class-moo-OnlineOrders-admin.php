@@ -368,9 +368,9 @@ class moo_OnlineOrders_Admin {
                             ?>
 
                             <div class="Moo_option-item">
-                                <div class="label"><?php echo $category->name?></div>
+                                <div class="label"><?php echo $category->name.' ( '.(count(explode(',',$category->items))-1).' items)'?></div>
                                 <div class="onoffswitch" onchange="MooChangeCategory_Status('<?php echo $category->uuid?>')" title="Show/Hide this Category">
-                                    <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_<?php echo $category->uuid?>" <?php echo ($category->sort_order != -1)?'checked':''?>>
+                                    <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_<?php echo $category->uuid?>" <?php echo ($category->show_by_default == 1)?'checked':''?>>
                                     <label class="onoffswitch-label" for="myonoffswitch_<?php echo $category->uuid?>"><span class="onoffswitch-inner"></span>
                                         <span class="onoffswitch-switch"></span>
                                     </label>
@@ -387,7 +387,7 @@ class moo_OnlineOrders_Admin {
                     <div id="MooPanel_tabContent6">
                     <h2>Modifiers</h2>
                     <div class="MooPanelItem">
-                        <h3>Update your modifier names so they are easy to understand.</h3>
+                        <h3>Update your modifierGroups names so they are easy to understand.</h3>
                         <?php
                         if(count($modifier_groups)==0) echo "<div style=\"text-align: center;margin-bottom: 10px;\">You don't have any Modifier Group,<br> please import your data by clicking on <b>Import Items</b></div>";
 

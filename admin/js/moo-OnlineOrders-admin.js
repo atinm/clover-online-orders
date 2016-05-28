@@ -90,7 +90,7 @@ function Moo_GetOrderTypes()
             {
                var orderTypes = JSON.parse(data.data);
                 var html='';
-                html +='<div class="Moo_option-title">'
+                html +='<div class="Moo_option-title">';
 
                 if(orderTypes.length>0){
                     html += '<div class="label"><strong>Name</strong></div><div class="onoffswitch"><strong>Enable/Disable</strong></div>';

@@ -196,11 +196,11 @@ class moo_OnlineOrders_Model {
     function UpdateCategoryStatus($cat_uuid,$status)
     {
         $uuid = esc_sql($cat_uuid);
-        $st = ($status == "true")? 0:-1;
+        $st = ($status == "true")? 1:0;
 
         return $this->db->update("{$this->db->prefix}moo_category",
                                 array(
-                                    'sort_order' => $st
+                                    'show_by_default' => $st
                                 ),
                                 array( 'uuid' => $uuid )
         );

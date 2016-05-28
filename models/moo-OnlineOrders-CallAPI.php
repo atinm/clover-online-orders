@@ -759,6 +759,7 @@ class moo_OnlineOrders_CallAPI {
                                                 'uuid' => $cat->id,
                                                 'name' => $cat->name,
                                                 'sort_order' => $cat->sortOrder,
+                                                'show_by_default' => 1,
                                                 'items' =>  $items_ids
                 ));
             if($wpdb->insert_id!=0) $count++;

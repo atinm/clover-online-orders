@@ -45,7 +45,7 @@ class Moo_OnlineOrders_Shortcodes {
                     <select id="ListCats" class="form-control" onchange="Moo_CategoryChanged(this)">
                         <?php
                         foreach ( $model->getCategories() as $cat ){
-                            if(strlen($cat->items)<1 || $cat->sort_order == -1 ) continue;
+                            if(strlen($cat->items)<1 || $cat->show_by_default == 0 ) continue;
                             if($cat->uuid == $category)
                                 echo '<option value="'.$cat->uuid.'" selected>'.$cat->name.'</option>';
                             else
@@ -177,7 +177,7 @@ class Moo_OnlineOrders_Shortcodes {
 
                    if(count($categories)>0)
                         foreach ( $categories as $category ){
-                            if(strlen($category->items)<1 || $category->sort_order == -1 ) continue;
+                            if(strlen($category->items)<1 || $category->show_by_default == 0 ) continue;
                             if(strlen ($category->name)> 14)$category_name = substr($category->name, 0, 14)."...";
                             else  $category_name = $category->name;
 
@@ -277,6 +277,11 @@ class Moo_OnlineOrders_Shortcodes {
                                 "uuid"=>'NoCategory'
                             ));
                         }
+                /*
+                 * Uncomment this line if you want to add the category all items your menu
+                 */
+                    //array_push($categories,(object)array("name"=>'All Items',"uuid"=>'NoCategory'));
+                
                     foreach ($categories as $category ){
 
 	                    if($category->uuid == 'NoCategory')
@@ -285,7 +290,7 @@ class Moo_OnlineOrders_Shortcodes {
                         }
                         else
                         {
-                            if(strlen ($category->items)< 1 || $category->sort_order == -1) continue;
+                            if(strlen ($category->items)< 1 || $category->show_by_default == 0) continue;
                             if(strlen ($category->name) > 30)$category_name = substr($category->name, 0, 30)."...";
                             else  $category_name = $category->name;
                         }

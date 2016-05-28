@@ -36,8 +36,6 @@ class Moo_OnlineOrders_Activator {
         -- Table `item_group`
         -- -----------------------------------------------------
 */
-       // $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_group` ;");
-
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_item_group` (
                           `_id` INT NOT NULL AUTO_INCREMENT,
                           `uuid` VARCHAR(100) NOT NULL,
@@ -52,8 +50,6 @@ class Moo_OnlineOrders_Activator {
         -- Table `item--
         --------------------------------------------------------
 */
-
-      //  $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item` ;");
 
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_item` (
                       `_id` INT NOT NULL AUTO_INCREMENT,
@@ -113,14 +109,13 @@ class Moo_OnlineOrders_Activator {
 -- Table `category`
 -- -----------------------------------------------------
 */
-      //  $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_category` ;");
 
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_category` (
                        `_id` INT NOT NULL AUTO_INCREMENT,
                       `uuid` VARCHAR(100) NOT NULL ,
                       `name` VARCHAR(45) NULL ,
                       `sort_order` INT NULL ,
-                      `show_by_default` INT NULL ,
+                      `show_by_default` INT(1) NOT NULL DEFAULT '1' ,
                       `items` TEXT NULL ,
                       PRIMARY KEY (`_id`)  ,
                       UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC)  )
@@ -131,8 +126,6 @@ class Moo_OnlineOrders_Activator {
 -- Table `attribute`
 -- -----------------------------------------------------
 */
-
-       // $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_attribute` ;");
 
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_attribute` (
                       `_id` INT NOT NULL AUTO_INCREMENT,
@@ -156,8 +149,6 @@ class Moo_OnlineOrders_Activator {
 -- -----------------------------------------------------
 */
 
-      //  $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_option` ;");
-
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_option` (
                       `_id` INT NOT NULL AUTO_INCREMENT,
                       `uuid` VARCHAR(100) NOT NULL ,
@@ -178,8 +169,6 @@ class Moo_OnlineOrders_Activator {
 -- Table `modifier_group`
 -- -----------------------------------------------------
 */
-      //  $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_modifier_group` ;");
-
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_modifier_group` (
                        `_id` INT NOT NULL AUTO_INCREMENT,
                       `uuid` VARCHAR(100) NOT NULL ,
@@ -198,8 +187,6 @@ class Moo_OnlineOrders_Activator {
 -- Table `modifier`
 -- -----------------------------------------------------
 */
-
-      //  $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_modifier` ;");
 
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_modifier` (
                        `_id` INT NOT NULL AUTO_INCREMENT,
@@ -225,7 +212,6 @@ class Moo_OnlineOrders_Activator {
 -- -----------------------------------------------------
 */
 
-      //  $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_tag` ;");
 
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_tag` (
                       `_id` INT NOT NULL AUTO_INCREMENT,
@@ -242,7 +228,6 @@ class Moo_OnlineOrders_Activator {
 -- -----------------------------------------------------
 */
 
-      //  $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_tax_rate` ;");
 
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_tax_rate` (
                       `_id` INT NOT NULL AUTO_INCREMENT,
@@ -259,7 +244,6 @@ class Moo_OnlineOrders_Activator {
 -- Table `item_tax_rate`
 -- -----------------------------------------------------
 */
-      //  $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_tax_rate` ;");
 
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_item_tax_rate` (
                       `_id` INT NOT NULL AUTO_INCREMENT,
@@ -287,7 +271,6 @@ class Moo_OnlineOrders_Activator {
 -- Table `item_tag`
 -- -----------------------------------------------------
 */
-      //  $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_tag` ;");
 
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_item_tag` (
                       `_id` INT NOT NULL AUTO_INCREMENT,
@@ -314,7 +297,6 @@ class Moo_OnlineOrders_Activator {
         -- Table `item_option`
         -- -----------------------------------------------------
         */
-      //  $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_option` ;");
 
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_item_option` (
                       `_id` INT NOT NULL AUTO_INCREMENT,
@@ -341,7 +323,6 @@ class Moo_OnlineOrders_Activator {
 -- Table `item_modifier_group`
 -- -----------------------------------------------------
 */
-      //  $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_modifier_group` ;");
 
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_item_modifier_group` (
                           `_id` INT NOT NULL AUTO_INCREMENT,
@@ -431,7 +412,8 @@ class Moo_OnlineOrders_Activator {
             'post_type' => 'page',
             'post_content' => '[moo_checkout]'
         );
-
+        // Save the version of the plugin in the Database
+         update_option('moo_onlineOrders_version', '112');
         //insert page and save the id
         $store_page_id    =  wp_insert_post( $post_store, false );
         $checkout_page_id =  wp_insert_post( $post_checkout, false );
