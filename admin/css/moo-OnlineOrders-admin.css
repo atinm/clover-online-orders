@@ -372,3 +372,67 @@
 .tooltip:hover .tooltiptext {
     opacity: 1;
 }
+
+/* Edit Item CSS */
+#moo_editItem
+{
+    box-sizing: content-box;
+}
+#moo_editItem .moo_editItem_right
+{
+    float: right;
+    background-color: #ffffff;
+    width: 66%;
+    min-height: 200px;
+    padding: 10px;
+    margin: 0px;
+
+}
+#moo_editItem .moo_editItem_left
+{
+    float: left;
+    background-color: #ffffff;
+    width: 28%;
+    min-height: 200px;
+    padding: 10px;
+    margin: 0px;
+}
+#moo_editItem .moo_pull_right
+{
+    float: right;
+    color: #2e6da4;
+    margin-top: -35px;
+    cursor: pointer;
+}
+#moo_editItem .moo_itemsimages .moo_itemsimages_oneimg
+{
+    text-align: center;
+    float: left;
+}
+#moo_editItem .moo_itemsimages .moo_itemsimages_oneimg img
+{
+    width: 200px;
+    float: left;
+    margin: 5px;
+}#moo_editItem .moo_itemsimages .moo_itemsimages_oneimg .moo_itemsimages_oneimg_options
+{
+    width: 200px;
+    margin: 5px;
+}
+#moo_editItem .moo_itemsimages .moo_moo_itemsimages_oneimg input[type=radio]
+{
+    float: left;
+    clear: both;
+}
+@media only screen and (max-width: 767px) {
+    #moo_editItem .moo_editItem_right
+    {
+        float: left;
+        width: 100%;
+    }
+    #moo_editItem .moo_editItem_left
+    {
+        float: left;
+        width: 100%;
+    }
+}

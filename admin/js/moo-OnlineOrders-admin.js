@@ -95,7 +95,7 @@ function Moo_GetOrderTypes()
                 if(orderTypes.length>0){
                     html += '<div class="label"><strong>Name</strong></div><div class="onoffswitch"><strong>Enable/Disable</strong></div>';
                     html += '<div class="onoffswitch" style="margin-left: 60px;width: 150px;">';
-                    html += '<strong>Show shipping address</strong></div><div style="float: right"><strong>DELETE</strong></div></div>';
+                    html += '<strong>Show customer address</strong></div><div style="float: right"><strong>DELETE</strong></div></div>';
 
                     for(var i=0;i<orderTypes.length;i++) {
                         var $ot = orderTypes[i];
@@ -286,5 +286,106 @@ function MooChangeCategory_Status(uuid)
     jQuery.post(moo_params.ajaxurl,{'action':'moo_update_category_status',"cat_uuid":uuid,"cat_status":cat_status}, function (data) {
             console.log(data);
         }
+    );
+}
+
+/* Upload Imges function */
+console.log('uplaod image loaded');
+var media_uploader  = null;
+var moo_item_images = [];
+
+function open_media_uploader_image()
+{
+    media_uploader = wp.media({
+        frame:    "post",
+        state:    "insert",
+        multiple: false
+    });
+
+    media_uploader.on("insert", function(){
+        var json = media_uploader.state().get("selection").first().toJSON();
+        var image_url = json.url;
+        var image_caption = json.caption;
+        var image_title = json.title;
+        moo_item_images[image_title] = image_url;
+        moo_display_item_images();
+    });
+    media_uploader.open();
+}
+
+function moo_display_item_images()
+{
+    jQuery('#moo_itemimagesection').html('');
+    for(i in moo_item_images ){
+        var image = moo_item_images[i];
+        var html = '<div class="moo_itemsimages_oneimg">'+
+                   '<div><img src="'+image+'" alt=""></div>'+
+                   '<div class="moo_itemsimages_oneimg_options"><a href="#" onclick="moo_delete_item_images(\''+i+'\')">delete</a></div></div>';
+        jQuery('#moo_itemimagesection').append(html);
+
+    }
+
+}
+function moo_delete_item_images(id)
+{
+    delete(moo_item_images[id]);
+    moo_display_item_images();
+}
+function moo_save_item_images(uuid)
+{
+    var description = jQuery('#moo_item_description').val();
+    var images = [];
+    for(i in moo_item_images ){
+        var img = moo_item_images[i];
+        images.push(img);
+    }
+    if(description.length>250)
+    {
+        alert("Description too long");
+        return
+    }
+    if(description != "" || Object.keys(moo_item_images).length>0)
+    {
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_save_items_with_images',"item_uuid":uuid,"description":description,"images":images}, function (data) {
+                if(data.status == 'Success')
+                {
+                    if(data.data==true)
+                    {
+                        alert("Your changes were saved")
+                        history.back();
+                    }
+                    // echo succus message
+
+                    else
+                    // echo error message
+                        alert("Error when saving your changes, please try again")
+                }
+                else
+                // echo error message
+                    alert("Error when saving your changes, please try again")
+            }
+        );
+    }
+    else
+    {
+        history.back();
+    }
+
+}
+
+function moo_get_item_with_images(uuid)
+{
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_get_items_with_images',"item_uuid":uuid}, function (data) {
+        var items = data.data;
+        for(i in items ){
+            var item = items[i];
+            if(item._id)
+                moo_item_images[item._id] = item.url;
+        }
+        moo_display_item_images();
+        jQuery('#moo_item_description').val(items[0].description);
+        jQuery('#moo_item_name').text(items[0].name);
+        jQuery('#moo_item_price').text(items[0].price);
+    }
     );
 }

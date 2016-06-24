@@ -58,7 +58,7 @@ class moo_OnlineOrders_Admin {
         add_action( 'admin_init',  array($this, 'register_mysettings' ));
         add_action( 'admin_bar_menu', array($this, 'toolbar_link_to_settings'), 999 );
 
-
+        add_action("admin_enqueue_scripts", function(){wp_enqueue_media();});
 
         $this->model = new moo_OnlineOrders_Admin_Model();
 
@@ -69,7 +69,45 @@ class moo_OnlineOrders_Admin {
         require_once "includes/class-moo-products-list.php";
         $products = new Products_List_Moo();
         $products->prepare_items();
+        if(isset($_GET['action']) && $_GET['action'] == 'update_item')
+        {
+            if(isset($_GET['item_uuid']) && $_GET['item_uuid'] != '')
+            {
+                $item_uuid = $_GET['item_uuid'];
+                
+              ?>
+                <div class="wrap">
+                    <h2>Edit an Item</h2>
+                    <div id="moo_editItem">
+                        <div class="moo_editItem_left">
+                            <h3>Item Name</h3> <p id="moo_item_name"></p>
+                            <h3>Item Price</h3><p id="moo_item_price"></p>
+                            <h3>Item Description</h3>
+                            <div id="titlediv">
+                                <textarea name="" rows="4" id="moo_item_description"></textarea>
+                            </div>
+                            <a href="#" class="button button-primary" onclick="moo_save_item_images('<?php echo $item_uuid?>')">Save item</a>
+                            <a href="#" class="button button-secondary" onclick="history.back()">Go back</a>
+                        </div>
+                        <div class="moo_editItem_right">
+                            <h3>Images</h3>
+                            <span class="moo_pull_right" id="moo_uploadImgBtn" onclick="open_media_uploader_image()">Upload Image</span>
+                            <div class="moo_itemsimages" id="moo_itemimagesection">
+                            </div>
 
+                        </div>
+
+                    </div>
+                </div>
+                <script type="application/javascript">
+                    moo_get_item_with_images('<?php echo $item_uuid?>');
+                </script>
+
+                <?php
+            }
+        }
+        else
+        {
     ?>
         <div class="wrap">
             <h2>List of products</h2>
@@ -82,7 +120,6 @@ class moo_OnlineOrders_Admin {
                                 <input type="hidden" name="page" value="moo_products" />
                                 <?php $products->search_box('search', 'search_id'); ?>
                             </form>
-
                             <form method="post">
 
                                 <?php $products->display(); ?>
@@ -95,6 +132,7 @@ class moo_OnlineOrders_Admin {
         </div>
 
     <?php
+        }
     }
 
     public function page_orders()
@@ -193,7 +231,7 @@ class moo_OnlineOrders_Admin {
                     <li id="MooPanel_tab4" onclick="tab_clicked(4)">Store interface</li>
                     <li id="MooPanel_tab5" onclick="tab_clicked(5)">Categories</li>
                     <li id="MooPanel_tab6" onclick="tab_clicked(6)">Modifiers</li>
-                    <li id="MooPanel_tab7" onclick="tab_clicked(7)">Feedback</li>
+                    <li id="MooPanel_tab7" onclick="tab_clicked(7)">Feedback / Help</li>
                 </ul>
             </div>
             <div id="MooPanel_main">
@@ -307,7 +345,7 @@ class moo_OnlineOrders_Admin {
                 <div id="MooPanel_tabContent3">
                     <h2>Orders Types</h2>
                     <div class="MooPanelItem" >
-                        <h3>Choose the defaults order types</h3>
+                        <h3>Choose the default order types</h3>
 							<div id="MooOrderTypesContent" style="margin-bottom: 10px">
 							</div>
                     </div>
@@ -346,6 +384,11 @@ class moo_OnlineOrders_Admin {
                                     <input name="moo_settings[default_style]" id="MooDefaultStyle" type="radio" value="style2" <?php echo ($MooOptions["default_style"]=="style2")?"checked":""; ?> >
                                     <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/style2.jpg" ?>" align="middle" />
                                 </label>
+                                <label style="display:block; margin-bottom:8px;">
+                                    <input name="moo_settings[default_style]" id="MooDefaultStyle" type="radio" value="style3" <?php echo ($MooOptions["default_style"]=="style3")?"checked":""; ?> >
+                                    <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/style3.jpg" ?>" align="middle" />
+                                   ( Support of images )
+                                </label>
                             </div>
 
 	                     </div>
@@ -359,14 +402,23 @@ class moo_OnlineOrders_Admin {
                 <div id="MooPanel_tabContent5">
                     <h2>Categories</h2>
                     <div class="MooPanelItem">
-                        <h3>Show or hide a category</h3>
+                        <h3>Show or hide a category ( only press save if giving category a new name )</h3>
                         <?php
-                        if(count($all_categories)==0) echo "<div style=\"text-align: center;margin-bottom: 10px;\">You don't have any Category,<br> please import your inventory by clicking on <b>Import Items</b> or refresh the page if you just imported your inventory</div>";
-
+                        $show_all_items = get_option("moo-show-allItems");
+                        $nb_items = $model->NbProducts();
+                        ?>
+                        <div class="Moo_option-item">
+                            <div class="label">All Items (<?php echo $nb_items[0]->nb.' items)'?></div>
+                            <div class="onoffswitch" onchange="MooChangeCategory_Status('NoCategory')" title="Show/Hide this Category">
+                                <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_NoCategory" <?php echo ($show_all_items == 'true')?'checked':''?>>
+                                <label class="onoffswitch-label" for="myonoffswitch_NoCategory"><span class="onoffswitch-inner"></span>
+                                    <span class="onoffswitch-switch"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <?php
                         foreach ($all_categories as $category) {
-                           // var_dump($category);
                             ?>
-
                             <div class="Moo_option-item">
                                 <div class="label"><?php echo $category->name.' ( '.(count(explode(',',$category->items))-1).' items)'?></div>
                                 <div class="onoffswitch" onchange="MooChangeCategory_Status('<?php echo $category->uuid?>')" title="Show/Hide this Category">
@@ -382,12 +434,13 @@ class moo_OnlineOrders_Admin {
                                 </div>
                             </div>
                         <?php }?>
+
                     </div>
                 </div>
                     <div id="MooPanel_tabContent6">
                     <h2>Modifiers</h2>
                     <div class="MooPanelItem">
-                        <h3>Update your modifierGroups names so they are easy to understand.</h3>
+                        <h3>Hide or change modifier group names so they are easy to understand</h3>
                         <?php
                         if(count($modifier_groups)==0) echo "<div style=\"text-align: center;margin-bottom: 10px;\">You don't have any Modifier Group,<br> please import your data by clicking on <b>Import Items</b></div>";
 
@@ -413,9 +466,9 @@ class moo_OnlineOrders_Admin {
                     </div>
                 </div>
                 <div id="MooPanel_tabContent7">
-                    <h2>Feedback</h2>
+                    <h2>Feedback / Help</h2>
                     <div class="MooPanelItem">
-                        <h3>Send us your feedback</h3>
+                        <h3>Do you need help or would like to give us feedback.<br/>Please e-mail or call us: 925-234-5554 (8am-8pm pacific time)</h3>
                         <div class="Moo_option-item">
                             <label for="MoofeedBackEmail"">Your Email</label>
                             <input type="text" name=MoofeedBackEmail" id=MoofeedBackEmail" placeholder="Your email" style="width: 100%">
@@ -438,7 +491,7 @@ class moo_OnlineOrders_Admin {
         add_menu_page('Settings page', 'Clover Orders', 'manage_options', 'moo_index', array($this, 'panel_settings'),$icon_url);
 
         add_submenu_page('moo_index', 'Settings', 'Settings', 'manage_options', 'moo_index', array($this, 'panel_settings'));
-        add_submenu_page('moo_index', 'Items', 'Items', 'manage_options', 'moo_items', array($this, 'page_products'));
+        add_submenu_page('moo_index', 'Items/Images', 'Items / Images', 'manage_options', 'moo_items', array($this, 'page_products'));
         add_submenu_page('moo_index', 'Orders', 'Orders', 'manage_options', 'moo_orders', array($this, 'page_orders'));
 
        // add_submenu_page('index.php', __('New Like Label'), __('New Link Label'), 'manage_options', 'new-link-display', 'new_link_display');
@@ -466,7 +519,7 @@ class moo_OnlineOrders_Admin {
         );
         $args4 = array(
             'id'    => 'Clover_Orders_items',
-            'title' => 'Items',
+            'title' => 'Items / Images',
             'href'  => admin_url().'admin.php?page=moo_items',
             'parent'  => 'Clover_Orders',
         );

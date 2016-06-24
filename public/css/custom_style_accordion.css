@@ -9,16 +9,16 @@
 {
     position: relative;
     cursor: pointer;
-    padding: 0 15px;
+    padding: 0 15px !important;
 }
-.moo_category_title>.title
+.moo_category_title>.moo_title
 {
-     color: #252525;
-     font-size: 22px;
-     line-height: 37px;
-     font-family: ProximaNovaAltExtraCondensedBold;
-     font-weight: bold;
-     margin: 0;
+     color: #252525 !important;
+     font-size: 22px !important;
+     line-height: 37px !important;
+     font-family: ProximaNovaAltExtraCondensedBold !important;
+     font-weight: bold !important;
+     margin: 0 !important;
 }
 .moo_category_title span
 {
@@ -52,10 +52,12 @@
 .moo_accordion_content ul li {
       overflow: hidden;
       border-bottom: solid 1px #e7e7e7;
-      padding: 14px 0;
-      position: relative;
+      padding: 14px 0 !important;
+      position: relative !important;
+ }.moo_accordion_content ul li::before {
+     display: none !important;
  }
-.moo_accordion_content ul li .detail {
+.moo_accordion_content ul li .moo_detail {
     overflow: hidden;
     padding: 0 80px 0 0;
     border: 0px;
@@ -66,7 +68,7 @@
     font-family: 'ProximaNovaAltExtraCondensedBold';
     margin: 0;
  }
-.moo_accordion_content ul li .price {
+.moo_accordion_content ul li .moo_price {
       position: absolute;
       right: 0;
       top: 35%;
@@ -78,10 +80,10 @@
       font-family: 'ProximaNovaAltExtraCondensedBold';
  }
 .moo_accordion_content ul li a {
-    text-decoration: none;
+    text-decoration: none !important;
     outline: none;
  }.moo_accordion_content ul li a:visited {
-    text-decoration: none;
+    text-decoration: none !important;
     outline: none;
  }
 

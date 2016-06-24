@@ -311,5 +311,65 @@ class moo_OnlineOrders_Model {
         return $this->db->get_results("SELECT count(*) as nb FROM {$this->db->prefix}moo_item");
     }
 
+    /*
+     * Manage Item's image
+     */
+    function getItemWithImage($uuid)
+    {
+        $uuid = esc_sql($uuid);
+        return $this->db->get_results("SELECT *
+                                    FROM {$this->db->prefix}moo_item items
+                                    LEFT JOIN {$this->db->prefix}moo_images images
+                                    ON items.uuid=images.item_uuid
+                                    WHERE items.uuid = '{$uuid}'
+                                    ");
+    }
+    function getItemImages($uuid)
+    {
+        $uuid = esc_sql($uuid);
+        return $this->db->get_results("SELECT *
+                                    FROM {$this->db->prefix}moo_images images
+                                    WHERE images.item_uuid = '{$uuid}'
+                                    ");
+    }
+    function saveItemWithImage($uuid,$description,$images)
+    {
+      //  $this->db->show_erros();
+        $compteur = 0;
+        // Update the description of the item
+        if($description != "")
+        {
+            $this->db->update("{$this->db->prefix}moo_item",
+                array(
+                    'description' => $description
+                ),
+                array( 'uuid' => $uuid ));
+        }
+        $this->db->query('START TRANSACTION');
+
+        $this->db->query("DELETE FROM {$this->db->prefix}moo_images  WHERE item_uuid = '{$uuid}'");
+
+        foreach ($images as $image) {
+            $this->db->insert(
+                "{$this->db->prefix}moo_images",
+                array(
+                    'is_default' => 0,
+                    'is_enabled' => 1,
+                    'item_uuid' => $uuid,
+                    'url' => $image
+                ));
+            if($this->db->insert_id) $compteur++;
+        }
+       if($compteur == count($images))
+       {
+           $this->db->query('COMMIT');
+           return true;
+       }
+       else {
+           $this->db->query('ROLLBACK');
+           return false;
+       }
+    }
+
 
 }

@@ -21,7 +21,6 @@ function moo_updateCart()
             for(item in data.data)
             {
                 if(item == "") continue;
-                MOO_CART[item] = {uuid:item,name:item.name};
                 var product = data.data[item];
                 var price = (product.item.price*product.quantity/100);
                 var subtotal = price;
@@ -33,21 +32,19 @@ function moo_updateCart()
                     html +="<td>"+product.item.name+"</td>"; //The name of the item
                     html +="<td>$"+(product.item.price/100)+"</td>"; // The price
                     html +='<td>' + //The quantity and buttons of commands
-                    '<div class="row" style="width: 130px;">' +
-                    '<div class="col-md-4 col-xs-12 col-sm-4">' +
-                    '<div class="moo_btn_qte" onclick="moo_decQte('+product.item.price+',\''+item+'\')">-</div>' +
-                    '</div>' +
-                    '<div class="col-md-4 col-xs-12 col-sm-4">' +
-                    '<div id="moo_itemqte_'+item+'" class="moo_qte" >'+product.quantity+'</div>' +
-                    '</div>' +
-                    '<div class="col-md-4 col-xs-12 col-sm-4">' +
-                    '<div class="moo_btn_qte" onclick="moo_incQte('+product.item.price+',\''+item+'\')">+</div>' +
-                    '</div>' +
-                    '</div>' +
-                    '</td>';
-                    html +='<td></td>'; //The Tax
-                    html +='<td></td>'; //Sub total  ( price + taxes )
-                    html +='<td></td>'; //Controlles Btn
+                        '<div class="row" style="width: 130px;">' +
+                        '<div class="col-md-4 col-xs-12 col-sm-4">' +
+                        '<div class="moo_btn_qte" onclick="moo_decQte('+product.item.price+',\''+item+'\')">-</div>' +
+                        '</div>' +
+                        '<div class="col-md-4 col-xs-12 col-sm-4">' +
+                        '<div id="moo_itemqte_'+item+'" class="moo_qte" >'+product.quantity+'</div>' +
+                        '</div>' +
+                        '<div class="col-md-4 col-xs-12 col-sm-4">' +
+                        '<div class="moo_btn_qte" onclick="moo_incQte('+product.item.price+',\''+item+'\')">+</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</td>';
+                    html +='<td colspan="2"></td>'; //Controlles Btn
                     html +='</tr>'; //Controlles Btn
                     // the Modifiers
                     for(uuid in product.modifiers){
@@ -57,7 +54,6 @@ function moo_updateCart()
                         html +='<tr id="moo_cart_modifier_'+uuid+'" class="warning MooLineModifier4_'+item+'" style="font-size: 0.8em;text-align: right;">';
                         html +='<td style="text-align: right;">'+modifier.name+'</td>';
                         html +='<td style="text-align: left;">$'+modifierPrice+'</td>';
-                        html +='<td></td>';
                         html +='<td></td>';
                         html +='<td></td>';
                         html +='<td style="text-align: left;"><i class="fa fa-close" style="cursor: pointer;" onclick="moo_cart_DeleteItemModifier(\''+uuid+'\',\''+item+'\')"></i></td>';
@@ -83,18 +79,18 @@ function moo_updateCart()
                     html +="<td>"+product.item.name+"</td>"; //The name of the item
                     html +="<td>$"+(product.item.price/100)+"</td>"; // The price
                     html +='<td>' + //The quantity and buttons of commands
-                    '<div class="row" style="width: 130px;">' +
-                    '<div class="col-md-4 col-xs-12 col-sm-4">' +
-                    '<div class="moo_btn_qte" onclick="moo_decQte('+product.item.price+',\''+item+'\')">-</div>' +
-                    '</div>' +
-                    '<div class="col-md-4 col-xs-12 col-sm-4">' +
-                    '<div id="moo_itemqte_'+item+'" class="moo_qte" >'+product.quantity+'</div>' +
-                    '</div>' +
-                    '<div class="col-md-4 col-xs-12 col-sm-4">' +
-                    '<div class="moo_btn_qte" onclick="moo_incQte('+product.item.price+',\''+item+'\')">+</div>' +
-                    '</div>' +
-                    '</div>' +
-                    '</td>';
+                        '<div class="row" style="width: 130px;">' +
+                        '<div class="col-md-4 col-xs-12 col-sm-4">' +
+                        '<div class="moo_btn_qte" onclick="moo_decQte('+product.item.price+',\''+item+'\')">-</div>' +
+                        '</div>' +
+                        '<div class="col-md-4 col-xs-12 col-sm-4">' +
+                        '<div id="moo_itemqte_'+item+'" class="moo_qte" >'+product.quantity+'</div>' +
+                        '</div>' +
+                        '<div class="col-md-4 col-xs-12 col-sm-4">' +
+                        '<div class="moo_btn_qte" onclick="moo_incQte('+product.item.price+',\''+item+'\')">+</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</td>';
                     html +='<td id="moo_itemsubtotal_'+item+'">$'+total+'</td>'; //Sub total  ( price + taxes )
                     html +='<td><i class="fa fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item+'\')"></i></td>'; //Controlles Btn
                     html +="</tr>";
@@ -122,7 +118,7 @@ function moo_updateCartTotal()
     jQuery.post(moo_params.ajaxurl,{'action':'moo_cart_getTotal'}, function (data) {
         if(data.status=="success")
         {
-            if(data.total == 0 || Object.keys(MOO_CART).length == 0 ){
+            if(data.total == 0 ){
                 jQuery(".moo_cart_total").remove();
                 jQuery(".moo-cart-modal-lg .modal-body").html("Your cart is empty !");
                 return;
@@ -166,7 +162,6 @@ function moo_cart_DeleteItem(item)
 
     jQuery("#moo_cart_line_"+item).remove();
     jQuery(".MooLineModifier4_"+item).remove();
-    delete(MOO_CART[item]);
     moo_updateCartTotal();
 }
 function moo_cart_DeleteItemModifier(uuid,item)
@@ -322,7 +317,8 @@ function moo_addModifiers()
         jQuery.post(moo_params.ajaxurl,{'action':'moo_modifier_add',"modifiers":Modifiers}, function (data) {
             if(data.status == 'success' )
             {
-                window.history.back();
+                toastr.success("Item added to your cart ");
+                setTimeout(function(){window.history.back();},2000)
             }
         })
 

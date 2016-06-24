@@ -107,15 +107,25 @@ class Moo_OnlineOrders_Public {
 
         wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/moo-OnlineOrders-public.css', array(), $this->version, 'all' );
 
+        wp_register_style( 'custom-style-cart3', plugins_url( '/css/custom_style_cart3.css', __FILE__ ),'bootstrap-min' );
+
+
         if($this->style == "style1"){
             wp_register_style( 'custom-style-accordion', plugins_url( '/css/custom_style_accordion.css', __FILE__ ),'bootstrap-min' );
             wp_register_style( 'simple-modal', plugins_url( '/css/simplemodal.css', __FILE__ ),'bootstrap-min' );
             wp_register_style( 'magnific-popup', plugins_url( '/css/magnific-popup.css', __FILE__ ));
         }
         else
-        {
-            wp_register_style( 'custom-style-items', plugins_url( '/css/items.css', __FILE__ ),'bootstrap-min' );
-        }
+            if($this->style == "style2")
+            {
+                wp_register_style( 'custom-style-items', plugins_url( '/css/items.css', __FILE__ ),'bootstrap-min' );
+            }
+            else
+            {
+                wp_register_style( 'custom-style-accordion', plugins_url( '/css/custom_style_accordion.css', __FILE__ ),'bootstrap-min' );
+                wp_register_style( 'custom-style-items', plugins_url( '/css/items-style3.css', __FILE__ ),'bootstrap-min' );
+                wp_register_style( 'magnific-popup', plugins_url( '/css/magnific-popup.css', __FILE__ ));
+            }
 
 
 
@@ -154,6 +164,9 @@ class Moo_OnlineOrders_Public {
             wp_register_script('moo_public_js',  plugins_url( 'js/moo-OnlineOrders-public.js', __FILE__ ));
 		    wp_enqueue_script('moo_public_js', array( 'jquery' ));
 
+            wp_register_script('script-cart-v3', plugins_url( '/js/cart_v3.js', __FILE__ ));
+            wp_enqueue_script('script-cart-v3', array( 'jquery' ));
+
             if($this->style == "style1"){
                 wp_register_script('custom-script-accordion', plugins_url( '/js/custom_script_store_accordion.js', __FILE__ ));
                 wp_register_script('simple-modal', plugins_url( '/js/simple-modal.js', __FILE__ ));
@@ -164,13 +177,19 @@ class Moo_OnlineOrders_Public {
                 wp_enqueue_script('script-cart-v2', array( 'jquery' ));
             }
             else
-            {
-                wp_register_script('custom-script-items', plugins_url( '/js/items.js', __FILE__ ));
-
-                wp_register_script('script-cart-v1', plugins_url( '/js/cart_v1.js', __FILE__ ));
-                wp_enqueue_script('script-cart-v1', array( 'jquery' ));
-
-            }
+                if($this->style == "style2")
+                {
+                    wp_register_script('custom-script-items', plugins_url( '/js/items.js', __FILE__ ));
+                    wp_register_script('script-cart-v1', plugins_url( '/js/cart_v1.js', __FILE__ ));
+                    wp_enqueue_script('script-cart-v1', array( 'jquery' ));
+                }
+                else
+                {
+                    wp_register_script('custom-script-accordion', plugins_url( '/js/custom_script_store_accordion.js', __FILE__ ));
+                    wp_register_script('jquery-accordion', plugins_url( '/js/jquery.accordion.js', __FILE__ ));
+                    wp_register_script('magnific-modal', plugins_url( '/js/magnific.min.js', __FILE__ ));
+                    wp_register_script('custom-script-items', plugins_url( '/js/custom-script-style3.js', __FILE__ ));
+                }
 
             wp_register_script('moo_validate_forms',  plugins_url( 'js/jquery.validate.min.js', __FILE__ ));
 		    wp_enqueue_script('moo_validate_forms', array( 'jquery' ));
@@ -195,7 +214,6 @@ class Moo_OnlineOrders_Public {
                 'comment_status' => 'closed',
                 'ping_status' =>  'closed' ,
                 'post_author' => 1,
-                'post_date' => date('Y-m-d H:i:s'),
                 'post_name' => 'Checkout',
                 'post_status' => 'publish' ,
                 'post_title' => 'Checkout',
@@ -236,6 +254,20 @@ class Moo_OnlineOrders_Public {
         </div>
         <?php
 	}
+        else
+            if($this->style == "style3")
+            {
+                ?>
+                <div id="moo_cart">
+                    <a href="<?php echo get_page_link(get_option('moo_cart_page'));
+                    ?>">
+                        <div id="moo_cart_icon">
+                            <span>VIEW SHOPPING CART</span>
+                        </div>
+                    </a>
+                </div>
+<?php
+            }
   }
 
 // AJAX Responses
@@ -256,7 +288,6 @@ class Moo_OnlineOrders_Public {
 
         $item = $this->model->getItem($item_uuid);
         if($item){
-
             if(isset($_POST['item']) & !empty($_POST['item']) )
                 if(isset($_SESSION['items']) && array_key_exists($item_uuid,$_SESSION['items']) ){
                     if($_SESSION['items'][$item_uuid]['quantity']<10) $_SESSION['items'][$item_uuid]['quantity']++;
@@ -334,6 +365,7 @@ class Moo_OnlineOrders_Public {
 
         $item_uuid = sanitize_text_field($_POST['item']);
         $item_qte= absint($_POST['qte']);
+
         if(isset($_SESSION['items'][$item_uuid]) && !empty($_SESSION['items'][$item_uuid]) && $item_qte>0){
             $_SESSION['items'][$item_uuid]['quantity'] = $item_qte ;
             if( $_SESSION['items'][$item_uuid]['quantity']>10)  $_SESSION['items'][$item_uuid]['quantity'] = 10;
@@ -923,9 +955,9 @@ class Moo_OnlineOrders_Public {
     }
     private function moo_PayOrder($cardEncrypted,$card_number,$cvv,$expMonth,$expYear,$orderId,$amount,$taxAmount,$zip)
     {
-       // var_dump($cardEncrypted);
-        $card_number = str_replace(' ','',trim($card_number));
 
+
+        $card_number = str_replace(' ','',trim($card_number));
         $cvv       = intval($cvv);
         $expMonth  = intval($expMonth);
         $expYear   = intval($expYear);
@@ -1204,7 +1236,7 @@ public function moo_AddOrderType()
     function moo_ChangeCategoryName()
     {
         $cat_uuid  = sanitize_text_field($_POST['cat_uuid']);
-        $name     = sanitize_text_field($_POST['cat_name']);
+        $name      = sanitize_text_field($_POST['cat_name']);
         $res = $this->model->ChangeCategoryName($cat_uuid,$name);
 
         $response = array(
@@ -1214,15 +1246,56 @@ public function moo_AddOrderType()
         wp_send_json($response);
 
     }
-    function moo_UpdateCategoryStatus()
+    /*
+     * Function to manage item's images
+     * since v1.1.3
+     */
+    function moo_getItemWithImages()
     {
-        $cat_uuid  = sanitize_text_field($_POST['cat_uuid']);
-        $status   = sanitize_text_field($_POST['cat_status']);
-        $res = $this->model->UpdateCategoryStatus($cat_uuid,$status);
+        $item_uuid = sanitize_text_field($_POST['item_uuid']);
+        $res = $this->model->getItemWithImage($item_uuid);
         $response = array(
             'status'	 => 'Success',
             'data'=>$res
         );
+        wp_send_json($response);
+    }
+    function moo_saveItemWithImages()
+    {
+        $item_uuid = sanitize_text_field($_POST['item_uuid']);
+        $description = sanitize_text_field($_POST['description']);
+        $images = $_POST['images'];
+
+        $res = $this->model->saveItemWithImage($item_uuid,$description,$images);
+        $response = array(
+            'status'	 => 'Success',
+            'data'=>$res
+        );
+        wp_send_json($response);
+    }
+
+    function moo_UpdateCategoryStatus()
+    {
+        $cat_uuid  = sanitize_text_field($_POST['cat_uuid']);
+        $status   = sanitize_text_field($_POST['cat_status']);
+        if($cat_uuid == 'NoCategory')
+        {
+            if($status == "true") update_option('moo-show-allItems','true');
+            else update_option('moo-show-allItems','false');
+            $response = array(
+                'status'	 => 'Success',
+                'data'=>'OK'
+            );
+        }
+        else
+        {
+            $res = $this->model->UpdateCategoryStatus($cat_uuid,$status);
+            $response = array(
+                'status'	 => 'Success',
+                'data'=>$res
+            );
+        }
+
         wp_send_json($response);
     }
     function moo_StoreIsOpen()

@@ -16,7 +16,7 @@
  * Plugin Name:       Merchantech Online Orders for Clover
  * Plugin URI:        http://www.merchantech.us
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.1.2
+ * Version:           1.1.3
  * Author:            Merchantech
  * Author URI:        http://www.merchantech.us
  * License:           Clover app
@@ -65,16 +65,29 @@ function moo_OnlineOrders_shortcodes_buybutton($atts, $content) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
     return Moo_OnlineOrders_Shortcodes::moo_BuyButton($atts, $content);
 }
+function moo_OnlineOrders_shortcodes_thecart($atts, $content) {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
+    return Moo_OnlineOrders_Shortcodes::theCart($atts, $content);
+}
 add_shortcode('moo_all_items', 'moo_OnlineOrders_shortcodes_allitems');
 add_shortcode('moo_checkout', 'moo_OnlineOrders_shortcodes_checkoutPage');
 add_shortcode('moo_buy_button', 'moo_OnlineOrders_shortcodes_buybutton');
+add_shortcode('moo_cart', 'moo_OnlineOrders_shortcodes_thecart');
 
 add_filter( 'wp_mail_content_type', function( $content_type ) {
     return 'text/html';
 });
 add_action('plugins_loaded', 'moo_onlineOrders_check_version');
 
-
+/*
+ * This function for updating the database structure when cersion is changed and updated automatically
+ * First of all we save the current version like an option
+ * then we compare the current version with the version saved in database
+ * for example in the version  1.1.3
+ * we added the support of product's image so if the current version is 1.1.2 or previous version we will create the table images.
+ *
+ * @since v 1.1.2
+ */
 function moo_onlineOrders_check_version()
 {
     global $wpdb;
@@ -82,9 +95,27 @@ function moo_onlineOrders_check_version()
     switch ($version)
     {
         case false :
+            //Adding show/hide a category
             $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `show_by_default` INT(1) NOT NULL DEFAULT '1' AFTER `sort_order`;");
-            update_option('moo_onlineOrders_version','112');
         case '112':
+            //Adding description field
+            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_item` ADD `description` VARCHAR(255) NULL  AFTER `alternate_name`;");
+            //Adding images table
+            $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_images` (
+                          `_id` INT NOT NULL AUTO_INCREMENT,
+                          `url` VARCHAR(255) NOT NULL,
+                          `is_enabled` INT NOT NULL,
+                          `is_default` INT NOT NULL,
+                          `item_uuid` VARCHAR(100) NOT NULL,
+                          PRIMARY KEY (`_id`),
+                          CONSTRAINT `fk_item_has_images`
+                                FOREIGN KEY (`item_uuid`)
+                                REFERENCES `{$wpdb->prefix}moo_item` (`uuid`)
+                                ON DELETE NO ACTION
+                                ON UPDATE NO ACTION)
+                        ENGINE = InnoDB;");
+            update_option('moo_onlineOrders_version','113');
+        case '113':
             break;
     }
 }

@@ -31,6 +31,7 @@ class Moo_OnlineOrders_Activator {
         update_option("moo_first_use", "true");
         // Install DB
         global $wpdb;
+            $wpdb->show_errors();
 
 /*      -- -----------------------------------------------------
         -- Table `item_group`
@@ -56,6 +57,7 @@ class Moo_OnlineOrders_Activator {
                       `uuid` VARCHAR(45) NOT NULL ,
                       `name` VARCHAR(100) NULL ,
                       `alternate_name` VARCHAR(100) NULL ,
+                      `description` VARCHAR(255) NULL ,
                       `price` MEDIUMTEXT NULL ,
                       `code` VARCHAR(100) NULL ,
                       `price_type` VARCHAR(10) NULL ,
@@ -387,6 +389,25 @@ class Moo_OnlineOrders_Activator {
                           PRIMARY KEY (`ot_uuid`))
                         ENGINE = InnoDB;");
 
+         /*
+        -- -----------------------------------------------------
+        -- Table `Images`
+        -- -----------------------------------------------------
+        */
+        $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_images` (
+                          `_id` INT NOT NULL AUTO_INCREMENT,
+                          `url` VARCHAR(255) NOT NULL,
+                          `is_enabled` INT NOT NULL,
+                          `is_default` INT NOT NULL,
+                          `item_uuid` VARCHAR(100) NOT NULL,
+                          PRIMARY KEY (`_id`),
+                          CONSTRAINT `fk_item_has_images`
+                                FOREIGN KEY (`item_uuid`)
+                                REFERENCES `{$wpdb->prefix}moo_item` (`uuid`)
+                                ON DELETE NO ACTION
+                                ON UPDATE NO ACTION)
+                        ENGINE = InnoDB;");
+
 // Add the page :
 
         //post status and options
@@ -394,7 +415,6 @@ class Moo_OnlineOrders_Activator {
             'comment_status' => 'closed',
             'ping_status' =>  'closed' ,
             'post_author' => 1,
-            'post_date' => date('Y-m-d H:i:s'),
             'post_name' => 'Store',
             'post_status' => 'publish' ,
             'post_title' => 'Order Online',
@@ -405,22 +425,33 @@ class Moo_OnlineOrders_Activator {
             'comment_status' => 'closed',
             'ping_status' =>  'closed' ,
             'post_author' => 1,
-            'post_date' => date('Y-m-d H:i:s'),
             'post_name' => 'Checkout',
             'post_status' => 'publish' ,
             'post_title' => 'Checkout',
             'post_type' => 'page',
             'post_content' => '[moo_checkout]'
         );
+         $post_cart = array(
+            'comment_status' => 'closed',
+            'ping_status' =>  'closed' ,
+            'post_author' => 1,
+            'post_name' => 'Cart',
+            'post_status' => 'publish' ,
+            'post_title' => 'Cart',
+            'post_type' => 'page',
+            'post_content' => '[moo_cart]'
+        );
         // Save the version of the plugin in the Database
-         update_option('moo_onlineOrders_version', '112');
+         update_option('moo_onlineOrders_version', '113');
         //insert page and save the id
         $store_page_id    =  wp_insert_post( $post_store, false );
         $checkout_page_id =  wp_insert_post( $post_checkout, false );
+        $cart_page_id     =  wp_insert_post( $post_cart, false );
 
         //save the id in the database
         update_option( 'moo_store_page', $store_page_id );
         update_option( 'moo_checkout_page', $checkout_page_id );
+        update_option( 'moo_cart_page', $cart_page_id );
 
         $defaultOptions = array (
                   'api_key' => '',

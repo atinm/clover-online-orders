@@ -125,11 +125,17 @@ class Products_List_Moo extends WP_List_Table_MOO {
 
         if($item['visible'])
             $actions = array(
-                'hide' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Hide from the Website</a>', esc_attr( $_REQUEST['page'] ), 'hide',esc_attr($item['uuid']), $hide_nonce,$this->get_pagenum() ),
+                'hide' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Hide from the Website</a> 
+                                   |<a href="?page=%s&action=%s&item_uuid=%s">Edit Item</a> ',
+                                    'moo_items', 'hide',esc_attr($item['uuid']), $hide_nonce,$this->get_pagenum(),
+                                    'moo_items', 'update_item',esc_attr($item['uuid'])  ),
             );
         else
             $actions = array(
-                'show' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Show in the Website</a>', esc_attr( $_REQUEST['page'] ), 'show',esc_attr($item['uuid']), $show_nonce,$this->get_pagenum() )
+                'show' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Show in the Website</a>
+                                   |<a href="?page=%s&action=%s&item_uuid=%s">Edit Item</a>',
+                                    esc_attr( $_REQUEST['page'] ), 'show',esc_attr($item['uuid']), $show_nonce,$this->get_pagenum(),
+                                    esc_attr( $_REQUEST['page'] ), 'update_item',esc_attr($item['uuid']))
             );
 
         return $title . $this->row_actions( $actions );

@@ -28,10 +28,12 @@ class Moo_OnlineOrders_Deactivator {
 	public static function deactivate() {
         global $wpdb;
         $store_page_id = get_option('moo_store_page');
+        $cart_page_id = get_option('moo_cart_page');
         $checkout_page_id = get_option('moo_checkout_page');
 
         if($store_page_id) wp_delete_post($store_page_id,true);
         if($checkout_page_id) wp_delete_post($checkout_page_id,true);
+        if($cart_page_id) wp_delete_post($cart_page_id,true);
 
         /*-- Table `item_option`--*/
         $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_option` ;");
@@ -47,6 +49,9 @@ class Moo_OnlineOrders_Deactivator {
 
         /*-- Table `item_modifier_group` --*/
         $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_modifier_group` ;");
+
+        /* -- Table `order_types -- */
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_images` ;");
 
         /* -- Table `item` -- */
         $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item` ;");
@@ -80,6 +85,7 @@ class Moo_OnlineOrders_Deactivator {
             
         /* -- Table `order_types -- */
         $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_order_types` ;");
+
 
     }
 

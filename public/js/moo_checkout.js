@@ -122,7 +122,19 @@ function moo_OrderTypeChanged(obj)
                document.getElementById('moo_Total_inCheckout').innerText = '$'+(moo_Total.total);
            }
             else
-               document.getElementById('moo_Total_inCheckout').innerText = '$'+(moo_Total.sub_total);
+           {
+               jQuery('.moo-totals-value').fadeOut(300, function() {
+                   jQuery('#moo-cart-subtotal').html(moo_Total.sub_total);
+                   jQuery('#moo-cart-tax').html('0.00');
+                   jQuery('#moo-cart-total').html(moo_Total.sub_total);
+                   if(moo_Total.total == 0){
+                       jQuery('.moo-checkout').fadeOut(300);
+                   }else{
+                       jQuery('.moo-checkout').fadeIn(300);
+                   }
+                   jQuery('.moo-totals-value').fadeIn(300);
+               });
+           }
             if( moo_OrderTypes[i].show_sa == "0"){
                 jQuery('#city').parent().hide();
                 jQuery('#address').parent().hide();

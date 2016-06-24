@@ -69,7 +69,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.1.2';
+		$this->version = '1.1.3';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -247,6 +247,7 @@ class moo_OnlineOrders {
 
         //Get Statistics
         $this->loader->add_action( 'wp_ajax_moo_get_stats', $plugin_public, 'moo_GetStats');
+
         //Change the status and show/hide shipping address of an OrderType
         $this->loader->add_action( 'wp_ajax_moo_update_ot_status', $plugin_public, 'moo_UpdateOrdertypesStatus');
         $this->loader->add_action( 'wp_ajax_moo_update_ot_showSa', $plugin_public, 'moo_UpdateOrdertypesShowSa');
@@ -297,11 +298,20 @@ class moo_OnlineOrders {
 		$this->loader->add_action( 'wp_ajax_moo_store_isopen', $plugin_public, 'moo_StoreIsOpen');
 		$this->loader->add_action( 'wp_ajax_nopriv_moo_store_isopen', $plugin_public, 'moo_StoreIsOpen');
 
+
+		/*
+		 * Item's images
+		 */
+
+		$this->loader->add_action( 'wp_ajax_moo_get_items_with_images', $plugin_public, 'moo_getItemWithImages');
+		$this->loader->add_action( 'wp_ajax_moo_save_items_with_images', $plugin_public, 'moo_saveItemWithImages');
+
 		/*
 		 * Suncy handle
 		 */
 		$this->loader->add_action( 'admin_post_moo_sync', $plugin_public, 'moo_SyncHandle');
 		$this->loader->add_action( 'admin_post_nopriv_moo_sync', $plugin_public, 'moo_SyncHandle');
+
 	}
 
 	/**
