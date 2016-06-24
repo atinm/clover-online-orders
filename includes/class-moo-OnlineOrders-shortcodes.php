@@ -589,6 +589,21 @@ class Moo_OnlineOrders_Shortcodes {
         $firstTotal = $total['total'];
 
         $cart_page_id    = get_option('moo_cart_page');
+        if($cart_page_id === false)
+        {
+            $post_cart = array(
+                'comment_status' => 'closed',
+                'ping_status' =>  'publish' ,
+                'post_name' => 'Cart',
+                'post_status' => 'publish' ,
+                'post_title' => 'Cart',
+                'post_type' => 'page',
+                'post_content' => '[moo_cart]'
+            );
+
+            $cart_page_id =  wp_insert_post( $post_cart );
+            update_option( 'moo_cart_page', $cart_page_id );
+        }
         $cart_page_url    =  get_page_link($cart_page_id);
 
         if($total === false){
@@ -668,7 +683,7 @@ class Moo_OnlineOrders_Shortcodes {
                                  <div class="input-group">
                                     <input class="form-control" name="cardNumber" id="Moo_cardNumber">
                                     <div class="input-group-addon">
-                                        <img style="min-width:116px;height: 20px;" class="moo_credit_cards hidden-xs">
+                                        <img style="min-width:116px;height: 20px;border: 0px;margin: 0;" class="moo_credit_cards hidden-xs">
                                     </div>
                                  </div>
 
@@ -768,7 +783,7 @@ class Moo_OnlineOrders_Shortcodes {
                                         <div class="moo-totals-value" id="moo-cart-total"><?php echo $total['total']?></div>
                                     </div>
                                 </div>
-                                <a href="<?php echo $cart_page_url?>" style="margin-bottom: 20px">
+                                <a href="<?php echo $cart_page_url?>" style="margin-bottom: 20px;color:blue">
                                     Shopping Cart
                                  </a>
                             </div>
