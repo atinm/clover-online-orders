@@ -372,7 +372,7 @@ function moo_recalculateCart()
         }
         else
         {
-            var html = '<div class="moo_emptycart"><p>Your cart is empty</p><span><a href="http://localhost/wp/store/">Browse the store</a></span></div>';
+            var html = '<div class="moo_emptycart"><p>Your cart is empty</p></div>';
             jQuery('.moo-shopping-cart').html(html);
         }
     });
