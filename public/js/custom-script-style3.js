@@ -1,74 +1,28 @@
-var MOO_CART = [];
 (function( $ ) {
     'use strict';
-
-    /*
-    $('.moo_item_flip').on("mouseenter",function (e) {
-       // $(".moo_item_flip_modifiers",e.currentTarget).slideDown();
-        console.log(e.currentTarget);
-    })
-    $('.moo_item_flip').on("mouseleave",function (e) {
-       // $(".moo_item_flip_modifiers",e.currentTarget).slideUp();
-        console.log(e.currentTarget);
-    })
-
-    $('.moo_item_flip').on("click",function (e) {
-        console.log(e);
-        $.post(moo_params.ajaxurl,{'action':'moo_add_to_cart'}, function (data) {
-            console.log(data);
-        })
-    })
-    */
-    //moo_item_flip
-    var DivFiltere_offset = jQuery('#Moo_FileterContainer').offset();
-
-    if(! (typeof DivFiltere_offset === 'undefined')){
-        var scrollIntervalID = setInterval(stickIt, 10);
-
-    }
-    function stickIt(){
-        if (jQuery(window).scrollTop() >= (DivFiltere_offset.top)) {
-            jQuery('#Moo_FileterContainer').addClass('FixedOnTop');
-            jQuery('#Moo_FileterContainer').removeClass('moo_items');
-
-            jQuery('#Moo_FileterContainer').width(jQuery('#Moo_ItemContainer').outerWidth());
-        } else {
-            jQuery('#Moo_FileterContainer').removeClass('FixedOnTop');
-            jQuery('#Moo_FileterContainer').addClass('moo_items');
-
-        }
-       // console.log("Div 0 "+jQuery('#Moo_ItemContainer').width());
-        //console.log("Div 1 "+jQuery('#Moo_FileterContainer').width());
-    }
-
-
-
-
 })( jQuery );
 
-jQuery('button').magnificPopup({
-    items: {
-        src: '<div class="white-popup">Dynamically created popup</div>',
-        type: 'inline'
-    },
-    closeBtnInside: true
-});
 jQuery('.open-popup-link').magnificPopup({
     type:'inline',
+    overflowY:'scroll',
     midClick: true, // Allow opening popup on middle mouse click. Always set it to true if you don't provide alternative source in href.
     closeBtnInside: true
 });
+function moo_openFirstModifierG(id)
+{
+    jQuery('#'+id).removeClass('accordion-close');
+    jQuery('#'+id).addClass('accordion-open');
+    jQuery('#'+id).next().show();
+};
 
 function moo_addToCart(event,item,name)
 {
     toastr.success(name+ ' added to cart');
-    MOO_CART[item] = {uuid:item,name:name};
     jQuery.post(moo_params.ajaxurl,{'action':'moo_add_to_cart',"item":item}, function (data) {
         if(data.status != 'success')
         {
             toastr.error('Error, please try again');
         }
-       // console.log(data);
     })
 
 }

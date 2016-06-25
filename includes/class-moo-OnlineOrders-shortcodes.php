@@ -1034,7 +1034,7 @@ class Moo_OnlineOrders_Shortcodes {
 
                     $item_name = ucfirst(strtolower($item_name));
                     echo '<div class="col-md-4 col-sm-6 col-xs-12 moo_item_flip">';
-                    echo '<a class="open-popup-link" href="#moo_popup_item_'.$item->uuid.'">';
+                    echo '<a class="open-popup-link" href="#moo_popup_item_'.$item->uuid.'" onclick="moo_openFirstModifierG(\'MooModifierGroup_default_'.$item->uuid.'\')">';
                     echo "<div class='moo_item_flip_container'>";
                     echo "<div class='moo_item_flip_image'>";
                     echo "<img src='".$default_image."' style='height: 242px;'>";
@@ -1092,9 +1092,15 @@ class Moo_OnlineOrders_Shortcodes {
                                                     }
                                                     if($mg->min_required != null || $mg->max_allowd != null ){
                                                         echo '<li class="Moo_modifiergroupMessage">';
+                                                        if($mg->min_required==1 && $mg->max_allowd==1)
+                                                            echo' Must choose 1 ';
+                                                        else
+                                                        {
+                                                            if($mg->min_required != null ) echo 'Must choose at least '.$mg->min_required;
+                                                            if($mg->max_allowd != null ) echo "<br/> Must choose  at max ".$mg->max_allowd;
+                                                        }
 
-                                                        if($mg->min_required != null ) echo 'You must choice at least '.$mg->min_required. ' Modifiers';
-                                                        if($mg->max_allowd != null ) echo "<br/> You must choice at max ".$mg->max_allowd.' Modifiers';
+
 
                                                         echo '</li>';
                                                     }
@@ -1156,7 +1162,9 @@ class Moo_OnlineOrders_Shortcodes {
                             </div>
                             <div class="moo_popup_special_instruction">
                                 Special Instructions :
-                                <textarea  class="form-control" name="" id="moo_popup_si" cols="30" rows="2"></textarea>
+                                <textarea  class="form-control" name="" id="moo_popup_si" cols="30" rows="2">
+
+                                </textarea>
                             </div>
                             <div class="moo_popup_btns_action">
                                 <a href="#" class="btn btn-primary" onclick="moo_cartv3_addtocart('<?php echo trim($item->uuid) ?>','<?php echo str_replace("'",'',$item->name) ?>')">ADD TO CART</a>

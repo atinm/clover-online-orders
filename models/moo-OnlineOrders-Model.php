@@ -112,7 +112,7 @@ class moo_OnlineOrders_Model {
     }
     function getModifiersGroupLimits($uuid)
     {
-        return $this->db->get_row("SELECT min_required, max_allowd
+        return $this->db->get_row("SELECT min_required, max_allowd, name
                                     FROM `{$this->db->prefix}moo_modifier_group` mg
                                     WHERE mg.uuid = '{$uuid}'
                                     ");

@@ -769,7 +769,8 @@ class Moo_OnlineOrders_Public {
                 'status'	=> 'success',
                 'uuid'	=> $mg_uuid,
                 'max'	=> $res->max_allowd,
-                'min'	=> $res->min_required
+                'min'	=> $res->min_required,
+                'name'	=> $res->name
             );
             wp_send_json($response);
         }

@@ -66,7 +66,7 @@ class moo_OnlineOrders_Admin {
 
   public function page_products()
     {
-        require_once "includes/class-moo-products-list.php";
+        require_once plugin_dir_path( dirname(__FILE__))."admin/includes/class-moo-products-list.php";
         $products = new Products_List_Moo();
         $products->prepare_items();
         if(isset($_GET['action']) && $_GET['action'] == 'update_item')
@@ -137,7 +137,7 @@ class moo_OnlineOrders_Admin {
 
     public function page_orders()
     {
-        require_once "includes/class-moo-orders-list.php";
+        require_once plugin_dir_path( dirname(__FILE__))."admin/includes/class-moo-orders-list.php";
         $orders = new Orders_List_Moo();
         $orders->prepare_items();
 
@@ -387,7 +387,6 @@ class moo_OnlineOrders_Admin {
                                 <label style="display:block; margin-bottom:8px;">
                                     <input name="moo_settings[default_style]" id="MooDefaultStyle" type="radio" value="style3" <?php echo ($MooOptions["default_style"]=="style3")?"checked":""; ?> >
                                     <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/style3.jpg" ?>" align="middle" />
-                                   ( Support of images )
                                 </label>
                             </div>
 
@@ -406,6 +405,11 @@ class moo_OnlineOrders_Admin {
                         <?php
                         $show_all_items = get_option("moo-show-allItems");
                         $nb_items = $model->NbProducts();
+                        if($nb_items == 0){
+                            echo '<h2>You don\'t have any catgory or you\'re just imported your inventory. <br/> Please refresh the page </h2>';
+                        }
+                        else
+                        {
                         ?>
                         <div class="Moo_option-item">
                             <div class="label">All Items (<?php echo $nb_items[0]->nb.' items)'?></div>
@@ -433,7 +437,7 @@ class moo_OnlineOrders_Admin {
                                     <div id="Moo_CategorySaveName_<?php echo $category->uuid?>" style="color: #008000;display: none">Saved</div>
                                 </div>
                             </div>
-                        <?php }?>
+                        <?php }  }?>
 
                     </div>
                 </div>
