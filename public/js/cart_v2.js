@@ -263,6 +263,7 @@ function moo_addModifiers(item_name)
                         if(data.status == 'success' )
                         {
                             toastr.success(item_name+' added to cart');
+                            moo_updateCart();
                             return true;
                         }
                     })

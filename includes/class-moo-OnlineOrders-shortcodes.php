@@ -389,14 +389,18 @@ class Moo_OnlineOrders_Shortcodes {
                                                                             </li>
                                                                         <?php
                                                                         }
-                                                                            if($mg->min_required != null || $mg->max_allowd != null ){
-                                                                                echo '<li class="Moo_modifiergroupMessage">';
-
-                                                                                if($mg->min_required != null ) echo 'You must choice at least '.$mg->min_required. ' Modifiers';
-                                                                                if($mg->max_allowd != null ) echo "<br/> You must choice at max ".$mg->max_allowd.' Modifiers';
-
-                                                                                echo '</li>';
+                                                                        if($mg->min_required != null || $mg->max_allowd != null ){
+                                                                            echo '<li class="Moo_modifiergroupMessage">';
+                                                                            if($mg->min_required==1 && $mg->max_allowd==1)
+                                                                                echo' Must choose 1 ';
+                                                                            else
+                                                                            {
+                                                                                if($mg->min_required != null ) echo 'Must choose at least '.$mg->min_required;
+                                                                                if($mg->max_allowd != null ) echo "<br/> Must choose  at max ".$mg->max_allowd;
                                                                             }
+
+                                                                            echo '</li>';
+                                                                        }
                                                                         ?>
 
                                                                     </ul>
@@ -1099,8 +1103,6 @@ class Moo_OnlineOrders_Shortcodes {
                                                             if($mg->min_required != null ) echo 'Must choose at least '.$mg->min_required;
                                                             if($mg->max_allowd != null ) echo "<br/> Must choose  at max ".$mg->max_allowd;
                                                         }
-
-
 
                                                         echo '</li>';
                                                     }
