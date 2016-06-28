@@ -5,12 +5,12 @@ class Orders_List_Moo extends WP_List_Table_MOO {
     /** Class constructor */
     public function __construct() {
 
-        parent::__construct( [
+        parent::__construct( array(
             'singular' => __( 'Order'), //singular name of the listed records
             'plural'   => __( 'Orders'), //plural name of the listed records
             'ajax'     => false //should this table support ajax?
 
-        ] );
+        ) );
         //var_dump('creating an Object');
         /** Process bulk action */
         $this->process_bulk_action();
@@ -206,10 +206,10 @@ class Orders_List_Moo extends WP_List_Table_MOO {
         $current_page = $this->get_pagenum();
         $total_items  = self::record_count();
 
-        $this->set_pagination_args( [
+        $this->set_pagination_args( array(
             'total_items' => $total_items, //WE have to calculate the total number of items
             'per_page'    => $per_page //WE have to determine how many items to show on a page
-        ] );
+        ) );
 
 
         $this->items = self::get_items( $per_page, $current_page );

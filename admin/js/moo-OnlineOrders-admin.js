@@ -385,7 +385,7 @@ function moo_get_item_with_images(uuid)
         moo_display_item_images();
         jQuery('#moo_item_description').val(items[0].description);
         jQuery('#moo_item_name').text(items[0].name);
-        jQuery('#moo_item_price').text(items[0].price);
+        jQuery('#moo_item_price').text("$"+items[0].price/100);
     }
     );
 }
