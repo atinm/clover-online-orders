@@ -64,9 +64,10 @@
 
 .moo_credit_cards
 {
-    background-image: url("../img/credit.png");
+    background-image: url("../img/credit.png") !important;
     margin: 0;
     border: 0;
+    padding: 0 !important;
 }
 
 .moo_btn_qte{

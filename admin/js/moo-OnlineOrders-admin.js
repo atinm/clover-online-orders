@@ -93,7 +93,7 @@ function Moo_GetOrderTypes()
                 html +='<div class="Moo_option-title">';
 
                 if(orderTypes.length>0){
-                    html += '<div class="label"><strong>Name</strong></div><div class="onoffswitch"><strong>Enable/Disable</strong></div>';
+                    html += '<div class="label"><strong>Name</strong></div><div class="onoffswitch"><strong>Disable/Enable</strong></div>';
                     html += '<div class="onoffswitch" style="margin-left: 60px;width: 150px;">';
                     html += '<strong>Show customer address</strong></div><div style="float: right"><strong>DELETE</strong></div></div>';
 
@@ -103,12 +103,12 @@ function Moo_GetOrderTypes()
                         html +='<div class="Moo_option-item">';
                         html +="<div class='label'>"+($ot.label)+"</div>";
                         //enable/disable
-                        html +='<div class="onoffswitch" onchange="MooChangeOT_Status(\''+$ot.ot_uuid +'\')" title="Enable/Disable this order types">';
+                        html +='<div class="onoffswitch" onchange="MooChangeOT_Status(\''+$ot.ot_uuid +'\')" title="'+(($ot.status==1)?"Disable":"Enable")+' this order types">';
                         html +='<input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_'+$ot.ot_uuid+'"'+(($ot.status==1)?"checked":"")+'>';
                         html +='<label class="onoffswitch-label" for="myonoffswitch_'+$ot.ot_uuid +'">';
                         html +='<span class="onoffswitch-inner"></span> <span class="onoffswitch-switch"></span></label></div>';
                         //show shipping adress
-                        html +='<div class="onoffswitch" onchange="MooChangeOT_showSa(\''+$ot.ot_uuid +'\')" style="margin-left: 100px" title="Show/Hide the shipping address for this order types">';
+                        html +='<div class="onoffswitch" onchange="MooChangeOT_showSa(\''+$ot.ot_uuid +'\')" style="margin-left: 100px" title="Hide/Show the shipping address for this order types">';
                         html +='<input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_sa_'+$ot.ot_uuid+'"'+(($ot.show_sa==1)?"checked":"")+'>';
                         html +='<label class="onoffswitch-label" for="myonoffswitch_sa_'+$ot.ot_uuid +'">';
                         html +='<span class="onoffswitch-inner"></span> <span class="onoffswitch-switch"></span></label></div>';
@@ -270,13 +270,14 @@ function MooChangeModifier_Status(uuid)
 function Moo_changeCategoryName(uuid)
 {
     var cat_name = jQuery('#Moo_categoryNewName_'+uuid).val();
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_change_category_name',"cat_uuid":uuid,"cat_name":cat_name}, function (data) {
-            jQuery('#Moo_CategorySaveName_'+uuid).show();
-        }
-    );
-    setTimeout(function () {
-        jQuery('#Moo_CategorySaveName_'+uuid).hide();
-    }, 5000);
+    if(cat_name != '')
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_change_category_name',"cat_uuid":uuid,"cat_name":cat_name}, function (data) {
+                jQuery('#Moo_CategorySaveName_'+uuid).show();
+            }
+        );
+        setTimeout(function () {
+            jQuery('#Moo_CategorySaveName_'+uuid).hide();
+        }, 5000);
 
 
 }
@@ -351,10 +352,9 @@ function moo_save_item_images(uuid)
                 {
                     if(data.data==true)
                     {
-                        alert("Your changes were saved")
+                        alert("Your changes were saved");
                         history.back();
                     }
-                    // echo succus message
 
                     else
                     // echo error message

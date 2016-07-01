@@ -128,6 +128,10 @@ class moo_OnlineOrders_Model {
 {
     return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_order_types");
 }
+    function getOrder($orderId)
+{
+    return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_order where uuid='".$orderId."'");
+}
     function getVisibleOrderTypes()
 {
     return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_order_types where status=1");

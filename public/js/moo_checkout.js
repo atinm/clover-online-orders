@@ -75,17 +75,25 @@ jQuery("#moo_form_address").validate({
 
         jQuery.post(moo_params.ajaxurl,{'action':'moo_checkout','form':DataObject}, function (data) {
             if(data.status == 'APPROVED'){
-                html = '<div align="center" class="alert alert-success" role="alert">Thank you for your order<br> You can see your receipt <a href="https://www.clover.com/r/'+data.order+'" target="_blank">here</a></a> </div>';
-               // console.log(html);
-                jQuery("#moo_form_address").html('');
-                jQuery("#moo_form_address").parent().prepend("<h1>Our Address : </h1>");
-                jQuery("#moo_form_address").parent().prepend(html);
+                if(moo_thanks_page != '' && moo_thanks_page != null )
+                {
+                   window.location.href = moo_thanks_page;
+                }
+                else
+                {
+                    html = '<div align="center" class="alert alert-success" role="alert">Thank you for your order<br> You can see your receipt <a href="https://www.clover.com/r/'+data.order+'" target="_blank">here</a></a> </div>';
+                    // console.log(html);
+                    jQuery("#moo_form_address").html('');
+                    jQuery("#moo_form_address").parent().prepend("<h1>Our Address : </h1>");
+                    jQuery("#moo_form_address").parent().prepend(html);
 
-                jQuery("#moo_merchantmap").show();
-                moo_getLatLong();
-                jQuery("html, body").animate({
-                    scrollTop: 0
-                }, 600);
+                    jQuery("#moo_merchantmap").show();
+                    moo_getLatLong();
+                    jQuery("html, body").animate({
+                        scrollTop: 0
+                    }, 600);
+                }
+
             }
             else
             {

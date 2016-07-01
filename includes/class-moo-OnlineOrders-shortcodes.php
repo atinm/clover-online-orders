@@ -395,8 +395,8 @@ class Moo_OnlineOrders_Shortcodes {
                                                                                 echo' Must choose 1 ';
                                                                             else
                                                                             {
-                                                                                if($mg->min_required != null ) echo 'Must choose at least '.$mg->min_required;
-                                                                                if($mg->max_allowd != null ) echo "<br/> Must choose  at max ".$mg->max_allowd;
+                                                                                if($mg->min_required != null && $mg->min_required != 0  ) echo 'Must choose at least '.$mg->min_required;
+                                                                                if($mg->max_allowd != null && $mg->max_allowd != 0 ) echo "<br/> Must choose  at max ".$mg->max_allowd;
                                                                             }
 
                                                                             echo '</li>';
@@ -587,10 +587,11 @@ class Moo_OnlineOrders_Shortcodes {
         $model = new moo_OnlineOrders_Model();
         $api   = new moo_OnlineOrders_CallAPI();
         $MooOptions = (array)get_option('moo_settings');
+        $custom_css = $MooOptions["custom_css"];
+        $custom_js  = $MooOptions["custom_js"];
 
         $orderTypes = $model->getVisibleOrderTypes();
         $total =   Moo_OnlineOrders_Public::moo_cart_getTotal(true);
-        $firstTotal = $total['total'];
 
         $cart_page_id    = get_option('moo_cart_page');
         if($cart_page_id === false)
@@ -610,6 +611,12 @@ class Moo_OnlineOrders_Shortcodes {
         }
         $cart_page_url    =  get_page_link($cart_page_id);
 
+
+
+        //Include custom css
+        if($custom_css != null)
+           echo '<style type="text/css">'.$custom_css.'</style>';
+
         if($total === false){
 
            echo '<div class="moo_emptycart"><p>Your cart is empty</p><span><a href="'.get_page_link(get_option('moo_store_page')).'">Browse the store</a></span></div>';
@@ -623,9 +630,11 @@ class Moo_OnlineOrders_Shortcodes {
         $key = json_decode($key);
         if($key==NULL)
             echo '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>This store cannot accept orders, if you are the owner please verify your API Key</div>';
+
         wp_localize_script("custom-script-checkout", "moo_OrderTypes",$orderTypes);
         wp_localize_script("custom-script-checkout", "moo_Total",$total);
         wp_localize_script("custom-script-checkout", "moo_Key",(array)$key);
+        wp_localize_script("custom-script-checkout", "moo_thanks_page",$MooOptions['thanks_page']);
 
         wp_localize_script("display-merchant-map", "moo_merchantLat",$MooOptions['lat']);
         wp_localize_script("display-merchant-map", "moo_merchantLng",$MooOptions['lng']);
@@ -642,7 +651,9 @@ class Moo_OnlineOrders_Shortcodes {
                             <p style="font-size: 16px !important; margin:0;">Customer Information</p>
                         </div>
                         <div class="panel-body">
+
                             <div class="col-md-6">
+                                <?php if(count($orderTypes)>0) {?>
                                 <div class="form-group">
                                     <label for="OrderType">Order Type:</label>
                                     <select class="form-control" name="OrderType" id="OrderType"
@@ -654,6 +665,7 @@ class Moo_OnlineOrders_Shortcodes {
                                         ?>
                                     </select>
                                 </div>
+                                <?php }?>
                                 <div class="form-group">
                                     <label for="name">Name:</label><input class="form-control" name="name" id="name"></div>
                                 <div class="form-group"><label for="phone">Phone number:</label>
@@ -664,7 +676,7 @@ class Moo_OnlineOrders_Shortcodes {
                                     <input class="form-control" name="address" id="address"></div>
 
                             </div>
-                            <div class="col-md-6">
+                             <div class="col-md-6">
 
                                         <div class="form-group"><label for="city">City:</label>
                                             <input class="form-control" name="city" id="city"></div>
@@ -872,6 +884,8 @@ class Moo_OnlineOrders_Shortcodes {
         </form>
         </div>
     <?php
+        if($custom_js != null)
+            echo '<script type="text/javascript">'.$custom_js.'</script>';
         return ob_get_clean();
     }
     public  static function getItemsModifiers($item_uuid)
@@ -1031,11 +1045,7 @@ class Moo_OnlineOrders_Shortcodes {
                     $default_image = (count($item_images)==0)?$no_image_url:$item_images[0]->url;
 
                     $nb_modifiers = $model->itemHasModifiers($item->uuid)->total;
-
-                    //Cut the name if the lenght > 20 char
-                    if(strlen ($item->name)> 20) $item_name = substr($item->name, 0, 20)."...";
-                    else  $item_name = $item->name;
-
+                    $item_name = $item->name;
                     $item_name = ucfirst(strtolower($item_name));
                     echo '<div class="col-md-4 col-sm-6 col-xs-12 moo_item_flip">';
                     echo '<a class="open-popup-link" href="#moo_popup_item_'.$item->uuid.'" onclick="moo_openFirstModifierG(\'MooModifierGroup_default_'.$item->uuid.'\')">';
@@ -1100,8 +1110,8 @@ class Moo_OnlineOrders_Shortcodes {
                                                             echo' Must choose 1 ';
                                                         else
                                                         {
-                                                            if($mg->min_required != null ) echo 'Must choose at least '.$mg->min_required;
-                                                            if($mg->max_allowd != null ) echo "<br/> Must choose  at max ".$mg->max_allowd;
+                                                            if($mg->min_required != null && $mg->min_required != 0 ) echo 'Must choose at least '.$mg->min_required;
+                                                            if($mg->max_allowd != null && $mg->max_allowd != 0 ) echo "<br/> Must choose  at max ".$mg->max_allowd;
                                                         }
 
                                                         echo '</li>';
@@ -1237,13 +1247,30 @@ class Moo_OnlineOrders_Shortcodes {
                 <?php
 
             }
+        ?>
+        <div id="moo_cart">
+            <a href="<?php echo get_page_link(get_option('moo_cart_page'));
+            ?>">
+                <div id="moo_cart_icon">
+                    <span>VIEW SHOPPING CART</span>
+                </div>
+            </a>
+        </div>
+        <?php
         return ob_get_clean();
     }
     public static function TheStore($atts, $content)
     {
-        $html_code =  '<div id="moo_OnlineStoreContainer">';
-
         $MooOptions = (array)get_option('moo_settings');
+        $html_code  = '';
+
+        $custom_css = $MooOptions["custom_css"];
+        $custom_js  = $MooOptions["custom_js"];
+        //Include custom css
+        if($custom_css != null)
+            $html_code .= '<style type="text/css">'.$custom_css.'</style>';
+
+        $html_code .=  '<div id="moo_OnlineStoreContainer">';
         $style = $MooOptions["default_style"];
         if($style == "style1")
             $html_code .= self::AllItemsAcordion($atts, $content);
@@ -1254,6 +1281,10 @@ class Moo_OnlineOrders_Shortcodes {
                 $html_code .= self::ItemsWithImages($atts, $content);
 
         $html_code .=  '<div class="row Moo_Copyright">Powered by <a href="http://merchantech.us" target="_blank">Merchantech apps</a></div>';
+
+        //Include custom js
+        if($custom_js != null)
+            $html_code .= '<script type="text/javascript">'.$custom_js.'</script>';
 
         return $html_code;
     }
@@ -1271,6 +1302,13 @@ class Moo_OnlineOrders_Shortcodes {
         $checkout_page_url =  get_page_link($checkout_page_id);
 
         ob_start();
+
+        $MooOptions = (array)get_option('moo_settings');
+        $custom_css = $MooOptions["custom_css"];
+        $custom_js  = $MooOptions["custom_js"];
+        //Include custom css
+        if($custom_css != null)
+           echo '<style type="text/css">'.$custom_css.'</style>';
 
         $total =   Moo_OnlineOrders_Public::moo_cart_getTotal(true);
         if($total === false){
@@ -1345,6 +1383,8 @@ class Moo_OnlineOrders_Shortcodes {
 
         </div>
         <?php
+        if($custom_js != null)
+            echo '<script type="text/javascript">'.$custom_js.'</script>';
         return ob_get_clean();
     }
     /*

@@ -117,6 +117,8 @@ function moo_onlineOrders_check_version()
         case '113':
             update_option('moo_onlineOrders_version','114');
         case '114':
+            update_option('moo_onlineOrders_version','115');
+        case '115':
             break;
     }
 }

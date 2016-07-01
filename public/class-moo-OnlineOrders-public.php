@@ -254,20 +254,6 @@ class Moo_OnlineOrders_Public {
         </div>
         <?php
 	}
-        else
-            if($this->style == "style3")
-            {
-                ?>
-                <div id="moo_cart">
-                    <a href="<?php echo get_page_link(get_option('moo_cart_page'));
-                    ?>">
-                        <div id="moo_cart_icon">
-                            <span>VIEW SHOPPING CART</span>
-                        </div>
-                    </a>
-                </div>
-<?php
-            }
   }
 
 // AJAX Responses
@@ -827,6 +813,7 @@ class Moo_OnlineOrders_Public {
                 }
 
                 else  $orderCreated = $this->moo_CreateOrder('default',true);
+
                 if($orderCreated != false)
                 {
                     $this->model->addOrder($orderCreated['OrderId'],$orderCreated['taxamount'],$orderCreated['amount'],$_POST['form']['name'],$_POST['form']['address'], $_POST['form']['city'],$_POST['form']['zipcode'],$_POST['form']['phone'],$_POST['form']['email'],$_POST['form']['instructions'],json_decode($orderType)->label);
@@ -847,6 +834,8 @@ class Moo_OnlineOrders_Public {
                         );
                         if($response['status'] == 'APPROVED'){
 
+                            $MooOptions = (array)get_option('moo_settings');
+
                             $customer = array(
                                 "name"    =>(isset($_POST['form']['name']))?$_POST['form']['name']:"",
                                 "address" =>(isset($_POST['form']['address']))?$_POST['form']['address']:"",
@@ -858,7 +847,9 @@ class Moo_OnlineOrders_Public {
 
                             $this->model->updateOrder($orderCreated['OrderId'],json_decode($paid)->paymentId);
                             $this->api->NotifyMerchant($orderCreated['OrderId'],$_POST['form']['instructions'],$customer);
+                            
                             $this->sendEmail($_POST['form']['email'],$_POST['form']['name'],$orderCreated['OrderId']);
+                            $this->sendEmail2merchant($MooOptions['merchant_email'],$orderCreated['OrderId']);
                             unset($_SESSION['items']);
                             wp_send_json($response);
                         }
@@ -957,6 +948,9 @@ class Moo_OnlineOrders_Public {
     private function moo_PayOrder($cardEncrypted,$card_number,$cvv,$expMonth,$expYear,$orderId,$amount,$taxAmount,$zip)
     {
 
+
+        $amount = str_replace(',', '', $amount);
+        $taxAmount = str_replace(',', '', $taxAmount);
 
         $card_number = str_replace(' ','',trim($card_number));
         $cvv       = intval($cvv);
@@ -1170,9 +1164,9 @@ public function moo_AddOrderType()
            $message .='EMAIl : '.$email.'<br/>';
            $message .='Plugin Version : '.$this->version.'<br/>';
            $message .='Default Style  : '.$this->style.'<br/>';
-           $message .='Plugin  : '.json_encode(get_plugins());
+           $message .='Plugins  : '.json_encode(get_plugins());
 
-	       $res = wp_mail("m.elbanyaoui@gmail.com", 'Feedback from Wordpress plugin user', $message);
+	       $res = wp_mail("support@merchantech.us", 'Feedback from Wordpress plugin user', $message);
            $response = array(
                'status'	 => 'Success',
 	           'data'=>$res,
@@ -1376,6 +1370,34 @@ public function moo_AddOrderType()
         $message   .=  '<br/>Thank you for placing your order with us ';
         $message   .=  '<br/><b><a href="https://www.clover.com/r/'.$orderID.'" target="_blanck">Order details</a></b>';
         wp_mail($email, 'Thank you for your order', $message);
+    }
+    private function sendEmail2merchant($email,$orderID)
+    {
+        if($email != null && $email != '')
+        {
+            $order = $this->model->getOrder($orderID);
+            $order = $order[0];
+            $emails = explode(',',$email);
+            $message    =  'Hello';
+            $message   .=  '<br/>You have received a new order on your website ';
+            $message   .=  '<br/><br/><b>Customer Information</b>';
+            $message   .=  '<br/>Name : '.$order->p_name;
+            $message   .=  '<br/>Address : '.$order->p_address;
+            $message   .=  '<br/>City : '.$order->p_city;
+            $message   .=  '<br/>ZipCode : '.$order->p_zipcode;
+            $message   .=  '<br/>Email : '.$order->p_email;
+            $message   .=  '<br/>Phone : '.$order->p_phone;
+            if($order->instructions != '')
+                $message   .=  '<br/><b>Special Instructions</b>';
+            $message   .=  '<br/>'.$order->instructions;
+            $message   .=  '<br/><br/><b><a href="https://www.clover.com/r/'.$orderID.'" target="_blanck">Order receipt</a></b>';
+
+            foreach ($emails as $email) {
+                wp_mail(trim($email), 'New order received', $message);
+            }
+
+        }
+
     }
 
 }
