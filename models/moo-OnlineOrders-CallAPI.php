@@ -193,10 +193,10 @@ class moo_OnlineOrders_CallAPI {
         return $this->callApi_Post("add_modifier_to_line",$this->Token,'oid='.$oid.'&lineid='.$lineId.'&modifier='.$modifer_uuid);
     }
     //Pay the order
-    function payOrder($oid,$taxAmount,$amount,$zip,$expMonth,$cvv,$last4,$expYear,$first6,$cardEncrypted)
+    function payOrder($oid,$taxAmount,$amount,$zip,$expMonth,$cvv,$last4,$expYear,$first6,$cardEncrypted,$tipAmount)
     {
         return $this->callApi_Post("pay_order",$this->Token,'orderId='.$oid.'&taxAmount='.$taxAmount.'&amount='.$amount.'&zip='.$zip.'&expMonth='.$expMonth.
-            '&cvv='.$cvv.'&last4='.$last4.'&first6='.$first6.'&expYear='.$expYear.'&cardEncrypted='.$cardEncrypted);
+            '&cvv='.$cvv.'&last4='.$last4.'&first6='.$first6.'&expYear='.$expYear.'&cardEncrypted='.$cardEncrypted.'&tipAmount='.$tipAmount);
     }
     //Send Notification to the merchant when a new order is registered
     function NotifyMerchant($oid,$instructions,$customer)
@@ -236,6 +236,10 @@ class moo_OnlineOrders_CallAPI {
     function getOpeningStatus()
     {
         return $this->callApi("is_open",$this->Token);
+    }
+    function getMerchantProprietes()
+    {
+        return $this->callApi("properties",$this->Token);
     }
     //Create default Orders Types
     function CreateOrdersTypes()

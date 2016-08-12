@@ -323,6 +323,11 @@
     width: 100%;
     height: 300px;
 }
+#moo_map_da
+{
+    width: 100%;
+    height: 450px;
+}
 /* Tooltip container */
 .tooltip {
     position: relative;
@@ -436,3 +441,37 @@
         width: 100%;
     }
 }
+#moo_adding-zone {
+    display: none;
+}
+.moo_adding-zone-btn
+{
+    float: right;
+    color: #0085ba;
+    cursor: pointer;
+}
+.moo_delivery_zone_label
+{
+    border: solid 1px #eee;
+    margin: 9px;
+    padding: 8px;
+    cursor: pointer;
+
+}
+.moo_delivery_zone_label span
+{
+    width: 15px;
+    height: 15px;
+    border: solid 1px #2f323b;
+    display: inline-block;
+    margin-right: 5px;
+    vertical-align: text-bottom;
+}.moo_delivery_zone_label .moo_da_actions
+{
+   float: right;
+    display: none
+ }
+ #moo_dz_action_for_updating,#moo_dz_action_for_adding
+ {
+     display: none;
+ }

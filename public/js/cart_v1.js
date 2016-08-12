@@ -1,7 +1,6 @@
 function moo_updateCart()
 {
     jQuery(".moo-cart-modal-lg .modal-body").html('Loading');
-
     jQuery.post(moo_params.ajaxurl,{'action':'moo_get_cart'}, function (data) {
         //console.log(data);
         if(data.status=="success")
@@ -190,37 +189,36 @@ function moo_incQte(productPrice,item)
 {
     // inc in the session by sending request to the server
     var qte = (jQuery("#moo_itemqte_"+item).text())*1;
-    if(qte<10) {
-        qte = qte+1;
-        var sub_total =productPrice*qte/100;
+    qte = qte+1;
+    var sub_total =productPrice*qte/100;
 
-        jQuery("#moo_itemqte_"+item).text(qte);
+    jQuery("#moo_itemqte_"+item).text(qte);
 
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_cart_incQuantity','item':item}, function (data) {
-            if(data.status == "success"){
-                if( jQuery("#moo_cart_line_"+item).hasClass('warning'))
-                {
-                    jQuery.post(moo_params.ajaxurl,{'action':'moo_cart_getItemTotal','item':item}, function (data) {
-                        if(data.status == "success"){
-                            jQuery("#moo_itemsubtotal_"+item).text('$'+data.total);
-                        }
-                    });
-                }
-                else
-                {
-                    jQuery("#moo_itemsubtotal_"+item).text('$'+sub_total);
-                }
-                moo_updateCartTotal();
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_cart_incQuantity','item':item}, function (data) {
+        if(data.status == "success"){
+            if( jQuery("#moo_cart_line_"+item).hasClass('warning'))
+            {
+                jQuery.post(moo_params.ajaxurl,{'action':'moo_cart_getItemTotal','item':item}, function (data) {
+                    if(data.status == "success"){
+                        jQuery("#moo_itemsubtotal_"+item).text('$'+data.total);
+                    }
+                });
             }
             else
             {
-                moo_updateCart();
-            };
-        });
+                jQuery("#moo_itemsubtotal_"+item).text('$'+sub_total);
+            }
+            moo_updateCartTotal();
+        }
+        else
+        {
+            moo_updateCart();
+        };
+    });
 
 
 
-    }
+
 }
 function moo_decQte(productPrice,item)
 {

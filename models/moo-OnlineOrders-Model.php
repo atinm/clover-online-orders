@@ -48,13 +48,6 @@ class moo_OnlineOrders_Model {
         $item = $this->getItem($uuid);
 
         if($item->default_taxe_rate){
-          /*  $taxes = $this->db->get_row("SELECT SUM(rate) as taxes
-                                    FROM {$this->db->prefix}moo_tax_rate t
-                                    GROUP by t.is_default
-                                    HAVING t.is_default = 1
-                                    ");
-            return $taxes->taxes/100000;
-          */
             $taxes = $this->db->get_results("SELECT uuid,rate
                                     FROM {$this->db->prefix}moo_tax_rate t
                                     WHERE t.is_default = 1
@@ -63,16 +56,6 @@ class moo_OnlineOrders_Model {
         }
         else
         {
-            /*
-
-             $taxes = $this->db->get_row("SELECT SUM(rate) as taxes
-                                          FROM (SELECT rate FROM {$this->db->prefix}moo_item_tax_rate itr,{$this->db->prefix}moo_tax_rate tr
-                                          WHERE itr.tax_rate_uuid=tr.uuid
-                                          AND itr.item_uuid='{$uuid}') t
-
-                                    ");
-            return $taxes->taxes/100000;
-            */
             $taxes = $this->db->get_results("SELECT uuid,rate FROM {$this->db->prefix}moo_item_tax_rate itr,{$this->db->prefix}moo_tax_rate tr
                                           WHERE itr.tax_rate_uuid=tr.uuid
                                           AND itr.item_uuid='{$uuid}'
@@ -115,6 +98,16 @@ class moo_OnlineOrders_Model {
         return $this->db->get_row("SELECT min_required, max_allowd, name
                                     FROM `{$this->db->prefix}moo_modifier_group` mg
                                     WHERE mg.uuid = '{$uuid}'
+                                    ");
+    }
+    function getItemModifiersGroupsRequired($uuid)
+    {
+        return $this->db->get_results("SELECT mg.uuid
+                                    FROM `{$this->db->prefix}moo_modifier_group` mg,`{$this->db->prefix}moo_item` item,`{$this->db->prefix}moo_item_modifier_group` item_mg  
+                                    WHERE item_mg.item_id =  item.uuid
+                                    AND item_mg.group_id =  mg.uuid
+                                    AND item.uuid = '{$uuid}'
+                                    AND mg.min_required >= 1
                                     ");
     }
     function getModifier($uuid)
@@ -218,7 +211,7 @@ class moo_OnlineOrders_Model {
     );
 }
 
-    function addOrder($uuid,$tax,$total,$name,$address, $city,$zipcode,$phone,$email,$instructions,$ordertype)
+    function addOrder($uuid,$tax,$total,$name,$address, $city,$zipcode,$phone,$email,$instructions,$state,$country,$deliveryFee,$tipAmount,$shippingFee,$customer_lat,$customer_lng,$ordertype)
     {
         $uuid         = esc_sql($uuid);
         $tax          = esc_sql($tax);
@@ -232,6 +225,15 @@ class moo_OnlineOrders_Model {
         $instructions = esc_sql($instructions);
         $ordertype    = esc_sql($ordertype);
 
+        $state       = esc_sql($state);
+        $country     = esc_sql($country);
+
+        $deliveryFee     = esc_sql($deliveryFee);
+        $tipAmount       = esc_sql($tipAmount);
+        $shippingFee     = esc_sql($shippingFee);
+        $customer_lat    = esc_sql($customer_lat);
+        $customer_lng    = esc_sql($customer_lng);
+        $this->db->show_errors();
         $this->db->insert(
             "{$this->db->prefix}moo_order",
             array(
@@ -244,9 +246,16 @@ class moo_OnlineOrders_Model {
                 'p_name' => $name,
                 'p_address' => $address,
                 'p_city' => $city,
+                'p_state' => $state,
+                'p_country' => $country,
                 'p_zipcode' => $zipcode,
                 'p_phone' => $phone,
                 'p_email' => $email,
+                'p_lat' => $customer_lat,
+                'p_lng' => $customer_lng,
+                'shippingfee' => $shippingFee,
+                'deliveryfee' => $deliveryFee,
+                'tipAmount' => $tipAmount,
                 'instructions' => $instructions,
             ));
         return $this->db->insert_id;

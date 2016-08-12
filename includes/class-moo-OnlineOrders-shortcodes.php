@@ -366,7 +366,7 @@ class Moo_OnlineOrders_Shortcodes {
                                                             <div class="moo_category">
                                                                 <div class="moo_accordion accordion-open" id="<?php echo ($nb_mg == 1)?'MooModifierGroup_default_'.$item->uuid:'MooModifierGroup_'.$mg->uuid?>">
                                                                     <div class="moo_category_title">
-                                                                        <div class="moo_title"><?php echo ($mg->alternate_name=="")?$mg->name:$mg->alternate_name; ?></div>
+                                                                        <div class="moo_title"><?php echo ($mg->alternate_name=="")?$mg->name:$mg->alternate_name; echo ($mg->min_required>=1)?' ( Required )':''; ?></div>
                                                                         <span></span>
                                                                     </div>
                                                                  </div>
@@ -578,19 +578,24 @@ class Moo_OnlineOrders_Shortcodes {
     {
         wp_enqueue_style( 'custom-style-cart3');
 
-        wp_enqueue_script( 'custom-script-checkout' );
         wp_enqueue_script( 'moo-google-map' );
         wp_enqueue_script( 'display-merchant-map',array('moo-google-map') );
+        wp_enqueue_script( 'custom-script-checkout',array('display-merchant-map') );
+
+
         wp_enqueue_script( 'forge' );
 
         ob_start();
         $model = new moo_OnlineOrders_Model();
         $api   = new moo_OnlineOrders_CallAPI();
+        $merchantProprietes = json_decode($api->getMerchantProprietes());
         $MooOptions = (array)get_option('moo_settings');
         $custom_css = $MooOptions["custom_css"];
         $custom_js  = $MooOptions["custom_js"];
 
         $orderTypes = $model->getVisibleOrderTypes();
+        
+
         $total =   Moo_OnlineOrders_Public::moo_cart_getTotal(true);
 
         $cart_page_id    = get_option('moo_cart_page');
@@ -626,10 +631,14 @@ class Moo_OnlineOrders_Shortcodes {
             echo '<div class="moo_emptycart"><p>Your cart is empty</p><span><a href="'.get_page_link(get_option('moo_store_page')).'">Browse the store</a></span></div>';
             return;
         };
+
         $key = $api->getPayKey();
         $key = json_decode($key);
+
         if($key==NULL)
             echo '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>This store cannot accept orders, if you are the owner please verify your API Key</div>';
+
+        $merchant_address =  $api->getMerchantAddress();
 
         wp_localize_script("custom-script-checkout", "moo_OrderTypes",$orderTypes);
         wp_localize_script("custom-script-checkout", "moo_Total",$total);
@@ -638,6 +647,11 @@ class Moo_OnlineOrders_Shortcodes {
 
         wp_localize_script("display-merchant-map", "moo_merchantLat",$MooOptions['lat']);
         wp_localize_script("display-merchant-map", "moo_merchantLng",$MooOptions['lng']);
+        wp_localize_script("display-merchant-map", "moo_merchantAddress",$merchant_address);
+        wp_localize_script("display-merchant-map", "moo_delivery_zones",$MooOptions['zones_json']);
+        wp_localize_script("display-merchant-map", "moo_delivery_other_zone_fee",$MooOptions['other_zones_delivery']);
+        wp_localize_script("display-merchant-map", "moo_delivery_free_amount",$MooOptions['free_delivery']);
+        wp_localize_script("display-merchant-map", "moo_delivery_fixed_amount",$MooOptions['fixed_delivery']);
         ?>
 
         <div id="moo_OnlineStoreContainer">
@@ -651,43 +665,86 @@ class Moo_OnlineOrders_Shortcodes {
                             <p style="font-size: 16px !important; margin:0;">Customer Information</p>
                         </div>
                         <div class="panel-body">
-
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <?php if(count($orderTypes)>0) {?>
-                                <div class="form-group">
-                                    <label for="OrderType">Order Type:</label>
-                                    <select class="form-control" name="OrderType" id="OrderType"
-                                            onchange="moo_OrderTypeChanged(this)">
-                                        <?php
-                                        foreach ($orderTypes as $ot) {
-                                               echo "<option value='".$ot->ot_uuid."'>".$ot->label.(($ot->taxable)?"":" (Not taxable)")."</option>";
-                                        }
-                                        ?>
-                                    </select>
-                                </div>
+                                    <div class="form-group">
+                                        <label for="OrderType">Order Type:</label>
+                                        <select class="form-control" name="OrderType" id="OrderType"
+                                                onchange="moo_OrderTypeChanged(this)">
+                                            <?php
+                                            foreach ($orderTypes as $ot) {
+                                                echo "<option value='".$ot->ot_uuid."'>".$ot->label.(($ot->taxable)?"":" (Not taxable)")."</option>";
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
                                 <?php }?>
+                            </div>
+                            <div class="col-md-6">
+
                                 <div class="form-group">
-                                    <label for="name">Name:</label><input class="form-control" name="name" id="name"></div>
+                                    <label for="name">Full Name:</label><input class="form-control" name="name" id="name"></div>
                                 <div class="form-group"><label for="phone">Phone number:</label>
                                     <input class="form-control" name="phone" id="phone"></div>
-                                <div class="form-group"><label for="email">Email address:</label>
-                                    <input class="form-control" name="email" id="email"></div>
                                 <div class="form-group"><label for="address">Address:</label>
-                                    <input class="form-control" name="address" id="address"></div>
+                                    <input class="form-control" name="address" id="address" onchange="moo_address_changed()"></div>
+                                <div class="form-group">
+                                    <label for="city">City:</label>
+                                    <input class="form-control" name="city" id="city" onchange="moo_address_changed()">
+                                </div>
 
                             </div>
                              <div class="col-md-6">
 
-                                        <div class="form-group"><label for="city">City:</label>
-                                            <input class="form-control" name="city" id="city"></div>
-                                        <div class="form-group"><label for="zipcode">Zip code:</label>
-                                            <input class="form-control" name="zipcode" id="zipcode"></div>
-                                        <div class="form-group"><label for="instructions">Special instructions</label>
-                                            <textarea rows="9" class="form-control" name="instructions" id="instructions"></textarea></div>
+
+                                 <div class="form-group"><label for="email">Email address:</label>
+                                     <input class="form-control" name="email" id="email"></div>
+                                        <div class="form-group">
+                                            <label for="state">State:</label>
+                                            <input class="form-control" name="state" id="state" onchange="moo_address_changed()">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="zipcode">Zip code:</label>
+                                            <input class="form-control" name="zipcode" id="zipcode">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="country">Country:</label>
+                                            <input class="form-control" name="country" id="country" onchange="moo_address_changed()">
+                                        </div>
                                 </div>
+                            <div class="col-md-12">
+                                <div class="form-group"><label for="instructions">Special instructions</label>
+                                    <textarea rows="9" class="form-control" name="instructions" id="instructions"></textarea>
+                                    <small>*additional charges may apply and not all changes are possible</small>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
+
+                <div class="col-md-12" id="moo-delivery-details">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <p style="font-size: 16px !important; margin:0;">Delivery Details</p>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-8">Your address : <div id="moo_dz_address"></div></div>
+                                <div class="col-md-2 col-md-offset-1"><a href="#" class="btn btn-primary" onclick="moo_address_SetOnMap(event)" title="checks to see if your delivery address is accepted">Set on map ?</a> </div>
+                            </div>
+                            <div class="row">
+                                <div id="moo_dz_map"></div>
+                                <input type="hidden"  id="moo_customer_lat"  name="moo_customer_lat"/>
+                                <input type="hidden"  id="moo_customer_lng"  name="moo_customer_lng" />
+                                <input type="hidden"  id="moo_delivery_amount" name="moo_delivery_amount" value="ERROR" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--  Here you can add your personal fields   -->
+
+                <!--  End of  personal fields   -->
                 <div class="col-md-12">
                     <div class="panel panel-default">
                         <div class="panel-heading"><p style="font-size: 16px !important; margin:0;">Payment</p></div>
@@ -740,44 +797,75 @@ class Moo_OnlineOrders_Shortcodes {
                             </div>
                         </div>
                     </div>
-                    <div class="row">
+                </div>
+                <!-- TIPS Start -->
+                <?php if($merchantProprietes->tipsEnabled && $MooOptions['tips']=='enabled'){ ?>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><p style="font-size: 16px !important; margin:0;">TIP</p></div>
+                        <div class="panel-body">
+                                <div class="row"  style="margin-top: 13px;">
+                                    <div class="col-md-6">
+                                        <select class="form-control" name="moo_tips_select" id="moo_tips_select" onchange="moo_tips_select_changed()">
+                                            <option value="cash">Add a tip to this order</option>
+                                            <option value="10">10%</option>
+                                            <option value="15">15%</option>
+                                            <option value="20">20%</option>
+                                            <option value="25">25%</option>
+                                            <option value="other">Custom $</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input class="form-control" name="tip" id="moo_tips" value="0" onchange="moo_tips_amount_changed()">
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+                 </div>   <!-- TIPS End -->
+                <?php }?>
+               <div class="row">
                         <div class="col-md-12">
-                            <h3>Order Information</h3>
+                            <p style="font-size: 20px">Order Information</p>
                             <div class="moo-shopping-cart">
                                 <div class="moo-column-labels">
-                                    <label class="moo-product-image">Image</label>
-                                    <label class="moo-product-details">Product</label>
+                                    <?php if($MooOptions['default_style']=='style3'){ ?><label class="moo-product-image">Image</label><?php  }?>
+                                    <label class="moo-product-details" <?php if($MooOptions['default_style']!='style3'){echo 'style="width:57%"';}?> >Product</label>
                                     <label class="moo-product-price">Price</label>
                                     <label class="moo-product-quantity">Quantity</label>
-                                    <label class="moo-product-line-price">Total</label>
+                                    <label class="moo-product-line-price" style="width: 21%">Total</label>
                                 </div>
                                 <?php foreach ($_SESSION['items'] as $key=>$line) {
                                     $modifiers_price=0;
-                                    $item_images = $model->getItemImages($line['item']->uuid);
-                                    $no_image_url =  plugin_dir_url(dirname(__FILE__))."public/img/no-image.jpg";
-                                    $default_image = (count($item_images)==0)?$no_image_url:$item_images[0]->url;
+                                    if($MooOptions['default_style']=='style3'){
+                                        $item_images = $model->getItemImages($line['item']->uuid);
+                                        $no_image_url =  plugin_dir_url(dirname(__FILE__))."public/img/no-image.jpg";
+                                        $default_image = (count($item_images)==0)?$no_image_url:$item_images[0]->url;
+                                    }
+
                                     ?>
                                     <div class="moo-product">
+                                     <?php if($MooOptions['default_style']=='style3'){ ?>
                                         <div class="moo-product-image">
                                             <img src="<?php echo $default_image ?>">
                                         </div>
-                                        <div class="moo-product-details">
+                                     <?php  }?>
+                                        <div class="moo-product-details" <?php if($MooOptions['default_style']!='style3'){echo 'style="width:57%"';}?>  >
                                             <div class="moo-product-title"><?php echo $line['item']->name?></div>
                                             <p class="moo-product-description">
                                                 <?php foreach($line['modifiers'] as $modifier){
                                                     if($modifier['price']>0)
-                                                        echo '- '.$modifier['name'].'- $'.($modifier['price']/100)."<br/>";
+                                                        echo '- '.$modifier['name'].'- $'.number_format(($modifier['price']/100),2)."<br/>";
                                                     else
                                                         echo '- '.$modifier['name']."<br/>";
                                                     $modifiers_price += $modifier['price'];
                                                 }?>
                                             </p>
                                         </div>
-                                        <div class="moo-product-price"><?php $line_price = $line['item']->price+$modifiers_price; echo $line_price/100?></div>
+                                        <div class="moo-product-price"><?php $line_price = $line['item']->price+$modifiers_price; echo number_format(($line_price/100),2)?></div>
                                         <div class="moo-product-quantity">
                                             <?php echo $line['quantity']?>
                                         </div>
-                                        <div class="moo-product-line-price"><?php echo $line_price*$line['quantity']/100?></div>
+                                        <div class="moo-product-line-price" style="width: 21%"><?php echo number_format(($line_price*$line['quantity']/100),2)?></div>
                                     </div>
                                 <?php } ?>
 
@@ -790,6 +878,17 @@ class Moo_OnlineOrders_Shortcodes {
                                         <label>Tax</label>
                                         <div class="moo-totals-value" id="moo-cart-tax"><?php echo $total['total_of_taxes']?></div>
                                     </div>
+                                    <div class="moo-totals-item">
+                                        <label>Delivery fee</label>
+                                        <div class="moo-totals-value" id="moo-cart-delivery-fee">0.00</div>
+                                    </div>
+                                    <?php if($merchantProprietes->tipsEnabled && $MooOptions['tips']=='enabled'){?>
+                                    <div class="moo-totals-item">
+                                        <label>Tip</label>
+                                        <div class="moo-totals-value" id="moo-cart-tip">0.00</div>
+                                    </div>
+                                    <?php } ?>
+
                                     <!--                <div class="moo-totals-item">-->
                                     <!--                    <label>Shipping</label>-->
                                     <!--                    <div class="moo-totals-value" id="moo-cart-shipping">15.00</div>-->
@@ -806,8 +905,8 @@ class Moo_OnlineOrders_Shortcodes {
                         </div>
 
                     </div>
-                </div>
             </div>
+            <!-- Button finalize Order -->
             <div class="row" style="margin: 20px">
                 <div class="col-md-12">
                     <div id="moo_checkout_loading" style="display: none; width: 100%;text-align: center">
@@ -1055,16 +1154,16 @@ class Moo_OnlineOrders_Shortcodes {
                     echo "</div>";
                     echo "<div class='moo_item_flip_title'>".$item_name."</div>";
                     if($item->price_type == "PER_UNIT")
-                        echo "<div class='moo_item_flip_content'>$".($item->price/100)." /".$item->unit_name."";
+                        echo "<div class='moo_item_flip_content'>$".(number_format(($item->price/100),2,'.',''))." /".$item->unit_name."";
                     else
-                        echo "<div class='moo_item_flip_content'>$".($item->price/100)."";
+                        echo "<div class='moo_item_flip_content'>$".(number_format(($item->price/100),2,'.',''))."";
                     echo "<span class='center-span'></span></div>";
                     echo '</div></a></div>';
 
                     ?>
                     <div class="row white-popup mfp-hide" id="moo_popup_item_<?php echo $item->uuid?>">
                         <?php
-                        if($nb_modifiers!="0")
+                        if($nb_modifiers != "0")
                         {
                           ?>
                             <div class="col-md-7" id="moo_popup_rightSide">
@@ -1081,7 +1180,7 @@ class Moo_OnlineOrders_Shortcodes {
                                         <div class="moo_category">
                                             <div class="moo_accordion accordion-open" id="<?php echo ($nb_mg == 1)?'MooModifierGroup_default_'.$item->uuid:'MooModifierGroup_'.$mg->uuid?>">
                                                 <div class="moo_category_title">
-                                                    <div class="moo_title"><?php echo ($mg->alternate_name=="")?$mg->name:$mg->alternate_name; ?></div>
+                                                    <div class="moo_title"><?php echo ($mg->alternate_name=="")?$mg->name:$mg->alternate_name; echo ($mg->min_required>=1)?' ( Required )':''; ?></div>
                                                     <span></span>
                                                 </div>
                                             </div>
@@ -1132,7 +1231,7 @@ class Moo_OnlineOrders_Shortcodes {
                                     <?php echo $item->description ?>
                                 </div>
                                 <div class="moo_popup_price">
-                                    $<?php echo $item->price/100 ?>
+                                    $<?php echo (number_format(($item->price/100),2,'.','')) ?>
                                 </div>
                                 <div class="moo_popup_quantity">
                                     Quantity :
@@ -1166,7 +1265,7 @@ class Moo_OnlineOrders_Shortcodes {
                                 <?php echo $item->description ?>
                             </div>
                             <div class="moo_popup_price">
-                               $<?php echo $item->price/100 ?>
+                               $<?php echo (number_format(($item->price/100),2,'.','')) ?>
                             </div>
                             <div class="moo_popup_quantity">
                                 Quantity :
@@ -1318,10 +1417,12 @@ class Moo_OnlineOrders_Shortcodes {
     ?>
         <div class="moo-shopping-cart">
             <div class="moo-column-labels">
-                <label class="moo-product-image">Image</label>
-                <label class="moo-product-details">Product</label>
+                <?php if($MooOptions['default_style']=='style3'){?>
+                    <label class="moo-product-image">Image</label>
+                <?php }?>
+                <label class="moo-product-details"  <?php if($MooOptions['default_style']!='style3'){echo 'style="width:57%"';}?>>Product</label>
                 <label class="moo-product-price">Price</label>
-                <label class="moo-product-quantity">Quantity</label>
+                <label class="moo-product-quantity">Qty</label>
                 <label class="moo-product-removal">Remove</label>
                 <label class="moo-product-line-price">Total</label>
             </div>
@@ -1332,31 +1433,33 @@ class Moo_OnlineOrders_Shortcodes {
                 $default_image = (count($item_images)==0)?$no_image_url:$item_images[0]->url;
                 ?>
             <div class="moo-product">
+                <?php if($MooOptions['default_style']=='style3'){?>
                 <div class="moo-product-image">
                     <img src="<?php echo $default_image ?>">
                 </div>
-                <div class="moo-product-details">
+                <?php }?>
+                <div class="moo-product-details"  <?php if($MooOptions['default_style']!='style3'){echo 'style="width:57%"';}?>>
                     <div class="moo-product-title"><?php echo $line['item']->name?></div>
                     <p class="moo-product-description">
                         <?php foreach($line['modifiers'] as $modifier){
                             if($modifier['price']>0)
-                                echo '- '.$modifier['name'].'- $'.($modifier['price']/100)."<br/>";
+                                echo '- '.$modifier['name'].'- $'.number_format(($modifier['price']/100),2)."<br/>";
                             else
                                 echo '- '.$modifier['name']."<br/>";
                             $modifiers_price += $modifier['price'];
                         }?>
                     </p>
                 </div>
-                <div class="moo-product-price"><?php $line_price = $line['item']->price+$modifiers_price; echo $line_price/100?></div>
+                <div class="moo-product-price"><?php $line_price = $line['item']->price+$modifiers_price; echo number_format(($line_price/100),2)?></div>
                 <div class="moo-product-quantity">
-                    <input type="number" value="<?php echo $line['quantity']?>" min="1" max="10" onchange="moo_updateQuantity(this,'<?php echo $key?>')">
+                    <input type="number" value="<?php echo $line['quantity']?>" min="1" onchange="moo_updateQuantity(this,'<?php echo $key?>')">
                 </div>
                 <div class="moo-product-removal">
-                    <button class="moo-remove-product" onclick="moo_removeItem(this,'<?php echo $key?>')">
+                    <a class="moo-remove-product" onclick="moo_removeItem(this,'<?php echo $key?>')">
                         Remove
-                    </button>
+                    </a>
                 </div>
-                <div class="moo-product-line-price"><?php echo $line_price*$line['quantity']/100?></div>
+                <div class="moo-product-line-price"><?php echo number_format(($line_price*$line['quantity']/100),2)?></div>
             </div>
         <?php } ?>
 

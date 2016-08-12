@@ -7,8 +7,7 @@
  */
 
 class moo_OnlineOrders_Admin_Model {
-
-
+    
     private $token;
     private $db;
     private $url_api;

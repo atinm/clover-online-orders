@@ -216,6 +216,9 @@ class moo_OnlineOrders {
         $this->loader->add_action( 'wp_ajax_moo_modifiergroup_getlimits', $plugin_public, 'moo_modifiergroup_getlimits');
         $this->loader->add_action( 'wp_ajax_nopriv_moo_modifiergroup_getlimits', $plugin_public, 'moo_modifiergroup_getlimits');
 
+        $this->loader->add_action( 'wp_ajax_moo_check_item_modifiers', $plugin_public, 'moo_checkItemModifiers');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_check_item_modifiers', $plugin_public, 'moo_checkItemModifiers');
+
         //MODIFIERS : add a modifier
         $this->loader->add_action( 'wp_ajax_moo_modifier_add', $plugin_public, 'moo_modifier_add');
         $this->loader->add_action( 'wp_ajax_nopriv_moo_modifier_add', $plugin_public, 'moo_modifier_add');
@@ -297,6 +300,10 @@ class moo_OnlineOrders {
 		//verify if the store is open according to bussiness hours configured in Clover
 		$this->loader->add_action( 'wp_ajax_moo_store_isopen', $plugin_public, 'moo_StoreIsOpen');
 		$this->loader->add_action( 'wp_ajax_nopriv_moo_store_isopen', $plugin_public, 'moo_StoreIsOpen');
+
+		//verify if the store accepting tips
+		$this->loader->add_action( 'wp_ajax_moo_tips_isenabled', $plugin_public, 'moo_TipsIsEnabled');
+		$this->loader->add_action( 'wp_ajax_nopriv_moo_tips_isenabled', $plugin_public, 'moo_TipsIsEnabled');
 
 
 		/*

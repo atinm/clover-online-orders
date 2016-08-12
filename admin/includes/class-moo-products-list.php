@@ -119,8 +119,9 @@ class Products_List_Moo extends WP_List_Table_MOO {
     function column_name( $item ) {
 
         // create a nonce
-        $hide_nonce = wp_create_nonce( 'moo_hide_item' );
-        $show_nonce = wp_create_nonce( 'moo_show_item' );
+        $hide_nonce       = wp_create_nonce( 'moo_hide_item' );
+        $show_nonce       = wp_create_nonce( 'moo_show_item' );
+
         $title = '<strong>' . $item['name'] . '</strong>';
 
         if($item['visible'])

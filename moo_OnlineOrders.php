@@ -16,7 +16,7 @@
  * Plugin Name:       Merchantech Online Orders for Clover
  * Plugin URI:        http://www.merchantech.us
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.1.5
+ * Version:           1.1.6
  * Author:            Merchantech
  * Author URI:        http://www.merchantech.us
  * License:           Clover app
@@ -77,10 +77,11 @@ add_shortcode('moo_cart', 'moo_OnlineOrders_shortcodes_thecart');
 add_filter( 'wp_mail_content_type', function( $content_type ) {
     return 'text/html';
 });
+
 add_action('plugins_loaded', 'moo_onlineOrders_check_version');
 
 /*
- * This function for updating the database structure when cersion is changed and updated automatically
+ * This function for updating the database structure when the version changed and updated it automatically
  * First of all we save the current version like an option
  * then we compare the current version with the version saved in database
  * for example in the version  1.1.3
@@ -115,10 +116,20 @@ function moo_onlineOrders_check_version()
                                 ON UPDATE NO ACTION)
                         ENGINE = InnoDB;");
         case '113':
-            update_option('moo_onlineOrders_version','114');
         case '114':
-            update_option('moo_onlineOrders_version','115');
         case '115':
+            //Adding new fields in order table
+            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order` ADD `p_state` VARCHAR(100) NULL");
+            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order` ADD `p_country` VARCHAR(100) NULL");
+            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order` ADD `p_lat` VARCHAR(255) NULL");
+            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order` ADD `p_lng` VARCHAR(255) NULL");
+            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order` ADD `shippingfee` VARCHAR(100) NULL");
+            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order` ADD `tipAmount` VARCHAR(100) NULL");
+            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order` ADD `deliveryfee` VARCHAR(100) NULL");
+            
+            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_item` ADD `outofstock` INT(1) NOT NULL DEFAULT '0'");
+            update_option('moo_onlineOrders_version','116');
+        case '116':
             break;
     }
 }

@@ -92,7 +92,7 @@ class Orders_List_Moo extends WP_List_Table_MOO {
         $title = '<strong>' . $item['p_name'] . '</strong>';
             $actions = array(
                 'Delete' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s">Delete Order</a>', esc_attr( $_REQUEST['page'] ), 'delete',$item['uuid'], $delete_nonce ),
-                'Show' => sprintf( '<a href="https://www.clover.com/r/%s" target="_blank">Show Order</a>',$item['uuid']),
+                'Show' => sprintf( '<a href="https://www.clover.com/r/%s" target="_blank">Show Receipt</a>',$item['uuid']),
             );
 
         return
@@ -111,16 +111,16 @@ class Orders_List_Moo extends WP_List_Table_MOO {
             case 'p_name':
             case 'p_email':
             case 'ordertype':
-            case 'p_address':
-            case 'p_city':
             case 'date':
             case 'p_phone':
             case 'instructions':
                 return stripslashes($item[$column_name]);
+            case 'p_address':
+                return stripslashes($item['p_address'].' '.$item['p_city'].' '.$item['p_state'].' '.$item['p_country']);
             case 'amount':
-                return '$'.$item['amount'];
-            case 'taxAmount':
-                return '$'.$item['taxAmount'];
+                return 'Total : $'.$item['amount'].'<br/>'.'TAX : $'.$item['taxAmount'].'<br/>'.'TIP : $'.$item['tipAmount'];
+            case 'deliveryfee':
+                return '$'.$item['deliveryfee'];
             case 'paid':
                 return ($item['paid'])?'YES':'NO';
             default:
@@ -148,12 +148,11 @@ class Orders_List_Moo extends WP_List_Table_MOO {
         $columns = array(
             'cb'      => '<input type="checkbox" />',
             'p_name'    => __( 'By'),
-            'amount' => __( 'Total'),
-            'taxAmount' => __( 'Taxes'),
+            'amount' => __( 'Totals'),
+            'deliveryfee' => __( 'DeliveryFee'),
             'paid' => __( 'Paid'),
             'ordertype' => __( 'OrderType'),
             'p_address' => __( 'Address'),
-            'p_city' => __( 'City'),
             'p_phone' => __( 'Phone'),
             'p_email' => __( 'Email'),
             'date' => __( 'Date'),

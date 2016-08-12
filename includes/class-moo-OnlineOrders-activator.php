@@ -70,10 +70,11 @@ class Moo_OnlineOrders_Activator {
                       `modified_time` MEDIUMTEXT NULL,
                       `item_group_uuid` VARCHAR(100) NULL,
                       `visible` INT(1) DEFAULT '1',
+                      `outofstock` INT(1) NOT NULL DEFAULT '0',
                       PRIMARY KEY (`_id`),
                       UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC),
-                      INDEX `fk_item_item_group_idx` (`item_group_uuid` ASC),
-                      CONSTRAINT `fk_item_item_group`
+                      INDEX `{$wpdb->prefix}fk_item_item_group_idx` (`item_group_uuid` ASC),
+                      CONSTRAINT `{$wpdb->prefix}fk_item_item_group`
                         FOREIGN KEY (`item_group_uuid`)
                         REFERENCES `{$wpdb->prefix}moo_item_group` (`uuid`)
                         ON DELETE NO ACTION
@@ -90,6 +91,9 @@ class Moo_OnlineOrders_Activator {
                       `uuid` VARCHAR(45) NOT NULL ,
                       `taxAmount` VARCHAR(100) NULL ,
                       `amount` VARCHAR(100) NULL ,
+                      `deliveryfee` VARCHAR(100) NULL ,
+                      `shippingfee` VARCHAR(100) NULL ,
+                      `tipAmount` VARCHAR(100) NULL ,
                       `date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
                       `paid` INT(1)  DEFAULT '0' ,
                       `refpayment` VARCHAR(50) NULL ,
@@ -97,9 +101,13 @@ class Moo_OnlineOrders_Activator {
                       `p_name` VARCHAR(100) NULL ,
                       `p_address` VARCHAR(100) NULL ,
                       `p_city` VARCHAR(100) NULL ,
+                      `p_state` VARCHAR(100) NULL ,
                       `p_zipcode` VARCHAR(100) NULL ,
+                      `p_country` VARCHAR(100) NULL ,
                       `p_phone` VARCHAR(100) NULL ,
                       `p_email` VARCHAR(100) NULL ,
+                      `p_lat` VARCHAR(255) NULL ,
+                      `p_lng` VARCHAR(255) NULL ,
                       `instructions` VARCHAR(250) NULL ,
                       PRIMARY KEY (`_id`),
                       UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC)
@@ -136,8 +144,8 @@ class Moo_OnlineOrders_Activator {
                       `item_group_uuid` VARCHAR(100) NOT NULL ,
                       PRIMARY KEY (`_id`)  ,
                       UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) ,
-                      INDEX `fk_attribute_item_group1_idx` (`item_group_uuid` ASC),
-                      CONSTRAINT `fk_attribute_item_group1`
+                      INDEX `{$wpdb->prefix}fk_attribute_item_group1_idx` (`item_group_uuid` ASC),
+                      CONSTRAINT `{$wpdb->prefix}fk_attribute_item_group1`
                         FOREIGN KEY (`item_group_uuid`)
                         REFERENCES `{$wpdb->prefix}moo_item_group` (`uuid`)
                         ON DELETE NO ACTION
@@ -158,8 +166,8 @@ class Moo_OnlineOrders_Activator {
                       `attribute_uuid` VARCHAR(100) NOT NULL ,
                       PRIMARY KEY (`_id`)  ,
                       UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) ,
-                      INDEX `fk_option_attribute1_idx` (`attribute_uuid` ASC) ,
-                      CONSTRAINT `fk_option_attribute1`
+                      INDEX `{$wpdb->prefix}fk_option_attribute1_idx` (`attribute_uuid` ASC) ,
+                      CONSTRAINT `{$wpdb->prefix}fk_option_attribute1`
                         FOREIGN KEY (`attribute_uuid`)
                         REFERENCES `{$wpdb->prefix}moo_attribute` (`uuid`)
                         ON DELETE NO ACTION
@@ -198,9 +206,9 @@ class Moo_OnlineOrders_Activator {
                       `alternate_name` MEDIUMTEXT NULL,
                       `group_id` VARCHAR(100) NOT NULL ,
                       PRIMARY KEY (`_id`)  ,
-                      INDEX `fk_modifier_modifier_group1_idx` (`group_id` ASC) ,
+                      INDEX `{$wpdb->prefix}fk_modifier_modifier_group1_idx` (`group_id` ASC) ,
                       UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC),
-                      CONSTRAINT `fk_modifier_modifier_group1`
+                      CONSTRAINT `{$wpdb->prefix}fk_modifier_modifier_group1`
                         FOREIGN KEY (`group_id`)
                         REFERENCES `{$wpdb->prefix}moo_modifier_group` (`uuid`)
                         ON DELETE NO ACTION
@@ -252,14 +260,14 @@ class Moo_OnlineOrders_Activator {
                       `tax_rate_uuid` VARCHAR(100) NOT NULL ,
                       `item_uuid` VARCHAR(100) NOT NULL ,
                       PRIMARY KEY (`_id`) ,
-                      INDEX `fk_tax_rate_has_item_item1_idx` (`item_uuid` ASC),
-                      INDEX `fk_tax_rate_has_item_tax_rate1_idx` (`tax_rate_uuid` ASC),
-                      CONSTRAINT `fk_tax_rate_has_item_tax_rate1`
+                      INDEX `{$wpdb->prefix}fk_tax_rate_has_item_item1_idx` (`item_uuid` ASC),
+                      INDEX `{$wpdb->prefix}fk_tax_rate_has_item_tax_rate1_idx` (`tax_rate_uuid` ASC),
+                      CONSTRAINT `{$wpdb->prefix}fk_tax_rate_has_item_tax_rate1`
                         FOREIGN KEY (`tax_rate_uuid`)
                         REFERENCES `{$wpdb->prefix}moo_tax_rate` (`uuid`)
                         ON DELETE NO ACTION
                         ON UPDATE NO ACTION,
-                      CONSTRAINT `fk_tax_rate_has_item_item1`
+                      CONSTRAINT `{$wpdb->prefix}fk_tax_rate_has_item_item1`
                         FOREIGN KEY (`item_uuid`)
                         REFERENCES `{$wpdb->prefix}moo_item` (`uuid`)
                         ON DELETE NO ACTION
@@ -278,15 +286,15 @@ class Moo_OnlineOrders_Activator {
                       `_id` INT NOT NULL AUTO_INCREMENT,
                       `tag_uuid` VARCHAR(100) NOT NULL ,
                       `item_uuid` VARCHAR(100) NOT NULL,
-                      INDEX `fk_tag_has_item_item1_idx` (`item_uuid` ASC),
-                      INDEX `fk_tag_has_item_tag1_idx` (`tag_uuid` ASC),
+                      INDEX `{$wpdb->prefix}fk_tag_has_item_item1_idx` (`item_uuid` ASC),
+                      INDEX `{$wpdb->prefix}fk_tag_has_item_tag1_idx` (`tag_uuid` ASC),
                       PRIMARY KEY (`_id`) ,
-                      CONSTRAINT `fk_tag_has_item_tag1`
+                      CONSTRAINT `{$wpdb->prefix}fk_tag_has_item_tag1`
                         FOREIGN KEY (`tag_uuid`)
                         REFERENCES `{$wpdb->prefix}moo_tag` (`uuid`)
                         ON DELETE NO ACTION
                         ON UPDATE NO ACTION,
-                      CONSTRAINT `fk_tag_has_item_item1`
+                      CONSTRAINT `{$wpdb->prefix}fk_tag_has_item_item1`
                         FOREIGN KEY (`item_uuid`)
                         REFERENCES `{$wpdb->prefix}moo_item` (`uuid`)
                         ON DELETE NO ACTION
@@ -304,15 +312,15 @@ class Moo_OnlineOrders_Activator {
                       `_id` INT NOT NULL AUTO_INCREMENT,
                       `item_uuid` VARCHAR(100) NOT NULL,
                       `option_uuid` VARCHAR(100) NOT NULL,
-                      INDEX `fk_item_has_option_option1_idx` (`option_uuid` ASC) ,
-                      INDEX `fk_item_has_option_item1_idx` (`item_uuid` ASC),
+                      INDEX `{$wpdb->prefix}fk_item_has_option_option1_idx` (`option_uuid` ASC) ,
+                      INDEX `{$wpdb->prefix}fk_item_has_option_item1_idx` (`item_uuid` ASC),
                       PRIMARY KEY (`_id`),
-                      CONSTRAINT `fk_item_has_option_item1`
+                      CONSTRAINT `{$wpdb->prefix}fk_item_has_option_item1`
                         FOREIGN KEY (`item_uuid`)
                         REFERENCES `{$wpdb->prefix}moo_item` (`uuid`)
                         ON DELETE NO ACTION
                         ON UPDATE NO ACTION,
-                      CONSTRAINT `fk_item_has_option_option1`
+                      CONSTRAINT `{$wpdb->prefix}fk_item_has_option_option1`
                         FOREIGN KEY (`option_uuid`)
                         REFERENCES `{$wpdb->prefix}moo_option` (`uuid`)
                         ON DELETE NO ACTION
@@ -333,12 +341,12 @@ class Moo_OnlineOrders_Activator {
                           PRIMARY KEY (`_id`, `item_id`, `group_id`),
                           INDEX `fk_item_has_modifier_group_modifier_group1_idx` (`group_id` ASC) ,
                           INDEX `fk_item_has_modifier_group_item1_idx` (`item_id` ASC)  ,
-                          CONSTRAINT `fk_item_has_modifier_group_item1`
+                          CONSTRAINT `{$wpdb->prefix}fk_item_has_modifier_group_item1`
                             FOREIGN KEY (`item_id`)
                             REFERENCES `{$wpdb->prefix}moo_item` (`uuid`)
                             ON DELETE NO ACTION
                             ON UPDATE NO ACTION,
-                          CONSTRAINT `fk_item_has_modifier_group_modifier_group1`
+                          CONSTRAINT `{$wpdb->prefix}fk_item_has_modifier_group_modifier_group1`
                             FOREIGN KEY (`group_id`)
                             REFERENCES `{$wpdb->prefix}moo_modifier_group` (`uuid`)
                             ON DELETE NO ACTION
@@ -360,14 +368,14 @@ class Moo_OnlineOrders_Activator {
                           `modifiers` VARCHAR(255) NOT NULL,
                           `special_ins` VARCHAR(255) NOT NULL,
                           PRIMARY KEY (`_id`, `item_uuid`, `order_uuid`),
-                          INDEX `fk_order_has_items_idx1` (`order_uuid` ASC) ,
-                          INDEX `fk_order_has_items_idx2` (`item_uuid` ASC)  ,
-                          CONSTRAINT `fk_order_has_items_item`
+                          INDEX `{$wpdb->prefix}fk_order_has_items_idx1` (`order_uuid` ASC) ,
+                          INDEX `{$wpdb->prefix}fk_order_has_items_idx2` (`item_uuid` ASC)  ,
+                          CONSTRAINT `{$wpdb->prefix}fk_order_has_items_item`
                             FOREIGN KEY (`item_uuid`)
                             REFERENCES `{$wpdb->prefix}moo_item` (`uuid`)
                             ON DELETE NO ACTION
                             ON UPDATE NO ACTION,
-                          CONSTRAINT `fk_order_has_items_order`
+                          CONSTRAINT `{$wpdb->prefix}fk_order_has_items_order`
                             FOREIGN KEY (`order_uuid`)
                             REFERENCES `{$wpdb->prefix}moo_order` (`uuid`)
                             ON DELETE NO ACTION
@@ -401,7 +409,7 @@ class Moo_OnlineOrders_Activator {
                           `is_default` INT NOT NULL,
                           `item_uuid` VARCHAR(100) NOT NULL,
                           PRIMARY KEY (`_id`),
-                          CONSTRAINT `fk_item_has_images`
+                          CONSTRAINT `{$wpdb->prefix}fk_item_has_images`
                                 FOREIGN KEY (`item_uuid`)
                                 REFERENCES `{$wpdb->prefix}moo_item` (`uuid`)
                                 ON DELETE NO ACTION
@@ -442,7 +450,7 @@ class Moo_OnlineOrders_Activator {
             'post_content' => '[moo_cart]'
         );
         // Save the version of the plugin in the Database
-         update_option('moo_onlineOrders_version', '115');
+         update_option('moo_onlineOrders_version', '116');
         //insert page and save the id
         $store_page_id    =  wp_insert_post( $post_store, false );
         $checkout_page_id =  wp_insert_post( $post_checkout, false );
@@ -453,11 +461,10 @@ class Moo_OnlineOrders_Activator {
         update_option( 'moo_checkout_page', $checkout_page_id );
         update_option( 'moo_cart_page', $cart_page_id );
 
-        $defaultOptions = array (
-                  'api_key' => '',
-                  'default_style' => 'style1',
-                  'payment'=>array('cc'=>true,'cash'=>false));
-
+        $defaultOptions = get_option( 'moo_settings' );
+        if($defaultOptions["default_style"] == "") $defaultOptions["default_style"] == "style1";
+        if($defaultOptions["hours"] == "") $defaultOptions["hours"] == "business";
+            
         update_option( 'moo_settings', $defaultOptions );
 
        // exit( wp_redirect( admin_url( 'admin.php?page=moo_index' ) ) );

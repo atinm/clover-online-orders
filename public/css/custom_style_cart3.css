@@ -68,6 +68,9 @@ Side note: I know that this style of nesting in SASS doesn't result in the most 
 }
 
 /* Column headers */
+.moo-column-labels {
+    font-weight: bold;
+}
 .moo-column-labels label {
     padding-bottom: 15px;
     margin-bottom: 15px;
@@ -100,7 +103,7 @@ Side note: I know that this style of nesting in SASS doesn't result in the most 
     line-height: 1.4em;
 }
 .moo-product .moo-product-quantity input {
-    width: 40px;
+    width: 70px;
 }
 .moo-product .moo-remove-product {
     border: 0;
@@ -110,6 +113,8 @@ Side note: I know that this style of nesting in SASS doesn't result in the most 
     font-family: "HelveticaNeue-Medium", "Helvetica Neue Medium";
     font-size: 12px;
     border-radius: 3px;
+    text-decoration: none;
+    cursor: pointer;
 }
 .moo-product .moo-remove-product:hover {
     background-color: #a44;

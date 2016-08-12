@@ -61,58 +61,73 @@ jQuery("#moo_form_address").validate({
         }
     },
     submitHandler: function(form) {
-        jQuery('#moo_checkout_msg').remove();
-        jQuery('#moo_btn_submit_order').hide();
 
-        //Show loading Icon
-        jQuery('#moo_checkout_loading').show();
+        var delivery_amount = document.getElementById('moo_delivery_amount').value;
+        // if(delivery_amount === 'ERROR')
+        // {
+        //     toastr.error('Zone Not Supported');
+        //     return;
+        // }
 
-        var DataArray = jQuery(form).serializeArray();
-        var DataObject = {};
+        if(delivery_amount == 'ERROR')
+        {
+            toastr.error('Verify your delivery details');
+        }
+        else
+        {
+            jQuery('#moo_checkout_msg').remove();
+            jQuery('#moo_btn_submit_order').hide();
 
-        for(i in DataArray) DataObject[DataArray[i]['name']] = DataArray[i]['value'] ;
-        DataObject['cardEncrypted'] = cryptCardNumber(DataObject.cardNumber);
+            //Show loading Icon
+            jQuery('#moo_checkout_loading').show();
 
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_checkout','form':DataObject}, function (data) {
-            if(data.status == 'APPROVED'){
-                if(moo_thanks_page != '' && moo_thanks_page != null )
-                {
-                   window.location.href = moo_thanks_page;
+            var DataArray = jQuery(form).serializeArray();
+            var DataObject = {};
+
+            for(i in DataArray) DataObject[DataArray[i]['name']] = DataArray[i]['value'] ;
+            DataObject['cardEncrypted'] = cryptCardNumber(DataObject.cardNumber);
+
+            jQuery.post(moo_params.ajaxurl,{'action':'moo_checkout','form':DataObject}, function (data) {
+                if(data.status == 'APPROVED'){
+                    if(moo_thanks_page != '' && moo_thanks_page != null )
+                    {
+                        window.location.href = moo_thanks_page;
+                    }
+                    else
+                    {
+                        html = '<div align="center" class="alert alert-success" role="alert">Thank you for your order<br> You can see your receipt <a href="https://www.clover.com/r/'+data.order+'" target="_blank">here</a></a> </div>';
+                        // console.log(html);
+                        jQuery("#moo_form_address").html('');
+                        jQuery("#moo_form_address").parent().prepend("<p style='font-size: 21px;'>Our Address : </p>"+moo_merchantAddress+"<br/><br/>");
+                        jQuery("#moo_form_address").parent().prepend(html);
+
+                        jQuery("#moo_merchantmap").show();
+                        moo_getLatLong();
+                        jQuery("html, body").animate({
+                            scrollTop: 0
+                        }, 600);
+                    }
+
                 }
                 else
                 {
-                    html = '<div align="center" class="alert alert-success" role="alert">Thank you for your order<br> You can see your receipt <a href="https://www.clover.com/r/'+data.order+'" target="_blank">here</a></a> </div>';
-                    // console.log(html);
-                    jQuery("#moo_form_address").html('');
-                    jQuery("#moo_form_address").parent().prepend("<h1>Our Address : </h1>");
-                    jQuery("#moo_form_address").parent().prepend(html);
-
-                    jQuery("#moo_merchantmap").show();
-                    moo_getLatLong();
+                    //Hide Loading Icon and Show the button if there is an error
+                    jQuery('#moo_checkout_loading').hide();
+                    jQuery('#moo_btn_submit_order').show();
+                    if(data.message != "Internal Error, please contact us, if you're the site owner verify your API Key")
+                        html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>Payment card was declined. Check card info or try another card.</div>';
+                    else
+                        html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg">'+data.message+'</div>';
+                    console.log(data.message);
+                    jQuery("#moo_form_address").prepend(html);
                     jQuery("html, body").animate({
                         scrollTop: 0
                     }, 600);
                 }
 
-            }
-            else
-            {
-                //Hide Loading Icon and Show the button if there is an error
-                jQuery('#moo_checkout_loading').hide();
-                jQuery('#moo_btn_submit_order').show();
-                if(data.message != "Internal Error, please contact us, if you're the site owner verify your API Key")
-                    html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>Payment card was declined. Check card info or try another card.</div>';
-                else
-                    html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg">'+data.message+'</div>';
-                console.log(data.message);
+            });
+        }
 
-                jQuery("#moo_form_address").prepend(html);
-                jQuery("html, body").animate({
-                    scrollTop: 0
-                }, 600);
-            }
-
-        });
     }
 });
 
@@ -123,38 +138,63 @@ jQuery('#moo_cardcvv').payment('formatCardCVC');
 function moo_OrderTypeChanged(obj)
 {
     var OrderTypeID = jQuery(obj).val();
+    var moo_delivery_areas  = JSON.parse(moo_delivery_zones);
+
     for(i in moo_OrderTypes)
     {
         if(OrderTypeID == moo_OrderTypes[i].ot_uuid) {
-           if( moo_OrderTypes[i].taxable == "1"){
-               document.getElementById('moo_Total_inCheckout').innerText = '$'+(moo_Total.total);
-           }
-            else
-           {
-               jQuery('.moo-totals-value').fadeOut(300, function() {
-                   jQuery('#moo-cart-subtotal').html(moo_Total.sub_total);
-                   jQuery('#moo-cart-tax').html('0.00');
-                   jQuery('#moo-cart-total').html(moo_Total.sub_total);
-                   if(moo_Total.total == 0){
-                       jQuery('.moo-checkout').fadeOut(300);
-                   }else{
-                       jQuery('.moo-checkout').fadeIn(300);
-                   }
-                   jQuery('.moo-totals-value').fadeIn(300);
-               });
-           }
             if( moo_OrderTypes[i].show_sa == "0"){
+
                 jQuery('#city').parent().hide();
                 jQuery('#address').parent().hide();
+                jQuery('#state').parent().hide();
+                jQuery('#country').parent().hide();
+                jQuery('#moo-delivery-details').hide();
+                jQuery('#moo-cart-delivery-fee').parent().hide();
+                document.getElementById('moo_delivery_amount').value = "";
+                moo_update_totals();
             }
             else
             {
                 jQuery('#city').parent().show();
                 jQuery('#address').parent().show();
+                jQuery('#state').parent().show();
+                jQuery('#country').parent().show();
+                jQuery('#moo-cart-delivery-fee').parent().show();
+                if(moo_delivery_areas.length >= 1) jQuery('#moo-delivery-details').show();
+                moo_calculate_delivery_fee();
+                moo_update_totals();
             }
+            moo_update_totals();
         }
     }
 }
+
+function  moo_tips_select_changed()
+{
+    var tips_select_percent = jQuery('#moo_tips_select').val();
+    if(tips_select_percent != "cash" && tips_select_percent != 'other')
+        jQuery('#moo_tips').val((moo_Total.sub_total*tips_select_percent/100).toFixed(2));
+    else
+        if(tips_select_percent == "cash")
+            jQuery('#moo_tips').val(0);
+        else
+            jQuery('#moo_tips').select();
+
+    moo_change_total_with_tips();
+}
+
+function moo_tips_amount_changed()
+{
+    jQuery('#moo_tips').val((parseFloat(jQuery('#moo_tips').val())).toFixed(2));
+    moo_change_total_with_tips();
+}
+
+function moo_change_total_with_tips()
+{
+    moo_update_totals();
+}
+
 function cryptCardNumber(ccn)
 {
     var rsa = forge.pki.rsa;
@@ -172,5 +212,6 @@ function cryptCardNumber(ccn)
 }
 
 moo_OrderTypeChanged(jQuery('#OrderType'));
+moo_InitZones();
 
 

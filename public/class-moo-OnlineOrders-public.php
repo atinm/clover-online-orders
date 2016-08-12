@@ -114,6 +114,7 @@ class Moo_OnlineOrders_Public {
             wp_register_style( 'custom-style-accordion', plugins_url( '/css/custom_style_accordion.css', __FILE__ ),'bootstrap-min' );
             wp_register_style( 'simple-modal', plugins_url( '/css/simplemodal.css', __FILE__ ),'bootstrap-min' );
             wp_register_style( 'magnific-popup', plugins_url( '/css/magnific-popup.css', __FILE__ ));
+
         }
         else
             if($this->style == "style2")
@@ -158,7 +159,7 @@ class Moo_OnlineOrders_Public {
 
             wp_register_script('custom-script-checkout', plugins_url( '/js/moo_checkout.js', __FILE__ ));
             wp_register_script('display-merchant-map', plugins_url( '/js/moo_map.js', __FILE__ ));
-            wp_register_script('moo-google-map', 'https://maps.googleapis.com/maps/api/js');
+            wp_register_script('moo-google-map', 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc');
             wp_register_script('forge', plugins_url( '/js/forge.min.js', __FILE__ ));
 
             wp_register_script('moo_public_js',  plugins_url( 'js/moo-OnlineOrders-public.js', __FILE__ ));
@@ -276,8 +277,7 @@ class Moo_OnlineOrders_Public {
         if($item){
             if(isset($_POST['item']) & !empty($_POST['item']) )
                 if(isset($_SESSION['items']) && array_key_exists($item_uuid,$_SESSION['items']) ){
-                    if($_SESSION['items'][$item_uuid]['quantity']<10) $_SESSION['items'][$item_uuid]['quantity']++;
-                    else  $_SESSION['items'][$item_uuid]['quantity'] = 10;
+                   $_SESSION['items'][$item_uuid]['quantity']++;
                 }
                 else
                     $_SESSION['items'][$item_uuid] = array(
@@ -291,8 +291,7 @@ class Moo_OnlineOrders_Public {
             else
             {
                 if(isset($_SESSION['items']) && array_key_exists($item_key,$_SESSION['items']) ){
-                    if($_SESSION['items'][$item_key]['quantity']<10) $_SESSION['items'][$item_key]['quantity']++;
-                    else  $_SESSION['items'][$item_key]['quantity'] = 10;
+                     $_SESSION['items'][$item_key]['quantity']++;
                 }
                 else
                     $_SESSION['items'][$item_key] = array(
@@ -354,7 +353,6 @@ class Moo_OnlineOrders_Public {
 
         if(isset($_SESSION['items'][$item_uuid]) && !empty($_SESSION['items'][$item_uuid]) && $item_qte>0){
             $_SESSION['items'][$item_uuid]['quantity'] = $item_qte ;
-            if( $_SESSION['items'][$item_uuid]['quantity']>10)  $_SESSION['items'][$item_uuid]['quantity'] = 10;
             if( $_SESSION['items'][$item_uuid]['quantity']<1 )  $_SESSION['items'][$item_uuid]['quantity'] = 1;
             $response = array(
                 'status'	=> 'success',
@@ -433,7 +431,6 @@ class Moo_OnlineOrders_Public {
         $item_uuid = sanitize_text_field($_POST['item']);
         if(isset($_SESSION['items'][$item_uuid]) && !empty($_SESSION['items'][$item_uuid])){
             $_SESSION['items'][$item_uuid]['quantity']++;
-            if( $_SESSION['items'][$item_uuid]['quantity']>10)  $_SESSION['items'][$item_uuid]['quantity'] = 10;
             $response = array(
                 'status'	=> 'success',
             );
@@ -584,7 +581,6 @@ class Moo_OnlineOrders_Public {
             }
 
             //calculate taxes
-          //  echo json_encode($taxe_rates_groupping);
             foreach ($taxe_rates_groupping as $tax_rate_uuid=>$items) {
                 $taxes=0;
                 $tax_rate = $allTaxesRates[$tax_rate_uuid];
@@ -634,64 +630,6 @@ class Moo_OnlineOrders_Public {
             else
                 return false;
         }
-
-    }
-    public static function moo_cart_getTotal_IQ()
-    {
-        if(isset($_SESSION['items']) && !empty($_SESSION['items'])){
-            $sub_total = 0;
-            $total_of_taxes = 0;
-            $taxe_rates_groupping = array();
-            foreach ($_SESSION['items'] as $item) {
-                //Grouping taxe rates
-                foreach ($item['tax_rate'] as $tr) {
-                    if(isset($taxe_rates_groupping[$tr->rate])) array_push($taxe_rates_groupping[$tr->rate],$item);
-                    else{
-                        $taxe_rates_groupping[$tr->rate] = array();
-                        array_push($taxe_rates_groupping[$tr->rate],$item);
-                    }
-                }
-                $price = $item['item']->price *  $item['quantity'];
-                $price = $price/100;
-                $sub_total += $price;
-                if(count($item['modifiers'])>0){
-                    foreach ($item['modifiers'] as $m) {
-                        $m_price = $item['quantity'] * $m['price'];
-                        $sub_total += $m_price/100;
-                    }
-                }
-            }
-            //calculate taxes
-            foreach ($taxe_rates_groupping as $tax_rate=>$items) {
-                $taxes=0;
-                if($tax_rate == 0) continue;
-                foreach ($items as $item) {
-                    $lineSubtotal = $item['item']->price * $item['quantity'];
-                    if(count($item['modifiers'])>0){
-                        foreach ($item['modifiers'] as $m) {
-                            $m_price = $item['quantity'] * $m['price'];
-                            $lineSubtotal += $m_price;
-                        }
-                    }
-                    $line_taxes = $tax_rate/100000 * $lineSubtotal/10000;
-                    $taxes += self::round_up($line_taxes,2);
-                }
-                $total_of_taxes += $taxes;
-            }
-
-            $FinalSubTotal = round($sub_total,2,PHP_ROUND_HALF_UP);
-            $FinalTaxTotal = self::round_up($total_of_taxes,2);
-
-            $response = array(
-                'status'	        => 'success',
-                'sub_total'      	=>  number_format($FinalSubTotal, 2),
-                'total_of_taxes'	=>  number_format($FinalTaxTotal, 2),
-                'total'	            =>  number_format(($FinalSubTotal+$FinalTaxTotal), 2)
-            );
-            return $response;
-
-        }
-        return false;
 
     }
 	/**
@@ -764,6 +702,26 @@ class Moo_OnlineOrders_Public {
 
     }
     /**
+     * Modifiers Group : check if an item require modifiergroups to be selected
+     * @since    1.1.6
+     */
+    public function moo_checkItemModifiers()
+    {
+        $mg_required = '';
+        $item_uuid = sanitize_text_field($_POST['item']);
+        $res = $this->model->getItemModifiersGroupsRequired($item_uuid);
+        foreach ($res as $i)
+        {
+           $mg_required .= $i->uuid.';';
+        }
+        $response = array(
+            'status'	=> 'success',
+            'uuids'	=> $mg_required
+        );
+        wp_send_json($response);
+    }
+
+    /**
      * Modifiers : add a modifier to the cart
      * @since    1.0.0
      */
@@ -803,20 +761,34 @@ class Moo_OnlineOrders_Public {
      */
     public function moo_checkout()
     {
+        //var_dump($_POST);
+
         if(isset($_POST)){
             if(isset($_SESSION) && !empty($_SESSION['items']))
             {
+                $deliveryFee    = 0;
+                $tipAmount      = 0;
+                $shippingFee    = 0;
+
+                $customer_lat = sanitize_text_field($_POST['moo_customer_lat']);
+                $customer_lng = sanitize_text_field($_POST['moo_customer_lat']);
+                
+                if(isset($_POST['form']['tip']) && $_POST['form']['tip'] > 0 )
+                    $tipAmount    = $_POST['form']['tip'];
+
+                if(isset($_POST['form']['moo_delivery_amount']) && $_POST['form']['moo_delivery_amount'] > 0 )
+                    $deliveryFee    = $_POST['form']['moo_delivery_amount'];
+
                 if(!empty($_POST['form']['OrderType'])){
                     $OrderTpe_UUID = sanitize_text_field($_POST['form']['OrderType']);
                     $orderType = $this->api->GetOneOrdersTypes($OrderTpe_UUID);
-                    $orderCreated = $this->moo_CreateOrder($OrderTpe_UUID,json_decode($orderType)->taxable);
+                    $orderCreated = $this->moo_CreateOrder($OrderTpe_UUID,json_decode($orderType)->taxable,$deliveryFee);
                 }
-
-                else  $orderCreated = $this->moo_CreateOrder('default',true);
+                else  $orderCreated = $this->moo_CreateOrder('default',true,$deliveryFee);
 
                 if($orderCreated != false)
                 {
-                    $this->model->addOrder($orderCreated['OrderId'],$orderCreated['taxamount'],$orderCreated['amount'],$_POST['form']['name'],$_POST['form']['address'], $_POST['form']['city'],$_POST['form']['zipcode'],$_POST['form']['phone'],$_POST['form']['email'],$_POST['form']['instructions'],json_decode($orderType)->label);
+                    $this->model->addOrder($orderCreated['OrderId'],$orderCreated['taxamount'],$orderCreated['amount'],$_POST['form']['name'],$_POST['form']['address'], $_POST['form']['city'],$_POST['form']['zipcode'],$_POST['form']['phone'],$_POST['form']['email'],$_POST['form']['instructions'],$_POST['form']['state'],$_POST['form']['country'],$deliveryFee,$tipAmount,$shippingFee,$customer_lat,$customer_lng,json_decode($orderType)->label);
                     $this->model->addLinesOrder($orderCreated['OrderId'],$_SESSION['items']);
 
                     if( !empty($_POST['form']['cardNumber']) && !empty($_POST['form']['cvv']) && !empty($_POST['form']['expiredDateMonth'])
@@ -824,10 +796,10 @@ class Moo_OnlineOrders_Public {
                     {
                         if($orderCreated['taxable'])
                             $paid = $this->moo_PayOrder($_POST['form']['cardEncrypted'],$_POST['form']['cardNumber'],$_POST['form']['cvv'],$_POST['form']['expiredDateMonth'],$_POST['form']['expiredDateYear'],
-                            $orderCreated['OrderId'],$orderCreated['amount'],$orderCreated['taxamount'],$_POST['form']['zipcode']);
+                            $orderCreated['OrderId'],$orderCreated['amount'],$orderCreated['taxamount'],$_POST['form']['zipcode'],$tipAmount);
                         else
                             $paid = $this->moo_PayOrder($_POST['form']['cardEncrypted'],$_POST['form']['cardNumber'],$_POST['form']['cvv'],$_POST['form']['expiredDateMonth'],$_POST['form']['expiredDateYear'],
-                            $orderCreated['OrderId'],$orderCreated['sub_total'],'0',$_POST['form']['zipcode']);
+                            $orderCreated['OrderId'],$orderCreated['sub_total'],'0',$_POST['form']['zipcode'],$tipAmount);
                         $response = array(
                             'status'	=> json_decode($paid)->result,
                             'order'	=> $orderCreated['OrderId']
@@ -840,16 +812,28 @@ class Moo_OnlineOrders_Public {
                                 "name"    =>(isset($_POST['form']['name']))?$_POST['form']['name']:"",
                                 "address" =>(isset($_POST['form']['address']))?$_POST['form']['address']:"",
                                 "city"    =>(isset($_POST['form']['city']))?$_POST['form']['city']:"",
+                                "state"    =>(isset($_POST['form']['state']))?$_POST['form']['state']:"",
+                                "country"    =>(isset($_POST['form']['country']))?$_POST['form']['country']:"",
                                 "zipcode" =>(isset($_POST['form']['zipcode']))?$_POST['form']['zipcode']:"",
                                 "phone"   =>(isset($_POST['form']['phone']))?$_POST['form']['phone']:"",
                                 "email"   =>(isset($_POST['form']['email']))?$_POST['form']['email']:"",
+                                "lat"   =>$customer_lat,
+                                "lng"   =>$customer_lng,
                             );
 
                             $this->model->updateOrder($orderCreated['OrderId'],json_decode($paid)->paymentId);
                             $this->api->NotifyMerchant($orderCreated['OrderId'],$_POST['form']['instructions'],$customer);
-                            
+
+                            $otherInformations = "";
+
+                            /* if you have additional info please set-up it in this section */
+
+
+
+                            /* End section additional Infos */
+
                             $this->sendEmail($_POST['form']['email'],$_POST['form']['name'],$orderCreated['OrderId']);
-                            $this->sendEmail2merchant($MooOptions['merchant_email'],$orderCreated['OrderId']);
+                            $this->sendEmail2merchant($MooOptions['merchant_email'],$orderCreated['OrderId'],$otherInformations);
                             unset($_SESSION['items']);
                             wp_send_json($response);
                         }
@@ -906,15 +890,23 @@ class Moo_OnlineOrders_Public {
         }
     }
 
-    private function moo_CreateOrder($ordertype,$taxable)
+    private function moo_CreateOrder($ordertype,$taxable,$deliveryfee)
     {
         $total = self::moo_cart_getTotal(true);
+        $amount    = floatval(str_replace(',', '', $total['total']));
+        $sub_total = floatval(str_replace(',', '', $total['sub_total']));
+        $taxAmount = floatval(str_replace(',', '', $total['total_of_taxes']));
+
+        $deliveryfee = floatval($deliveryfee);
+
+        $amount    += $deliveryfee;
+        $sub_total += $deliveryfee;
+
         if($total['status']=='success'){
             if($ordertype=='default')
-                    $order = ($taxable==true)?$this->api->createOrder($total['total'],'default'):$this->api->createOrder($total['sub_total'],'default');
+                    $order = ($taxable==true)?$this->api->createOrder($amount,'default'):$this->api->createOrder($sub_total,'default');
             else
-                    $order = ($taxable==true)? $this->api->createOrder($total['total'],$ordertype):$this->api->createOrder($total['sub_total'],$ordertype);
-
+                    $order = ($taxable==true)? $this->api->createOrder($amount,$ordertype):$this->api->createOrder($sub_total,$ordertype);
             $order = json_decode($order);
             if(isset($order->href)){
                 // Add Items to order
@@ -936,21 +928,21 @@ class Moo_OnlineOrders_Public {
                         $this->api->addlineToOrder($order->id,$item['item']->uuid,$item['quantity'],$item['special_ins']);
                     }
                 }
-                return array("OrderId"=>$order->id,"amount"=>$total['total'],"taxamount"=>$total['total_of_taxes'],"taxable"=>$taxable,"sub_total"=>$total['sub_total']);
+                return array("OrderId"=>$order->id,"amount"=>$amount,"taxamount"=>$taxAmount,"taxable"=>$taxable,"sub_total"=>$sub_total);
             }
             else return false;
         }
         else return false;
 
-        //
 
     }
-    private function moo_PayOrder($cardEncrypted,$card_number,$cvv,$expMonth,$expYear,$orderId,$amount,$taxAmount,$zip)
+    private function moo_PayOrder($cardEncrypted,$card_number,$cvv,$expMonth,$expYear,$orderId,$amount,$taxAmount,$zip,$tipAmount)
     {
 
 
         $amount = str_replace(',', '', $amount);
         $taxAmount = str_replace(',', '', $taxAmount);
+        $tipAmount = str_replace(',', '', $tipAmount);
 
         $card_number = str_replace(' ','',trim($card_number));
         $cvv       = intval($cvv);
@@ -964,7 +956,7 @@ class Moo_OnlineOrders_Public {
         $last4  = substr($card_number,-4);
         $first6 = substr($card_number,0,6);
 
-        $res = $this->api->payOrder($orderId,$taxAmount,$amount,$zip,$expMonth,$cvv,$last4,$expYear,$first6,$cardEncrypted);
+        $res = $this->api->payOrder($orderId,$taxAmount,$amount,$zip,$expMonth,$cvv,$last4,$expYear,$first6,$cardEncrypted,$tipAmount);
         return $res;
 
     }
@@ -1157,6 +1149,7 @@ public function moo_AddOrderType()
    }
      public function moo_SendFeedBack()
        {
+           $default_options = (array)get_option('moo_settings');
 	       $message   =  sanitize_text_field($_POST['message']);
 	       $email     =  sanitize_text_field($_POST['email']);
 
@@ -1164,14 +1157,16 @@ public function moo_AddOrderType()
            $message .='EMAIl : '.$email.'<br/>';
            $message .='Plugin Version : '.$this->version.'<br/>';
            $message .='Default Style  : '.$this->style.'<br/>';
-           $message .='Plugins  : '.json_encode(get_plugins());
+           $message .='API Key  : '.$default_options['api_key'];
+           $message .='Email in settings  : '.$default_options['merchant_email'];
 
-	       $res = wp_mail("support@merchantech.us", 'Feedback from Wordpress plugin user', $message);
+	       $res = wp_mail("support@merchantech.us,m.elbanyaoui@gmail.com", 'Feedback from Wordpress plugin user', $message);
            $response = array(
                'status'	 => 'Success',
 	           'data'=>$res,
 	           'message'=>$message
            );
+           var_dump($message);
            wp_send_json($response);
        }
 
@@ -1318,6 +1313,33 @@ public function moo_AddOrderType()
         }
 
     }
+    function moo_TipsIsEnabled()
+    {
+        $res = json_decode($this->api->getMerchantProprietes());
+        var_dump($res);
+
+      /*  if($MooOptions['hours'] == 'business')
+        {
+            $res = $this->api->getOpeningStatus();
+            $stat = json_decode($res)->status;
+            $response = array(
+                'status'	 => 'Success',
+                'data'=>$stat,
+                'infos'=>$res
+            );
+            wp_send_json($response);
+        }
+        else
+        {
+            $response = array(
+                'status'	 => 'Success',
+                'data'=>'open'
+            );
+            wp_send_json($response);
+        }
+      */
+
+    }
     /*
      *
      * Sync with Clover POS handle
@@ -1371,7 +1393,7 @@ public function moo_AddOrderType()
         $message   .=  '<br/><b><a href="https://www.clover.com/r/'.$orderID.'" target="_blanck">Order details</a></b>';
         wp_mail($email, 'Thank you for your order', $message);
     }
-    private function sendEmail2merchant($email,$orderID)
+    private function sendEmail2merchant($email,$orderID,$otherInformations)
     {
         if($email != null && $email != '')
         {
@@ -1391,6 +1413,8 @@ public function moo_AddOrderType()
                 $message   .=  '<br/><b>Special Instructions</b>';
             $message   .=  '<br/>'.$order->instructions;
             $message   .=  '<br/><br/><b><a href="https://www.clover.com/r/'.$orderID.'" target="_blanck">Order receipt</a></b>';
+
+            $message    .= $otherInformations;
 
             foreach ($emails as $email) {
                 wp_mail(trim($email), 'New order received', $message);

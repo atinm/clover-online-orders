@@ -1,13 +1,13 @@
-(function( $ ) {
-	'use strict';
+jQuery(document).ready(function($){
     window.moo_loading = '<svg xmlns="http://www.w3.org/2000/svg" width="44px" height="44px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="uil-default"><rect x="0" y="0" width="100" height="100" fill="none" class="bk"></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(0 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(30 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.08333333333333333s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(60 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.16666666666666666s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(90 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.25s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(120 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.3333333333333333s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(150 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.4166666666666667s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(180 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(210 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5833333333333334s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(240 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.6666666666666666s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(270 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.75s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(300 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.8333333333333334s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(330 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.9166666666666666s" repeatCount="indefinite"></animate></rect></svg>';
-   // Moo_ImportCategories();
+    window.moo_first_time = true; // this variable is used to make sure the an action is happen only one time
     moo_Update_stats();
     Moo_GetOrderTypes();
-})( jQuery );
+    $('.moo-color-field').wpColorPicker();
+});
 function tab_clicked(tab)
 {
-    var Nb_Tabs=8; // Number for tabs
+    var Nb_Tabs=10; // Number for tabs
     for(var i=1;i<=Nb_Tabs;i++) {
         jQuery('#MooPanel_tabContent'+i).hide();
         jQuery('#MooPanel_tab'+i).removeClass("MooPanel_Selected");
@@ -15,6 +15,14 @@ function tab_clicked(tab)
     jQuery('#MooPanel_tabContent'+tab).show();
     jQuery('#MooPanel_tab'+tab).addClass("MooPanel_Selected");
     jQuery('#MooPanel_sidebar').css('min-height',jQuery('#MooPanel_main').height()+72+'px');
+
+    if(tab==8 &&  window.moo_first_time == true)
+    {
+        moo_getLatLongforMapDa();
+        window.moo_first_time = false;
+        moo_setup_existing_zones();
+    }
+
 }
 function MooPanel_ImportItems(event)
 {
@@ -180,12 +188,6 @@ function MooChangeOT_showSa(uuid)
         }
     );
 };
-
-function MooPanelRefrechOT(e)
-{
-    e.preventDefault();
-    Moo_GetOrderTypes();
-}
 function moo_addordertype(e)
 {
     e.preventDefault();
@@ -235,13 +237,19 @@ function MooSendFeedBack(e)
     e.preventDefault();
     var msg =  jQuery("#Moofeedback").val();
     var email =  jQuery("#MoofeedbackEmail").val();
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_send_feedback','message':msg,'email':email}, function (data) {
-        if(data.status == "Success"){
-            alert("Thank you for your feedback.");
-            jQuery("#Moofeedback").val("");
-        }
+    if(msg == '')
+    {
+        alert("Please enter your message");
     }
-);
+    else
+    {
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_send_feedback','message':msg,'email':email}, function (data) {
+            if(data.status == "Success"){
+                alert("Thank you for your feedback.");
+                jQuery("#Moofeedback").val("");
+            }
+        });
+    }
 }
 /* Modifiers Panel */
 
@@ -291,7 +299,6 @@ function MooChangeCategory_Status(uuid)
 }
 
 /* Upload Imges function */
-console.log('uplaod image loaded');
 var media_uploader  = null;
 var moo_item_images = [];
 

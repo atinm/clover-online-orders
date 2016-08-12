@@ -150,12 +150,10 @@ function ChangeQuantity(item_uuid)
         html += 'Special Requests : <input id="MooItemSpecialInstructions" class="form-control" type="text" placeholder="Enter any special requests for this item"/> ';
     jQuery.fn.SimpleModal({btn_ok: 'Change', title: 'More options', contents: html,"model":"confirm",
         "callback": function(){
-                                console.log(currentQte);
-                                console.log(currentIns);
                                 var new_qte = jQuery('#MooQteForChange').val();
                                 var new_ins = jQuery('#MooItemSpecialInstructions').val();
 
-                               if(new_qte>0 && new_qte<=10 && new_qte != currentQte )
+                               if(new_qte>0 && new_qte != currentQte )
                                 jQuery.post(moo_params.ajaxurl,{'action':'moo_update_qte',"item":item_uuid,"qte":new_qte}, function (data) {
                                     if(data.status == 'success')
                                     {
