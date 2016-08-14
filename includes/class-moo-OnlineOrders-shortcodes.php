@@ -408,7 +408,7 @@ class Moo_OnlineOrders_Shortcodes {
                                                              </div>
                                                         <?php } ?>
                                                         <div style='text-align: center;margin-top: 10px;'>
-                                                            <?php echo '<div class="btn btn-danger" onclick="moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')"  >ADD TO YOUR CART</div>'; ?>
+                                                            <?php echo '<div class="btn btn-danger" onclick="moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.preg_replace('/[^A-Za-z0-9 \-]/', '', $item->name).'\',\''.$item->price.'\')"  >ADD TO YOUR CART</div>'; ?>
                                                             <div class="btn btn-info" onclick="javascript:jQuery.magnificPopup.close()">Close</div>
                                                         </div>
                                                     </form>
@@ -1059,7 +1059,7 @@ class Moo_OnlineOrders_Shortcodes {
                             </div>
                         </form>
 	                    <div style="text-align: center;padding: 10px">
-		                   <?php echo '<div class="btn btn-primary" onclick="moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.preg_replace('/[^A-Za-z0-9\-]/', '', $item->name).'\',\''.$item->price.'\')">ADD TO YOUR CART</div>'; ?>
+		                   <?php echo '<div class="btn btn-primary" onclick="moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.preg_replace('/[^A-Za-z0-9 \-]/', '', $item->name).'\',\''.$item->price.'\')">ADD TO YOUR CART</div>'; ?>
 	                    </div>
                     </div>
                 </div>
@@ -1242,7 +1242,7 @@ class Moo_OnlineOrders_Shortcodes {
                                     <textarea  class="form-control" name="" id="moo_popup_si" cols="30" rows="2"></textarea>
                                 </div>
                                 <div class="moo_popup_btns_action">
-                                    <a href="#" class="btn btn-primary" onclick="moo_addItemWithModifiersToCart(event,'<?php echo trim($item->uuid) ?>','<?php echo preg_replace('/[^A-Za-z0-9\-]/', '', $item->name); ?>','<?php echo trim($item->price) ?>')" >ADD TO CART</a>
+                                    <a href="#" class="btn btn-primary" onclick="moo_addItemWithModifiersToCart(event,'<?php echo trim($item->uuid) ?>','<?php echo preg_replace('/[^A-Za-z0-9 \-]/', '', $item->name); ?>','<?php echo trim($item->price) ?>')" >ADD TO CART</a>
                                     <a href="<?php echo $cart_page_url; ?>" class="btn btn-default">VIEW CART</a>
                                 </div>
                             </div>
@@ -1278,7 +1278,7 @@ class Moo_OnlineOrders_Shortcodes {
                                 </textarea>
                             </div>
                             <div class="moo_popup_btns_action">
-                                <a href="#" class="btn btn-primary" onclick="moo_cartv3_addtocart('<?php echo trim($item->uuid) ?>','<?php echo str_replace("'",'',$item->name) ?>')">ADD TO CART</a>
+                                <a href="#" class="btn btn-primary" onclick="moo_cartv3_addtocart('<?php echo trim($item->uuid) ?>','<?php echo preg_replace('/[^A-Za-z0-9 \-]/', '', $item->name) ?>')">ADD TO CART</a>
                                 <a href="<?php echo $cart_page_url; ?>" class="btn btn-default">VIEW CART</a>
                             </div>
                         </div>
