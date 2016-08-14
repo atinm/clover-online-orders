@@ -864,11 +864,11 @@ class moo_OnlineOrders_Admin {
 
 		//wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/moo-OnlineOrders-admin.js', array( 'jquery' ), $this->version, false );
 
-        wp_register_script('moo-publicAdmin-js', plugins_url( 'js/moo-OnlineOrders-admin.js', __FILE__ ));
+        wp_register_script('moo-publicAdmin-js', plugins_url( 'js/moo-OnlineOrders-admin.js', __FILE__ ),array(), $this->version);
 
         wp_register_script('moo-google-map', 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc&libraries=drawing');
-        wp_register_script('moo-map-js', plugins_url( 'js/moo_map.js', __FILE__ ));
-        wp_register_script('moo-map-da', plugins_url( 'js/moo_map_da.js', __FILE__ ));
+        wp_register_script('moo-map-js', plugins_url( 'js/moo_map.js', __FILE__ ),array(), $this->version);
+        wp_register_script('moo-map-da', plugins_url( 'js/moo_map_da.js', __FILE__ ),array(), $this->version);
         
         wp_register_script('magnific-modal', plugin_dir_url(dirname(__FILE__))."public/js/magnific.min.js");
         wp_enqueue_script('magnific-modal',array('jquery'));

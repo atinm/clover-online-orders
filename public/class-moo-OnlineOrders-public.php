@@ -96,36 +96,36 @@ class Moo_OnlineOrders_Public {
 	public function enqueue_styles() {
 
 
-        wp_register_style( 'bootstrap-css',plugins_url( '/css/bootstrap.min.css', __FILE__ ));
+        wp_register_style( 'bootstrap-css',plugins_url( '/css/bootstrap.min.css', __FILE__ ),array(), $this->version);
         wp_enqueue_style( 'bootstrap-css' );
 
-        wp_register_style( 'font-awesome',plugins_url( '/css/font-awesome.css', __FILE__ ));
+        wp_register_style( 'font-awesome',plugins_url( '/css/font-awesome.css', __FILE__ ),array(), $this->version);
         wp_enqueue_style( 'font-awesome' );
 
-        wp_register_style( 'toastr-css',plugins_url( '/css/toastr.css', __FILE__ ));
+        wp_register_style( 'toastr-css',plugins_url( '/css/toastr.css', __FILE__ ),array(), $this->version);
         wp_enqueue_style( 'toastr-css' );
 
         wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/moo-OnlineOrders-public.css', array(), $this->version, 'all' );
 
-        wp_register_style( 'custom-style-cart3', plugins_url( '/css/custom_style_cart3.css', __FILE__ ),'bootstrap-min' );
+        wp_register_style( 'custom-style-cart3', plugins_url( '/css/custom_style_cart3.css', __FILE__ ),'bootstrap-min', $this->version );
 
 
         if($this->style == "style1"){
-            wp_register_style( 'custom-style-accordion', plugins_url( '/css/custom_style_accordion.css', __FILE__ ),'bootstrap-min' );
-            wp_register_style( 'simple-modal', plugins_url( '/css/simplemodal.css', __FILE__ ),'bootstrap-min' );
-            wp_register_style( 'magnific-popup', plugins_url( '/css/magnific-popup.css', __FILE__ ));
+            wp_register_style( 'custom-style-accordion', plugins_url( '/css/custom_style_accordion.css', __FILE__ ),'bootstrap-min',$this->version );
+            wp_register_style( 'simple-modal', plugins_url( '/css/simplemodal.css', __FILE__ ),'bootstrap-min', $this->version );
+            wp_register_style( 'magnific-popup', plugins_url( '/css/magnific-popup.css', __FILE__ ),array(), $this->version);
 
         }
         else
             if($this->style == "style2")
             {
-                wp_register_style( 'custom-style-items', plugins_url( '/css/items.css', __FILE__ ),'bootstrap-min' );
+                wp_register_style( 'custom-style-items', plugins_url( '/css/items.css', __FILE__ ),'bootstrap-min', $this->version );
             }
             else
             {
-                wp_register_style( 'custom-style-accordion', plugins_url( '/css/custom_style_accordion.css', __FILE__ ),'bootstrap-min' );
-                wp_register_style( 'custom-style-items', plugins_url( '/css/items-style3.css', __FILE__ ),'bootstrap-min' );
-                wp_register_style( 'magnific-popup', plugins_url( '/css/magnific-popup.css', __FILE__ ));
+                wp_register_style( 'custom-style-accordion', plugins_url( '/css/custom_style_accordion.css', __FILE__ ),'bootstrap-min', $this->version );
+                wp_register_style( 'custom-style-items', plugins_url( '/css/items-style3.css', __FILE__ ),'bootstrap-min', $this->version );
+                wp_register_style( 'magnific-popup', plugins_url( '/css/magnific-popup.css', __FILE__ ),array(), $this->version);
             }
 
 
@@ -157,24 +157,24 @@ class Moo_OnlineOrders_Public {
             wp_register_script('toastr-js', plugins_url( '/js/toastr.min.js', __FILE__ ));
             wp_enqueue_script('toastr-js',array('jquery'));
 
-            wp_register_script('custom-script-checkout', plugins_url( '/js/moo_checkout.js', __FILE__ ));
-            wp_register_script('display-merchant-map', plugins_url( '/js/moo_map.js', __FILE__ ));
+            wp_register_script('custom-script-checkout', plugins_url( '/js/moo_checkout.js', __FILE__ ),array(), $this->version);
+            wp_register_script('display-merchant-map', plugins_url( '/js/moo_map.js', __FILE__ ),array(), $this->version);
             wp_register_script('moo-google-map', 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc');
             wp_register_script('forge', plugins_url( '/js/forge.min.js', __FILE__ ));
 
-            wp_register_script('moo_public_js',  plugins_url( 'js/moo-OnlineOrders-public.js', __FILE__ ));
+            wp_register_script('moo_public_js',  plugins_url( 'js/moo-OnlineOrders-public.js', __FILE__ ),array(), $this->version);
 		    wp_enqueue_script('moo_public_js', array( 'jquery' ));
 
-            wp_register_script('script-cart-v3', plugins_url( '/js/cart_v3.js', __FILE__ ));
+            wp_register_script('script-cart-v3', plugins_url( '/js/cart_v3.js', __FILE__ ),array(), $this->version);
             wp_enqueue_script('script-cart-v3', array( 'jquery' ));
 
             if($this->style == "style1"){
-                wp_register_script('custom-script-accordion', plugins_url( '/js/custom_script_store_accordion.js', __FILE__ ));
+                wp_register_script('custom-script-accordion', plugins_url( '/js/custom_script_store_accordion.js', __FILE__ ),array(), $this->version);
                 wp_register_script('simple-modal', plugins_url( '/js/simple-modal.js', __FILE__ ));
                 wp_register_script('magnific-modal', plugins_url( '/js/magnific.min.js', __FILE__ ));
                 wp_register_script('jquery-accordion', plugins_url( '/js/jquery.accordion.js', __FILE__ ));
 
-                wp_register_script('script-cart-v2', plugins_url( '/js/cart_v2.js', __FILE__ ));
+                wp_register_script('script-cart-v2', plugins_url( '/js/cart_v2.js', __FILE__ ),array(), $this->version);
                 wp_enqueue_script('script-cart-v2', array( 'jquery' ));
             }
             else
@@ -186,10 +186,10 @@ class Moo_OnlineOrders_Public {
                 }
                 else
                 {
-                    wp_register_script('custom-script-accordion', plugins_url( '/js/custom_script_store_accordion.js', __FILE__ ));
-                    wp_register_script('jquery-accordion', plugins_url( '/js/jquery.accordion.js', __FILE__ ));
-                    wp_register_script('magnific-modal', plugins_url( '/js/magnific.min.js', __FILE__ ));
-                    wp_register_script('custom-script-items', plugins_url( '/js/custom-script-style3.js', __FILE__ ));
+                    wp_register_script('custom-script-accordion', plugins_url( '/js/custom_script_store_accordion.js', __FILE__ ),array(), $this->version);
+                    wp_register_script('jquery-accordion', plugins_url( '/js/jquery.accordion.js', __FILE__ ),array(), $this->version);
+                    wp_register_script('magnific-modal', plugins_url( '/js/magnific.min.js', __FILE__ ),array(), $this->version);
+                    wp_register_script('custom-script-items', plugins_url( '/js/custom-script-style3.js', __FILE__ ),array(), $this->version);
                 }
 
             wp_register_script('moo_validate_forms',  plugins_url( 'js/jquery.validate.min.js', __FILE__ ));
