@@ -4,7 +4,7 @@ Donate link: http://merchantech.us/
 Tags: clover,online orders for clover,merchantech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover
 Requires at least: 3.0.1
 Tested up to: 3.0
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -84,6 +84,11 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 7. Example of menu with images
 
 == Changelog ==
+= 1.1.7 =
+* Improving The CART CSS
+* remove qty limit
+* Removing Style 2
+* fixing map empty in checkout
 = 1.1.6 =
 * Adding delivery area
 * Adding tips

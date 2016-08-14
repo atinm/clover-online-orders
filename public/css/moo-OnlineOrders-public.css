@@ -178,8 +178,7 @@
 {
     padding: 5px;
     text-align: center;
-    color: #000;
-    font-size: 17px;
+    font-size: 12px;
     margin-bottom: 20px;
 }
 .Moo_Copyright a
@@ -223,4 +222,8 @@
 select
 {
     padding: 0px !important;
+}
+.moo_loading
+{
+    display: none;
 }

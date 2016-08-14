@@ -12,8 +12,7 @@ function moo_updateCart()
                     '</thead><tbody>';
         if(data.status=="success")
         {
-            var nb_items=0;
-            // console.log(data.data);
+            var nb_items = 0;
             for(item in data.data)
             {
                 if(item == "") continue;
@@ -24,7 +23,7 @@ function moo_updateCart()
                 var tax = price*product.tax_rate/100;
                 var subtotal = price;
                 nb_items++;
-
+/*
                 if(Object.keys(product.modifiers).length>0){
 
                     //line of the cart
@@ -57,6 +56,29 @@ function moo_updateCart()
                     html +='<td id="moo_itemsubtotal_'+item+'">$'+subtotal.toFixed(2)+'</td>'; //Sub total
                     html +='<td><i class="fa fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item+'\')"></i></td>'; //Controlles Btn
                     html +="</tr>";
+
+                    //Fin line
+
+
+                }
+            */
+                if(Object.keys(product.modifiers).length>0){
+                    //line of the cart
+                    html +="<tr id='moo_cart_line_"+item+"'>";
+                    html +="<td  style='cursor: pointer' onclick=\"ChangeQuantity('"+item+"')\" ><strong>"+product.item.name+"</strong>"; //The name of the item
+                    // the Modifiers
+                    for(uuid in product.modifiers){
+                        var modifier = product.modifiers[uuid];
+                        var modifierPrice = modifier.price/100;
+                        html +='<br/><small>- '+modifier.name+': $'+modifierPrice.toFixed(2)+'</small>';
+                        subtotal += modifierPrice*product.quantity;
+                    }
+                    html +="</td>";
+
+                    html +='<td>'+product.quantity+'</td>'; //qty
+                    html +='<td>$'+subtotal.toFixed(2)+'</td>'; //Sub total  ( price + taxes )
+                    html +='<td><i class="fa fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item+'\')"></i></td>'; //Controlles Btn
+                    html +='</tr>';
 
                     //Fin line
 
@@ -192,109 +214,216 @@ function moo_emptyCart()
     });
 }
 
-function moo_addModifiers(item_name)
+// function moo_addModifiers(item_name)
+// {
+//     var selected_modifies = jQuery("#moo_form_modifiers").serializeArray();
+//     var Mgroups = {};
+//     var Modifiers = [];
+//     for(m in selected_modifies)
+//     {
+//         var modifier = selected_modifies[m];
+//         if(modifier.value=='on'){
+//             var name = modifier.name; //the format is : moo_modifiers['item','modifierGroup','Modifier']
+//             var string = name.split(','); // the new format is a table
+//             var item = string[0].substr(15);  // 15 is the length of moo_modifiers['
+//             item = item.substr(0,item.length-1); // remove the last '
+//
+//             var modifierGroup = string[1].substr(1);
+//             modifierGroup = modifierGroup.substr(0,modifierGroup.length-1);
+//
+//             var modif = string[2].substr(1);
+//             modif = modif.substr(0,modif.length-2);
+//
+//             if(item == '' || modifierGroup == '' || modif == '') continue;
+//
+//             if(typeof Mgroups[modifierGroup] === 'undefined') Mgroups[modifierGroup] = 1;
+//             else Mgroups[modifierGroup] +=1;
+//
+//             var modifier = {
+//                 "item":item,
+//                 "modifier": modif,
+//                 "modifierGroup": modifierGroup
+//             };
+//             Modifiers.push(modifier);
+//         }
+//     }
+//
+//     var flag = false;
+//
+//     if(Object.keys(Mgroups).length == 0) {
+//         return false;
+//     }
+//     /* verify the min and max in modifier Group */
+//     var compteur = 0;
+//     for(mg in Mgroups){
+//
+//         jQuery.post(moo_params.ajaxurl,{'action':'moo_modifiergroup_getlimits',"modifierGroup":mg}, function (data) {
+//             if(data.status == 'success' )
+//             {
+//                 /* If the min is not null then we display a message if the custmet not choose the minimum */
+//                 if(data.min != null && data.min != 0 && Mgroups[mg] < data.min) {
+//                     toastr.error("You must choose "+data.min+" modifier in "+data.name);
+//                     flag=true;
+//                 }
+//                 if(data.max!= null && data.max != 0 && Mgroups[mg] > data.max) {
+//                     toastr.error("You can't choose more than "+ data.max+" modifier in "+data.name);
+//                     flag=true;
+//                 }
+//             }
+//             else
+//             {
+//                 flag = true;
+//             }
+//         }).done(function () {
+//             compteur++;
+//             if(compteur == Object.keys(Mgroups).length)
+//             {
+//                 if(!flag)
+//                 {
+//                     //send the request to the server
+//                     jQuery.post(moo_params.ajaxurl,{'action':'moo_modifier_add',"modifiers":Modifiers}, function (data) {
+//                         if(data.status == 'success' )
+//                         {
+//                             toastr.success(item_name+' added to cart');
+//                             moo_updateCart();
+//                             return true;
+//                         }
+//                     })
+//
+//                 }
+//                 else
+//                 {
+//                     return 'error';
+//                 }
+//
+//             }
+//         });
+//
+//
+//
+//     }
+// }
+function moo_addModifiers(event,item_name,item_uuid,item_price)
 {
-    var selected_modifies = jQuery("#moo_form_modifiers").serializeArray();
-    var Mgroups = {};
-    var Modifiers = [];
-    for(m in selected_modifies)
-    {
-        var modifier = selected_modifies[m];
-        if(modifier.value=='on'){
-            var name = modifier.name; //the format is : moo_modifiers['item','modifierGroup','Modifier']
-            var string = name.split(','); // the new format is a table
-            var item = string[0].substr(15);  // 15 is the length of moo_modifiers['
-            item = item.substr(0,item.length-1); // remove the last '
-
-            var modifierGroup = string[1].substr(1);
-            modifierGroup = modifierGroup.substr(0,modifierGroup.length-1);
-
-            var modif = string[2].substr(1);
-            modif = modif.substr(0,modif.length-2);
-
-            if(item == '' || modifierGroup == '' || modif == '') continue;
-
-            if(typeof Mgroups[modifierGroup] === 'undefined') Mgroups[modifierGroup] = 1;
-            else Mgroups[modifierGroup] +=1;
-
-            var modifier = {
-                "item":item,
-                "modifier": modif,
-                "modifierGroup": modifierGroup
-            };
-            Modifiers.push(modifier);
-        }
-    }
-
-    var flag = false;
-
-    if(Object.keys(Mgroups).length == 0) {
-        return false;
-    }
-    /* verify the min and max in modifier Group */
-    var compteur = 0;
-    for(mg in Mgroups){
-
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_modifiergroup_getlimits',"modifierGroup":mg}, function (data) {
-            if(data.status == 'success' )
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_check_item_modifiers',"item":item_uuid}, function (data) {
+        if(data.status == 'success')
+        {
+            var required_modifiers_groups = "";
+            required_modifiers_groups = data.uuids.split(';');
+            var selected_modifiers = jQuery("#moo_form_modifiers").serializeArray();
+            var Mgroups = {};
+            var Modifiers = [];
+            for(m in selected_modifiers)
             {
-                /* If the min is not null then we display a message if the custmet not choose the minimum */
-                if(data.min != null && data.min != 0 && Mgroups[mg] < data.min) {
-                    toastr.error("You must choose "+data.min+" modifier in "+data.name);
-                    flag=true;
-                }
-                if(data.max!= null && data.max != 0 && Mgroups[mg] > data.max) {
-                    toastr.error("You can't choose more than "+ data.max+" modifier in "+data.name);
-                    flag=true;
+                var modifier = selected_modifiers[m];
+                if(modifier.value=='on'){
+                    var name = modifier.name; //the format is : moo_modifiers['item','modifierGroup','Modifier']
+                    var string = name.split(','); // the new format is a table
+                    var item = string[0].substr(15);  // 15 is the length of moo_modifiers['
+                    item = item.substr(0,item.length-1); // remove the last '
+
+                    var modifierGroup = string[1].substr(1);
+                    modifierGroup = modifierGroup.substr(0,modifierGroup.length-1);
+
+                    var modif = string[2].substr(1);
+                    modif = modif.substr(0,modif.length-2);
+
+                    if(item == '' || modifierGroup == '' || modif == '') continue;
+
+                    if(typeof Mgroups[modifierGroup] === 'undefined') Mgroups[modifierGroup] = 1;
+                    else Mgroups[modifierGroup] +=1;
+
+                    var modifier = {
+                        "item":item,
+                        "modifier": modif,
+                        "modifierGroup": modifierGroup
+                    };
+                    Modifiers.push(modifier);
                 }
             }
-            else
+
+            var flag = false;
+
+            if(Object.keys(Mgroups).length == 0 && Object.keys(required_modifiers_groups).length <= 1)
             {
-                flag = true;
+                jQuery.magnificPopup.close();
+                moo_addToCart(event,item_uuid,item_name,item_price);
+                return false;
             }
-        }).done(function () {
-            compteur++;
-            if(compteur == Object.keys(Mgroups).length)
-            {
-                if(!flag)
+            /* verify if required modifier Groups are chooses */
+            for(mg in required_modifiers_groups){
+                var element = required_modifiers_groups[mg]
+                if(element != "")
                 {
-                    //send the request to the server
-                    jQuery.post(moo_params.ajaxurl,{'action':'moo_modifier_add',"modifiers":Modifiers}, function (data) {
-                        if(data.status == 'success' )
-                        {
-                            toastr.success(item_name+' added to cart');
-                            moo_updateCart();
-                            return true;
+                    if(Object.keys(Mgroups).indexOf(element) == -1)
+                    {
+                        toastr.error("You didn't choose all required modifiers");
+                        flag=true;
+                        return;
+                    }
+                }
+            }
+            /* verify the min and max in modifier Group */
+            var compteur = 0;
+            for(mg in Mgroups){
+                jQuery.post(moo_params.ajaxurl,{'action':'moo_modifiergroup_getlimits',"modifierGroup":mg}, function (data) {
+                    if(data.status == 'success' )
+                    {
+
+                        /* If the min is not null then we display a message if the custmet not choose the minimum */
+                        if(data.min != null && data.min != 0 && Mgroups[mg] < data.min) {
+                            toastr.error("You must choose "+data.min+" modifier in "+data.name);
+                            flag=true;
                         }
-                    })
+                        if(data.max!= null && data.max != 0 && Mgroups[mg] > data.max) {
+                            toastr.error("You can't choose more than "+ data.max+" modifier in "+data.name);
+                            flag=true;
+                        }
+                    }
+                    else
+                    {
+                        flag = true;
+                    }
+                }).done(function () {
+                    compteur++;
+                    if(compteur == Object.keys(Mgroups).length)
+                    {
+                        if(!flag)
+                        {
+                            //send the request to the server
+                            jQuery.post(moo_params.ajaxurl,{'action':'moo_modifier_add',"modifiers":Modifiers}, function (data) {
+                                if(data.status == 'success' )
+                                {
+                                    toastr.success(item_name+' added to cart');
+                                    moo_updateCart();
+                                    jQuery.magnificPopup.close();
+                                    return true;
+                                }
+                            })
+                        }
+                        else
+                        {
+                            return 'error';
+                        }
 
-                }
-                else
-                {
-                    return 'error';
-                }
-
+                    }
+                });
             }
-        });
-
-
-
-    }
+        }
+        else
+        {
+            toastr.error('Please verify your internet connection');
+            jQuery.magnificPopup.close();
+        }
+    });
 }
 function moo_addItemWithModifiersToCart(event,item_uuid,item_name,item_price)
 {
-    if(moo_addModifiers(item_name)== false ){
+    event.preventDefault();
+    if(moo_addModifiers(event,item_name,item_uuid,item_price)== false ){
         if(item_price==0)
         {
             toastr.error('Please choose a modifier');
         }
-            else
-        {
-            moo_addToCart(event,item_uuid,item_name,item_price);
-            jQuery.magnificPopup.close();
-        }
-
     }
-    else
-       jQuery.magnificPopup.close();
 }

@@ -21,7 +21,12 @@
 
        if(data.status =='Success' && data.data=='close')
         {
-            var store_time = JSON.parse(data.infos).store_time;
+            var store_time = {}
+            try {
+                store_time = JSON.parse(data.infos).store_time;
+            } catch (e) {
+                console.error("Parsing error:", e);
+            }
             
             if(store_time.length>0)
                 var html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '+store_time+'<br/>Currently Not Available - Order in Advance.</div>';
@@ -33,6 +38,9 @@
       //  jQuery('#moo_OnlineStoreContainer').prepend(html);
     });
 
+    jQuery( document ).ready(function() {
+        jQuery('#moo_OnlineStoreContainer').removeClass('moo_loading')
+    });
 
 })( jQuery );
 

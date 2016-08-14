@@ -709,7 +709,7 @@ class Moo_OnlineOrders_Shortcodes {
                                         </div>
                                         <div class="form-group">
                                             <label for="country">Country:</label>
-                                            <input class="form-control" name="country" id="country" onchange="moo_address_changed()">
+                                            <input class="form-control" name="country" id="country" value="United States" onchange="moo_address_changed()">
                                         </div>
                                 </div>
                             <div class="col-md-12">
@@ -831,7 +831,7 @@ class Moo_OnlineOrders_Shortcodes {
                                     <?php if($MooOptions['default_style']=='style3'){ ?><label class="moo-product-image">Image</label><?php  }?>
                                     <label class="moo-product-details" <?php if($MooOptions['default_style']!='style3'){echo 'style="width:57%"';}?> >Product</label>
                                     <label class="moo-product-price">Price</label>
-                                    <label class="moo-product-quantity">Quantity</label>
+                                    <label class="moo-product-quantity">Qty</label>
                                     <label class="moo-product-line-price" style="width: 21%">Total</label>
                                 </div>
                                 <?php foreach ($_SESSION['items'] as $key=>$line) {
@@ -1369,7 +1369,7 @@ class Moo_OnlineOrders_Shortcodes {
         if($custom_css != null)
             $html_code .= '<style type="text/css">'.$custom_css.'</style>';
 
-        $html_code .=  '<div id="moo_OnlineStoreContainer">';
+        $html_code .=  '<div id="moo_OnlineStoreContainer" class="moo_loading">';
         $style = $MooOptions["default_style"];
         if($style == "style1")
             $html_code .= self::AllItemsAcordion($atts, $content);

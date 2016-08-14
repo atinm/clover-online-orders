@@ -604,12 +604,17 @@ class Moo_OnlineOrders_Public {
 
             $FinalSubTotal = round($sub_total,2,PHP_ROUND_HALF_UP);
             $FinalTaxTotal = round($total_of_taxes,2,PHP_ROUND_HALF_UP);
+            $FinalTotal    = $FinalSubTotal+$FinalTaxTotal;
+
+            $FinalSubTotal = str_replace(',', '', number_format($FinalSubTotal,2));
+            $FinalTaxTotal = str_replace(',', '', number_format($FinalTaxTotal,2));
+            $FinalTotal = str_replace(',', '', number_format($FinalTotal,2));
 
             $response = array(
                 'status'	        => 'success',
-                'sub_total'      	=> number_format($FinalSubTotal,2),
-                'total_of_taxes'	=> number_format($FinalTaxTotal,2),
-                'total'	            => number_format(($FinalSubTotal+$FinalTaxTotal),2)
+                'sub_total'      	=> $FinalSubTotal,
+                'total_of_taxes'	=> $FinalTaxTotal,
+                'total'	            => $FinalTotal
             );
             if(!$internal)
               wp_send_json($response);
@@ -833,7 +838,7 @@ class Moo_OnlineOrders_Public {
                             /* End section additional Infos */
 
                             $this->sendEmail($_POST['form']['email'],$_POST['form']['name'],$orderCreated['OrderId']);
-                            $this->sendEmail2merchant($MooOptions['merchant_email'],$orderCreated['OrderId'],$otherInformations);
+                            $this->sendEmail2merchant($MooOptions['merchant_email'],$orderCreated['OrderId'],$otherInformations,$deliveryFee);
                             unset($_SESSION['items']);
                             wp_send_json($response);
                         }
@@ -1157,10 +1162,10 @@ public function moo_AddOrderType()
            $message .='EMAIl : '.$email.'<br/>';
            $message .='Plugin Version : '.$this->version.'<br/>';
            $message .='Default Style  : '.$this->style.'<br/>';
-           $message .='API Key  : '.$default_options['api_key'];
+           $message .='API Key  : '.$default_options['api_key'].'<br/>';
            $message .='Email in settings  : '.$default_options['merchant_email'];
 
-	       $res = wp_mail("support@merchantech.us,m.elbanyaoui@gmail.com", 'Feedback from Wordpress plugin user', $message);
+	       $res = wp_mail("support@merchantech.us", 'Feedback from Wordpress plugin user', $message);
            $response = array(
                'status'	 => 'Success',
 	           'data'=>$res,
@@ -1393,7 +1398,7 @@ public function moo_AddOrderType()
         $message   .=  '<br/><b><a href="https://www.clover.com/r/'.$orderID.'" target="_blanck">Order details</a></b>';
         wp_mail($email, 'Thank you for your order', $message);
     }
-    private function sendEmail2merchant($email,$orderID,$otherInformations)
+    private function sendEmail2merchant($email,$orderID,$otherInformations,$deliveryFee)
     {
         if($email != null && $email != '')
         {
@@ -1406,12 +1411,16 @@ public function moo_AddOrderType()
             $message   .=  '<br/>Name : '.$order->p_name;
             $message   .=  '<br/>Address : '.$order->p_address;
             $message   .=  '<br/>City : '.$order->p_city;
+            $message   .=  '<br/>State : '.$order->p_state;
             $message   .=  '<br/>ZipCode : '.$order->p_zipcode;
             $message   .=  '<br/>Email : '.$order->p_email;
             $message   .=  '<br/>Phone : '.$order->p_phone;
             if($order->instructions != '')
                 $message   .=  '<br/><b>Special Instructions</b>';
             $message   .=  '<br/>'.$order->instructions;
+            if($deliveryFee != 0)
+                $message   .=  '<br/><b>Delivery Fee : $'.$deliveryFee.'</b>';
+
             $message   .=  '<br/><br/><b><a href="https://www.clover.com/r/'.$orderID.'" target="_blanck">Order receipt</a></b>';
 
             $message    .= $otherInformations;

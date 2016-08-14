@@ -138,7 +138,12 @@ jQuery('#moo_cardcvv').payment('formatCardCVC');
 function moo_OrderTypeChanged(obj)
 {
     var OrderTypeID = jQuery(obj).val();
-    var moo_delivery_areas  = JSON.parse(moo_delivery_zones);
+    var moo_delivery_areas = null;
+    try {
+        moo_delivery_areas  = JSON.parse(moo_delivery_zones);
+    } catch (e) {
+        console.error("Parsing error:", e);
+    }
 
     for(i in moo_OrderTypes)
     {
@@ -161,7 +166,7 @@ function moo_OrderTypeChanged(obj)
                 jQuery('#state').parent().show();
                 jQuery('#country').parent().show();
                 jQuery('#moo-cart-delivery-fee').parent().show();
-                if(moo_delivery_areas.length >= 1) jQuery('#moo-delivery-details').show();
+                if(moo_delivery_areas != null && moo_delivery_areas.length >= 1) jQuery('#moo-delivery-details').show();
                 moo_calculate_delivery_fee();
                 moo_update_totals();
             }

@@ -409,20 +409,14 @@ class moo_OnlineOrders_Admin {
                                     <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/style1.jpg" ?>" align="middle" />
                                 </label>
                                 <label style="display:block; margin-bottom:8px;">
-                                    <input name="moo_settings[default_style]" id="MooDefaultStyle" type="radio" value="style2" <?php echo ($MooOptions["default_style"]=="style2")?"checked":""; ?> >
-                                    <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/style2.jpg" ?>" align="middle" />
-                                </label>
-                                <label style="display:block; margin-bottom:8px;">
                                     <input name="moo_settings[default_style]" id="MooDefaultStyle" type="radio" value="style3" <?php echo ($MooOptions["default_style"]=="style3")?"checked":""; ?> >
                                     <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/style3.jpg" ?>" align="middle" />
                                 </label>
                             </div>
-
 	                     </div>
 	                    <div style="text-align: center; margin: 20px;">
 		                    <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
 	                    </div>
-
                     </div>
                     </form>
                 </div>

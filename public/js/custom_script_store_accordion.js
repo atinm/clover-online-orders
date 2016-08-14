@@ -14,75 +14,16 @@ jQuery(document).ready(function() {
         type: 'ajax'
     });
 
-/*
-    var cart_offset = jQuery('.moo_cart').offset();
-    var cart_width = jQuery('.moo_cart').outerWidth();
-   
-    if(! (typeof cart_offset === 'undefined')){
-        var scrollIntervalID = setInterval(stickIt, 10);
-    }
-    function stickIt(){
-            if (jQuery(window).scrollTop() >= (cart_offset.top)) {
-                jQuery('.moo_cart').addClass('Fixedthecart');
-                jQuery('.moo_cart').css('left',cart_offset.left);
-                jQuery('.moo_cart').css('width',cart_width);
-
-
-            } else {
-                jQuery('.moo_cart').removeClass('Fixedthecart');
-                jQuery('.moo_cart').css('left','');
-                jQuery('.moo_cart').css('width','100%');
-               // jQuery('#Moo_FileterContainer').addClass('moo_items');
-
-            }
-        // console.log("Div 0 "+jQuery('#Moo_ItemContainer').width());
-        //console.log("Div 1 "+jQuery('#Moo_FileterContainer').width());
-    }
-    jQuery( window ).resize(function() {
-        jQuery('.moo_cart').css('left','');
-        jQuery('.moo_cart').css('width','100%');
-        cart_offset = jQuery('.moo_cart').offset();
-        cart_width = jQuery('.moo_cart').outerWidth();
-    });
-*/
-    var btn_offset = jQuery('#moo_BtnAddInModifiers').offset();
-    var btn_width = jQuery('#moo_BtnAddInModifiers').outerWidth();
-
-    if(! (typeof btn_offset === 'undefined')){
-        var scrollIntervalID = setInterval(stickIt, 10);
-    }
-    function stickIt(){
-        if (jQuery(window).scrollTop() >= (btn_offset.top)) {
-            jQuery('#moo_BtnAddInModifiers').addClass('Fixedthecart');
-            jQuery('#moo_BtnAddInModifiers').css('left',btn_offset.left);
-            jQuery('#moo_BtnAddInModifiers').css('width',btn_width);
-        } else {
-            jQuery('#moo_BtnAddInModifiers').removeClass('Fixedthecart');
-            jQuery('#moo_BtnAddInModifiers').css('left','');
-            jQuery('#moo_BtnAddInModifiers').css('width','100%');
-        }
-    }
-    jQuery( window ).resize(function()
-    {
-        btn_offset = jQuery('#moo_BtnAddInModifiers').offset();
-        btn_width =  jQuery('#moo_BtnAddInModifiers').outerWidth();
-    });
 });
 function moo_addToCart(e,item_uuid,name,price)
 {
     e.preventDefault();
-
     if(MOO_CART[item_uuid])
     {
-        if(MOO_CART[item_uuid].quantity<10){
-                MOO_CART[item_uuid].quantity++;
-                toastr.success(name+ "'s quantity updated");
-        }
-        else  {
-            MOO_CART[item_uuid].quantity=10;
-            toastr.error("You can't add more than 10 item");
-        }
+        MOO_CART[item_uuid].quantity++;
+        toastr.success(name+ "'s quantity updated");
         jQuery('#moo_cart_line_'+item_uuid+'>td:nth-child(2)').html(MOO_CART[item_uuid].quantity);
+        jQuery('#moo_cart_line_'+item_uuid+'>td:nth-child(3)').html('$'+(parseInt(MOO_CART[item_uuid].quantity)*price/100).toFixed(2));
 
     }
     else {
@@ -102,6 +43,7 @@ function moo_addToCart(e,item_uuid,name,price)
         //console.log(MOO_CART);
     })
 }
+// Add one line To the Cart just html code )
 function addLineToHtmlCart(item_name,item_price,item_uuid)
 {
     var price = item_price/100
@@ -116,24 +58,13 @@ function addLineToHtmlCart(item_name,item_price,item_uuid)
     else jQuery(".moo_cart .CartContent>table>tbody").html(html);
 
 }
-function ItemHasModifiers(element,event,item_uuid,item_name,item_price)
-{
-    event.preventDefault();
-    jQuery('#Moo_ItemWithModifierContainer').html('Loading ...');
-    var html = "<h4>Sorry there is no Modifier</h4>";
 
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_getitemmodifiers',"item_uuid":item_uuid}, function (data) {
-        if(data)
-        {
-            html = data;
-            jQuery('#Moo_ItemWithModifierContainer').html(html);
-        }
-    });
-}
+// Change the quantity ans spesilat instruction for one item from the POPUP
 function ChangeQuantity(item_uuid)
 {
     var currentQte='';
     var currentIns='';
+
     jQuery.post(moo_params.ajaxurl,{'action':'moo_get_item_options',"item":item_uuid}, function (data) {
         if(data.status == 'success')
         {
@@ -158,15 +89,17 @@ function ChangeQuantity(item_uuid)
                                     if(data.status == 'success')
                                     {
                                         toastr.warning("Updating the quantity...");
+
                                     }
                                 }).done(function(e){
                                     moo_updateCart();
-                                    setTimeout(function(){toastr.success("Quantity updated")},2000)
+                                    toastr.remove();
+                                    toastr.success("Quantity updated")
 
                                 });
                                 else
                                    if(new_qte != currentQte)
-                                       toastr.error('The quantity should be between 1 and 10');
+                                       toastr.error('The quantity should be more than 1');
 
                                 if(new_ins != currentIns )
                                     jQuery.post(moo_params.ajaxurl,{'action':'moo_update_special_ins',"item":item_uuid,"special_ins":new_ins}, function (data) {
@@ -196,6 +129,7 @@ function moo_openFirstModifierG(id)
     jQuery('#'+id).addClass('accordion-open');
     jQuery('#'+id).next().show();
 };
+
 moo_updateCart();
-//jQuery('.CartContent>table>tbody').css('max-height',"100px");
+
 

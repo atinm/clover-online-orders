@@ -109,7 +109,7 @@ Side note: I know that this style of nesting in SASS doesn't result in the most 
     border: 0;
     padding: 4px 8px;
     background-color: #c66;
-    color: #fff;
+    color: #fff !important;
     font-family: "HelveticaNeue-Medium", "Helvetica Neue Medium";
     font-size: 12px;
     border-radius: 3px;

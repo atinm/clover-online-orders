@@ -408,7 +408,13 @@ function moo_save_changes()
 
 function moo_setup_existing_zones() {
     var zones_txt = jQuery('#moo_zones_json').val();
-    var zones = JSON.parse(zones_txt);
+    var zones = null;
+    try {
+        zones = JSON.parse(zones_txt);
+    } catch (e) {
+        console.error("Parsing error:", e);
+    }
+
     for (i in zones) {
         var tmp_zone = zones[i];
         tmp_zone.shape = null;

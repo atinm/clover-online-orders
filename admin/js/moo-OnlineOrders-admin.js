@@ -96,7 +96,12 @@ function Moo_GetOrderTypes()
     jQuery.post(moo_params.ajaxurl,{'action':'moo_getAllOrderTypes'}, function (data) {
             if(data.status == 'success')
             {
-               var orderTypes = JSON.parse(data.data);
+                var orderTypes = {};
+                try {
+                    orderTypes = JSON.parse(data.data);
+                } catch (e) {
+                    console.error("Parsing error:", e);
+                }
                 var html='';
                 html +='<div class="Moo_option-title">';
 

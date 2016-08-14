@@ -58,8 +58,14 @@ function moo_initMapDZ(myLatLng) {
 
 function moo_draw_zones()
 {
-    var moo_delivery_areas  = JSON.parse(moo_delivery_zones);
-    if(moo_delivery_areas.length >= 1)
+    var moo_delivery_areas = null;
+    try {
+        moo_delivery_areas  = JSON.parse(moo_delivery_zones);
+    } catch (e) {
+        console.error("Parsing error:", e);
+    }
+
+    if(moo_delivery_areas != null && moo_delivery_areas.length >= 1)
     {
         for(i in moo_delivery_areas)
         {
@@ -207,7 +213,13 @@ function moo_calculate_delivery_fee()
     var delivery_free_after     = parseFloat(moo_delivery_free_amount)  ; //Free delivery after this amount
     var delivery_fixed_amount   = parseFloat(moo_delivery_fixed_amount) ; //Fixed delivery amount
     var delivery_for_other_zone = parseFloat(moo_delivery_other_zone_fee) ; //Amount of delivery for other zones
-    var moo_delivery_areas      = JSON.parse(moo_delivery_zones);
+    var moo_delivery_areas = null;
+
+    try {
+        moo_delivery_areas  = JSON.parse(moo_delivery_zones);
+    } catch (e) {
+        console.error("Parsing error:", e);
+    }
     var customer_lat            = document.getElementById("moo_customer_lat").value;
     var customer_lng            = document.getElementById("moo_customer_lng").value;
 
@@ -331,7 +343,13 @@ function moo_update_delivery_amount(amount,zone_id)
         }
         else
         {
-            var  moo_delivery_areas = JSON.parse(moo_delivery_zones);
+            var moo_delivery_areas = null;
+            try {
+                moo_delivery_areas  = JSON.parse(moo_delivery_zones);
+            } catch (e) {
+                console.error("Parsing error:", e);
+            }
+
             //Verify the min amount
             for(i in moo_delivery_areas)
             {
@@ -362,7 +380,10 @@ function moo_update_delivery_amount(amount,zone_id)
  function moo_update_totals()
  {
      var delivery_amount = parseFloat(document.getElementById('moo_delivery_amount').value);
-     var tips_amount     = parseFloat(document.getElementById('moo_tips').value);
+     if(document.getElementById('moo_tips') != null)
+         var tips_amount     = parseFloat(document.getElementById('moo_tips').value);
+     else
+         var tips_amount = 0;
 
      var orderTypes_id   = document.getElementById('OrderType').value;
      var orderType = null;
