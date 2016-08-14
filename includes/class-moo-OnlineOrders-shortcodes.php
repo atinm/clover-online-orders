@@ -731,7 +731,7 @@ class Moo_OnlineOrders_Shortcodes {
                         <div class="panel-body">
                             <div class="row">
                                 <div class="col-md-8">Your address : <div id="moo_dz_address"></div></div>
-                                <div class="col-md-2 col-md-offset-1"><a href="#" class="btn btn-primary" onclick="moo_address_SetOnMap(event)" title="checks to see if your delivery address is accepted">Set on map ?</a> </div>
+                                <div class="col-md-2 col-md-offset-1"><a href="#" class="btn btn-primary" onclick="moo_address_SetOnMap(event)" title="checks to see if your delivery address is accepted">Set on map</a> </div>
                             </div>
                             <div class="row">
                                 <div id="moo_dz_map"></div>
@@ -1059,7 +1059,7 @@ class Moo_OnlineOrders_Shortcodes {
                             </div>
                         </form>
 	                    <div style="text-align: center;padding: 10px">
-		                   <?php echo '<div class="btn btn-primary" onclick="moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')">ADD TO YOUR CART</div>'; ?>
+		                   <?php echo '<div class="btn btn-primary" onclick="moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.preg_replace('/[^A-Za-z0-9\-]/', '', $item->name).'\',\''.$item->price.'\')">ADD TO YOUR CART</div>'; ?>
 	                    </div>
                     </div>
                 </div>
@@ -1242,7 +1242,7 @@ class Moo_OnlineOrders_Shortcodes {
                                     <textarea  class="form-control" name="" id="moo_popup_si" cols="30" rows="2"></textarea>
                                 </div>
                                 <div class="moo_popup_btns_action">
-                                    <a href="#" class="btn btn-primary" onclick="moo_addItemWithModifiersToCart(event,'<?php echo trim($item->uuid) ?>','<?php echo trim($item->name) ?>','<?php echo trim($item->price) ?>')" >ADD TO CART</a>
+                                    <a href="#" class="btn btn-primary" onclick="moo_addItemWithModifiersToCart(event,'<?php echo trim($item->uuid) ?>','<?php echo preg_replace('/[^A-Za-z0-9\-]/', '', $item->name); ?>','<?php echo trim($item->price) ?>')" >ADD TO CART</a>
                                     <a href="<?php echo $cart_page_url; ?>" class="btn btn-default">VIEW CART</a>
                                 </div>
                             </div>
