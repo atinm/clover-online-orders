@@ -25,7 +25,7 @@
             try {
                 store_time = JSON.parse(data.infos).store_time;
             } catch (e) {
-                console.error("Parsing error:", e);
+                console.log("Parsing error: store_time");
             }
             
             if(store_time.length>0)
@@ -56,4 +56,14 @@ function moo_OrderTypeChanged(ot)
         document.getElementById('moo_Total_inCheckout').innerText = '$'+window.total;
 }
 
-
+function moo_btn_addToCart(event,item,name)
+{
+    event.preventDefault();
+    toastr.success(name+ ' added to cart');
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_add_to_cart',"item":item}, function (data) {
+        if(data.status != 'success')
+        {
+            toastr.error('Error, please try again');
+        }
+    })
+}

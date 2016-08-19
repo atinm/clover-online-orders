@@ -103,7 +103,7 @@ Side note: I know that this style of nesting in SASS doesn't result in the most 
     line-height: 1.4em;
 }
 .moo-product .moo-product-quantity input {
-    width: 70px;
+    width: 40px !important;
 }
 .moo-product .moo-remove-product {
     border: 0;

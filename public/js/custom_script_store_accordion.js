@@ -116,11 +116,9 @@ function moo_check(event,id)
 {
     event.preventDefault();
     event.stopPropagation();
-
     var checked =   jQuery('#moo_checkbox_'+id).prop('checked');
     jQuery('#moo_checkbox_'+id).prop("checked", !checked);
-
-
+    
 }
 
 function moo_openFirstModifierG(id)

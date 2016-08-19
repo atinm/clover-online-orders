@@ -14,6 +14,7 @@ class moo_OnlineOrders_CallAPI {
 		//Put the API URL here and don't forget the last slash
         $this->url_api = "http://api.smartonlineorders.com/";
 
+
     }
     /*
      * This functions import data from Clover POS and call the save functions
@@ -82,6 +83,24 @@ class moo_OnlineOrders_CallAPI {
        else{
            return "Please verify your Key in page settings";
        }
+    }
+    function getItemsWithoutSaving($page)
+    {
+       $res = $this->callApi("items_expanded/".$page."/20",$this->Token);
+       return $res;
+    }
+    function getCategoriesWithoutSaving()
+    {
+       return  $this->callApi("categories",$this->Token);
+    }
+    function getModifiersGroupsWithoutSaving()
+    {
+       return $this->callApi("modifier_groups",$this->Token);
+    }
+    function getModifiersWithoutSaving()
+    {
+       return $this->callApi("modifiers",$this->Token);
+
     }
     function getModifiers()
     {
@@ -172,14 +191,15 @@ class moo_OnlineOrders_CallAPI {
         return $this->callApi("paykey",$this->Token);
     }
     //create the order
-    function createOrder($total,$orderType)
+    function createOrder($total,$orderType,$paymentmethod)
     {
         if($orderType=='default')
         {
-            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType=default');
+            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType=default&paymentmethod='.$paymentmethod);
         }
         else
-            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType);
+            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod);
+
         return $res;
     }
     //create the order
@@ -479,10 +499,7 @@ class moo_OnlineOrders_CallAPI {
         }
 
 
-
-
         //save the taxes rates
-
         foreach($item->taxRates->elements as $tax_rate)
         {
             if( $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_tax_rate where uuid='{$tax_rate->id}'") == 0 )
@@ -541,6 +558,208 @@ class moo_OnlineOrders_CallAPI {
         else {
             $wpdb->query('ROLLBACK'); // // something went wrong, Rollback
         }
+    }
+    public function update_item($item)
+    {
+
+        global $wpdb;
+        $wpdb->query('START TRANSACTION');
+
+        // $wpdb->show_errors();
+        /*
+         * I verify if the Item is already in Wordpress DB and if it's up to date
+         */
+        if($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_item where uuid='{$item->id}'") > 0)
+        {
+            if($item->itemGroup != NULL)
+            {
+                $this->updateItemGroup($item->itemGroup->id);
+            }
+            $wpdb->delete("{$wpdb->prefix}moo_item_tax_rate",array('item_uuid'=>$item->id));
+            $wpdb->delete("{$wpdb->prefix}moo_item_modifier_group",array('item_id'=>$item->id));
+            $wpdb->delete("{$wpdb->prefix}moo_item_tag",array('item_uuid'=>$item->id));
+           // update the Item
+            $res1=$wpdb->update("{$wpdb->prefix}moo_item",array(
+                'name' => $item->name,
+                'alternate_name' => $item->alternateName,
+                'price' => $item->price,
+                'code' => $item->code,
+                'price_type' => $item->priceType,
+                'unit_name' => $item->unitName,
+                'default_taxe_rate' => $item->defaultTaxRates,
+                'sku' => $item->sku,
+                'hidden' => $item->hidden,
+                'is_revenue' => $item->isRevenue,
+                'cost' => $item->cost,
+                'modified_time' => $item->modifiedTime,
+            ),array('uuid'=>$item->id));
+            //var_dump($res1);
+            if($res1>=0) $res1 = true;
+        }
+        else
+        {
+            $item_To_Add = array(
+                'uuid' => $item->id,
+                'name' => $item->name,
+                'alternate_name' => $item->alternateName,
+                'price' => $item->price,
+                'code' => $item->code,
+                'price_type' => $item->priceType,
+                'unit_name' => $item->unitName,
+                'default_taxe_rate' => $item->defaultTaxRates,
+                'sku' => $item->sku,
+                'hidden' => $item->hidden,
+                'is_revenue' => $item->isRevenue,
+                'cost' => $item->cost,
+                'modified_time' => $item->modifiedTime,
+            );
+            if($item->itemGroup != NULL)
+                $item_To_Add['item_group_uuid'] = $item->itemGroup->id;
+
+            $res1 = $wpdb->insert("{$wpdb->prefix}moo_item",$item_To_Add);
+        }
+
+        //save the taxes rates
+        foreach($item->taxRates->elements as $tax_rate)
+        {
+            if( $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_tax_rate where uuid='{$tax_rate->id}'") == 0 )
+            {
+                $table = array('elements'=>array($tax_rate));
+                $this->save_tax_rates(json_encode($table));
+            }
+
+            $wpdb->insert("{$wpdb->prefix}moo_item_tax_rate",array(
+                'tax_rate_uuid' => $tax_rate->id,
+                'item_uuid' => $item->id
+            ));
+        }
+
+        //save modifierGroups
+        foreach($item->modifierGroups->elements as $modifier_group)
+        {
+            if( $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_modifier_group where  uuid='{$modifier_group->id}'") == 0 )
+            {
+                $this->getOneModifierGroups($modifier_group->id);
+            }
+            $wpdb->insert("{$wpdb->prefix}moo_item_modifier_group",array(
+                'group_id' => $modifier_group->id,
+                'item_id' => $item->id
+            ));
+        }
+
+
+        //save Tags
+        foreach($item->tags->elements as $tag)
+        {
+            if( $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_tag where uuid='{$tag->id}'") == 0 )
+            {
+                $table = array('elements'=>array($tag));
+                $this->save_tags(json_encode($table));
+            }
+            $wpdb->insert("{$wpdb->prefix}moo_item_tag",array(
+                'tag_uuid' => $tag->id,
+                'item_uuid' => $item->id
+            ));
+        }
+        if($res1)
+        {
+            $wpdb->query('COMMIT'); // if the item Inserted in the DB
+            return true;
+        }
+        else {
+            $wpdb->query('ROLLBACK'); // // something went wrong, Rollback
+            return false;
+        }
+    }
+    public function update_category($category)
+    {
+        global $wpdb;
+        $items_ids="";
+
+        foreach($category->items->elements as $item)
+            $items_ids.=$item->id.",";
+        if($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_category where uuid='{$category->id}'") > 0)
+            $res = $wpdb->update("{$wpdb->prefix}moo_category",array(
+                'name' => $category->name,
+                'sort_order' => $category->sortOrder,
+                'items' =>  $items_ids
+            ),array('uuid'=>$category->id));
+        else
+            $res = $wpdb->insert("{$wpdb->prefix}moo_category",array(
+                'uuid'=>$category->id,
+                'name' => $category->name,
+                'sort_order' => $category->sortOrder,
+                'show_by_default' => 1,
+                'items' =>  $items_ids
+            ));
+
+        if($res>0) return true;
+        return false;
+    }
+    public function update_modifierGroups($modifier_groups)
+    {
+        global $wpdb;
+        if($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_modifier_group where uuid='{$modifier_groups->id}'") > 0)
+            $res = $wpdb->update("{$wpdb->prefix}moo_modifier_group",array(
+                'name' => $modifier_groups->name,
+                'min_required' => $modifier_groups->minRequired,
+                'max_allowd' => $modifier_groups->maxAllowed
+
+            ),array('uuid' => $modifier_groups->id));
+        else
+            $res = $wpdb->insert("{$wpdb->prefix}moo_modifier_group",array(
+                'uuid' => $modifier_groups->id,
+                'name' => $modifier_groups->name,
+                'alternate_name' => $modifier_groups->alternateName,
+                'show_by_default' => $modifier_groups->showByDefault,
+                'min_required' => $modifier_groups->minRequired,
+                'max_allowd' => $modifier_groups->maxAllowed
+
+            ));
+
+        if($res>0) return true;
+        return false;
+/*
+        $res = $wpdb->update("{$wpdb->prefix}moo_category",array(
+            'sort_order' => $category->sortOrder,
+            'items' =>  $items_ids
+        ),array('uuid'=>$category->id));
+
+        if($res>0) return true;
+        return false;
+*/
+    }
+
+    public function update_modifier($modifier)
+    {
+        global $wpdb;
+        if($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_modifier where uuid='{$modifier->id}'") > 0)
+            $res = $wpdb->update("{$wpdb->prefix}moo_modifier",array(
+                'name' => $modifier->name,
+                'alternate_name' => $modifier->alternateName,
+                'price' => $modifier->price,
+                'group_id' => $modifier->modifierGroup->id,
+
+            ),array('uuid' => $modifier->id));
+        else
+            $res = $wpdb->insert("{$wpdb->prefix}moo_modifier_group",array(
+                'uuid' => $modifier->id,
+                'name' => $modifier->name,
+                'alternate_name' => $modifier->alternateName,
+                'price' => $modifier->price,
+                'group_id' => $modifier->modifierGroup->id
+            ));
+        if($res>0) return true;
+        return false;
+/*
+        $res = $wpdb->update("{$wpdb->prefix}moo_category",array(
+            'sort_order' => $category->sortOrder,
+            'items' =>  $items_ids
+        ),array('uuid'=>$category->id));
+
+        if($res>0) return true;
+        return false;
+*/
     }
 
     private function save_tax_rates($obj)
@@ -799,6 +1018,12 @@ class moo_OnlineOrders_CallAPI {
             ));
         return $res;
     }
+    public function sendSms($code,$phone)
+    {
+        $phone = str_replace('+','%2B',$phone);
+        $message = 'Your verification code is : '.$code;
+        return $this->callApi_Post("sendsms",$this->Token,'to='.$phone.'&body='.$message);
+    }
     private function callApi($url,$accesstoken)
     {
 
@@ -822,7 +1047,7 @@ class moo_OnlineOrders_CallAPI {
         }
         $info = curl_getinfo($crl);
         curl_close($crl);
-	   // echo 'GET : '.$url;
+	    //echo 'GET : '.$url;
        // var_dump($reply);
         if($info['http_code']==200)return $reply;
         return false;
@@ -851,9 +1076,10 @@ class moo_OnlineOrders_CallAPI {
 
         $info = curl_getinfo($crl);
         curl_close($crl);
-	 //  echo $url." ---- ";
-     //  var_dump($reply);
-        if($info['http_code']==200)return $reply;
+	    //echo $url." ---- ";
+       // var_dump($reply);
+        if($info['http_code'] == 200)
+            return $reply;
         return false;
     }
 }

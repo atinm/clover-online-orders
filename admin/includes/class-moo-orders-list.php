@@ -122,7 +122,7 @@ class Orders_List_Moo extends WP_List_Table_MOO {
             case 'deliveryfee':
                 return '$'.$item['deliveryfee'];
             case 'paid':
-                return ($item['paid'])?'YES':'NO';
+                return ($item['paid'])?(($item['refpayment']=='CASH')?'CASH':'PAID'):'FAILED';
             default:
                 return print_r( $item, true ); //Show the whole array for troubleshooting purposes
         }
@@ -150,7 +150,7 @@ class Orders_List_Moo extends WP_List_Table_MOO {
             'p_name'    => __( 'By'),
             'amount' => __( 'Totals'),
             'deliveryfee' => __( 'DeliveryFee'),
-            'paid' => __( 'Paid'),
+            'paid' => __( 'Payment'),
             'ordertype' => __( 'OrderType'),
             'p_address' => __( 'Address'),
             'p_phone' => __( 'Phone'),

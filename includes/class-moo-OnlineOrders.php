@@ -69,7 +69,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.1.7';
+		$this->version = '1.1.8';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -235,6 +235,14 @@ class moo_OnlineOrders {
         $this->loader->add_action( 'wp_ajax_moo_getodertybes', $plugin_public, 'moo_GetOrderTypes');
         $this->loader->add_action( 'wp_ajax_nopriv_moo_getodertybes', $plugin_public, 'moo_GetOrderTypes');
 
+		//Checkout : Sending sms and verify the code
+
+        $this->loader->add_action( 'wp_ajax_moo_send_sms', $plugin_public, 'moo_SendVerifSMS');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_send_sms', $plugin_public, 'moo_SendVerifSMS');
+		$this->loader->add_action( 'wp_ajax_moo_check_verification_code', $plugin_public, 'moo_CheckVerificationCode');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_check_verification_code', $plugin_public, 'moo_CheckVerificationCode');
+
+
         //Importing DATA, Valid only in the administration page.
 
         // Import Categories
@@ -247,6 +255,13 @@ class moo_OnlineOrders {
         $this->loader->add_action( 'wp_ajax_moo_import_items', $plugin_public, 'moo_ImportItems');
         // Import OrderTypes
         $this->loader->add_action( 'wp_ajax_moo_import_ordertypes', $plugin_public, 'moo_ImportOrderTypes');
+
+
+		/* Sync manually */
+		$this->loader->add_action( 'wp_ajax_moo_update_items', $plugin_public, 'moo_UpdateItems');
+		$this->loader->add_action( 'wp_ajax_moo_update_categories', $plugin_public, 'moo_UpdateCategories');
+		$this->loader->add_action( 'wp_ajax_moo_update_modifiers_groups', $plugin_public, 'moo_UpdateModifiersG');
+		$this->loader->add_action( 'wp_ajax_moo_update_modifiers', $plugin_public, 'moo_UpdateModifiers');
 
         //Get Statistics
         $this->loader->add_action( 'wp_ajax_moo_get_stats', $plugin_public, 'moo_GetStats');

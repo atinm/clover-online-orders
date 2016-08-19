@@ -101,12 +101,16 @@
 .moo_cart table
 {
     border: 0px !important;
+    table-layout: fixed;
 }
 .moo_cart table thead th
 {
     color: #ffffff;
     background-color: #2f323b;
     background-image: none;
+}.moo_cart table thead th:first-child
+{
+    width: 60%;
 }
 .moo_cart table tbody
 {

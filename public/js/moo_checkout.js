@@ -1,6 +1,25 @@
-(function( $ ) {
-    'use strict';
-})( jQuery );
+
+//Validate Input credit cards
+jQuery('#Moo_cardNumber').payment('formatCardNumber');
+jQuery('#moo_cardcvv').payment('formatCardCVC');
+
+jQuery('#moo_paymentOptions_cc').iCheck({
+    checkboxClass: 'icheckbox_square',
+    radioClass: 'iradio_square-blue',
+    increaseArea: '20%' // optional
+});
+jQuery('#moo_paymentOptions_cash').iCheck({
+    checkboxClass: 'icheckbox_square',
+    radioClass: 'iradio_square-blue',
+    increaseArea: '20%' // optional
+});
+
+jQuery('#moo_paymentOptions_cc').on('ifClicked', function () {
+    moo_changePaymentMethod('cc')
+});
+jQuery('#moo_paymentOptions_cash').on('ifClicked', function () {
+    moo_changePaymentMethod('cash')
+});
 
 jQuery("#moo_form_address").validate({
     rules: {
@@ -46,15 +65,6 @@ jQuery("#moo_form_address").validate({
         }
     },
     messages: {
-        name: {
-            required: "Please enter your full name "
-        },
-        email: {
-            required: "We need your email address to contact you"
-        },
-        phone: {
-            required: "We need your phone to contact you"
-        },
         cardNumber: {
             minlength: "Please enter at least 16 numbers",
             maxlength: "Please enter no more than 16 numbers."
@@ -63,12 +73,6 @@ jQuery("#moo_form_address").validate({
     submitHandler: function(form) {
 
         var delivery_amount = document.getElementById('moo_delivery_amount').value;
-        // if(delivery_amount === 'ERROR')
-        // {
-        //     toastr.error('Zone Not Supported');
-        //     return;
-        // }
-
         if(delivery_amount == 'ERROR')
         {
             toastr.error('Verify your delivery details');
@@ -114,11 +118,7 @@ jQuery("#moo_form_address").validate({
                     //Hide Loading Icon and Show the button if there is an error
                     jQuery('#moo_checkout_loading').hide();
                     jQuery('#moo_btn_submit_order').show();
-                    if(data.message != "Internal Error, please contact us, if you're the site owner verify your API Key")
-                        html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>Payment card was declined. Check card info or try another card.</div>';
-                    else
-                        html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg">'+data.message+'</div>';
-                    console.log(data.message);
+                    html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>'+data.message+'</div>';
                     jQuery("#moo_form_address").prepend(html);
                     jQuery("html, body").animate({
                         scrollTop: 0
@@ -131,9 +131,6 @@ jQuery("#moo_form_address").validate({
     }
 });
 
-//Validate Input credit cards
-jQuery('#Moo_cardNumber').payment('formatCardNumber');
-jQuery('#moo_cardcvv').payment('formatCardCVC');
 
 function moo_OrderTypeChanged(obj)
 {
@@ -142,7 +139,7 @@ function moo_OrderTypeChanged(obj)
     try {
         moo_delivery_areas  = JSON.parse(moo_delivery_zones);
     } catch (e) {
-        console.error("Parsing error:", e);
+        console.log("Parsing error: moo_delivery_areas");
     }
 
     for(i in moo_OrderTypes)
@@ -215,7 +212,59 @@ function cryptCardNumber(ccn)
     var encryptedData = publicKey.encrypt(text, 'RSA-OAEP');
     return forge.util.encode64(encryptedData);
 }
+function moo_verifyPhone(event)
+{
+    event.preventDefault();
 
+    var phone_number=jQuery('#Moo_PhoneToVerify').val();
+    jQuery('#moo_verifPhone_sending').hide();
+    jQuery('#moo_verifPhone_verified').hide();
+    jQuery('#Moo_VerificationCode').val('');
+    jQuery('#moo_verifPhone_verificatonCode').show();
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_send_sms','phone':phone_number});
+}
+function moo_verifyCode(event)
+{
+    event.preventDefault();
+    var code=jQuery('#Moo_VerificationCode').val();
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_check_verification_code','code':code}, function (data) {
+        if(data.status == 'success')
+        {
+            jQuery('#moo_verifPhone_sending').hide();
+            jQuery('#moo_verifPhone_verificatonCode').hide();
+            jQuery('#moo_verifPhone_verified').show();
+            toastr.success('Your phone was verified');
+        }
+        else
+            toastr.error('Code invalid, please try again');
+    });
+}
+function moo_verifyCodeTryAgain(event)
+{
+    event.preventDefault();
+    jQuery('#moo_verifPhone_sending').show();
+    jQuery('#moo_verifPhone_verificatonCode').hide();
+    jQuery('#moo_verifPhone_verified').hide();
+}
+function moo_cardNumberChanged()
+{
+    var card_number=jQuery('#Moo_cardNumber').val();
+    var res = jQuery.payment.cardType(card_number);
+
+}
+function moo_changePaymentMethod(type)
+{
+    if(type=='cash')
+    {
+        jQuery('#moo_cashPanel').show();
+        jQuery('#moo_creditCardPanel').hide();
+    }
+    else
+    {
+        jQuery('#moo_cashPanel').hide();
+        jQuery('#moo_creditCardPanel').show();
+    }
+}
 moo_OrderTypeChanged(jQuery('#OrderType'));
 moo_InitZones();
 

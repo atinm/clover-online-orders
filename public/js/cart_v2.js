@@ -214,95 +214,6 @@ function moo_emptyCart()
     });
 }
 
-// function moo_addModifiers(item_name)
-// {
-//     var selected_modifies = jQuery("#moo_form_modifiers").serializeArray();
-//     var Mgroups = {};
-//     var Modifiers = [];
-//     for(m in selected_modifies)
-//     {
-//         var modifier = selected_modifies[m];
-//         if(modifier.value=='on'){
-//             var name = modifier.name; //the format is : moo_modifiers['item','modifierGroup','Modifier']
-//             var string = name.split(','); // the new format is a table
-//             var item = string[0].substr(15);  // 15 is the length of moo_modifiers['
-//             item = item.substr(0,item.length-1); // remove the last '
-//
-//             var modifierGroup = string[1].substr(1);
-//             modifierGroup = modifierGroup.substr(0,modifierGroup.length-1);
-//
-//             var modif = string[2].substr(1);
-//             modif = modif.substr(0,modif.length-2);
-//
-//             if(item == '' || modifierGroup == '' || modif == '') continue;
-//
-//             if(typeof Mgroups[modifierGroup] === 'undefined') Mgroups[modifierGroup] = 1;
-//             else Mgroups[modifierGroup] +=1;
-//
-//             var modifier = {
-//                 "item":item,
-//                 "modifier": modif,
-//                 "modifierGroup": modifierGroup
-//             };
-//             Modifiers.push(modifier);
-//         }
-//     }
-//
-//     var flag = false;
-//
-//     if(Object.keys(Mgroups).length == 0) {
-//         return false;
-//     }
-//     /* verify the min and max in modifier Group */
-//     var compteur = 0;
-//     for(mg in Mgroups){
-//
-//         jQuery.post(moo_params.ajaxurl,{'action':'moo_modifiergroup_getlimits',"modifierGroup":mg}, function (data) {
-//             if(data.status == 'success' )
-//             {
-//                 /* If the min is not null then we display a message if the custmet not choose the minimum */
-//                 if(data.min != null && data.min != 0 && Mgroups[mg] < data.min) {
-//                     toastr.error("You must choose "+data.min+" modifier in "+data.name);
-//                     flag=true;
-//                 }
-//                 if(data.max!= null && data.max != 0 && Mgroups[mg] > data.max) {
-//                     toastr.error("You can't choose more than "+ data.max+" modifier in "+data.name);
-//                     flag=true;
-//                 }
-//             }
-//             else
-//             {
-//                 flag = true;
-//             }
-//         }).done(function () {
-//             compteur++;
-//             if(compteur == Object.keys(Mgroups).length)
-//             {
-//                 if(!flag)
-//                 {
-//                     //send the request to the server
-//                     jQuery.post(moo_params.ajaxurl,{'action':'moo_modifier_add',"modifiers":Modifiers}, function (data) {
-//                         if(data.status == 'success' )
-//                         {
-//                             toastr.success(item_name+' added to cart');
-//                             moo_updateCart();
-//                             return true;
-//                         }
-//                     })
-//
-//                 }
-//                 else
-//                 {
-//                     return 'error';
-//                 }
-//
-//             }
-//         });
-//
-//
-//
-//     }
-// }
 function moo_addModifiers(event,item_name,item_uuid,item_price)
 {
     jQuery.post(moo_params.ajaxurl,{'action':'moo_check_item_modifiers',"item":item_uuid}, function (data) {
@@ -390,11 +301,11 @@ function moo_addModifiers(event,item_name,item_uuid,item_price)
                     {
                         if(!flag)
                         {
+                            toastr.success(item_name+' added to cart');
                             //send the request to the server
                             jQuery.post(moo_params.ajaxurl,{'action':'moo_modifier_add',"modifiers":Modifiers}, function (data) {
                                 if(data.status == 'success' )
                                 {
-                                    toastr.success(item_name+' added to cart');
                                     moo_updateCart();
                                     jQuery.magnificPopup.close();
                                     return true;

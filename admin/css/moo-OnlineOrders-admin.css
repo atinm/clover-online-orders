@@ -475,3 +475,10 @@
  {
      display: none;
  }
+#moo_progressbar_container {
+    margin: 0 auto;
+    margin-bottom: 40px;
+    width: 400px;
+    height: 8px;
+    position: relative;
+}

@@ -39,6 +39,10 @@
         z-index: 999999;
         cursor: pointer;
     }
+    #moo_creditCardPanel>*>.form-group
+    {
+        height: 60px;
+    }
 }
 @media only screen and (min-width: 768px) {
     #moo_cart{
@@ -56,9 +60,15 @@
         width:44px;
         height:152px;
         float: right;
-    }#moo_cart_icon>span{
+    }
+    #moo_cart_icon>span{
          display: none;
-     }
+    }
+    #moo_creditCardPanel>*>.form-group
+    {
+        height: 30px;
+    }
+
 
 }
 
@@ -103,6 +113,7 @@
 #moo_form_address .error
 {
     color:red;
+    font-size: 13px;
 }
 #Moo_FileterContainer
 {
@@ -223,7 +234,21 @@ select
 {
     padding: 0px !important;
 }
-.moo_loading
+.moo_loading,#moo_cashPanel,#moo_verifPhone_verificatonCode
 {
     display: none;
+}
+#moo_cashPanel,#moo_creditCardPanel
+{
+    padding-top: 25px;
+}
+#moo_paymentOptions
+{
+    font-size: 20px;
+}
+#moo_paymentOptions_cc,#moo_paymentOptions_cash
+{
+    margin-right: 5px;
+    margin-left: 20px;
+
 }

@@ -1,3 +1,6 @@
+/* Set rates + misc */
+var fadeTime = 300;
+
 function moo_updateCartTotal()
 {
         jQuery(".moo_cart_total > td:last").html("Calculating...");
@@ -34,7 +37,6 @@ function moo_updateCartTotal()
         });
 
 }
-
 function moo_cart_DeleteItem(item)
 {
     //send delete query to server
@@ -61,32 +63,19 @@ function moo_cart_DeleteItem(item)
 
 
 }
-function moo_cart_DeleteItemModifier(uuid,item)
+function moo_emptyCart(event)
 {
-    //send delete query to server
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_cart_DeleteItemModifier',"modifier":uuid,"item":item}, function (data) {
-        if(data.status != "success" || data.last ){
-            moo_updateCart();
-        }
-    });
-
-    jQuery("#moo_cart_modifier_"+uuid).remove();
-    moo_updateCartTotal();
-}
-function moo_emptyCart()
-{
+    event.preventDefault();
     //send delete query to server
     jQuery.post(moo_params.ajaxurl,{'action':'moo_emptycart'}, function (data) {
         if(data.status == "success"){
-
-            moo_updateCart();
+            jQuery(".moo-shopping-cart").html('<p style="text-align: center; font-size: 20px">Your Cart is empty</p>');
         };
     });
 }
 
 function moo_addModifiers(item_name,item_uuid)
 {
-
     jQuery.post(moo_params.ajaxurl,{'action':'moo_check_item_modifiers',"item":item_uuid}, function (data) {
         if(data.status == 'success' )
         {
@@ -126,7 +115,9 @@ function moo_addModifiers(item_name,item_uuid)
 
             var flag = false;
 
-            if(Object.keys(Mgroups).length == 0 && Object.keys(required_modifiers_groups).length == 0) {
+            if(Object.keys(Mgroups).length == 0 && Object.keys(required_modifiers_groups).length <= 1) {
+                jQuery.magnificPopup.close();
+                moo_cartv3_addtocart(item_uuid,item_name);
                 return false;
             }
             /* verify if required modifier Groups are chooses */
@@ -169,14 +160,18 @@ function moo_addModifiers(item_name,item_uuid)
                     {
                         if(!flag)
                         {
+                            toastr.success(item_name+' added to cart');
                             //send the request to the server
                             jQuery.post(moo_params.ajaxurl,{'action':'moo_modifier_add',"modifiers":Modifiers}, function (data) {
                                 if(data.status == 'success' )
                                 {
-                                    toastr.success(item_name+' added to cart');
+                                    item_uuid = data.uuid;
                                     jQuery.magnificPopup.close();
                                     return true;
                                 }
+                            }).done(function () {
+                                console.log(item_uuid);
+                                moo_updateQuantityAndSI(item_uuid);
                             })
                         }
                         else
@@ -192,47 +187,27 @@ function moo_addModifiers(item_name,item_uuid)
 
 
 }
-function addModifiersAfterLimitVerification(item_name,Modifiers)
-{
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_modifier_add',"modifiers":Modifiers}, function (data) {
-        if(data.status == 'success' )
-        {
-            toastr.success(item_name+' added to cart');
-            return true;
-        }
-    })
-}
 function moo_addItemWithModifiersToCart(event,item_uuid,item_name,item_price)
 {
-    if(moo_addModifiers(item_name,item_uuid)== false ){
-        if(item_price==0)
+    moo_addModifiers(item_name,item_uuid);
+}
+function moo_updateQuantityAndSI(item_uuid)
+{
+    var qte = jQuery('#moo_popup_quantity').val();
+    var special_instruction = jQuery('#moo_popup_si').val();
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_qte',"item":item_uuid,"qte":qte}, function (data) {
+        if(data.status == 'success')
         {
-            toastr.error('Please choose a modifier');
+            console.log('Item add to cart');
+            jQuery.magnificPopup.close();
         }
-        else
+    });
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_special_ins',"item":item_uuid,"special_ins":special_instruction}, function (data) {
+        if(data.status == 'success')
         {
-            moo_cartv3_addtocart(item_uuid,item_name);
+            console.log("Special Instructions updated");
         }
-
-    }
-    else
-    {
-        var qte = jQuery('#moo_popup_quantity').val();
-        var special_instruction = jQuery('#moo_popup_si').val();
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_update_qte',"item":item_uuid,"qte":qte}, function (data) {
-            if(data.status == 'success')
-            {
-                console.log('Item add to cart');
-                jQuery.magnificPopup.close();
-            }
-        });
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_update_special_ins',"item":item_uuid,"special_ins":special_instruction}, function (data) {
-            if(data.status == 'success')
-            {
-                console.log("Special Instructions updated");
-            }
-        });
-    }
+    });
 }
 
 function moo_cartv3_addtocart(uuid,name)
@@ -257,11 +232,6 @@ function moo_cartv3_addtocart(uuid,name)
         });
     jQuery.magnificPopup.close();
 }
-
-/* Set rates + misc */
-
-var fadeTime = 300;
-
 /* Recalculate cart */
 function moo_recalculateCart()
 {

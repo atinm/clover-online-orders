@@ -1,9 +1,37 @@
 jQuery(document).ready(function($){
     window.moo_loading = '<svg xmlns="http://www.w3.org/2000/svg" width="44px" height="44px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="uil-default"><rect x="0" y="0" width="100" height="100" fill="none" class="bk"></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(0 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(30 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.08333333333333333s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(60 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.16666666666666666s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(90 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.25s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(120 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.3333333333333333s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(150 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.4166666666666667s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(180 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(210 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5833333333333334s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(240 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.6666666666666666s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(270 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.75s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(300 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.8333333333333334s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(330 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.9166666666666666s" repeatCount="indefinite"></animate></rect></svg>';
     window.moo_first_time = true; // this variable is used to make sure the an action is happen only one time
+    window.moo_nb_allItems =0;
     moo_Update_stats();
     Moo_GetOrderTypes();
     $('.moo-color-field').wpColorPicker();
+    if($('#moo_progressbar_container').length == 1)
+         window.bar = new ProgressBar.Line('#moo_progressbar_container', {
+                strokeWidth: 4,
+                easing: 'easeInOut',
+                duration: 1400,
+                color: '#496F4E',
+                trailColor: '#eee',
+                trailWidth: 1,
+                svgStyle: {width: '100%', height: '100%'},
+                text: {
+                    style: {
+                        // Text color.
+                        // Default: same as stroke color (options.color)
+                        color: '#999',
+                        position: 'absolute',
+                        right: '0',
+                        top: '30px',
+                        padding: 0,
+                        margin: 0,
+                        transform: null
+                    },
+                    autoStyleContainer: false
+                },
+                from: {color: '#FFEA82'},
+                to: {color: '#ED6A5A'}
+        });
+
 });
 function tab_clicked(tab)
 {
@@ -93,14 +121,15 @@ function Moo_ImportItems()
 }
 function Moo_GetOrderTypes()
     {
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_getAllOrderTypes'}, function (data) {
+        if(document.querySelector('#MooOrderTypesContent') != null)
+            jQuery.post(moo_params.ajaxurl,{'action':'moo_getAllOrderTypes'}, function (data) {
             if(data.status == 'success')
             {
                 var orderTypes = {};
                 try {
                     orderTypes = JSON.parse(data.data);
                 } catch (e) {
-                    console.error("Parsing error:", e);
+                    console.log("Parsing error: orderTypes");
                 }
                 var html='';
                 html +='<div class="Moo_option-title">';
@@ -145,6 +174,7 @@ function moo_Update_stats()
 {
     jQuery.post(moo_params.ajaxurl,{'action':'moo_get_stats'}, function (data) {
             if(data.status=='Success'){
+                window.moo_nb_allItems = data.products;
                 jQuery({someValue: 0}).animate({someValue: data.products}, {
                     duration: 5000,
                     easing:'swing',
@@ -400,4 +430,80 @@ function moo_get_item_with_images(uuid)
         jQuery('#moo_item_price').text("$"+items[0].price/100);
     }
     );
+}
+
+function MooPanel_UpdateItems(event)
+{
+    event.preventDefault();
+    window.bar.animate(0.01);
+    window.bar.setText('1 %');
+    moo_upadateItemsPerPage(0)
+}
+function MooPanel_UpdateCategories(event)
+{
+    event.preventDefault();
+    window.bar.animate(0.01);
+    window.bar.setText('1 %');
+
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_categories'}, function (data)
+        {
+            window.bar.animate(0.5);
+            window.bar.setText('50 %');
+        }
+    ).done(function () {
+            alert("Categories updated");
+            window.bar.animate(1.0);
+            window.bar.setText('100 %');
+
+    });
+}
+function MooPanel_UpdateModifiers(event)
+{
+    event.preventDefault();
+    window.bar.animate(0.01);
+    window.bar.setText('1 %');
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_modifiers_groups'}, function (data)
+        {
+            window.bar.animate(0.5);
+            window.bar.setText('50 %');
+        }
+    ).done(function () {
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_update_modifiers'}, function (data)
+            {
+                window.bar.animate(1.0);
+                window.bar.setText('100 %');
+            }
+        ).done(function () {
+            alert("Modifiers updated");
+            window.bar.animate(1.0);
+            window.bar.setText('100 %');
+
+        });
+
+    });
+}
+function moo_upadateItemsPerPage(page)
+{
+    var received = 0;
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_items','page':page}, function (data)
+    {
+        received = data.received;
+        var percent_loaded = data.received*100/window.moo_nb_allItems;
+        if(percent_loaded == null)
+            percent_loaded = 1;
+        window.bar.animate(bar.value()+percent_loaded/100);
+        window.bar.setText(Math.round(percent_loaded+bar.value()*100) + ' %');
+    }
+    ).done(function () {
+        if(received>0)
+            moo_upadateItemsPerPage(page+1)
+        else
+        {
+            alert("Items updated");
+            window.bar.animate(1.0);
+            window.bar.setText('100 %');
+            moo_Update_stats();
+
+        }
+    });
 }

@@ -412,7 +412,7 @@ function moo_setup_existing_zones() {
     try {
         zones = JSON.parse(zones_txt);
     } catch (e) {
-        console.error("Parsing error:", e);
+        console.error("Parsing error: zones");
     }
 
     for (i in zones) {

@@ -62,7 +62,7 @@ function moo_draw_zones()
     try {
         moo_delivery_areas  = JSON.parse(moo_delivery_zones);
     } catch (e) {
-        console.error("Parsing error:", e);
+        console.log("Parsing error: moo_delivery_areas");
     }
 
     if(moo_delivery_areas != null && moo_delivery_areas.length >= 1)
@@ -218,7 +218,7 @@ function moo_calculate_delivery_fee()
     try {
         moo_delivery_areas  = JSON.parse(moo_delivery_zones);
     } catch (e) {
-        console.error("Parsing error:", e);
+        console.log("Parsing error: moo_delivery_areas");
     }
     var customer_lat            = document.getElementById("moo_customer_lat").value;
     var customer_lng            = document.getElementById("moo_customer_lng").value;
@@ -347,7 +347,7 @@ function moo_update_delivery_amount(amount,zone_id)
             try {
                 moo_delivery_areas  = JSON.parse(moo_delivery_zones);
             } catch (e) {
-                console.error("Parsing error:", e);
+                console.log("Parsing error: moo_delivery_areas");
             }
 
             //Verify the min amount
