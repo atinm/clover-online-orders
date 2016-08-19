@@ -756,9 +756,9 @@ class Moo_OnlineOrders_Shortcodes {
                             <div id="moo_paymentOptions">
                                 <?php if($MooOptions['payment_cash'] == 'on'){ ?>
                                 <input type="radio" name="paymentMethod" value="cc"   id="moo_paymentOptions_cc"  onclick="moo_changePaymentMethod('cc')" checked>
-                                <label for="moo_paymentOptions_cc" style="display: inline"> Credit Card</label>
+                                <label for="moo_paymentOptions_cc" style="display: inline"> Pay now with Credit Card</label>
                                 <input type="radio" name="paymentMethod" value="cash" id="moo_paymentOptions_cash"  onclick="moo_changePaymentMethod('cash')">
-                                <label for="moo_paymentOptions_cash" style="display: inline"> Cash</label>
+                                <label for="moo_paymentOptions_cash" style="display: inline"> Pay in Store</label>
                                 <?php }?>
                             </div>
                             <div id="moo_creditCardPanel">
@@ -817,7 +817,7 @@ class Moo_OnlineOrders_Shortcodes {
                             <div id="moo_cashPanel">
                                 <div id="moo_verifPhone_verified" style="text-align: center;display:none <?php //echo ($_SESSION['moo_phone_verified'])?'block':'none'?>">
                                     <img src="<?php echo  plugin_dir_url(dirname(__FILE__))."public/img/check.png"?>" width="60px">
-                                    <p style="margin-top: 10px;font-size: 20px">Your phone number was verified <br />This is cash payment. Please make sure that you carry enough cash or card to pay at our location</p>
+                                    <p style="margin-top: 10px;font-size: 20px">Your phone number has been verified <br />Please have your payment ready when picking up from the store</p>
                                 </div>
                                 <div class="col-md-6 col-md-offset-3" id="moo_verifPhone_sending" style="display:block <?php //echo ($_SESSION['moo_phone_verified'])?'none':'block'?>">
                                     <div class="form-group form-inline">
@@ -831,9 +831,9 @@ class Moo_OnlineOrders_Shortcodes {
                                     </p>
                                 </div>
                                 <div class="col-md-6 col-md-offset-3" id="moo_verifPhone_verificatonCode">
-                                    <p>
-                                       Please enter the verification code we sent to your phone, if you didn't receive a code, you can
-                                        <a href="#" onclick="moo_verifyCodeTryAgain(event)">try again</a>
+                                    <p style='font-size:15px;color:green'>
+                                       Please enter the verification that was sent to your phone, if you didn't receive a code,
+                                        <a href="#" onclick="moo_verifyCodeTryAgain(event)"> click here try again</a>
                                     </p>
                                     <div class="form-group form-inline">
                                         <input class="form-control" id="Moo_VerificationCode" />
