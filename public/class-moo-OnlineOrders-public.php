@@ -1080,7 +1080,6 @@ class Moo_OnlineOrders_Public {
         $res = $this->api->sendSms($verification_code,$phone_number);
         $response = array(
             'status'	=> 'success',
-            'code'	=> $verification_code,
             'result'    => $res
         );
         wp_send_json($response);
