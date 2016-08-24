@@ -796,9 +796,10 @@ class Moo_OnlineOrders_Shortcodes {
                                         <select class="form-control" name="moo_pickup_hour" id="moo_pickup_hour" >
                                             <?php
                                             foreach ($oppening_status->pickup_time as $key=>$val) {
-                                                echo '<option value="asap">ASAP</option>';
-                                                foreach ($val as $h)
-                                                    echo '<option value="'.$h.'">'.$h.'</option>';
+                                                    echo '<option value="asap">ASAP</option>';
+                                                    foreach ($val as $h)
+                                                        echo '<option value="'.$h.'">'.$h.'</option>';
+                                                break;
                                             }
                                             ?>
                                         </select>
