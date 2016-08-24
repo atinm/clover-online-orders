@@ -97,10 +97,8 @@ class Moo_OnlineOrders_Public {
 
 
         wp_register_style( 'bootstrap-css',plugins_url( '/css/bootstrap.min.css', __FILE__ ),array(), $this->version);
-        wp_enqueue_style( 'bootstrap-css' );
-
         wp_register_style( 'font-awesome',plugins_url( '/css/font-awesome.css', __FILE__ ),array(), $this->version);
-        wp_enqueue_style( 'font-awesome' );
+        
 
         wp_register_style( 'toastr-css',plugins_url( '/css/toastr.css', __FILE__ ),array(), $this->version);
         wp_enqueue_style( 'toastr-css' );
@@ -782,11 +780,19 @@ class Moo_OnlineOrders_Public {
                 $tipAmount      = 0;
                 $shippingFee    = 0;
                 $paymentmethod  = 'cc';
+                $pickup_time    = '';
 
                 if(isset($_POST['form']['paymentMethod']))
                     $paymentmethod = $_POST['form']['paymentMethod'];
 
+                if(isset($_POST['form']['moo_pickup_day']))
+                                    $pickup_time = $_POST['form']['moo_pickup_day'];
 
+                if(isset($_POST['form']['moo_pickup_hour']))
+                                    $pickup_time .= ' at '.$_POST['form']['moo_pickup_hour'];
+
+                if($pickup_time != '')
+                    $pickup_time = ' Scheduled for '.$pickup_time;
 
                 $customer_lat = sanitize_text_field($_POST['moo_customer_lat']);
                 $customer_lng = sanitize_text_field($_POST['moo_customer_lat']);
@@ -826,27 +832,6 @@ class Moo_OnlineOrders_Public {
                     else
                         $_POST['form']['phone'] = $_SESSION['moo_phone_number'];
                 }
-
-//                    {
-//                        if($_POST['form']['phone'] != $_SESSION['moo_phone_number'])
-//                        {
-//                           /*
-//                           $response = array(
-//                                'status'	=> 'ERROR',
-//                                'message'	=> "The phone number : ".$_POST['form']['phone']." not verified yet"
-//                            );
-//
-//                            unset($_SESSION['moo_phone_number']);
-//                            $_SESSION['moo_phone_verified'] = false;
-//                            wp_send_json($response);
-//                            return;
-//                           */
-//                        }
-//
-//                    }
-//                    else
-
-
                 if(!empty($_POST['form']['OrderType'])){
                     $OrderTpe_UUID = sanitize_text_field($_POST['form']['OrderType']);
                     $orderType = $this->api->GetOneOrdersTypes($OrderTpe_UUID);
@@ -878,10 +863,13 @@ class Moo_OnlineOrders_Public {
                     //var_dump($paymentmethod);
                     if($paymentmethod == 'cash' && $_SESSION['moo_phone_verified'])
                     {
-                            $this->model->updateOrder($orderCreated['OrderId'],'CASH');
-                            $this->api->NotifyMerchant($orderCreated['OrderId'],$_POST['form']['instructions'],$customer);
+                        $this->SendSmsToMerchant($orderCreated['OrderId'],'will be paid in cash',$pickup_time);
+                        $this->SendSmsToCustomer($orderCreated['OrderId'],$customer['phone']);
+
+                        $this->model->updateOrder($orderCreated['OrderId'],'CASH');
+                            $this->api->NotifyMerchant($orderCreated['OrderId'],$_POST['form']['instructions'],$customer,$pickup_time,$paymentmethod);
                             $this->sendEmail($_POST['form']['email'],$_POST['form']['name'],$orderCreated['OrderId']);
-                            $this->sendEmail2merchant($MooOptions['merchant_email'],$orderCreated['OrderId'],$otherInformations,$deliveryFee);
+                            $this->sendEmail2merchant($MooOptions['merchant_email'],$orderCreated['OrderId'],$otherInformations,$deliveryFee,$pickup_time);
                             unset($_SESSION['items']);
                             $response = array(
                                 'status'	=> 'APPROVED',
@@ -906,11 +894,12 @@ class Moo_OnlineOrders_Public {
                                 'order'	=> $orderCreated['OrderId']
                             );
                             if($response['status'] == 'APPROVED'){
-
+                                $this->SendSmsToMerchant($orderCreated['OrderId'],'is paid with CC',$pickup_time);
+                                $this->SendSmsToCustomer($orderCreated['OrderId'],$customer['phone']);
                                 $this->model->updateOrder($orderCreated['OrderId'],json_decode($paid)->paymentId);
-                                $this->api->NotifyMerchant($orderCreated['OrderId'],$_POST['form']['instructions'],$customer);
+                                $this->api->NotifyMerchant($orderCreated['OrderId'],$_POST['form']['instructions'],$customer,$pickup_time,$paymentmethod);
                                 $this->sendEmail($_POST['form']['email'],$_POST['form']['name'],$orderCreated['OrderId']);
-                                $this->sendEmail2merchant($MooOptions['merchant_email'],$orderCreated['OrderId'],$otherInformations,$deliveryFee);
+                                $this->sendEmail2merchant($MooOptions['merchant_email'],$orderCreated['OrderId'],$otherInformations,$deliveryFee,$pickup_time);
                                 unset($_SESSION['items']);
                                 wp_send_json($response);
                             }
@@ -918,12 +907,14 @@ class Moo_OnlineOrders_Public {
                                 if(json_decode($paid)->failureMessage == null)
                                     $response = array(
                                         'status'	=> 'Error',
-                                        'message'	=> $paid
+                                        'message'	=> "Payment card was declined. Check card info or try another card.",
+                                        'CloverMessage'	=> $paid,
                                     );
                                 else
                                     $response = array(
                                         'status'	=> json_decode($paid)->result,
-                                        'message'	=> json_decode($paid)->failureMessage
+                                        'message'	=> 'Payment card was declined. Check card info or try another card.',
+                                        'CloverMessage'	=> json_decode($paid)->failureMessage
                                     );
                                 wp_send_json($response);
                             }
@@ -1414,7 +1405,7 @@ public function moo_AddOrderType()
 
         if($MooOptions['hours'] == 'business')
         {
-            $res = $this->api->getOpeningStatus();
+            $res = $this->api->getOpeningStatus(4,30);
             $stat = json_decode($res)->status;
             $response = array(
                 'status'	 => 'Success',
@@ -1431,33 +1422,6 @@ public function moo_AddOrderType()
             );
             wp_send_json($response);
         }
-
-    }
-    function moo_TipsIsEnabled()
-    {
-        $res = json_decode($this->api->getMerchantProprietes());
-        var_dump($res);
-
-      /*  if($MooOptions['hours'] == 'business')
-        {
-            $res = $this->api->getOpeningStatus();
-            $stat = json_decode($res)->status;
-            $response = array(
-                'status'	 => 'Success',
-                'data'=>$stat,
-                'infos'=>$res
-            );
-            wp_send_json($response);
-        }
-        else
-        {
-            $response = array(
-                'status'	 => 'Success',
-                'data'=>'open'
-            );
-            wp_send_json($response);
-        }
-      */
 
     }
     /*
@@ -1578,18 +1542,12 @@ public function moo_AddOrderType()
         );
         wp_send_json($response);
     }
-
-
-    private function round_up ( $value, $precision ) {
-		$pow = pow ( 10, $precision );
-		return ( ceil ( $pow * $value ) + ceil ( $pow * $value - ceil ( $pow * $value ) ) ) / $pow;
-	}
     private function sendEmail($email,$name,$orderID)
     {
         $MooOptions = (array)get_option('moo_settings');
         $emails = explode(",",$MooOptions['merchant_email']);
         $headers[] = 'Content-Type: text/html; charset=UTF-8';
-        $headers[] = 'From: '. $email[0]. "\r\n";
+        $headers[] = 'From: '. $emails[0]. "\r\n";
 
        // $order = $this->model->getOrder($orderID);
 
@@ -1607,13 +1565,13 @@ public function moo_AddOrderType()
         $message   .=  '<br/><br/>You can see your receipt at this <a href="https://www.clover.com/r/'.$orderID.'" target="_blanck">link</a> ( https://www.clover.com/r/'.$orderID.' )';
         wp_mail($email, 'Thank you for your order', $message,$headers);
     }
-    private function sendEmail2merchant($email,$orderID,$otherInformations,$deliveryFee)
+    private function sendEmail2merchant($email,$orderID,$otherInformations,$deliveryFee,$pickuptime)
     {
         if($email != null && $email != '')
         {
             $MooOptions = (array)get_option('moo_settings');
             $headers[] = 'Content-Type: text/html; charset=UTF-8';
-            $headers[] = 'From: '. $MooOptions['merchant_email']. "\r\n";
+//            $headers[] = 'From: '. $MooOptions['merchant_email']. "\r\n";
 
             $order = $this->model->getOrder($orderID);
             $order = $order[0];
@@ -1631,8 +1589,12 @@ public function moo_AddOrderType()
             if($order->instructions != '')
                 $message   .=  '<br/><b>Special Instructions</b>';
             $message   .=  '<br/>'.$order->instructions;
+
             if($deliveryFee != 0)
                 $message   .=  '<br/><b>Delivery Fee : $'.$deliveryFee.'</b>';
+
+            if($pickuptime != '')
+                $message   .=  '<br/>'.$pickuptime;
 
             $message   .=  '<br/><br/><b><a href="https://www.clover.com/r/'.$orderID.'" target="_blanck">Order receipt</a></b>';
 
@@ -1644,6 +1606,25 @@ public function moo_AddOrderType()
 
         }
 
+    }
+
+    private function SendSmsToMerchant($orderID,$PaymentMethod,$pickuptime)
+    {
+            $MooOptions = (array)get_option('moo_settings');
+            if(isset($MooOptions['merchant_phone']) && $MooOptions['merchant_phone'] != '' )
+            {
+                $phone = $MooOptions['merchant_phone'];
+                $message = 'You have received a new order with the ID : '.$orderID.' and this order '.$PaymentMethod.' '.$pickuptime;
+                $this->api->sendSmsTo($message,$phone);
+            }
+    }
+    private function SendSmsToCustomer($orderID,$phone)
+    {
+            if($phone != '' )
+            {
+                $message = 'Thank you for your order, You can see your receipt at this link http://www.clover.com/r/'.$orderID;
+                $this->api->sendSmsTo($message,$phone);
+            }
     }
 
 }

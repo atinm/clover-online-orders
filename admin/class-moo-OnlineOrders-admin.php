@@ -276,6 +276,11 @@ class moo_OnlineOrders_Admin {
                             <textarea  name="moo_settings[zones_json]" hidden><?php echo $MooOptions['zones_json']?></textarea>
                             <input type="text"  name="moo_settings[tips]"     value="<?php echo $MooOptions['tips']?>" hidden/>
                             <input type="text"  name="moo_settings[payment_cash]"     value="<?php echo $MooOptions['payment_cash']?>" hidden/>
+                            <input type="text"  name="moo_settings[merchant_phone]"     value="<?php echo $MooOptions['merchant_phone']?>" hidden/>
+                            <input type="text"  name="moo_settings[order_later]"     value="<?php echo $MooOptions['order_later']?>" hidden/>
+                            <input type="text"  name="moo_settings[order_later_days]"     value="<?php echo $MooOptions['order_later_days']?>" hidden/>
+                            <input type="text"  name="moo_settings[order_later_minutes]"     value="<?php echo $MooOptions['order_later_minutes']?>" hidden/>
+
                             <div id="MooPanel_tabContent1">
                                 <h2>Key settings</h2>
                                 <div class="MooPanelItem">
@@ -363,7 +368,7 @@ class moo_OnlineOrders_Admin {
                         </div>
                     </div>
                  <div class="MooPanelItem">
-                        <h3>Manually Sync</h3>
+                        <h3 style="font-size: 12px">Manual Sync "Use manual sync if changes have been made to your inventory and it hasn't synced"</h3>
                         <div id="moo_progressbar_container"></div>
                         <div class="Moo_option-item">
                             <a href="#" onclick="MooPanel_UpdateItems(event)" class="button button-secondary"
@@ -416,7 +421,12 @@ class moo_OnlineOrders_Admin {
                         <textarea  name="moo_settings[zones_json]" hidden><?php echo $MooOptions['zones_json']?></textarea>
                         <input type="text"  name="moo_settings[tips]"     value="<?php echo $MooOptions['tips']?>" hidden/>
                         <input type="text"  name="moo_settings[payment_cash]"     value="<?php echo $MooOptions['payment_cash']?>" hidden/>
-                    <h2>Store interface</h2>
+                        <input type="text"  name="moo_settings[merchant_phone]"     value="<?php echo $MooOptions['merchant_phone']?>" hidden/>
+                        <input type="text"  name="moo_settings[order_later]"     value="<?php echo $MooOptions['order_later']?>" hidden/>
+                        <input type="text"  name="moo_settings[order_later_days]"     value="<?php echo $MooOptions['order_later_days']?>" hidden/>
+                        <input type="text"  name="moo_settings[order_later_minutes]"     value="<?php echo $MooOptions['order_later_minutes']?>" hidden/>
+
+                        <h2>Store interface</h2>
                     <div class="MooPanelItem">
                         <h3>Default style</h3>
                         <div class="Moo_option-item">
@@ -441,12 +451,12 @@ class moo_OnlineOrders_Admin {
                 <div id="MooPanel_tabContent5">
                     <h2>Categories</h2>
                     <div class="MooPanelItem">
-                        <h3>Show or hide a category ( press save if giving category a new name )</h3>
+                        <h3>Show or hide a category (press save if giving category a new name)</h3>
                         <?php
                         $show_all_items = get_option("moo-show-allItems");
                         $nb_items = $model->NbProducts();
                         if($nb_items[0]->nb == 0){
-                            echo '<p style="font-size: 15px;text-align: center">You don\'t have any category or you\'re just imported your inventory. <br/> Please refresh the page </p>';
+                            echo '<p style="font-size: 15px;text-align: center">It\'s appears you don\'t have any categories. If you have just imported your inventory. <br/> Please refresh this page </p>';
                         }
                         else
                         {
@@ -487,7 +497,7 @@ class moo_OnlineOrders_Admin {
                     <div class="MooPanelItem">
                         <h3>Hide or change modifier group names so they are easy to understand</h3>
                         <?php
-                        if(count($modifier_groups)==0) echo "<div style=\"text-align: center;margin-bottom: 10px;\">You don't have any Modifier Group,<br> please import your data by clicking on <b>Import Items</b></div>";
+                        if(count($modifier_groups)==0) echo "<div style=\"text-align: center;margin-bottom: 10px;\">It's appears you don't have any Modifier Group, please import your data by clicking on <b>Import Items from sidebar then import inventory</b></div>";
 
                         foreach ($modifier_groups as $mg) {
                             //var_dump($mg);
@@ -537,6 +547,15 @@ class moo_OnlineOrders_Admin {
                                         <div class="label">Your Emails</div>
                                         <input style="width: 60%" name="moo_settings[merchant_email]" id="MooDefaultMerchantEmail" type="text" value="<?php echo $MooOptions['merchant_email']?>" />
                                      </div>
+                                    <div class="Moo_option-item" >
+                                        <div style="padding-right: 5px;font-size: 12px;">
+                                            We use this phone to inform you via SMS  when a new order has been made. Enjoy SMS Notification feature for free for 60 days only
+                                        </div>
+                                     </div>
+                                    <div class="Moo_option-item">
+                                        <div class="label">Your Phone</div>
+                                        <input style="width: 60%" name="moo_settings[merchant_phone]" id="MooDefaultMerchantPhone" type="text" value="<?php echo $MooOptions['merchant_phone']?>" />
+                                     </div>
                                 </div>
                                 <div class="MooPanelItem" style="margin-bottom: 0;border-bottom: 0">
                                     <h3>Tips</h3>
@@ -563,9 +582,9 @@ class moo_OnlineOrders_Admin {
                                     <?php } ?>
                                 </div>
                                 <div class="MooPanelItem" style="margin-bottom: 0;border-bottom: 0">
-                                    <h3>Payment methods</h3>
+                                    <h3>Additional payment options</h3>
                                     <div class="Moo_option-item">
-                                        <div class="label">Cash</div>
+                                        <div class="label" style="margin-top: -10px">Pay in Store</div>
                                         <div class="onoffswitch"  title="Accept cash payment">
                                             <input type="checkbox" name="moo_settings[payment_cash]" class="onoffswitch-checkbox" id="myonoffswitch_payment_cash" <?php echo ($MooOptions['payment_cash'] == 'on')?'checked':''?>>
                                             <label class="onoffswitch-label" for="myonoffswitch_payment_cash"><span class="onoffswitch-inner"></span>
@@ -574,7 +593,6 @@ class moo_OnlineOrders_Admin {
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="MooPanelItem">
                                     <h3>Please choose the Hours your store is available</h3>
                                     <div class="Moo_option-item">
@@ -604,6 +622,29 @@ class moo_OnlineOrders_Admin {
                                         </div>
                                     </div>
                                 </div>
+
+                                <div class="MooPanelItem">
+                                    <h3>Accept orders for later</h3>
+                                    <div class="Moo_option-item">
+                                        <div class="label" style="margin-top: -10px">Show Order Date</div>
+                                        <div class="onoffswitch"  title="Show/hide order date">
+                                            <input type="checkbox" name="moo_settings[order_later]" class="onoffswitch-checkbox" id="myonoffswitch_order_later" <?php echo ($MooOptions['order_later'] == 'on')?'checked':''?>>
+                                            <label class="onoffswitch-label" for="myonoffswitch_order_later"><span class="onoffswitch-inner"></span>
+                                                <span class="onoffswitch-switch"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="Moo_option-item">
+                                        <div class="label">The order placement has to be at least </div>
+                                        <input style="width: 20%" name="moo_settings[order_later_minutes]" id="MooOrderLaterMinutes" type="text" value="<?php echo $MooOptions['order_later_minutes']?>" /> min in advance
+                                    </div>
+                                    <div class="Moo_option-item">
+                                        <div class="label">And the order placement cannot come more than  </div>
+                                        <input style="width: 20%" name="moo_settings[order_later_days]" id="MooOrderLaterDays" type="text" value="<?php echo $MooOptions['order_later_days']?>" /> days in advance
+                                    </div>
+
+                                </div>
+
                                 <div class="MooPanelItem" style="margin-bottom: 0;border-bottom: 0">
                                     <h3>Thank you page</h3>
                                     <div class="Moo_option-item" >
@@ -653,6 +694,10 @@ class moo_OnlineOrders_Admin {
                         <input type="text"  name="moo_settings[default_style]"     value="<?php echo $MooOptions['default_style']?>" hidden/>
                         <input type="text"  name="moo_settings[tips]"     value="<?php echo $MooOptions['tips']?>" hidden/>
                         <input type="text"  name="moo_settings[payment_cash]"     value="<?php echo $MooOptions['payment_cash']?>" hidden/>
+                        <input type="text"  name="moo_settings[merchant_phone]"     value="<?php echo $MooOptions['merchant_phone']?>" hidden/>
+                        <input type="text"  name="moo_settings[order_later]"     value="<?php echo $MooOptions['order_later']?>" hidden/>
+                        <input type="text"  name="moo_settings[order_later_days]"     value="<?php echo $MooOptions['order_later_days']?>" hidden/>
+                        <input type="text"  name="moo_settings[order_later_minutes]"     value="<?php echo $MooOptions['order_later_minutes']?>" hidden/>
                     <div class="MooPanelItem">
                         <h3>Set Delivery Areas <span class="moo_adding-zone-btn" onclick="moo_show_form_adding_zone()">Add zone</span></h3>
                         <div class="Moo_option-item" id='moo_adding-zone'>
@@ -909,13 +954,16 @@ class moo_OnlineOrders_Admin {
     public function moo_update_address()
     {
         $MooOptions = (array)get_option('moo_settings');
+
         $api   = new  moo_OnlineOrders_CallAPI();
+        $merchant_address = $api->getMerchantAddress();
 
         wp_enqueue_script('moo-google-map');
         wp_enqueue_script('moo-map-js',array('jquery','moo-google-map'));
         wp_localize_script("moo-map-js", "moo_merchantAddress",$merchant_address);
         wp_localize_script("moo-map-js", "moo_merchantLat",$MooOptions['lat']);
         wp_localize_script("moo-map-js", "moo_merchantLng",$MooOptions['lng']);
+
        ?>
         <form method="post" action="options.php">
         <?php settings_fields('moo_settings') ?>
@@ -934,14 +982,19 @@ class moo_OnlineOrders_Admin {
         <textarea name="moo_settings[zones_json]" hidden><?php echo $MooOptions['zones_json']?></textarea>
         <input type="text"  name="moo_settings[tips]"     value="<?php echo $MooOptions['tips']?>" hidden/>
         <input type="text"  name="moo_settings[payment_cash]"     value="<?php echo $MooOptions['payment_cash']?>" hidden/>
+        <input type="text"  name="moo_settings[merchant_phone]"     value="<?php echo $MooOptions['merchant_phone']?>" hidden/>
+        <input type="text"  name="moo_settings[order_later]"     value="<?php echo $MooOptions['order_later']?>" hidden/>
+        <input type="text"  name="moo_settings[order_later_days]"     value="<?php echo $MooOptions['order_later_days']?>" hidden/>
+        <input type="text"  name="moo_settings[order_later_minutes]"     value="<?php echo $MooOptions['order_later_minutes']?>" hidden/>
 
-        <input type="hidden" name="_wp_http_referer" value="<?php echo (esc_url((admin_url('admin.php?page=moo_index')))); ?>" />
+
+            <input type="hidden" name="_wp_http_referer" value="<?php echo (esc_url((admin_url('admin.php?page=moo_index')))); ?>" />
 
             <div id="MooPanel_tabContent1">
             <h2>Set-up your address</h2>
             <div class="MooPanelItem">
                 <h3>Please validate or change your address</h3>
-                <div class="Moo_option-item">
+                <div class="Moo_option-item" style="padding-top: 0px;margin-top: -15px;">
                     <p>Your current address is : </p>
                     <p><?php echo $merchant_address?></p>
                     <div class="moo_map" id="moo_map"></div>

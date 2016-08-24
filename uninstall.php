@@ -92,5 +92,5 @@ else
 	/* -- Table `order_types -- */
 	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_order_types` ;");
 
-
+	update_option( 'moo_settings','');
 }

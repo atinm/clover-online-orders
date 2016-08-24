@@ -4,7 +4,7 @@ Donate link: http://merchantech.us/
 Tags: clover,online orders for clover,merchantech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover
 Requires at least: 3.0.1
 Tested up to: 3.0
-Stable tag: 1.1.8
+Stable tag: 1.1.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,17 +78,19 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 1. Example of menu 'style1'
 2. Example of checkout page
 3. Dashboard of the plug-in
-4. Example of menu 'style2'
-5. Example of menu 'style2'
-6. Example of menu with images
-7. Example of menu with images
+4. Example of menu with images
+5. Example of menu with images
+6. Add to cart button
+7. An other example of menu
 
 == Changelog ==
+= 1.1.9 =
+* Adding Order for later
+* Adding SMS notification for merchants and customers
 = 1.1.8 =
 * Pickup without paying
 * Manually Sync
 * Add to cart button
-
 = 1.1.7 =
 * Improving The CART CSS
 * remove qty limit

@@ -219,9 +219,9 @@ class moo_OnlineOrders_CallAPI {
             '&cvv='.$cvv.'&last4='.$last4.'&first6='.$first6.'&expYear='.$expYear.'&cardEncrypted='.$cardEncrypted.'&tipAmount='.$tipAmount);
     }
     //Send Notification to the merchant when a new order is registered
-    function NotifyMerchant($oid,$instructions,$customer)
+    function NotifyMerchant($oid,$instructions,$customer,$pickup_time,$paymentMethode)
     {
-        return $this->callApi_Post("notify",$this->Token,'orderId='.$oid.'&instructions='.$instructions.'&customer='.json_encode($customer));
+        return $this->callApi_Post("notify",$this->Token,'orderId='.$oid.'&instructions='.$instructions.'&pickup_time='.$pickup_time.'&paymentmethod='.$paymentMethode.'&customer='.json_encode($customer));
     }
     // OrderTypes
     function GetOneOrdersTypes($uuid)
@@ -253,9 +253,9 @@ class moo_OnlineOrders_CallAPI {
     {
         return $this->callApi("opening_hours",$this->Token);
     }
-    function getOpeningStatus()
+    function getOpeningStatus($nb_days,$nb_minites)
     {
-        return $this->callApi("is_open",$this->Token);
+        return $this->callApi("is_open/".$nb_days."/".$nb_minites,$this->Token);
     }
     function getMerchantProprietes()
     {
@@ -1022,6 +1022,11 @@ class moo_OnlineOrders_CallAPI {
     {
         $phone = str_replace('+','%2B',$phone);
         $message = 'Your verification code is : '.$code;
+        return $this->callApi_Post("sendsms",$this->Token,'to='.$phone.'&body='.$message);
+    }
+    public function sendSmsTo($message,$phone)
+    {
+        $phone = str_replace('+','%2B',$phone);
         return $this->callApi_Post("sendsms",$this->Token,'to='.$phone.'&body='.$message);
     }
     private function callApi($url,$accesstoken)

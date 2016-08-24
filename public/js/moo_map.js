@@ -32,13 +32,14 @@ function moo_initMap(myLatLng) {
 
 function moo_InitZones()
 {
-    if(moo_merchantLat!= "" && moo_merchantLng != "")
-    {
-        var Merchantlocation = {};
-        Merchantlocation.lng = parseFloat(moo_merchantLng);
-        Merchantlocation.lat = parseFloat(moo_merchantLat);
-        moo_initMapDZ(Merchantlocation);
-    }
+    if(!(typeof moo_merchantLat === 'undefined'))
+        if(moo_merchantLat!= "" && moo_merchantLng != "")
+        {
+            var Merchantlocation = {};
+            Merchantlocation.lng = parseFloat(moo_merchantLng);
+            Merchantlocation.lat = parseFloat(moo_merchantLat);
+            moo_initMapDZ(Merchantlocation);
+        }
 }
 
 function moo_initMapDZ(myLatLng) {

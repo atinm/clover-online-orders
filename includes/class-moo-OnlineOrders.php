@@ -69,7 +69,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.1.8';
+		$this->version = '1.1.9';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -315,10 +315,7 @@ class moo_OnlineOrders {
 		//verify if the store is open according to bussiness hours configured in Clover
 		$this->loader->add_action( 'wp_ajax_moo_store_isopen', $plugin_public, 'moo_StoreIsOpen');
 		$this->loader->add_action( 'wp_ajax_nopriv_moo_store_isopen', $plugin_public, 'moo_StoreIsOpen');
-
-		//verify if the store accepting tips
-		$this->loader->add_action( 'wp_ajax_moo_tips_isenabled', $plugin_public, 'moo_TipsIsEnabled');
-		$this->loader->add_action( 'wp_ajax_nopriv_moo_tips_isenabled', $plugin_public, 'moo_TipsIsEnabled');
+		
 
 
 		/*

@@ -256,7 +256,9 @@ class Moo_OnlineOrders_Shortcodes {
     {
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-Model.php";
         $model = new moo_OnlineOrders_Model();
-
+        
+        wp_enqueue_style( 'bootstrap-css' );
+        wp_enqueue_style( 'font-awesome' );
         wp_enqueue_script( 'custom-script-accordion');
         wp_enqueue_script( 'jquery-accordion',array( 'jquery' ));
         wp_enqueue_script( 'simple-modal',array( 'jquery' ));
@@ -576,6 +578,8 @@ class Moo_OnlineOrders_Shortcodes {
     }
     public static function checkoutPage($atts, $content)
     {
+        wp_enqueue_style( 'bootstrap-css' );
+        wp_enqueue_style( 'font-awesome' );
         wp_enqueue_style( 'custom-style-cart3');
 
         wp_enqueue_script( 'moo-google-map' );
@@ -634,8 +638,25 @@ class Moo_OnlineOrders_Shortcodes {
         $key = $api->getPayKey();
         $key = json_decode($key);
 
-        if($key==NULL)
-            echo '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>This store cannot accept orders, if you are the owner please verify your API Key</div>';
+        if($key == NULL)
+        {
+            echo '<div id="moo_checkout_msg">This store cannot accept orders, if you are the owner please verify your API Key</div>';
+            return;
+        }
+
+        $nb_days = ($MooOptions["order_later_days"]>0)?$MooOptions["order_later_days"]:4;
+        $nb_minutes = ($MooOptions["order_later_minutes"]>0)?$MooOptions["order_later_minutes"]:60;
+
+        $oppening_status = json_decode($api->getOpeningStatus($nb_days,$nb_minutes));
+        $oppening_msg = "";
+        if($oppening_status->status == 'close')
+        {
+            if($oppening_status->store_time == '')
+                $oppening_msg = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg">Currently Not Available - Order in Advance.</div>';
+            else
+                $oppening_msg = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Currently Not Available - Order in Advance.</div>';
+
+        }
 
         $merchant_address =  $api->getMerchantAddress();
 
@@ -643,6 +664,7 @@ class Moo_OnlineOrders_Shortcodes {
         wp_localize_script("custom-script-checkout", "moo_Total",$total);
         wp_localize_script("custom-script-checkout", "moo_Key",(array)$key);
         wp_localize_script("custom-script-checkout", "moo_thanks_page",$MooOptions['thanks_page']);
+        wp_localize_script("custom-script-checkout", "moo_pickup_time",$oppening_status->pickup_time);
 
         wp_localize_script("display-merchant-map", "moo_merchantLat",$MooOptions['lat']);
         wp_localize_script("display-merchant-map", "moo_merchantLng",$MooOptions['lng']);
@@ -654,6 +676,7 @@ class Moo_OnlineOrders_Shortcodes {
         ?>
 
         <div id="moo_OnlineStoreContainer">
+        <?php echo $oppening_msg?>
         <div id="moo_merchantmap">
         </div>
         <form id="moo_form_address" method="post" action="#" novalidate="novalidate">
@@ -738,7 +761,7 @@ class Moo_OnlineOrders_Shortcodes {
                                 <input type="hidden"  id="moo_customer_lng"  name="moo_customer_lng" />
                                 <input type="hidden"  id="moo_delivery_amount" name="moo_delivery_amount" value="ERROR" />
                                 <div class="col-md-12">
-                                    <p>
+                                    <p style="margin: 9px 33px -5px;">
                                         If your address isn’t detected, please drop pin to the exact location to verify you are in the delivery zone                                    </p>
                                 </div>
 
@@ -746,6 +769,53 @@ class Moo_OnlineOrders_Shortcodes {
                         </div>
                     </div>
                 </div>
+                 <?php if($MooOptions['order_later'] == 'on'){ ?>
+                <div class="col-md-12" id="moo-pickup-time">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <p style="font-size: 16px !important; margin:0;padding: 0;">Order Date</p>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                  Schedule for
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <select class="form-control" name="moo_pickup_day" id="moo_pickup_day" onchange="moo_pickup_day_changed(this)">
+                                            <?php
+                                            foreach ($oppening_status->pickup_time as $key=>$val) {
+                                                echo '<option value="'.$key.'">'.$key.'</option>';
+                                            }
+                                            ?>
+                                        </select>
+                                     </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <select class="form-control" name="moo_pickup_hour" id="moo_pickup_hour" >
+                                            <?php
+                                            foreach ($oppening_status->pickup_time as $key=>$val) {
+                                                echo '<option value="asap">ASAP</option>';
+                                                foreach ($val as $h)
+                                                    echo '<option value="'.$h.'">'.$h.'</option>';
+                                            }
+                                            ?>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php if($oppening_status->store_time != '') { ?>
+                                <div class="row">
+                                    <div class="col-md-12 col-md-offset-4">
+                                        Today's Online Ordering Hours: <?php echo $oppening_status->store_time  ?>
+                                    </div>
+                                </div>
+                            <?php } ?>
+                        </div>
+                    </div>
+                </div>
+                 <?php }?>
                 <!--  Here you can add your personal fields   -->
 
                 <!--  End of  personal fields   -->
@@ -755,10 +825,15 @@ class Moo_OnlineOrders_Shortcodes {
                         <div class="panel-body">
                             <div id="moo_paymentOptions">
                                 <?php if($MooOptions['payment_cash'] == 'on'){ ?>
-                                <input type="radio" name="paymentMethod" value="cc"   id="moo_paymentOptions_cc"  onclick="moo_changePaymentMethod('cc')" checked>
-                                <label for="moo_paymentOptions_cc" style="display: inline"> Pay now with Credit Card</label>
-                                <input type="radio" name="paymentMethod" value="cash" id="moo_paymentOptions_cash"  onclick="moo_changePaymentMethod('cash')">
-                                <label for="moo_paymentOptions_cash" style="display: inline"> Pay in Store</label>
+
+                                    <div class="col-md-5" style="margin-bottom: 10px">
+                                        <input type="radio" name="paymentMethod" value="cc"   id="moo_paymentOptions_cc"  onclick="moo_changePaymentMethod('cc')" checked>
+                                        <label for="moo_paymentOptions_cc" style="display: inline"> Pay now with Credit Card</label>
+                                    </div>
+                                    <div class="col-md-4" style="margin-bottom: 10px">
+                                        <input type="radio" name="paymentMethod" value="cash" id="moo_paymentOptions_cash"  onclick="moo_changePaymentMethod('cash')">
+                                        <label for="moo_paymentOptions_cash" style="display: inline"> Pay in Store</label>
+                                    </div>
                                 <?php }?>
                             </div>
                             <div id="moo_creditCardPanel">
@@ -819,11 +894,11 @@ class Moo_OnlineOrders_Shortcodes {
                                     <img src="<?php echo  plugin_dir_url(dirname(__FILE__))."public/img/check.png"?>" width="60px">
                                     <p style="margin-top: 10px;font-size: 20px">Your phone number has been verified <br />Please have your payment ready when picking up from the store</p>
                                 </div>
-                                <div class="col-md-6 col-md-offset-3" id="moo_verifPhone_sending" style="display:block <?php //echo ($_SESSION['moo_phone_verified'])?'none':'block'?>">
+                                <div class="col-md-8 col-md-offset-2 col-xs-12" id="moo_verifPhone_sending" style="display:block <?php //echo ($_SESSION['moo_phone_verified'])?'none':'block'?>">
                                     <div class="form-group form-inline">
                                         <label for="Moo_PhoneToVerify">Your phone</label>
-                                        <input class="form-control" id="Moo_PhoneToVerify" />
-                                        <a class="btn btn-primary" href="#" onclick="moo_verifyPhone(event)">Verify via SMS</a>
+                                        <input class="form-control" id="Moo_PhoneToVerify" style="margin-bottom: 10px" />
+                                        <a class="btn btn-primary" href="#" style="margin-bottom: 10px" onclick="moo_verifyPhone(event)">Verify via SMS</a>
                                         <label for="Moo_PhoneToVerify" class="error" style="display: none;"></label>
                                     </div>
                                     <p>
@@ -831,13 +906,13 @@ class Moo_OnlineOrders_Shortcodes {
                                     </p>
                                 </div>
                                 <div class="col-md-6 col-md-offset-3" id="moo_verifPhone_verificatonCode">
-                                    <p style='font-size:15px;color:green'>
+                                    <p style='font-size:18px;color:green'>
                                        Please enter the verification that was sent to your phone, if you didn't receive a code,
                                         <a href="#" onclick="moo_verifyCodeTryAgain(event)"> click here try again</a>
                                     </p>
                                     <div class="form-group form-inline">
-                                        <input class="form-control" id="Moo_VerificationCode" />
-                                        <a class="btn btn-primary" href="#" onclick="moo_verifyCode(event)">Submit</a>
+                                        <input class="form-control" id="Moo_VerificationCode" style="margin-bottom: 10px"  />
+                                        <a class="btn btn-primary" href="#" style="margin-bottom: 10px" onclick="moo_verifyCode(event)">Submit</a>
                                         <label for="Moo_VerificationCode" class="error" style="display: none;"></label>
                                     </div>
 
@@ -856,17 +931,21 @@ class Moo_OnlineOrders_Shortcodes {
                         <div class="panel-body">
                                 <div class="row"  style="margin-top: 13px;">
                                     <div class="col-md-6">
-                                        <select class="form-control" name="moo_tips_select" id="moo_tips_select" onchange="moo_tips_select_changed()">
-                                            <option value="cash">Add a tip to this order</option>
-                                            <option value="10">10%</option>
-                                            <option value="15">15%</option>
-                                            <option value="20">20%</option>
-                                            <option value="25">25%</option>
-                                            <option value="other">Custom $</option>
-                                        </select>
+                                        <div class="form-group">
+                                            <select class="form-control" name="moo_tips_select" id="moo_tips_select" onchange="moo_tips_select_changed()">
+                                                <option value="cash">Add a tip to this order</option>
+                                                <option value="10">10%</option>
+                                                <option value="15">15%</option>
+                                                <option value="20">20%</option>
+                                                <option value="25">25%</option>
+                                                <option value="other">Custom $</option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <input class="form-control" name="tip" id="moo_tips" value="0" onchange="moo_tips_amount_changed()">
+                                        <div class="form-group">
+                                             <input class="form-control" name="tip" id="moo_tips" value="0" onchange="moo_tips_amount_changed()">
+                                        </div>
                                     </div>
                                 </div>
                         </div>
@@ -1125,6 +1204,8 @@ class Moo_OnlineOrders_Shortcodes {
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-Model.php";
         $model = new moo_OnlineOrders_Model();
 
+        wp_enqueue_style( 'bootstrap-css' );
+        wp_enqueue_style( 'font-awesome' );
         wp_enqueue_script( 'custom-script-items' );
         wp_enqueue_script( 'jquery-accordion',array( 'jquery' ));
 
@@ -1292,7 +1373,6 @@ class Moo_OnlineOrders_Shortcodes {
                                 </div>
                                 <div class="moo_popup_btns_action">
                                     <a href="#" class="btn btn-primary" onclick="moo_addItemWithModifiersToCart(event,'<?php echo trim($item->uuid) ?>','<?php echo preg_replace('/[^A-Za-z0-9 \-]/', '', $item->name); ?>','<?php echo trim($item->price) ?>')" >ADD TO CART</a>
-                                    <a href="<?php echo $cart_page_url; ?>" class="btn btn-default">VIEW CART</a>
                                 </div>
                             </div>
                             <?php
@@ -1328,7 +1408,6 @@ class Moo_OnlineOrders_Shortcodes {
                             </div>
                             <div class="moo_popup_btns_action">
                                 <a href="#" class="btn btn-primary" onclick="moo_cartv3_addtocart('<?php echo trim($item->uuid) ?>','<?php echo preg_replace('/[^A-Za-z0-9 \-]/', '', $item->name) ?>')">ADD TO CART</a>
-                                <a href="<?php echo $cart_page_url; ?>" class="btn btn-default">VIEW CART</a>
                             </div>
                         </div>
                         <?php } ?>
@@ -1409,6 +1488,17 @@ class Moo_OnlineOrders_Shortcodes {
     }
     public static function TheStore($atts, $content)
     {
+        $api   = new moo_OnlineOrders_CallAPI();
+        $oppening_status = json_decode($api->getOpeningStatus(4,30));
+        $oppening_msg = "";
+        if($oppening_status->status == 'close')
+        {
+            if($oppening_status->store_time == '')
+                $oppening_msg = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg">Currently Not Available - Order in Advance.</div>';
+            else
+                $oppening_msg = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Currently Not Available - Order in Advance.</div>';
+
+        }
         $MooOptions = (array)get_option('moo_settings');
         $html_code  = '';
 
@@ -1419,6 +1509,7 @@ class Moo_OnlineOrders_Shortcodes {
             $html_code .= '<style type="text/css">'.$custom_css.'</style>';
 
         $html_code .=  '<div id="moo_OnlineStoreContainer" class="moo_loading">';
+        $html_code .=  $oppening_msg;
 
         $style = $MooOptions["default_style"];
 
@@ -1430,7 +1521,7 @@ class Moo_OnlineOrders_Shortcodes {
             else
                 $html_code .= self::ItemsWithImages($atts, $content);
 
-        $html_code .=  '<div class="row Moo_Copyright">Powered by <a href="http://merchantech.us" target="_blank">Merchantech apps</a></div></div>';
+        $html_code .=  '<div class="row Moo_Copyright">Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover">Smart Merchantapps</a></div></div>';
 
         //Include custom js
         if($custom_js != null)
@@ -1443,6 +1534,8 @@ class Moo_OnlineOrders_Shortcodes {
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-Model.php";
         $model = new moo_OnlineOrders_Model();
 
+        wp_enqueue_style( 'bootstrap-css' );
+        wp_enqueue_style( 'font-awesome' );
         wp_enqueue_style( 'custom-style-cart3');
 
         $store_page_id    = get_option('moo_store_page');
@@ -1520,7 +1613,7 @@ class Moo_OnlineOrders_Shortcodes {
         <?php } ?>
 
             <div class="moo-totals">
-                <a href="#" onclick="moo_emptyCart(event)">Empty the cart</a>
+                <a href="#" style="color: #337ab7;" onclick="moo_emptyCart(event)">Empty the cart</a>
                 <div class="moo-totals-item">
                     <label>Subtotal</label>
                     <div class="moo-totals-value" id="moo-cart-subtotal"><?php echo $total['sub_total'] ?></div>

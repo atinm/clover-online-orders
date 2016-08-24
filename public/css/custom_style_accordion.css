@@ -108,9 +108,10 @@
     color: #ffffff;
     background-color: #2f323b;
     background-image: none;
-}.moo_cart table thead th:first-child
+}
+.moo_cart table thead th:first-child
 {
-    width: 60%;
+    width: 50%;
 }
 .moo_cart table tbody
 {
