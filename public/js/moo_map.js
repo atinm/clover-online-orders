@@ -138,7 +138,7 @@ function moo_address_changed()
     var address   = document.getElementById('address').value;
     var city      = document.getElementById('city').value;
     var state     = document.getElementById('state').value;
-    var country   = document.getElementById('country').value;
+    var country   = 'United state';
     document.getElementById('moo_dz_address').innerText  = address + ' ' + city + ' ' + state + ' ' + country;
 }
 

@@ -71,6 +71,7 @@ class moo_OnlineOrders_Model {
         return $this->db->get_results("SELECT *
                                     FROM `{$this->db->prefix}moo_modifier` m
                                     WHERE m.group_id = '{$uuid_group}'
+                                  
                                     ");
     }
     function getModifiersGroup($item)

@@ -118,11 +118,11 @@ class Orders_List_Moo extends WP_List_Table_MOO {
             case 'p_address':
                 return stripslashes($item['p_address'].' '.$item['p_city'].' '.$item['p_state'].' '.$item['p_country']);
             case 'amount':
-                return 'Total : $'.$item['amount'].'<br/>'.'TAX : $'.$item['taxAmount'].'<br/>'.'TIP : $'.$item['tipAmount'];
+                return 'Total : $'.(floatval($item['amount'])+floatval($item['tipAmount'])).'<br/>'.'TAX : $'.$item['taxAmount'].'<br/>'.'TIP : $'.$item['tipAmount'];
             case 'deliveryfee':
                 return '$'.$item['deliveryfee'];
             case 'paid':
-                return ($item['paid'])?(($item['refpayment']=='CASH')?'CASH':'PAID'):'FAILED';
+                return ($item['paid'])?(($item['refpayment']=='CASH')?'CASH':(($item['refpayment']=='SCP')?'SCP':'PAID')):'FAILED';
             default:
                 return print_r( $item, true ); //Show the whole array for troubleshooting purposes
         }

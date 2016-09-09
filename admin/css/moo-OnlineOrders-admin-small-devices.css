@@ -1,0 +1,159 @@
+#MooPanel_sidebar {
+	display: none;
+}
+#MooPanel_main {
+	width: 100%;
+}
+
+div#MooPanel .button {
+    height: 28px !important;
+    line-height: 15px !important;
+}
+#MooPanel_main .stats .stat .value {
+    font-size: 25px;
+}
+div#MooPanel_tabContent2 div.button_center a{
+	margin-left:0 !important;
+	margin-right: 0 !important;
+}
+div#moo_progressbar_container svg {
+	width: 58%;
+}
+#Moo_AddOT_taxable_oui {
+	margin-left: 20px !important;
+}
+#Moo_AddOT_taxable_non {
+	margin-left: 66px !important;
+}
+#Moo_AddOT_btn {
+	margin-top: 12px !important;
+}
+div#MooPanel_tabContent4 form div.MooPanelItem div.Moo_option-item div label img {
+	margin: 0px auto !important;
+	margin-bottom: 15px !important;
+}
+.MooPanel_Selected:after {
+	border: none;
+}
+#menu_for_mobile ul {
+	display: none;
+}
+div.MooPanelItem span.moo_adding-zone-btn {
+    margin-top: 18px;
+}
+#menu_for_mobile {
+	display: initial;
+}
+
+/* Force table to not be like tables anymore */
+table,thead,tbody,th,td,tr {
+	display: block;
+}
+/* Hide table headers (but not display: none;, for accessibility) */
+thead tr {
+	position: absolute;
+	top: -9999px;
+	left: -9999px;
+}
+tr {
+	border: 1px solid #ccc;
+}
+td {
+	/* Behave  like a "row" */
+	border: none;
+	border-bottom: 1px solid #eee;
+	position: relative;
+	padding-left: 50%;
+}
+td:before {
+	/* Now like a table header */
+	position: absolute;
+	/* Top/left values mimic padding */
+	top: 6px;
+	left: 6px;
+	width: 45%;
+	padding-right: 10px;
+	white-space: nowrap;
+}
+/*
+Label the data
+*/
+/*
+td:nth-of-type(1):before {
+	content: "First Name";
+}
+div.table_mobile td:nth-of-type(2):before {
+	content: "Last Name";
+}
+div.table_mobile td:nth-of-type(3):before {
+	content: "Job Title";
+}
+div.table_mobile td:nth-of-type(4):before {
+	content: "Favorite Color";
+}
+div.table_mobile td:nth-of-type(5):before {
+	content: "Wars of Trek?";
+}
+div.table_mobile td:nth-of-type(6):before {
+	content: "Porn Name";
+}
+div.table_mobile td:nth-of-type(7):before { 
+	content: "Date of Birth"; 
+}
+div.table_mobile td:nth-of-type(8):before { 
+	content: "Dream Vacation City"; 
+}
+div.table_mobile td:nth-of-type(9):before { 
+	content: "GPA"; 
+}
+div.table_mobile td:nth-of-type(10):before { 
+	content: "Arbitrary Data"; 
+}
+*/
+div#MooOrderTypesContent {
+	width: 100% !important;
+}
+#display_panel5_on_desktop {
+	display: none !important;
+}
+#show_hide_modifer_desktop {
+	display: none;
+}
+.for_mobile_enable_disable {
+	margin-left: 25% !important;
+	float: none !important;
+}
+.additional_payment_options_desktop {
+	display: none;
+}
+.additional_payment_options_mobile {
+	margin-left: 25%;
+}
+.hour_store_mobile {
+	margin-left: 25% !important;
+}
+.display_order_types_desktop {
+	display: none;
+}
+.display_order_types_mobile {
+	display: initial;
+}
+#display_panel5_on_mobile {
+	display: initial;
+}
+#show_hide_modifer_mobile {
+	display: initial !important;
+}
+.additional_payment_options_mobile {
+	display: initial;
+}
+.delivery_area_for_mobile {
+	width: 100% !important;
+}
+.td_for_mobile {
+	border: none;
+    padding-left: 1%;
+}
+.tr_for_mobile {
+	border: none !important;
+}

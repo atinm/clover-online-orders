@@ -3,8 +3,8 @@ Contributors: merchantech
 Donate link: http://merchantech.us/
 Tags: clover,online orders for clover,merchantech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover
 Requires at least: 3.0.1
-Tested up to: 3.0
-Stable tag: 1.1.9
+Tested up to: 4.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -84,55 +84,60 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 7. An other example of menu
 
 == Changelog ==
+= 1.2.0 =
+* Added Out of stock feature
+* Improved checkout feature
+* New design for plugin's dashboard
+* Improved the exiting styles
 = 1.1.9 =
-* Adding Order for later
-* Adding SMS notification for merchants and customers
+* Added Order for later
+* Added SMS notification for merchants and customers
 = 1.1.8 =
 * Pickup without paying
 * Manually Sync
 * Add to cart button
 = 1.1.7 =
-* Improving The CART CSS
+* Improved The CART CSS
 * remove qty limit
-* Removing Style 2
-* fixing map empty in checkout
+* Removed Style 2
+* fixed empty map in checkout
 = 1.1.6 =
-* Adding delivery area
-* Adding tips
-* Adding required modifiers
+* Added delivery area
+* Added tips
+* Added required modifiers
 = 1.1.4 =
-* Fixing Modifier issues
+* Fixed Modifier issues
 = 1.1.3 =
-* Adding image for products
-* Fixing more than one checkout page issue
+* Added image for products
+* Fixed more than one checkout page issue
 * The Cart in new page
-* Adding order information in checkout page
+* Added order information in checkout page
 = 1.1.1 =
 * Display the items without category
 * Min and Max Modifier allowed in group modifier
 = 1.1.0 =
-* Fixing bulk show/hide items
-* Adding show/hide category
+* Fixed bulk show/hide items
+* Added show/hide category
 * Change category's name
 = 1.0.9 =
-* Fixing cart's color
-* Fixing the shortcode issue
+* Fixed cart's color
+* Fixed the shortcode issue
 = 1.0.8 =
-* Adding a video
+* Added a video
 = 1.0.7 =
-= Adding : =
+= Added : =
 * Store's hours
 * Business address
 * Show/Hide shipping address for an order type
 * Sync with your Clover POS
 * Item's notes
-= Fixing : =
+= Fixed : =
 * Partially paid
 * Changing the quantify of an item in the cart
 = 1.0.6 =
 Fix issues
 = 1.0.5 =
-= Adding : =
+= Added : =
 * Change name of Modifier group
 * Show/hide Modifier group
 = 1.0.4 =

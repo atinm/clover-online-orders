@@ -28,13 +28,15 @@
 {
     color: #000000;
     font-family: Lato, sans-serif !important;
-    font-size: 22px;
+    font-size: 20px;
     min-height: 58px;
     line-height: 55px;
     text-align: center;
     font-weight: bold;
     text-decoration: none !important;
-
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .moo_category_flip  a
 {
@@ -202,6 +204,8 @@
 .moo_popup_btns_action
 {
     margin-top: 20px;
+    color: #000;
+    font-size: 18px;
 }
 .moo_popup_image img
 {

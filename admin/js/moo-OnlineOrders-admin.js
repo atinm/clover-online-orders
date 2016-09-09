@@ -1,10 +1,21 @@
 jQuery(document).ready(function($){
+    $("div.faq_question").click(function() {
+        var clicked = $(this);
+        // Get next element to current element
+        clicked = clicked.next();
+        // Show or hide the next element
+        clicked.toggle();
+    });
+
     window.moo_loading = '<svg xmlns="http://www.w3.org/2000/svg" width="44px" height="44px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="uil-default"><rect x="0" y="0" width="100" height="100" fill="none" class="bk"></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(0 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(30 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.08333333333333333s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(60 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.16666666666666666s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(90 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.25s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(120 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.3333333333333333s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(150 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.4166666666666667s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(180 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(210 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5833333333333334s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(240 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.6666666666666666s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(270 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.75s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(300 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.8333333333333334s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(330 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.9166666666666666s" repeatCount="indefinite"></animate></rect></svg>';
     window.moo_first_time = true; // this variable is used to make sure the an action is happen only one time
     window.moo_nb_allItems =0;
+
     moo_Update_stats();
     Moo_GetOrderTypes();
+
     $('.moo-color-field').wpColorPicker();
+
     if($('#moo_progressbar_container').length == 1)
          window.bar = new ProgressBar.Line('#moo_progressbar_container', {
                 strokeWidth: 4,
@@ -32,6 +43,30 @@ jQuery(document).ready(function($){
                 to: {color: '#ED6A5A'}
         });
 
+    if($('div#MooPanel_tabContent4 input[value=style1]').prop('checked')) {
+        a = $('div#MooPanel_tabContent4 input[value=style1]').next();
+        a.css('border', '5px solid #1e5429');
+        $('div#MooPanel_tabContent4 input[value=style3]').next().css('border', 'none');
+    }
+    if ($('div#MooPanel_tabContent4 input[value=style3]').prop('checked')) {
+        a = $('div#MooPanel_tabContent4 input[value=style3]').next();
+        a.css('border', '5px solid #1e5429');
+        $('div#MooPanel_tabContent4 input[value=style1]').next().css('border', 'none');
+    }
+    $('div#MooPanel_tabContent4 input[value=style1]').click(function() {
+        $('div#MooPanel_tabContent4 input[value=style1]').next().css('border', '5px solid #1e5429');
+        $('div#MooPanel_tabContent4 input[value=style3]').next().css('border', 'none');
+    });
+    $('div#MooPanel_tabContent4 input[value=style3]').click(function() {
+        $('div#MooPanel_tabContent4 input[value=style3]').next().css('border', '5px solid #1e5429');
+        $('div#MooPanel_tabContent4 input[value=style1]').next().css('border', 'none');
+    });
+
+    $("#show_menu").click(function() {
+        $("#menu_for_mobile ul").toggle();
+    });
+
+
 });
 function tab_clicked(tab)
 {
@@ -50,6 +85,7 @@ function tab_clicked(tab)
         window.moo_first_time = false;
         moo_setup_existing_zones();
     }
+    jQuery("#menu_for_mobile ul").toggle();
 
 }
 function MooPanel_ImportItems(event)
@@ -132,7 +168,10 @@ function Moo_GetOrderTypes()
                     console.log("Parsing error: orderTypes");
                 }
                 var html='';
-                html +='<div class="Moo_option-title">';
+                html +='<div class="display_order_types_desktop"><div class="Moo_option-title">';
+
+                var html_m ="";
+                html_m += "<div class='display_order_types_mobile'><div>";
 
                 if(orderTypes.length>0){
                     html += '<div class="label"><strong>Name</strong></div><div class="onoffswitch"><strong>Disable/Enable</strong></div>';
@@ -156,12 +195,27 @@ function Moo_GetOrderTypes()
                         html +='<span class="onoffswitch-inner"></span> <span class="onoffswitch-switch"></span></label></div>';
                         //delete
                         html +='<div  style="float: right"><a href="#" title="Delete this order types from the wordpress Database" onclick="Moo_deleteOrderType(event,\''+$ot.ot_uuid+'\')">DELETE</a></div></div>';
+
+                        html_m  += "<div style='border-bottom: 1px solid'><div style='margin-bottom: 7px;'><strong>Name</strong> : "+($ot.label)+"</div>";
+                        html_m +='<div style="display: block; margin-bottom: 7px;" class="" onchange="MooChangeOT_Status_Mobile(\''+$ot.ot_uuid +'\')" title="'+(($ot.status==1)?"Disable":"Enable")+' this order types"><strong>Disable/Enable</strong> : ';
+                        html_m +='<input type="checkbox" name="onoffswitch[]" class="" id="myonoffswitch_mobile_'+$ot.ot_uuid+'"'+(($ot.status==1)?"checked":"")+'>';
+                        html_m +='<label class="" for="myonoffswitch_'+$ot.ot_uuid +'">';
+                        html_m +='<span class=""></span> <span class=""></span></label></div>';
+
+                        html_m +='<div class="" onchange="MooChangeOT_showSa_Mobile(\''+$ot.ot_uuid +'\')" style="margin-bottom: 7px;" title="Hide/Show the shipping address for this order types"><strong>Show customer address</strong> : ';
+                        html_m +='<input type="checkbox" name="onoffswitch[]" class="" id="myonoffswitch_sa_mobile_'+$ot.ot_uuid+'"'+(($ot.show_sa==1)?"checked":"")+'>';
+                        html_m +='<label class="" for="myonoffswitch_sa_'+$ot.ot_uuid +'">';
+                        html_m +='<span class=""></span> <span class=""></span></label></div>';
+                        html_m +='<div style="margin-bottom: 8px;"><strong>Delete</strong> : <a href="#" title="Delete this order types from the wordpress Database" onclick="Moo_deleteOrderType(event,\''+$ot.ot_uuid+'\')">DELETE</a></div></div>';
                     }
+                    html += "</div>";
+                    html_m += "</div>";
                 }
                 else
-                  html = "<div style='text-align: center'>You don't have any OrderTypes,<br/> please import your data by clicking on <b>Import Items</b></div>";
+                  html = "<div class='normal_text' >You don't have any OrderTypes,<br/> please import your data by clicking on <b>Import Items</b></div>";
 
                document.querySelector('#MooOrderTypesContent').innerHTML = html;
+               document.querySelector('#MooOrderTypesContent').innerHTML += html_m;
             }
             else
                 document.querySelector('#MooOrderTypesContent').innerHTML  ="<div style='text-align: center'>Please verify your API Key<br/></div>";
@@ -214,7 +268,23 @@ function MooChangeOT_Status(uuid)
            console.log(data);
         }
     );
-};
+}
+function MooChangeOT_Status_Mobile(uuid)
+{
+    var ot_status = jQuery('#myonoffswitch_mobile_'+uuid).prop('checked');
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_ot_status',"ot_uuid":uuid,"ot_status":ot_status}, function (data) {
+            console.log(data);
+        }
+    );
+}
+function MooChangeOT_showSa_Mobile(uuid)
+{
+    var ot_showSa = jQuery('#myonoffswitch_sa_mobile_'+uuid).prop('checked');
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_ot_showSa',"ot_uuid":uuid,"show_sa":ot_showSa}, function (data) {
+            console.log(data);
+        }
+    );
+}
 function MooChangeOT_showSa(uuid)
 {
     var ot_showSa = jQuery('#myonoffswitch_sa_'+uuid).prop('checked');
@@ -222,7 +292,7 @@ function MooChangeOT_showSa(uuid)
            console.log(data);
         }
     );
-};
+}
 function moo_addordertype(e)
 {
     e.preventDefault();
@@ -299,11 +369,30 @@ function Moo_changeModifierGroupName(uuid)
         jQuery('#Moo_ModifierGroupSaveName_'+uuid).hide();
     }, 5000);
 
-
+}
+function Moo_changeModifierGroupName_Mobile(uuid)
+{
+    var mg_name = jQuery('#Moo_ModifierGroupNewName_mobile_'+uuid).val();
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_change_modifiergroup_name',"mg_uuid":uuid,"mg_name":mg_name}, function (data) {
+            console.log(data);
+            jQuery('#Moo_ModifierGroupSaveName_mobile_'+uuid).show();
+        }
+    );
+    setTimeout(function () {
+        jQuery('#Moo_ModifierGroupSaveName_mobile_'+uuid).hide();
+    }, 5000);
 }
 function MooChangeModifier_Status(uuid)
 {
     var mg_status = jQuery('#myonoffswitch_'+uuid).prop('checked');
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_modifiergroup_status',"mg_uuid":uuid,"mg_status":mg_status}, function (data) {
+            console.log(data);
+        }
+    );
+}
+function MooChangeModifier_Status_Mobile(uuid)
+{
+    var mg_status = jQuery('#myonoffswitch_mobile_'+uuid).prop('checked');
     jQuery.post(moo_params.ajaxurl,{'action':'moo_update_modifiergroup_status',"mg_uuid":uuid,"mg_status":mg_status}, function (data) {
             console.log(data);
         }
@@ -321,12 +410,31 @@ function Moo_changeCategoryName(uuid)
         setTimeout(function () {
             jQuery('#Moo_CategorySaveName_'+uuid).hide();
         }, 5000);
-
-
+}
+function Moo_changeCategoryName_Mobile(uuid)
+{
+    var cat_name = jQuery('#Moo_categoryNewName_mobile_'+uuid).val();
+    if(cat_name != '')
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_change_category_name',"cat_uuid":uuid,"cat_name":cat_name}, function (data) {
+                jQuery('#Moo_CategorySaveName_mobile_'+uuid).show();
+            }
+        );
+    setTimeout(function () {
+        jQuery('#Moo_CategorySaveName_mobile_'+uuid).hide();
+    }, 5000);
 }
 function MooChangeCategory_Status(uuid)
 {
     var cat_status = jQuery('#myonoffswitch_'+uuid).prop('checked');
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_category_status',"cat_uuid":uuid,"cat_status":cat_status}, function (data) {
+            console.log(data);
+        }
+    );
+}
+function MooChangeCategory_Status_Mobile(uuid)
+{
+    console.log('I am here');
+    var cat_status = jQuery('#myonoffswitch_mobile_'+uuid).prop('checked');
     jQuery.post(moo_params.ajaxurl,{'action':'moo_update_category_status',"cat_uuid":uuid,"cat_status":cat_status}, function (data) {
             console.log(data);
         }

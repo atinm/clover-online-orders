@@ -342,21 +342,31 @@ class Moo_OnlineOrders_Shortcodes {
                                         if($item)
                                         {
                                             if($item->visible == 0 || $item->hidden == 1 || $item->price_type=='VARIABLE') continue;
-                                            echo '<li>';
-                                            if(($model->itemHasModifiers($item->uuid)->total) != "0")
-                                                echo '<a class="popup-text" href="#Modifiers_for_'.$item->uuid.'" onclick="moo_openFirstModifierG(\'MooModifierGroup_default_'.$item->uuid.'\')">';
+                                            if($item->outofstock)
+                                            {
+                                                echo '<li>';
+                                                echo '<a href="#" onclick="event.preventDefault()">';
+                                                echo '  <div class="moo_detail">'.$item->name.' (Out of stock) </div>';
+                                                echo '  <div class="moo_price">$'.(number_format(($item->price/100),2,'.','')).'</div>';
+                                                echo '</a>';
+                                                echo '</li>';
+                                            }
                                             else
-                                                echo '<a href="#" onclick="moo_addToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')">';
-                                            echo '  <div class="moo_detail">'.$item->name.'</div>';
-                                            echo '  <div class="moo_price">$'.(number_format(($item->price/100),2,'.','')).'</div>';
-                                            echo '</a>';
-                                            echo '</li>';
-
-                                            ?>
-                                            <div class="row white-popup mfp-hide" id="Modifiers_for_<?php echo $item->uuid?>">
-                                                <div class="col-md-12 col-sm-12 col-xs-12">
-                                                    <form id="moo_form_modifiers" method="post">
-                                                        <?php
+                                            {
+                                                echo '<li>';
+                                                if(($model->itemHasModifiers($item->uuid)->total) != "0")
+                                                    echo '<a class="popup-text" href="#Modifiers_for_'.$item->uuid.'" >';
+                                                else
+                                                    echo '<a href="#" onclick="moo_addToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')">';
+                                                echo '  <div class="moo_detail">'.$item->name.'</div>';
+                                                echo '  <div class="moo_price">$'.(number_format(($item->price/100),2,'.','')).'</div>';
+                                                echo '</a>';
+                                                echo '</li>';
+                                                if(($model->itemHasModifiers($item->uuid)->total) != "0")
+                                                {
+                                                    echo '<div class="row white-popup mfp-hide" id="Modifiers_for_'.$item->uuid.'">';
+                                                    echo ' <div class="col-md-12 col-sm-12 col-xs-12">';
+                                                    echo ' <form id="moo_form_modifiers" method="post">';
                                                         $modifiersgroup = $model->getModifiersGroup($item->uuid);
                                                         $nb_mg=0;
                                                         foreach ($modifiersgroup as $mg) {
@@ -365,61 +375,64 @@ class Moo_OnlineOrders_Shortcodes {
                                                             if( count($modifiers) == 0) continue;
                                                             $nb_mg++;
                                                          ?>
-                                                            <div class="moo_category">
-                                                                <div class="moo_accordion accordion-open" id="<?php echo ($nb_mg == 1)?'MooModifierGroup_default_'.$item->uuid:'MooModifierGroup_'.$mg->uuid?>">
-                                                                    <div class="moo_category_title">
-                                                                        <div class="moo_title"><?php echo ($mg->alternate_name=="")?$mg->name:$mg->alternate_name; echo ($mg->min_required>=1)?' ( Required )':''; ?></div>
-                                                                        <span></span>
+                                                                <div class="moo_category">
+                                                                    <div class="moo_accordion accordion-open" id="<?php echo ($nb_mg == 1)?'MooModifierGroup_default_'.$item->uuid:'MooModifierGroup_'.$mg->uuid?>">
+                                                                        <div class="moo_category_title">
+                                                                            <div class="moo_title"><?php echo ($mg->alternate_name=="")?$mg->name:$mg->alternate_name; echo ($mg->min_required>=1)?' ( Required )':''; ?></div>
+                                                                            <span></span>
+                                                                        </div>
+                                                                     </div>
+                                                                    <div class="moo_accordion_content moo_modifier-box2" style="display: none;">
+                                                                        <ul>
+                                                                            <?php  foreach ( $modifiers as $m) {
+                                                                                ?>
+                                                                                <li>
+                                                                                    <a href="#" onclick="moo_check(event,'<?php echo $m->uuid ?>')">
+                                                                                        <div class="detail" >
+                                                                                            <span class="moo_checkbox" >
+                                                                                                <input type="checkbox" onclick="event.stopPropagation();" name="<?php echo 'moo_modifiers[\''.$item->uuid.'\',\''.$mg->uuid.'\',\''.$m->uuid.'\']' ?>" id="moo_checkbox_<?php echo $m->uuid ?>" />
+                                                                                            </span>
+                                                                                            <p class="moo_label"><?php echo $m->name ?></p>
+                                                                                        </div>
+                                                                                        <div class="moo_price">
+                                                                                            $<?php echo number_format(($m->price/100), 2) ?>
+                                                                                        </div>
+                                                                                    </a>
+                                                                                </li>
+                                                                            <?php
+                                                                            }
+                                                                            if($mg->min_required != null || $mg->max_allowd != null ){
+                                                                                echo '<li class="Moo_modifiergroupMessage">';
+                                                                                if($mg->min_required==1 && $mg->max_allowd==1)
+                                                                                    echo' Must choose 1 ';
+                                                                                else
+                                                                                {
+                                                                                    if($mg->min_required != null && $mg->min_required != 0  ) echo 'Must choose at least '.$mg->min_required;
+                                                                                    if($mg->max_allowd != null && $mg->max_allowd != 0 ) echo "<br/> Must choose  at max ".$mg->max_allowd;
+                                                                                }
+
+                                                                                echo '</li>';
+                                                                            }
+                                                                            ?>
+
+                                                                        </ul>
                                                                     </div>
                                                                  </div>
-                                                                <div class="moo_accordion_content moo_modifier-box2" style="display: none;">
-                                                                    <ul>
-                                                                        <?php  foreach ( $modifiers as $m) {
-                                                                            ?>
-                                                                            <li>
-                                                                                <a href="#" onclick="moo_check(event,'<?php echo $m->uuid ?>')">
-                                                                                    <div class="detail" >
-                                                                                        <span class="moo_checkbox" >
-                                                                                            <input type="checkbox" onclick="event.stopPropagation();" name="<?php echo 'moo_modifiers[\''.$item->uuid.'\',\''.$mg->uuid.'\',\''.$m->uuid.'\']' ?>" id="moo_checkbox_<?php echo $m->uuid ?>" />
-                                                                                        </span>
-                                                                                        <p class="moo_label"><?php echo $m->name ?></p>
-                                                                                    </div>
-                                                                                    <div class="moo_price">
-                                                                                        $<?php echo number_format(($m->price/100), 2) ?>
-                                                                                    </div>
-                                                                                </a>
-                                                                            </li>
-                                                                        <?php
-                                                                        }
-                                                                        if($mg->min_required != null || $mg->max_allowd != null ){
-                                                                            echo '<li class="Moo_modifiergroupMessage">';
-                                                                            if($mg->min_required==1 && $mg->max_allowd==1)
-                                                                                echo' Must choose 1 ';
-                                                                            else
-                                                                            {
-                                                                                if($mg->min_required != null && $mg->min_required != 0  ) echo 'Must choose at least '.$mg->min_required;
-                                                                                if($mg->max_allowd != null && $mg->max_allowd != 0 ) echo "<br/> Must choose  at max ".$mg->max_allowd;
-                                                                            }
+                                                            <?php } ?>
+                                                            <div style='text-align: center;margin-top: 10px;'>
+                                                                <?php echo '<div class="btn btn-danger" onclick="moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.preg_replace('/[^A-Za-z0-9 \-]/', '', $item->name).'\',\''.$item->price.'\')"  >ADD TO YOUR CART</div>'; ?>
+                                                                <div class="btn btn-info" onclick="javascript:jQuery.magnificPopup.close()">Close</div>
+                                                            </div>
+                                                <?php
 
-                                                                            echo '</li>';
-                                                                        }
-                                                                        ?>
-
-                                                                    </ul>
-                                                                </div>
-                                                             </div>
-                                                        <?php } ?>
-                                                        <div style='text-align: center;margin-top: 10px;'>
-                                                            <?php echo '<div class="btn btn-danger" onclick="moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.preg_replace('/[^A-Za-z0-9 \-]/', '', $item->name).'\',\''.$item->price.'\')"  >ADD TO YOUR CART</div>'; ?>
-                                                            <div class="btn btn-info" onclick="javascript:jQuery.magnificPopup.close()">Close</div>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                            <?php
+                                                echo '</form>';
+                                                echo '</div>';
+                                                echo '</div>';
+                                                }
+                                            }
                                         }
                                     }
-                                    ?>
+                                                ?>
                                 </ul>
                             </div>
                         </div>
@@ -576,6 +589,7 @@ class Moo_OnlineOrders_Shortcodes {
 
         return ob_get_clean();
     }
+
     public static function checkoutPage($atts, $content)
     {
         wp_enqueue_style( 'bootstrap-css' );
@@ -645,25 +659,28 @@ class Moo_OnlineOrders_Shortcodes {
         }
 
         $nb_days = ($MooOptions["order_later_days"]>0)?$MooOptions["order_later_days"]:4;
-        $nb_minutes = ($MooOptions["order_later_minutes"]>0)?$MooOptions["order_later_minutes"]:60;
+        $nb_minutes = ($MooOptions["order_later_minutes"]>0)?$MooOptions["order_later_minutes"]:20;
 
         $oppening_status = json_decode($api->getOpeningStatus($nb_days,$nb_minutes));
+
         $oppening_msg = "";
-        if($oppening_status->status == 'close')
+        //var_dump($MooOptions);
+        if($MooOptions['hours'] != 'all' && $oppening_status->status == 'close')
         {
             if($oppening_status->store_time == '')
-                $oppening_msg = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg">Currently Not Available - Order in Advance.</div>';
+                    $oppening_msg = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg">Currently Not Available'.(($MooOptions['order_later'] == 'on' )?" - Order in Advance.":"").'</div>';
             else
-                $oppening_msg = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Currently Not Available - Order in Advance.</div>';
-
+                    $oppening_msg = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Currently Not Available'.(($MooOptions['order_later'] == 'on' )?" - Order in Advance.":"").'</div>';
         }
 
         $merchant_address =  $api->getMerchantAddress();
+
 
         wp_localize_script("custom-script-checkout", "moo_OrderTypes",$orderTypes);
         wp_localize_script("custom-script-checkout", "moo_Total",$total);
         wp_localize_script("custom-script-checkout", "moo_Key",(array)$key);
         wp_localize_script("custom-script-checkout", "moo_thanks_page",$MooOptions['thanks_page']);
+        
         wp_localize_script("custom-script-checkout", "moo_pickup_time",$oppening_status->pickup_time);
 
         wp_localize_script("display-merchant-map", "moo_merchantLat",$MooOptions['lat']);
@@ -717,8 +734,6 @@ class Moo_OnlineOrders_Shortcodes {
 
                             </div>
                              <div class="col-md-6">
-
-
                                  <div class="form-group"><label for="email">Email address:</label>
                                      <input class="form-control" name="email" id="email"></div>
                                         <div class="form-group">
@@ -729,10 +744,10 @@ class Moo_OnlineOrders_Shortcodes {
                                             <label for="zipcode">Zip code:</label>
                                             <input class="form-control" name="zipcode" id="zipcode">
                                         </div>
-                                        <div class="form-group">
-                                            <label for="country">Country:</label>
-                                            <input class="form-control" name="country" id="country" value="United States" onchange="moo_address_changed()">
-                                        </div>
+<!--                                        <div class="form-group">-->
+<!--                                            <label for="country">Country:</label>-->
+<!--                                            <input class="form-control" name="country" id="country" value="United States" onchange="moo_address_changed()"/>-->
+<!--                                        </div>-->
                                 </div>
                             <div class="col-md-12">
                                 <div class="form-group"><label for="instructions">Special instructions</label>
@@ -769,7 +784,7 @@ class Moo_OnlineOrders_Shortcodes {
                         </div>
                     </div>
                 </div>
-                 <?php if($MooOptions['order_later'] == 'on'){ ?>
+                 <?php if(isset($MooOptions['order_later']) && $MooOptions['order_later'] == 'on' && count($oppening_status->pickup_time)>0){ ?>
                 <div class="col-md-12" id="moo-pickup-time">
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -796,7 +811,6 @@ class Moo_OnlineOrders_Shortcodes {
                                         <select class="form-control" name="moo_pickup_hour" id="moo_pickup_hour" >
                                             <?php
                                             foreach ($oppening_status->pickup_time as $key=>$val) {
-                                                    echo '<option value="asap">ASAP</option>';
                                                     foreach ($val as $h)
                                                         echo '<option value="'.$h.'">'.$h.'</option>';
                                                 break;
@@ -816,27 +830,28 @@ class Moo_OnlineOrders_Shortcodes {
                         </div>
                     </div>
                 </div>
-                 <?php }?>
+                 <?php } ?>
                 <!--  Here you can add your personal fields   -->
 
                 <!--  End of  personal fields   -->
+                <?php if(!(isset($MooOptions['scp']) && $MooOptions['scp'] =='on' && $MooOptions['payment_cash'] != 'on' )){ ?>
                 <div class="col-md-12">
                     <div class="panel panel-default">
                         <div class="panel-heading"><p style="font-size: 16px !important; margin:0;padding: 0;">Payment</p></div>
                         <div class="panel-body">
                             <div id="moo_paymentOptions">
                                 <?php if($MooOptions['payment_cash'] == 'on'){ ?>
-
                                     <div class="col-md-5" style="margin-bottom: 10px">
                                         <input type="radio" name="paymentMethod" value="cc"   id="moo_paymentOptions_cc"  onclick="moo_changePaymentMethod('cc')" checked>
                                         <label for="moo_paymentOptions_cc" style="display: inline"> Pay now with Credit Card</label>
                                     </div>
                                     <div class="col-md-4" style="margin-bottom: 10px">
                                         <input type="radio" name="paymentMethod" value="cash" id="moo_paymentOptions_cash"  onclick="moo_changePaymentMethod('cash')">
-                                        <label for="moo_paymentOptions_cash" style="display: inline"> Pay in Store</label>
+                                        <label for="moo_paymentOptions_cash" id="moo_paymentOptions_cash_label" style="display: inline"> Pay in Store</label>
                                     </div>
                                 <?php }?>
                             </div>
+                            <?php if(!(isset($MooOptions['scp']) && $MooOptions['scp'] =='on')){ ?>
                             <div id="moo_creditCardPanel">
                                 <div class="col-md-10 col-md-offset-1">
                                     <div class="form-group">
@@ -845,7 +860,6 @@ class Moo_OnlineOrders_Shortcodes {
                                             <input class="form-control" name="cardNumber" id="Moo_cardNumber" onchange="moo_cardNumberChanged()" placeholder="Debit/Credit Card Number" autocomplete="on">
                                             <label for="Moo_cardNumber" class="error" style="display: none;"></label>
                                         </div>
-
                                     </div>
                                     <div class="form-group">
                                         <label for="expiredDate" class="col-sm-3 control-label">Expired date</label>
@@ -889,11 +903,12 @@ class Moo_OnlineOrders_Shortcodes {
                                     </div>
                                 </div>
                             </div>
+                            <?php } ?>
                             <?php if($MooOptions['payment_cash'] == 'on'){ ?>
                             <div id="moo_cashPanel">
                                 <div id="moo_verifPhone_verified" style="text-align: center;display:none <?php //echo ($_SESSION['moo_phone_verified'])?'block':'none'?>">
                                     <img src="<?php echo  plugin_dir_url(dirname(__FILE__))."public/img/check.png"?>" width="60px">
-                                    <p style="margin-top: 10px;font-size: 20px">Your phone number has been verified <br />Please have your payment ready when picking up from the store</p>
+                                    <p style="margin-top: 10px;font-size: 20px">Your phone number has been verified <br />Please have your payment ready when picking up from the store <br/>Please finalize your order below</p>
                                 </div>
                                 <div class="col-md-8 col-md-offset-2 col-xs-12" id="moo_verifPhone_sending" style="display:block <?php //echo ($_SESSION['moo_phone_verified'])?'none':'block'?>">
                                     <div class="form-group form-inline">
@@ -924,6 +939,7 @@ class Moo_OnlineOrders_Shortcodes {
                         </div>
                     </div>
                 </div>
+                <?php } ?>
                 <!-- TIPS Start -->
                 <?php if($merchantProprietes->tipsEnabled && $MooOptions['tips']=='enabled'){ ?>
                 <div class="col-md-12">
@@ -1117,6 +1133,7 @@ class Moo_OnlineOrders_Shortcodes {
             echo '<script type="text/javascript">'.$custom_js.'</script>';
         return ob_get_clean();
     }
+
     public  static function getItemsModifiers($item_uuid)
     {
             $model = new moo_OnlineOrders_Model();
@@ -1239,30 +1256,29 @@ class Moo_OnlineOrders_Shortcodes {
         $store_page_url =  get_page_link($store_page_id);
 
         ob_start();
+
         if(isset($_GET['category'])){
             $category = esc_sql($_GET['category']);
-            ?>
-            <?php
             echo '<div class="row moo_items" id="Moo_ItemContainer">';
-                if($category == 'NoCategory' || $category == "")
+            if($category == 'NoCategory' || $category == "")
+            {
+                $items_tab = $model->getItems();
+            }
+            else
+            {
+                $cat = $model->getCategory($category);
+                $items = explode(',',$cat->items);
+                $items_tab = array();
+                foreach($items as $uuid_item)
                 {
-                    $items_tab = $model->getItems();
+                    if($uuid_item == "") continue;
+                    array_push($items_tab,$model->getItem($uuid_item));
                 }
-                else
-                {
-                    $cat = $model->getCategory($category);
-                    $items = explode(',',$cat->items);
-                    $items_tab = array();
-                    foreach($items as $uuid_item)
-                    {
-                        if($uuid_item == "") continue;
-                        array_push($items_tab,$model->getItem($uuid_item));
-                    }
-                }
-
-
+             }
             if(count($items_tab)<=0)  echo '<div class="col-md-12">"No items available.</div>';
             else
+            {
+                echo '<h1>'.$cat->name.'</h1>';
                 foreach((array)$items_tab as $item)
                 {
                     // $item = $model->getItem($uuid_item);
@@ -1278,7 +1294,7 @@ class Moo_OnlineOrders_Shortcodes {
                     $item_name = $item->name;
                     $item_name = ucfirst(strtolower($item_name));
                     echo '<div class="col-md-4 col-sm-6 col-xs-12 moo_item_flip">';
-                    echo '<a class="open-popup-link" href="#moo_popup_item_'.$item->uuid.'" onclick="moo_openFirstModifierG(\'MooModifierGroup_default_'.$item->uuid.'\')">';
+                    echo '<a class="open-popup-link" href="#moo_popup_item_'.$item->uuid.'" >';
                     echo "<div class='moo_item_flip_container'>";
                     echo "<div class='moo_item_flip_image'>";
                     echo "<img src='".$default_image."' style='height: 242px;'>";
@@ -1296,7 +1312,7 @@ class Moo_OnlineOrders_Shortcodes {
                         <?php
                         if($nb_modifiers != "0")
                         {
-                          ?>
+                            ?>
                             <div class="col-md-7" id="moo_popup_rightSide">
                                 <form id="moo_form_modifiers" method="post">
                                     <?php
@@ -1373,7 +1389,11 @@ class Moo_OnlineOrders_Shortcodes {
                                     <textarea  class="form-control" name="" id="moo_popup_si" cols="30" rows="2"></textarea>
                                 </div>
                                 <div class="moo_popup_btns_action">
-                                    <a href="#" class="btn btn-primary" onclick="moo_addItemWithModifiersToCart(event,'<?php echo trim($item->uuid) ?>','<?php echo preg_replace('/[^A-Za-z0-9 \-]/', '', $item->name); ?>','<?php echo trim($item->price) ?>')" >ADD TO CART</a>
+                                    <?php if($item->outofstock == 1) {
+                                        echo '<div style="text-align: center">OUT OF STOCK</div>';
+                                    } else { ?>
+                                        <a href="#" class="btn btn-primary" onclick="moo_addItemWithModifiersToCart(event,'<?php echo trim($item->uuid) ?>','<?php echo preg_replace('/[^A-Za-z0-9 \-]/', '', $item->name); ?>','<?php echo trim($item->price) ?>')" >ADD TO CART</a>
+                                    <?php } ?>
                                 </div>
                             </div>
                             <?php
@@ -1381,55 +1401,57 @@ class Moo_OnlineOrders_Shortcodes {
                         else
                         {
 
-                        ?>
-                        <div class="col-md-6" id="moo_popup_rightSide">
-                            <div class="moo_popup_image">
-                                <img src='<?php echo $default_image ?>'>
+                            ?>
+                            <div class="col-md-6" id="moo_popup_rightSide">
+                                <div class="moo_popup_image">
+                                    <img src='<?php echo $default_image ?>'>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-6" id="moo_popup_leftSide">
-                            <div class="moo_popup_title">
-                                <?php echo ucfirst(strtolower($item->name)) ?>
-                            </div>
-                            <div class="moo_popup_description">
-                                <?php echo $item->description ?>
-                            </div>
-                            <div class="moo_popup_price">
-                               $<?php echo (number_format(($item->price/100),2,'.','')) ?>
-                            </div>
-                            <div class="moo_popup_quantity">
-                                Quantity :
-                                <input type="number" class="form-control" value="1" id='moo_popup_quantity'>
-                            </div>
-                            <div class="moo_popup_special_instruction">
-                                Special Instructions :
+                            <div class="col-md-6" id="moo_popup_leftSide">
+                                <div class="moo_popup_title">
+                                    <?php echo ucfirst(strtolower($item->name)) ?>
+                                </div>
+                                <div class="moo_popup_description">
+                                    <?php echo $item->description ?>
+                                </div>
+                                <div class="moo_popup_price">
+                                    $<?php echo (number_format(($item->price/100),2,'.','')) ?>
+                                </div>
+                                <div class="moo_popup_quantity">
+                                    Quantity :
+                                    <input type="number" class="form-control" value="1" id='moo_popup_quantity'>
+                                </div>
+                                <div class="moo_popup_special_instruction">
+                                    Special Instructions :
                                 <textarea  class="form-control" name="" id="moo_popup_si" cols="30" rows="2">
 
                                 </textarea>
+                                </div>
+                                <div class="moo_popup_btns_action">
+                                    <?php if($item->outofstock == 1) {
+                                        echo '<div style="text-align: center">OUT OF STOCK</div>';
+                                    } else { ?>
+                                        <a href="#" class="btn btn-primary" onclick="moo_cartv3_addtocart('<?php echo trim($item->uuid) ?>','<?php echo preg_replace('/[^A-Za-z0-9 \-]/', '', $item->name) ?>')">ADD TO CART</a>
+                                    <?php } ?>
+                                </div>
                             </div>
-                            <div class="moo_popup_btns_action">
-                                <a href="#" class="btn btn-primary" onclick="moo_cartv3_addtocart('<?php echo trim($item->uuid) ?>','<?php echo preg_replace('/[^A-Za-z0-9 \-]/', '', $item->name) ?>')">ADD TO CART</a>
-                            </div>
-                        </div>
                         <?php } ?>
                     </div>
                     <?php
                 }
-
-
-
+            }
             echo '</div>';
             echo '<div class="row moo_items" align="center"><a style="margin-right:10px" class="btn btn-primary" href="'.$cart_page_url.'">View cart</a><a class="btn btn-default" href="'.$store_page_url.'">Back to Main Menu</a></div>';
         }
         else
             {
-                ?>
+        ?>
                 <div class="row moo_categories">
                     <?php
-                    $colors = self::GetColors();
+                    //$colors = self::GetColors();
                     $categories = $model->getCategories();
                     $items = $model->getItems();
-                    if(count($categories)==0 && count($items)==0 )
+                    if(count($categories) == 0 && count($items)== 0 )
                         echo "<h2 style='text-align: center'>You don't have any Item, please import your Items from Clover</h2>";
                     else
                     {
@@ -1446,19 +1468,16 @@ class Moo_OnlineOrders_Shortcodes {
                                 }
                                 else
                                 {
-                                    if(strlen($category->items)<1 || $category->show_by_default == 0 ) continue;
-                                    if(strlen ($category->name)> 14)$category_name = substr($category->name, 0, 14)."...";
-                                    else  $category_name = $category->name;
+                                    if(strlen($category->items) < 1 || $category->show_by_default == 0 ) continue;
+                                    $category_name = $category->name;
                                 }
 
 
                                 echo '<div class="col-md-4 col-sm-6 col-xs-12 moo_category_flip" >';
                                 echo "<a href='".(esc_url( add_query_arg( 'category', $category->uuid) ))."'><div class='moo_category_flip_container'>";
                                 echo "<div class='moo_category_flip_title'>".ucfirst(strtolower($category_name))."</div>";
-                                echo "<div class='moo_category_flip_content' style='background-color: ".current($colors)."'></div>";
                                 echo '</div></a>';
                                 echo '</div>';
-                                if(!next($colors)) reset($colors);
                             }
                         else
                         {
@@ -1467,15 +1486,10 @@ class Moo_OnlineOrders_Shortcodes {
                             //echo $location;
                             wp_redirect ( $location );
                         }
-
-
                     }
                     ?>
                 </div>
-                <?php
-
-            }
-        ?>
+      <?php } ?>
         <div id="moo_cart">
             <a href="<?php echo get_page_link(get_option('moo_cart_page'));
             ?>">
@@ -1487,20 +1501,23 @@ class Moo_OnlineOrders_Shortcodes {
         <?php
         return ob_get_clean();
     }
+
     public static function TheStore($atts, $content)
     {
         $api   = new moo_OnlineOrders_CallAPI();
+
+        $MooOptions = (array)get_option('moo_settings');
+
         $oppening_status = json_decode($api->getOpeningStatus(4,30));
         $oppening_msg = "";
-        if($oppening_status->status == 'close')
+        if($MooOptions['hours'] != 'all' && $oppening_status->status == 'close')
         {
             if($oppening_status->store_time == '')
-                $oppening_msg = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg">Currently Not Available - Order in Advance.</div>';
+                $oppening_msg = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg">Currently Not Available'.(($MooOptions['order_later'] == 'on' )?" - Order in Advance.":"").'</div>';
             else
-                $oppening_msg = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Currently Not Available - Order in Advance.</div>';
-
+                $oppening_msg = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Currently Not Available'.(($MooOptions['order_later'] == 'on' )?" - Order in Advance.":"").'</div>';
         }
-        $MooOptions = (array)get_option('moo_settings');
+
         $html_code  = '';
 
         $custom_css = $MooOptions["custom_css"];

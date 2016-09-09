@@ -98,7 +98,12 @@ jQuery("#moo_form_address").validate({
                     if(data.status == 'APPROVED')
                         moo_order_approved(data.order);
                     else
-                        moo_order_notApproved(data.message);
+                        if(data.status == 'REDIRECT')
+                        {
+                            window.location.href = data.url;
+                        }
+                        else
+                            moo_order_notApproved(data.message);
                  else
                     if(data.indexOf('"status":"APPROVED"') != -1 )
                        moo_order_approved('');
@@ -144,6 +149,7 @@ function moo_OrderTypeChanged(obj)
                     jQuery('#moo-delivery-details').hide();
                     jQuery('#moo-cart-delivery-fee').parent().hide();
                     document.getElementById('moo_delivery_amount').value = "";
+                    jQuery('#moo_paymentOptions_cash_label').text('Pay in Store');
                     moo_update_totals();
                 }
                 else
@@ -153,6 +159,8 @@ function moo_OrderTypeChanged(obj)
                     jQuery('#state').parent().show();
                     jQuery('#country').parent().show();
                     jQuery('#moo-cart-delivery-fee').parent().show();
+                    jQuery('#moo_paymentOptions_cash_label').text('Pay upon Delivery');
+
                     if(moo_delivery_areas != null && moo_delivery_areas.length >= 1) jQuery('#moo-delivery-details').show();
                     moo_calculate_delivery_fee();
                     moo_update_totals();
@@ -222,7 +230,7 @@ function moo_verifyCode(event)
         {
             jQuery('#moo_verifPhone_sending').hide();
             jQuery('#moo_verifPhone_verificatonCode').hide();
-            jQuery('#moo_verifPhone_verified').show();
+            jQuery('#moo_verifPhone_verified').css("display","inline-block");
             toastr.success('Your phone was verified');
         }
         else

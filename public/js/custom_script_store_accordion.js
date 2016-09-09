@@ -4,12 +4,14 @@ jQuery(document).ready(function() {
 
     //accordion
     jQuery('.moo_accordion').accordion({defaultOpen: 'MooCat_NoCategory'});
+    
     jQuery('.popup-text').magnificPopup({
         type: 'inline',
         closeBtnInside: true,
         midClick: true,
         overflowY:'scroll'
     });
+    
     jQuery('.ajax-popup-link').magnificPopup({
         type: 'ajax'
     });

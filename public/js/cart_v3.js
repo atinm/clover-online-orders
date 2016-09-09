@@ -76,6 +76,7 @@ function moo_emptyCart(event)
 
 function moo_addModifiers(item_name,item_uuid)
 {
+   //
     jQuery.post(moo_params.ajaxurl,{'action':'moo_check_item_modifiers',"item":item_uuid}, function (data) {
         if(data.status == 'success' )
         {
@@ -84,6 +85,7 @@ function moo_addModifiers(item_name,item_uuid)
             var selected_modifies = jQuery("#moo_form_modifiers").serializeArray();
             var Mgroups = {};
             var Modifiers = [];
+            jQuery.magnificPopup.close();
             for(m in selected_modifies)
             {
                 var modifier = selected_modifies[m];
@@ -92,18 +94,13 @@ function moo_addModifiers(item_name,item_uuid)
                     var string = name.split(','); // the new format is a table
                     var item = string[0].substr(15);  // 15 is the length of moo_modifiers['
                     item = item.substr(0,item.length-1); // remove the last '
-
                     var modifierGroup = string[1].substr(1);
                     modifierGroup = modifierGroup.substr(0,modifierGroup.length-1);
-
                     var modif = string[2].substr(1);
                     modif = modif.substr(0,modif.length-2);
-
                     if(item == '' || modifierGroup == '' || modif == '') continue;
-
                     if(typeof Mgroups[modifierGroup] === 'undefined') Mgroups[modifierGroup] = 1;
                     else Mgroups[modifierGroup] +=1;
-
                     var modifier = {
                         "item":item,
                         "modifier": modif,
@@ -112,15 +109,13 @@ function moo_addModifiers(item_name,item_uuid)
                     Modifiers.push(modifier);
                 }
             }
-
             var flag = false;
-
             if(Object.keys(Mgroups).length == 0 && Object.keys(required_modifiers_groups).length <= 1) {
                 jQuery.magnificPopup.close();
                 moo_cartv3_addtocart(item_uuid,item_name);
                 return false;
             }
-            /* verify if required modifier Groups are chooses */
+            /* verify if required modifier Groups are chooser */
             for(mg in required_modifiers_groups){
                 var element = required_modifiers_groups[mg]
                 if(element != "")
@@ -139,7 +134,6 @@ function moo_addModifiers(item_name,item_uuid)
                 jQuery.post(moo_params.ajaxurl,{'action':'moo_modifiergroup_getlimits',"modifierGroup":mg}, function (data) {
                     if(data.status == 'success' )
                     {
-
                         /* If the min is not null then we display a message if the custmet not choose the minimum */
                         if(data.min != null && data.min != 0 && Mgroups[mg] < data.min) {
                             toastr.error("You must choose "+data.min+" modifier in "+data.name);
@@ -166,11 +160,9 @@ function moo_addModifiers(item_name,item_uuid)
                                 if(data.status == 'success' )
                                 {
                                     item_uuid = data.uuid;
-                                    jQuery.magnificPopup.close();
                                     return true;
                                 }
                             }).done(function () {
-                                console.log(item_uuid);
                                 moo_updateQuantityAndSI(item_uuid);
                             })
                         }
@@ -198,40 +190,12 @@ function moo_updateQuantityAndSI(item_uuid)
     jQuery.post(moo_params.ajaxurl,{'action':'moo_update_qte',"item":item_uuid,"qte":qte}, function (data) {
         if(data.status == 'success')
         {
-            console.log('Item add to cart');
             jQuery.magnificPopup.close();
         }
     });
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_special_ins',"item":item_uuid,"special_ins":special_instruction}, function (data) {
-        if(data.status == 'success')
-        {
-            console.log("Special Instructions updated");
-        }
-    });
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_special_ins',"item":item_uuid,"special_ins":special_instruction});
 }
 
-function moo_cartv3_addtocart(uuid,name)
-{
-    var qte = jQuery('#moo_popup_quantity').val();
-    var special_instruction = jQuery('#moo_popup_si').val();
-    moo_addToCart(this,uuid,name);
-    if(qte > 1)
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_update_qte',"item":uuid,"qte":qte}, function (data) {
-
-            if(data.status == 'success')
-            {
-               console.log('Item add to cart')
-            }
-        });
-    if(special_instruction != '')
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_update_special_ins',"item":uuid,"special_ins":special_instruction}, function (data) {
-            if(data.status == 'success')
-            {
-                console.log("Special Instructions updated");
-            }
-        });
-    jQuery.magnificPopup.close();
-}
 /* Recalculate cart */
 function moo_recalculateCart()
 {
@@ -258,8 +222,6 @@ function moo_recalculateCart()
     });
 
 }
-
-
 /* Update quantity */
 function moo_updateQuantity(quantityInput,item_uuid)
 {
@@ -285,8 +247,6 @@ function moo_updateQuantity(quantityInput,item_uuid)
         });
     });
 }
-
-
 /* Remove item from cart */
 function moo_removeItem(removeButton,item_uuid)
 {

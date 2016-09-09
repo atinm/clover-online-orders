@@ -27,11 +27,10 @@ class Moo_OnlineOrders_Activator {
 	 */
 	public static function activate() {
         // Add option to db
-
         update_option("moo_first_use", "true");
         // Install DB
         global $wpdb;
-            $wpdb->show_errors();
+       $wpdb->hide_errors();
 
 /*      -- -----------------------------------------------------
         -- Table `item_group`
@@ -450,7 +449,7 @@ class Moo_OnlineOrders_Activator {
             'post_content' => '[moo_cart]'
         );
         // Save the version of the plugin in the Database
-         update_option('moo_onlineOrders_version', '119');
+         update_option('moo_onlineOrders_version', '120');
         //insert page and save the id
         $store_page_id    =  wp_insert_post( $post_store, false );
         $checkout_page_id =  wp_insert_post( $post_checkout, false );
@@ -462,12 +461,13 @@ class Moo_OnlineOrders_Activator {
         update_option( 'moo_cart_page', $cart_page_id );
 
         $defaultOptions = get_option( 'moo_settings' );
-        if($defaultOptions["default_style"] == "" || $defaultOptions["default_style"] == "style2" ) $defaultOptions["default_style"] = "style1";
-        if($defaultOptions["hours"] == "") $defaultOptions["hours"] = "business";
-        if($defaultOptions["payment_cash"] == "") $defaultOptions["payment_cash"] = "on";
+
+        if( !isset($defaultOptions["default_style"]) || $defaultOptions["default_style"] == "" || $defaultOptions["default_style"] == "style2" ) $defaultOptions["default_style"] = "style1";
+        if( !isset($defaultOptions["default_style"]) || $defaultOptions["hours"] == "") $defaultOptions["hours"] = "business";
+        if( !isset($defaultOptions["default_style"]) || $defaultOptions["payment_cash"] == "") $defaultOptions["payment_cash"] = "on";
 
 
-        update_option( 'moo_settings', $defaultOptions );
+        update_option('moo_settings', $defaultOptions );
             
 	}
 

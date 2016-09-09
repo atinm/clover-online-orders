@@ -19,6 +19,7 @@
      font-family: ProximaNovaAltExtraCondensedBold !important;
      font-weight: bold !important;
      margin: 0 !important;
+     text-align: left;
 }
 .moo_category_title span
 {
@@ -67,6 +68,7 @@
     font-weight: normal;
     font-family: 'ProximaNovaAltExtraCondensedBold';
     margin: 0;
+    text-align: left;
  }
 .moo_accordion_content ul li .moo_price {
       position: absolute;

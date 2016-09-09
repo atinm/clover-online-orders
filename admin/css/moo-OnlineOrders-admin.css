@@ -19,35 +19,15 @@
 }
 .moo_option_right
 {
-   // float: right;
     padding-top: inherit;
     margin-top: 16px;
 }
-
 /* Order Table */
-
 #instructions
 {
     width: 200px;
 }
-/*
-#paid,#taxAmount,#amount
-{
-    width: 30px;
-}
-#taxAmount
-{
-    width: 80px;
-}
-#amount
-{
-    width: 80px;
-}
-#p_name,#p_email
-{
-    width: 250px;
-}
-*/
+
 .item-hidden
 {
     background-color: #faebcc !important;
@@ -55,7 +35,6 @@
 #price,#price_type,#unit_name,#sku,#code
 {
     width: 100px;
-
 }
 
 /* The Panel CSS */
@@ -335,6 +314,15 @@
 }
 
 /* Tooltip text */
+
+#moo_info_msg
+{
+    margin-left: 10px;
+}
+#moo_info_msg img
+{
+
+}
 .tooltip .tooltiptext {
     visibility: hidden;
     width: 120px;
@@ -481,4 +469,410 @@
     width: 400px;
     height: 8px;
     position: relative;
+}
+#MooPanel {
+    width: 80%;
+    background: white !important;
+}
+#MooPanel_sidebar {
+    width: 17%;
+    background-color: #1e5429;
+    min-height: 0 !important;
+    border-radius: 10px;
+    font-family: verdana, SANS-SERIF;
+    font-size: 15px;
+}
+#MooPanel_main {
+    height: 12px;
+    overflow-y: scroll;
+    width: 79%;
+    min-height: 537px;
+    padding: 20px 20px 20px;
+    border-radius: 10px;
+    /*background: white;*/
+    border: 1px solid rgba(0,0,0,0.25) !important;
+    /*border: 2px solid rgba(30, 84, 41, 0.5) !important;*/
+    /*-moz-box-shadow: 3px 3px 5px 6px #ccc;
+    -webkit-box-shadow: 3px 3px 5px 6px #ccc;
+    box-shadow: 3px 3px 5px 6px #ccc;*/
+    -webkit-box-shadow: 0 8px 6px -6px #456c4a;
+    -moz-box-shadow: 0 8px 6px -6px #456c4a;
+    box-shadow: 0 8px 6px -6px #456c4a;
+}
+#MooPanel_main .MooPanelItem {
+    margin: 10px;
+    /*border: none !important;*/
+    /*margin-bottom: 15px;*/
+    padding: 10px;
+}
+#MooPanel h2 {
+    padding: 0;
+    margin: 0 0 16px;
+    color: #1e5429;
+    font-size: 40px;
+    font-family: NeutraTextAltBold,proxima-nova,Futura,"Helvetica Neue",sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    margin-top: 20px;
+    font-size: 24px !important;
+    font-weight: bold !important;
+}
+#MooPanel_main .MooRow {
+    margin: 0;
+}
+#MooPanel h3 {
+    padding: 0 !important;
+    border-bottom: none !important;
+    font-family: NeutraTextAltBold,proxima-nova,Futura,"Helvetica Neue",sans-serif;
+    color: #5E7F62;
+    font-size: 19px !important;
+    /*margin-left: 10px !important;
+    margin-top: 10px !important;*/
+}
+div.normal_text {
+    font-family: Roboto,"Helvetica Neue",Helvetica,sans-serif !important;
+    color: #63666A !important;
+    font-size: 15px !important;
+    margin-left: 10px;
+}
+#MooPanel_main .MooPanelItem .Moo_option-item {
+    padding: 10px !important;
+    /*margin-bottom: 10px !important;*/
+    /*border-bottom: none;*/
+    /*border: 1px solid black;*/
+}
+div#MooPanel .button {
+    background-color: #5E7F62 !important;
+    border-color: #1e5429 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    color: #fff !important;
+    height: 35px !important;
+    border-radius: 5px !important;
+    min-width: 120px !important;
+    text-align: center;
+    height: 35px !important;
+    line-height: 34px !important;
+}
+div#MooPanel .button-small {
+    background-color: #5E7F62 !important;
+    border-color: #1e5429 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    color: #fff !important;
+    height: 35px !important;
+    border-radius: 5px !important;
+    min-width: 120px !important;
+    text-align: center;
+    height: 27px !important;
+    line-height: 26px !important;
+}
+div#MooPanel div#MooPanel_tabContent1 div.MooPanelItem div.Moo_option-item:nth-child(3) {
+    text-align: center;
+}
+div#MooPanel div#moo_progressbar_container {
+    height: 15px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+#MooPanel_main .MooPanelItem .Moo_option-title {
+    padding: 0 !important;
+}
+.onoffswitch {
+    padding-top: 0px;
+    width: 61px;
+}
+.onoffswitch div:nth-child(2) {
+
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+    background-color: #5E7F62;
+    border-color: green;
+    margin-right: 4px;
+}
+.onoffswitch-label {
+    border-radius: 0;
+    width: 59px;
+    /*border: none;*/
+}
+
+.MooPanel_tabContent3 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+    margin-right: 6px;
+}
+div.Moo_option-title div.onoffswitch:nth-child(3) {
+    margin-left: 93px !important;
+}
+div.Moo_option-title {
+    margin-bottom: 17px;
+}
+div#MooPanel_tabContent4 div.MooPanelItem div.Moo_option-item div {
+    text-align: center;
+}
+
+div#MooPanel_tabContent7 div.MooPanelItem div.Moo_option-item div{
+    margin-top: 0 !important;
+}
+
+div#MooPanel_tabContent8 div.MooPanelItem div.Moo_option-item div{
+    /*margin-top: 0 !important;*/
+}
+div.submits {
+    text-align: center;
+}
+div.button_center {
+    text-align: center;
+    /*margin-bottom: 15px;*/
+}
+div#MooPanel_tabContent4 div.button_center {
+    margin-bottom: 15px !important;
+}
+#MooPanel_main .stats .stat {
+    height: 120px;
+}
+#MooPanel_main .stats .stat .value {
+    line-height: 0.8em;
+    margin-top: 30px;
+    color: #1e5429;
+}
+#MooPanel_main .stats .stat .type {
+    margin-top: 12px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #456c4a;
+}
+div.input_label_center {
+    width: 70%;
+    margin: 0 auto;
+}
+span.some_error {
+    color: red;
+}
+
+div.input_label_center label {
+    font-size: 15px;
+    font-weight: bold;
+    margin-right: 8px;
+    width: 79px;
+}
+div#MooPanel input[type=text]:focus, input[type=search]:focus, input[type=radio]:focus, input[type=tel]:focus, input[type=time]:focus, input[type=url]:focus, input[type=week]:focus, input[type=password]:focus, input[type=checkbox]:focus, input[type=color]:focus, input[type=date]:focus, input[type=datetime]:focus, input[type=datetime-local]:focus, input[type=email]:focus, input[type=month]:focus, input[type=number]:focus, select:focus, textarea:focus {
+    border-color: #1e5429 !important;
+    -webkit-box-shadow: 0 0 2px rgba(30,84,41,.8) !important;
+    box-shadow: 0 0 2px rgba(30,84,41,.8) !important;
+}
+div.input_label_center input {
+    width: 100%;
+    border-radius: 0 !important;
+}
+div.label_div {
+    width: 40%;
+    display: inline-block;
+    text-align: right;
+}
+div.input_div {
+    width: 59%;
+    display: inline-block;
+}
+div.input_label_center input {
+    margin-top: 12px;
+    margin-bottom: 15px;
+}
+div#MooPanel input.check_input {
+    width: none !important;
+}
+div#MooPanel_tabContent9 textarea {
+    width: 100% !important;
+
+    /*margin-left: 122px !important;
+    margin-right: 122px !important;*/
+}
+div#MooPanel textarea {
+    border-radius: 3px;
+}
+div.faq_question {
+    cursor: pointer;
+    background-color: none;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-size: 17px;
+}
+div.faq_response {
+    display: none;
+    padding-left: 36px;
+}
+div#MooOrderTypesContent {
+    width: 72%;
+    margin: 0 auto;
+}
+div#MooCategoriesContent {
+    margin: 0 auto;
+}
+div#MooModifiersContent {
+    margin: 0 auto;
+}
+div#MooOrderTypesContent div.Moo_option-title div.label {
+    width: 20%;
+}
+div#MooOrderTypesContent div.Moo_option-item div.label {
+    width: 20%;
+}
+div#MooOrderTypesContent div.Moo_option-title div.onoffswitch {
+    width: 30% !important;
+    margin-left: 0px !important;
+}
+div#MooOrderTypesContent div.Moo_option-item div.onoffswitch {
+    /*width: 30% !important;*/
+    /*margin-left: 0px !important;*/
+    margin-right: 23px !important;
+}
+
+div#MooOrderTypesContent div.Moo_option-title div:nth-child(4) {
+    display: inline-block;
+    float: none !important;
+    width: 16% !important;
+    text-align: left;
+    text-align: right;
+}
+div#MooOrderTypesContent div.Moo_option-item div:nth-child(4) {
+    display: inline-block;
+    float: none !important;
+    width: 28% !important;
+    text-align: right;
+}
+div#MooOrderTypesContent div.Moo_option-title {
+    font-size: 14px;
+    font-weight: bold;
+}
+div.input_label_center input[type="radio"] {
+    width: 0;
+    margin-top: 7px;
+    margin-bottom: 7px;
+}
+input[type=radio] + label {
+    color: #a1afa3;
+    font-style: italic;
+}
+input[type=radio]:checked + label {
+    color: #456c4a;
+    font-style: normal;
+}
+div#bloc_moo_ptions_item {
+    width: 90%;
+    margin: 0 auto;
+    margin-top: 25px;
+}
+div.all_items {
+    width: 38%;
+    display: inline-block;
+}
+div.all_items_onoff {
+    width: 6%;
+    display: inline-block;
+}
+div.all_items_i_l {
+    display: inline-block;
+    width: 51%;
+    text-align: right;
+}
+div.all_items_i_l_b {
+    display: inline-block;
+}
+div#bloc_moo_ptions_item div.Moo_option-item:first-child {
+    /*height: 30px;*/
+    font-weight: bold;
+}
+div#MooPanel_tabContent3 div.MooPanelItem div.Moo_option-item {
+    /*overflow: visible;
+    height: 35px;*/
+}
+.onoffswitch-switch {
+    border-radius: 0px;
+    width: 13px !important;
+}
+div.resett {
+    height: 152px !important;
+}
+.input_table {
+    border-radius: 5px !important;
+    margin-right: 27px;
+}
+.btn_table {
+    height: 29px !important;
+    margin-bottom: 12px !important;
+}
+div#MooPanel_tabContent5 div.MooPanelItem div#bloc_moo_ptions_item div.Moo_option-item:first-child {
+    height: 37px;
+}
+#moo_map {
+    margin-bottom: 15px;
+}
+/*
+.onoffswitch-label {
+	border-radius: 5px;
+    width: 71px;
+}
+*/
+/*
+#MooPanel_main .MooPanelItem {
+    border: none !important;
+    margin: 10px 0 20px;
+    clear: both;
+    position: relative;
+}
+*/
+#MooPanel_sidebar ul>li:last-child {
+    border-radius: 8px;
+}
+
+/*INPUT WITH LABEL*/
+.iwl_holder {
+    width: 75%;
+    margin: 0 auto;
+}
+.iwl_label_holder {
+    margin-bottom: 3px;
+}
+.iwl_input_holder {
+    margin-bottom: 10px;
+    width: 100%;
+}
+.iwl_input_holder input{
+    width: 100%;
+}
+.iwl_input_holder textarea{
+    width: 100%;
+}
+#MooPanel_main .MooPanelItem .Moo_option-item {
+    border-bottom: none;
+}
+.progressbar-text {
+    top: 15px;
+}
+#menu_for_mobile {
+    display: none;
+}
+.enable_disable_for_mobile {
+    float:left;
+    width: 100%;
+}
+
+.display_order_types_mobile {
+    display: none;
+}
+#MooPanel_main .MooPanelItem .label {
+    width: 274px;
+}
+#display_panel5_on_mobile {
+    display: none;
+}
+#show_hide_modifer_mobile {
+    display: none;
+}
+.additional_payment_options_mobile {
+    display: none;
+}
+
+.moo-info-msg
+{
+    margin-left: 15px;
 }

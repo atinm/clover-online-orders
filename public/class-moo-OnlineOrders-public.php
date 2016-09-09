@@ -625,8 +625,6 @@ class Moo_OnlineOrders_Public {
               wp_send_json($response);
             else
                 return $response;
-
-
         }
         else
         {
@@ -832,6 +830,7 @@ class Moo_OnlineOrders_Public {
                     else
                         $_POST['form']['phone'] = $_SESSION['moo_phone_number'];
                 }
+                //Create the Order
                 if(!empty($_POST['form']['OrderType'])){
                     $OrderTpe_UUID = sanitize_text_field($_POST['form']['OrderType']);
                     $orderType = $this->api->GetOneOrdersTypes($OrderTpe_UUID);
@@ -843,6 +842,12 @@ class Moo_OnlineOrders_Public {
                 {
                     $this->model->addOrder($orderCreated['OrderId'],$orderCreated['taxamount'],$orderCreated['amount'],$_POST['form']['name'],$_POST['form']['address'], $_POST['form']['city'],$_POST['form']['zipcode'],$_POST['form']['phone'],$_POST['form']['email'],$_POST['form']['instructions'],$_POST['form']['state'],$_POST['form']['country'],$deliveryFee,$tipAmount,$shippingFee,$customer_lat,$customer_lng,json_decode($orderType)->label);
                     $this->model->addLinesOrder($orderCreated['OrderId'],$_SESSION['items']);
+
+                    // Add the delivery charges
+                    if(isset($MooOptions['item_delivery']) && $MooOptions['item_delivery'] != "" && $deliveryFee>0)
+                    {
+                        $this->api->addlineWithPriceToOrder($orderCreated['OrderId'],$MooOptions['item_delivery'],1,'',$deliveryFee);
+                    }
 
 
                     /* if you have additional info please set-up it in this section */
@@ -863,14 +868,18 @@ class Moo_OnlineOrders_Public {
                     //var_dump($paymentmethod);
                     if($paymentmethod == 'cash' && $_SESSION['moo_phone_verified'])
                     {
-                        $this->SendSmsToMerchant($orderCreated['OrderId'],'will be paid in cash',$pickup_time);
-                        $this->SendSmsToCustomer($orderCreated['OrderId'],$customer['phone']);
+                            $this->SendSmsToMerchant($orderCreated['OrderId'],'will be paid in cash',$pickup_time);
+                            $this->SendSmsToCustomer($orderCreated['OrderId'],$customer['phone']);
 
-                        $this->model->updateOrder($orderCreated['OrderId'],'CASH');
+                            $this->model->updateOrder($orderCreated['OrderId'],'CASH');
+
                             $this->api->NotifyMerchant($orderCreated['OrderId'],$_POST['form']['instructions'],$customer,$pickup_time,$paymentmethod);
+
                             $this->sendEmail($_POST['form']['email'],$_POST['form']['name'],$orderCreated['OrderId']);
                             $this->sendEmail2merchant($MooOptions['merchant_email'],$orderCreated['OrderId'],$otherInformations,$deliveryFee,$pickup_time);
+
                             unset($_SESSION['items']);
+
                             $response = array(
                                 'status'	=> 'APPROVED',
                                 'order'	=> $orderCreated['OrderId']
@@ -921,11 +930,52 @@ class Moo_OnlineOrders_Public {
 
                         }
                         else{
-                            $response = array(
-                                'status'	=> 'Error',
-                                'message'	=> 'credit card information are required'
-                            );
-                            wp_send_json($response);
+                            if(isset($MooOptions['scp']) && $MooOptions['scp'] =='on')
+                            {
+                                    /* Update order note */
+                                    $merchant_website = get_option( 'moo_store_page');
+                                    $note = array(
+                                        'tipAmount'=>$tipAmount,
+                                        'taxAmount'=>$orderCreated['taxamount'],
+                                        'customer'=>$customer,
+                                        'merchantPhone'=>$MooOptions['merchant_phone'],
+                                        'pickuptime'=>$pickup_time,
+                                        'instructions'=>$_POST['form']['instructions'],
+                                        'site_url'=>esc_url(get_permalink($merchant_website))
+                                    );
+                                    $result = json_decode($this->api->updateOrderNote($orderCreated['OrderId'],json_encode($note)));
+                                /* Save order in local db */
+                                    $this->model->updateOrder($orderCreated['OrderId'],'SCP');
+                                /* Empty the session */
+                                    unset($_SESSION['items']);
+                                /* redirect the customer to SCP */
+                                    if(isset($result->merchant) && isset($result->orderid))
+                                    {
+                                       $url = 'https://checkout.smartonlineorder.com/c/'.strtolower($result->merchant).'/'.strtolower($result->orderid);
+                                        $response = array(
+                                            'status'	=> 'REDIRECT',
+                                            'url'	=> $url
+                                        );
+                                        wp_send_json($response);
+                                    }
+                                    else
+                                    {
+                                        $response = array(
+                                            'status'	=> 'Error',
+                                            'message'	=> 'credit card information are required'
+                                        );
+                                        wp_send_json($response);
+                                    }
+                            }
+                            else
+                            {
+                                $response = array(
+                                    'status'	=> 'Error',
+                                    'message'	=> 'credit card information are required'
+                                );
+                                wp_send_json($response);
+                            }
+
                         }
                     }
 
@@ -1553,15 +1603,6 @@ public function moo_AddOrderType()
 
         $message    =  'Dear '.$name;
         $message   .=  '<br/><br/>Thank you for placing your order with us ';
-/*
-        $message   .=  '<br/><br/><b>Order total</b>';
-        $message   .=  '<br/>Sub total : $'.($order[0]->amount-$order[0]->taxAmount-$order[0]->deliveryfee);
-        $message   .=  '<br/>Tax : $'.$order[0]->taxAmount;
-        $message   .=  '<br/>TIP : $'.$order[0]->tipAmount;
-        $message   .=  '<br/>Delivery fee : $'.$order[0]->deliveryfee;
-        $message   .=  '<br/>--------------------------------';
-        $message   .=  '<br/><b>Total : </b>$'.$order[0]->amount;
-*/
         $message   .=  '<br/><br/>You can see your receipt at this <a href="https://www.clover.com/r/'.$orderID.'" target="_blanck">link</a> ( https://www.clover.com/r/'.$orderID.' )';
         wp_mail($email, 'Thank you for your order', $message,$headers);
     }
@@ -1569,10 +1610,7 @@ public function moo_AddOrderType()
     {
         if($email != null && $email != '')
         {
-            $MooOptions = (array)get_option('moo_settings');
             $headers[] = 'Content-Type: text/html; charset=UTF-8';
-//            $headers[] = 'From: '. $MooOptions['merchant_email']. "\r\n";
-
             $order = $this->model->getOrder($orderID);
             $order = $order[0];
             $emails = explode(',',$email);

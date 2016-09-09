@@ -18,6 +18,7 @@ function moo_getLatLongforMapDa()
 {
     if(moo_merchantLat == "" || moo_merchantLng == "" ||moo_merchantLat == null || moo_merchantLng == null)
     {
+        if(moo_merchantAddress == '') moo_merchantAddress ='united state';
         jQuery.get('https://maps.googleapis.com/maps/api/geocode/json?&address='+moo_merchantAddress+'&key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc',function (data) {
             if(data.results.length>0)
             {
@@ -165,6 +166,7 @@ function moo_deleteSelectedShape () {
         }
     }
     moo_create_areas_infos();
+    jQuery('#moo_areas_container').append("<p style='color: green;'>PS : Don't forget to click on save changes</p>");
 }
 
 function moo_show_form_adding_zone()
@@ -215,11 +217,13 @@ function moo_validate_selected_zone()
 
     var type = selectedShape.type;
     var color = selectedShape.fillColor;
+    var tmpMinAmount = jQuery('#moo_dz_min').val();
+    var tmpFee = jQuery('#moo_dz_fee').val();
 
     zone.shape     = selectedShape;
     zone.name      = jQuery('#moo_dz_name').val();
-    zone.minAmount = jQuery('#moo_dz_min').val();
-    zone.fee       = jQuery('#moo_dz_fee').val();
+    zone.minAmount = (tmpMinAmount!="")?tmpMinAmount:0.00;
+    zone.fee       = (tmpFee!="")?tmpFee:0.00;
     zone.type      = type;
     zone.color     = color;
     zone.center    = null;
@@ -254,6 +258,7 @@ function moo_validate_selected_zone()
     moo_delivery_areas.push(zone);
     moo_hide_form_adding_zone();
     moo_create_areas_infos();
+    jQuery('#moo_areas_container').append("<p style='color: green;'>PS : Don't forget to click on save changes</p>");
 
 }
 
@@ -280,9 +285,9 @@ function moo_update_selected_zone()
                 console.log(moo_delivery_areas[i]);
             }
         }
-
         moo_hide_form_adding_zone();
         moo_create_areas_infos();
+        jQuery('#moo_areas_container').append("<p style='color: green;'>PS : Don't forget to click on save changes</p>");
     }
 
 }
@@ -363,6 +368,7 @@ function moo_da_delete_zone(event,ZoneId)
     }
     moo_create_areas_infos();
     moo_clearSelection();
+    jQuery('#moo_areas_container').append("<p style='color: green;'>PS : Don't forget to click on save changes</p>");
 }
 
 function moo_save_changes()
@@ -412,9 +418,8 @@ function moo_setup_existing_zones() {
     try {
         zones = JSON.parse(zones_txt);
     } catch (e) {
-        console.error("Parsing error: zones");
+        console.log("Parsing error: zones");
     }
-
     for (i in zones) {
         var tmp_zone = zones[i];
         tmp_zone.shape = null;

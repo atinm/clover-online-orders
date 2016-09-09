@@ -16,7 +16,7 @@
  * Plugin Name:       Merchantech Online Orders for Clover
  * Plugin URI:        http://www.merchantech.us
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.1.9
+ * Version:           1.2.0
  * Author:            Merchantech
  * Author URI:        http://www.merchantech.us
  * License:           Clover app
@@ -56,6 +56,7 @@ function moo_OnlineOrders_shortcodes_allitems($atts, $content) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
     return Moo_OnlineOrders_Shortcodes::TheStore($atts, $content);
 }
+
 function moo_OnlineOrders_shortcodes_checkoutPage($atts, $content) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
     return Moo_OnlineOrders_Shortcodes::checkoutPage($atts, $content);
@@ -65,14 +66,18 @@ function moo_OnlineOrders_shortcodes_buybutton($atts, $content) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
     return Moo_OnlineOrders_Shortcodes::moo_BuyButton($atts, $content);
 }
+
 function moo_OnlineOrders_shortcodes_thecart($atts, $content) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
     return Moo_OnlineOrders_Shortcodes::theCart($atts, $content);
 }
+
 add_shortcode('moo_all_items', 'moo_OnlineOrders_shortcodes_allitems');
 add_shortcode('moo_checkout', 'moo_OnlineOrders_shortcodes_checkoutPage');
 add_shortcode('moo_buy_button', 'moo_OnlineOrders_shortcodes_buybutton');
 add_shortcode('moo_cart', 'moo_OnlineOrders_shortcodes_thecart');
+
+
 /*
 add_filter( 'wp_mail_content_type', function( $content_type ) {
     return 'text/html';
@@ -132,8 +137,9 @@ function moo_onlineOrders_check_version()
         case '116':
         case '117':
         case '118':
-            update_option('moo_onlineOrders_version','119');
         case '119':
+            update_option('moo_onlineOrders_version','120');
+        case '120':
             break;
     }
 }

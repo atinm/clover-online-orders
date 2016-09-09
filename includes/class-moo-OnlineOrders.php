@@ -69,7 +69,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.1.9';
+		$this->version = '1.2.0';
 
 		$this->load_dependencies();
 		$this->set_locale();

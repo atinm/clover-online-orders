@@ -79,6 +79,22 @@ class Products_List_Moo extends WP_List_Table_MOO {
             array( 'uuid' => $id )
         );
     }
+    /**
+     * Go out of stock.
+     *
+     * @param int $uuid of the item
+     */
+    public static function out_of_stock($id,$status) {
+        global $wpdb;
+        $res = ($status)?'1':'0';
+        $wpdb->update(
+            "{$wpdb->prefix}moo_item",
+            array(
+            'outofstock' => $res
+            ),
+            array( 'uuid' => $id )
+        );
+    }
     /** Text displayed when no customer data is available */
     public function no_items() {
         _e( 'No items available.');
@@ -90,6 +106,7 @@ class Products_List_Moo extends WP_List_Table_MOO {
      */
     public static function record_count() {
         global $wpdb;
+
         $per_page = 20;
         $page_number = 1;
 
@@ -122,22 +139,30 @@ class Products_List_Moo extends WP_List_Table_MOO {
         $hide_nonce       = wp_create_nonce( 'moo_hide_item' );
         $show_nonce       = wp_create_nonce( 'moo_show_item' );
 
-        $title = '<strong>' . $item['name'] . '</strong>';
+        $enable_ot_nonce       = wp_create_nonce( 'moo_enable_ot' );
+        $disable_ot_nonce       = wp_create_nonce( 'moo_disable_ot' );
 
+        $title = '<strong>' . $item['name'] . '</strong>';
         if($item['visible'])
             $actions = array(
-                'hide' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Hide from the Website</a> 
-                                   |<a href="?page=%s&action=%s&item_uuid=%s">Edit Item</a> ',
-                                    'moo_items', 'hide',esc_attr($item['uuid']), $hide_nonce,$this->get_pagenum(),
-                                    'moo_items', 'update_item',esc_attr($item['uuid'])  ),
+                'hide' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Hide from the Website</a>',
+                                    'moo_items', 'hide',esc_attr($item['uuid']), $hide_nonce,$this->get_pagenum())
             );
         else
             $actions = array(
-                'show' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Show in the Website</a>
-                                   |<a href="?page=%s&action=%s&item_uuid=%s">Edit Item</a>',
-                                    esc_attr( $_REQUEST['page'] ), 'show',esc_attr($item['uuid']), $show_nonce,$this->get_pagenum(),
-                                    esc_attr( $_REQUEST['page'] ), 'update_item',esc_attr($item['uuid']))
+                'show' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Show in the Website</a>',
+                    'moo_items', 'show',esc_attr($item['uuid']), $show_nonce,$this->get_pagenum())
             );
+
+        if($item['outofstock'])
+            $actions['disable_ot']  = sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Disable out of stock</a>',
+                    'moo_items', 'disable_ot',esc_attr($item['uuid']), $disable_ot_nonce,$this->get_pagenum());
+        else
+            $actions['enable_ot']  = sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Enable out of stock</a>',
+                'moo_items', 'enable_ot',esc_attr($item['uuid']), $enable_ot_nonce,$this->get_pagenum());
+
+        $actions['edit'] = sprintf( '<a href="?page=%s&action=%s&item_uuid=%s">Edit Item</a>',
+            'moo_items', 'update_item',esc_attr($item['uuid']));
 
         return $title . $this->row_actions( $actions );
     }
@@ -216,6 +241,8 @@ class Products_List_Moo extends WP_List_Table_MOO {
         $actions = array(
             'bulk-show' => 'Show Items',
             'bulk-hide' => 'Hide Items',
+            'bulk-enable-ot' => 'Enable Out of stock',
+            'bulk-disable-ot' => 'Disable Out of stock'
         );
 
         return $actions;
@@ -268,7 +295,6 @@ class Products_List_Moo extends WP_List_Table_MOO {
             if('show' === $this->current_action()){
                 // In our file that handles the request, verify the nonce.
                 $nonce = esc_attr( $_REQUEST['_wpnonce'] );
-
                 if ( ! wp_verify_nonce( $nonce, 'moo_show_item' ) ) {
                     die( 'Go get a life script kiddies' );
                 }
@@ -278,11 +304,40 @@ class Products_List_Moo extends WP_List_Table_MOO {
                     exit;
                 }
             }
+            else
+                if('enable_ot' === $this->current_action())
+                {
+                    $nonce = esc_attr( $_REQUEST['_wpnonce'] );
 
+                    if ( ! wp_verify_nonce( $nonce, 'moo_enable_ot' ) ) {
+                        die( 'Go get a life script kiddies' );
+                    }
+                    else {
+                        self::out_of_stock($_GET['item'],true);
+                        wp_redirect(admin_url('admin.php?page=moo_items&paged='.$_REQUEST['paged']));
+                        exit;
+                    }
+                }
+                else
+                {
+                    if('disable_ot' === $this->current_action())
+                    {
+                        $nonce = esc_attr( $_REQUEST['_wpnonce'] );
+                        if ( ! wp_verify_nonce( $nonce, 'moo_disable_ot' ) ) {
+                            die( 'Go get a life script kiddies' );
+                        }
+                        else {
+                            self::out_of_stock($_GET['item'],false);
+                            wp_redirect(admin_url('admin.php?page=moo_items&paged='.$_REQUEST['paged']));
+                            exit;
+                        }
+                    }
+                }
         // If the delete bulk action is triggered
         if ( ( isset( $_POST['action'] ) && $_POST['action'] == 'bulk-hide' )
             || ( isset( $_POST['action2'] ) && $_POST['action2'] == 'bulk-hide' )
-        ) {
+        )
+        {
 
             $hide_ids = esc_sql( $_POST['bulk-hideOrShow'] );
             // loop over the array of record IDs and delete them
@@ -291,12 +346,13 @@ class Products_List_Moo extends WP_List_Table_MOO {
             }
             wp_redirect(add_query_arg('paged',$_REQUEST['paged']));
            exit;
-        }
+         }
         else
         {
             if ( ( isset( $_POST['action'] ) && $_POST['action'] == 'bulk-show' )
                 || ( isset( $_POST['action2'] ) && $_POST['action2'] == 'bulk-show' )
-            ) {
+            )
+            {
 
                 $show_ids = esc_sql( $_POST['bulk-hideOrShow'] );
                 // loop over the array of record IDs and delete them
@@ -306,6 +362,40 @@ class Products_List_Moo extends WP_List_Table_MOO {
 
                 wp_redirect(add_query_arg('paged',$_REQUEST['paged']) );
                 exit;
+            }
+            else
+            {
+                if ( ( isset( $_POST['action'] ) && $_POST['action'] == 'bulk-enable-ot' )
+                    || ( isset( $_POST['action2'] ) && $_POST['action2'] == 'bulk-enable-ot' )
+                )
+                {
+
+                    $enable_ids = esc_sql( $_POST['bulk-hideOrShow'] );
+                    // loop over the array of record IDs and delete them
+                    foreach ( $enable_ids as $id ) {
+                        self::out_of_stock( esc_sql($id),true);
+                    }
+
+                    wp_redirect(add_query_arg('paged',$_REQUEST['paged']) );
+                    exit;
+                }
+                else
+                {
+                    if ( ( isset( $_POST['action'] ) && $_POST['action'] == 'bulk-disable-ot' )
+                        || ( isset( $_POST['action2'] ) && $_POST['action2'] == 'bulk-disable-ot' )
+                    )
+                    {
+
+                        $disable_ids = esc_sql( $_POST['bulk-hideOrShow'] );
+                        // loop over the array of record IDs and delete them
+                        foreach ( $disable_ids as $id ) {
+                            self::out_of_stock( esc_sql($id),false );
+                        }
+
+                        wp_redirect(add_query_arg('paged',$_REQUEST['paged']) );
+                        exit;
+                    }
+                }
             }
         }
     }

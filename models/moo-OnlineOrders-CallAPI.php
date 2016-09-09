@@ -207,6 +207,10 @@ class moo_OnlineOrders_CallAPI {
     {
         return $this->callApi_Post("create_line_in_order",$this->Token,'oid='.$oid.'&item='.$item_uuid.'&qte='.$qte.'&special_ins='.$special_ins);
     }
+    function addlineWithPriceToOrder($oid,$item_uuid,$qte,$special_ins,$price)
+    {
+        return $this->callApi_Post("create_line_in_order",$this->Token,'oid='.$oid.'&item='.$item_uuid.'&qte='.$qte.'&special_ins='.$special_ins.'&itemprice='.$price);
+    }
     //create the order
     function addModifierToLine($oid,$lineId,$modifer_uuid)
     {
@@ -283,12 +287,16 @@ class moo_OnlineOrders_CallAPI {
             return false;
         }
     }
+    function updateOrderNote($orderId,$note)
+    {
+        return $this->callApi_Post("update_order/".$orderId,$this->Token,'note='.$note);
+    }
 
     public function delete_item($uuid)
     {
         if($uuid=="") return;
         global $wpdb;
-        $wpdb->show_errors();
+        //$wpdb->show_errors();
         $wpdb->query('START TRANSACTION');
 
         $wpdb->delete("{$wpdb->prefix}moo_item_tax_rate",array('item_uuid'=>$uuid));
@@ -1081,7 +1089,7 @@ class moo_OnlineOrders_CallAPI {
 
         $info = curl_getinfo($crl);
         curl_close($crl);
-	    //echo $url." ---- ";
+	   // echo $url." ---- ";
        // var_dump($reply);
         if($info['http_code'] == 200)
             return $reply;

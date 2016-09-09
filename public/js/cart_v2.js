@@ -23,45 +23,6 @@ function moo_updateCart()
                 var tax = price*product.tax_rate/100;
                 var subtotal = price;
                 nb_items++;
-/*
-                if(Object.keys(product.modifiers).length>0){
-
-                    //line of the cart
-                    html +="<tr class='warning' id='moo_cart_line_"+item+"'>";
-                    html +="<td  style='cursor: pointer' onclick=\"ChangeQuantity('"+item+"')\" ><strong>"+product.item.name+"</strong></td>"; //The name of the item
-                    html +='<td>'+product.quantity+'</td>'; //qty
-                    html +='<td>$'+subtotal.toFixed(2)+'</td>'; //Sub total  ( price + taxes )
-                    html +='<td></td>'; //Controlles Btn
-                    html +='</tr>'; //Controlles Btn
-                    // the Modifiers
-                    for(uuid in product.modifiers){
-                        var modifier = product.modifiers[uuid];
-                        var modifierPrice = modifier.price/100;
-
-                        tax += product.tax_rate*modifierPrice/100;
-
-                        html +='<tr id="moo_cart_modifier_'+uuid+'" class="warning MooLineModifier4_'+item+'" style="font-size: 0.8em;text-align: right;">';
-                        html +='<td style="text-align: right;">'+modifier.name+'</td>';
-                        html +='<td></td>';
-                        html +='<td>$'+modifierPrice.toFixed(2)+'</td>';
-                        html +='<td style="text-align: left;"><i class="fa fa-close" style="cursor: pointer;" onclick="moo_cart_DeleteItemModifier(\''+uuid+'\',\''+item+'\')"></i></td>';
-                        html +="</tr>";
-
-                        subtotal += modifierPrice*product.quantity;
-                    }
-                     tax = Math.ceil(tax*100)/100;
-                     total = Math.ceil((subtotal+tax)*100)/100;
-
-                    html +='<tr class="warning MooLineModifier4_'+item+'" ><td colspan="2"></td>';
-                    html +='<td id="moo_itemsubtotal_'+item+'">$'+subtotal.toFixed(2)+'</td>'; //Sub total
-                    html +='<td><i class="fa fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item+'\')"></i></td>'; //Controlles Btn
-                    html +="</tr>";
-
-                    //Fin line
-
-
-                }
-            */
                 if(Object.keys(product.modifiers).length>0){
                     //line of the cart
                     html +="<tr id='moo_cart_line_"+item+"'>";
@@ -79,10 +40,6 @@ function moo_updateCart()
                     html +='<td>$'+subtotal.toFixed(2)+'</td>'; //Sub total  ( price + taxes )
                     html +='<td><i class="fa fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item+'\')"></i></td>'; //Controlles Btn
                     html +='</tr>';
-
-                    //Fin line
-
-
                 }
                 else
                 {
@@ -131,7 +88,6 @@ function moo_updateCart()
 function moo_updateCartTotal()
 {
         jQuery(".moo_cart_total > td:last").html("Calculating...");
-
         jQuery.post(moo_params.ajaxurl,{'action':'moo_cart_getTotal'}, function (data) {
                 if(data.status=="success")
                 {
@@ -143,12 +99,10 @@ function moo_updateCartTotal()
                     html +="<td colspan='1' style='text-align: right;'>Subtotal:</td>";
                     html +="<td colspan='3'>$"+data.sub_total+"</td>";
                     html +="</tr>";
-
                     html +="<tr  class='moo_cart_total'>";
                     html +="<td colspan='1' style='text-align: right;'>Tax:</td>";
                     html +="<td colspan='3'>$"+data.total_of_taxes+"</td>";
                     html +="</tr>";
-
                     html +="<tr  class='moo_cart_total'>";
                     html +="<td colspan='1' style='text-align: right;'>Total:</td>";
                     html +="<td colspan='3'>$"+data.total+"</td>";
@@ -162,7 +116,6 @@ function moo_updateCartTotal()
                     moo_updateCart();
                 }
         });
-
 }
 
 function moo_cart_DeleteItem(item)
@@ -224,6 +177,7 @@ function moo_addModifiers(event,item_name,item_uuid,item_price)
             var selected_modifiers = jQuery("#moo_form_modifiers").serializeArray();
             var Mgroups = {};
             var Modifiers = [];
+            jQuery.magnificPopup.close();
             for(m in selected_modifiers)
             {
                 var modifier = selected_modifiers[m];
@@ -307,7 +261,6 @@ function moo_addModifiers(event,item_name,item_uuid,item_price)
                                 if(data.status == 'success' )
                                 {
                                     moo_updateCart();
-                                    jQuery.magnificPopup.close();
                                     return true;
                                 }
                             })
