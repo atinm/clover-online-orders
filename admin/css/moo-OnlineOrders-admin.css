@@ -701,7 +701,7 @@ div.faq_response {
     padding-left: 36px;
 }
 div#MooOrderTypesContent {
-    width: 72%;
+   /* width: 72%;*/
     margin: 0 auto;
 }
 div#MooCategoriesContent {

@@ -59,8 +59,9 @@ class moo_OnlineOrders_Admin {
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action( 'admin_init',  array($this, 'register_mysettings' ));
         add_action( 'admin_bar_menu', array($this, 'toolbar_link_to_settings'), 999 );
-        add_action("admin_enqueue_scripts", function(){wp_enqueue_media();});
+        add_action("admin_enqueue_scripts", array($this, 'enq_media_uploader'));
         $this->model = new moo_OnlineOrders_Admin_Model();
+		
 
 	}
 
@@ -1087,6 +1088,10 @@ class moo_OnlineOrders_Admin {
         add_submenu_page('moo_index', 'Items/Images', 'Items / Images', 'manage_options', 'moo_items', array($this, 'page_products'));
         add_submenu_page('moo_index', 'Orders', 'Orders', 'manage_options', 'moo_orders', array($this, 'page_orders'));
     }
+	public function enq_media_uploader()
+	{
+	wp_enqueue_media();
+	}
 
     function toolbar_link_to_settings( $wp_admin_bar ) {
         $args = array(
