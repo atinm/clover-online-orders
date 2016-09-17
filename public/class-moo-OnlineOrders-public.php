@@ -1279,10 +1279,10 @@ public function moo_AddOrderType()
 
        $response = array(
            'status'	 => 'Success',
-           'cats'    => $cats[0]->nb?:0,
-           'labels'  => $labels[0]->nb?:0,
-           'taxes'   => $taxes[0]->nb?:0,
-           'products'=> $products[0]->nb?:0
+           'cats'    => (isset($cats[0]->nb) && $cats[0]->nb>0)?$cats[0]->nb:0,
+           'labels'  => (isset($labels[0]->nb) && $labels[0]->nb>0)?$labels[0]->nb:0,
+           'taxes'   => (isset($taxes[0]->nb) && $taxes[0]->nb>0)?$taxes[0]->nb:0,
+           'products'=> (isset($products[0]->nb) && $products[0]->nb>0)?$products[0]->nb:0
        );
        wp_send_json($response);
    }
