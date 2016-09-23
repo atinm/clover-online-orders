@@ -244,8 +244,7 @@ class moo_OnlineOrders_Admin {
         if(!isset($MooOptions['hide_menu']))
             $MooOptions['hide_menu']='false';
         if(!isset($MooOptions['accept_orders_w_closed']))
-            $MooOptions['accept_orders_w_closed']='false';
-
+            $MooOptions['accept_orders_w_closed']='on';
         if(!isset($MooOptions['show_categories_images']))
             $MooOptions['show_categories_images'] = 'false';
 
