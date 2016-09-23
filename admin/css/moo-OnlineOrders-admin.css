@@ -86,7 +86,7 @@
 }
 #Moopanel_logo img
 {
-  margin-top: 10px;
+    margin-top: 10px;
 }
 #MooPanel_main
 {
@@ -107,7 +107,7 @@
     margin: 0;
 
 }#MooPanel_sidebar ul>li
-{
+ {
      padding: 10px;
      display: block;
      color: #ffffff;
@@ -115,13 +115,13 @@
      border: 0;
      outline: none;
      text-decoration: none;
-    border-bottom: 1px solid ;
-    margin: 0;
+     border-bottom: 1px solid ;
+     margin: 0;
 
-}
+ }
 #MooPanel_sidebar ul>li:hover
 {
-     background-color: #496F4E;
+    background-color: #496F4E;
 }
 #MooPanel_tabContent2,#MooPanel_tabContent3,#MooPanel_tabContent4,#MooPanel_tabContent5, #MooPanel_tabContent6,
 #MooPanel_tabContent7,#MooPanel_tabContent8,#MooPanel_tabContent9,#MooPanel_tabContent10,#MooPanel_tabContent11
@@ -138,16 +138,16 @@
 
 .MooPanel_Selected:after
 {
-     right: 0;
-     border: solid 8px transparent;
-     content: " ";
-     height: 0;
-     width: 0;
-     position: absolute;
-     pointer-events: none;
-     border-right-color: #FAFAFA;
-     top: 50%;
-     margin-top: -8px;
+    right: 0;
+    border: solid 8px transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    border-right-color: #FAFAFA;
+    top: 50%;
+    margin-top: -8px;
 }
 #MooPanel_main h2
 {
@@ -155,7 +155,7 @@
     margin-bottom: 35px;
     font-size: 23px;
     font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",sans-serif;
-   /* float: left;*/
+    /* float: left;*/
     font-weight: normal;
 }
 #MooPanel_main .MooPanelSubmit
@@ -201,7 +201,7 @@
 }
 #MooPanel_main .MooPanelItem .Moo_option-item .Moo_on_off:hover
 {
-   cursor: pointer;
+    cursor: pointer;
 }
 #MooPanelSectionImport
 {
@@ -210,8 +210,8 @@
 }
 #MooPanel_main .stats
 {
-   display: table;
-   width:100%;
+    display: table;
+    width:100%;
 }
 #MooPanel_main .stats .stat
 {
@@ -229,10 +229,10 @@
 }
 #MooPanel_main .stats .stat .value
 {
-     font-size: 45px;
-     font-weight: 100;
-     color: #000;
-     line-height: 1em;
+    font-size: 45px;
+    font-weight: 100;
+    color: #000;
+    line-height: 1em;
 }
 #MooPanel_main .stats .stat .type
 {
@@ -241,10 +241,10 @@
 
 #MooPanel_main .MooRow
 {
-   /* border: solid 1px #0b0b0b;*/
+    /* border: solid 1px #0b0b0b;*/
     height: 110px;
     margin: 20px;
-   /* background-color: #ffffff;*/
+    /* background-color: #ffffff;*/
 }
 #MooPanel_main .MooRowSection
 {
@@ -371,6 +371,7 @@
 {
     box-sizing: content-box;
 }
+/*
 #moo_editItem .moo_editItem_right
 {
     float: right;
@@ -381,6 +382,7 @@
     margin: 0px;
 
 }
+
 #moo_editItem .moo_editItem_left
 {
     float: left;
@@ -390,13 +392,7 @@
     padding: 10px;
     margin: 0px;
 }
-#moo_editItem .moo_pull_right
-{
-    float: right;
-    color: #2e6da4;
-    margin-top: -35px;
-    cursor: pointer;
-}
+*/
 #moo_editItem .moo_itemsimages .moo_itemsimages_oneimg
 {
     text-align: center;
@@ -408,10 +404,10 @@
     float: left;
     margin: 5px;
 }#moo_editItem .moo_itemsimages .moo_itemsimages_oneimg .moo_itemsimages_oneimg_options
-{
-    width: 200px;
-    margin: 5px;
-}
+ {
+     width: 200px;
+     margin: 5px;
+ }
 #moo_editItem .moo_itemsimages .moo_moo_itemsimages_oneimg input[type=radio]
 {
     float: left;
@@ -455,14 +451,14 @@
     margin-right: 5px;
     vertical-align: text-bottom;
 }.moo_delivery_zone_label .moo_da_actions
-{
-   float: right;
-    display: none
- }
- #moo_dz_action_for_updating,#moo_dz_action_for_adding
  {
-     display: none;
+     float: right;
+     display: none
  }
+#moo_dz_action_for_updating,#moo_dz_action_for_adding
+{
+    display: none;
+}
 #moo_progressbar_container {
     margin: 0 auto;
     margin-bottom: 40px;
@@ -485,7 +481,7 @@
 #MooPanel_main {
     height: 12px;
     overflow-y: scroll;
-    width: 79%;
+    width: 80.2%;
     min-height: 537px;
     padding: 20px 20px 20px;
     border-radius: 10px;
@@ -701,7 +697,7 @@ div.faq_response {
     padding-left: 36px;
 }
 div#MooOrderTypesContent {
-   /* width: 72%;*/
+    /* width: 72%;*/
     margin: 0 auto;
 }
 div#MooCategoriesContent {
@@ -808,7 +804,7 @@ div#MooPanel_tabContent5 div.MooPanelItem div#bloc_moo_ptions_item div.Moo_optio
 }
 /*
 .onoffswitch-label {
-	border-radius: 5px;
+    border-radius: 5px;
     width: 71px;
 }
 */
@@ -875,4 +871,192 @@ div#MooPanel_tabContent5 div.MooPanelItem div#bloc_moo_ptions_item div.Moo_optio
 .moo-info-msg
 {
     margin-left: 15px;
+}
+.moo_hidden
+{
+    display: none;
+}
+/* --- table category --- */
+
+table.table_category{
+    width: 100%;
+}
+table.table_category thead tr{
+    background-color: currentColor;
+}
+table.table_category thead th{
+    padding: 10px;
+    color: #fff;
+}
+table.table_category tbody tr{
+    background: #ddd;
+    cursor: pointer;
+    width: 100%;
+    height: 65px;
+}
+table.table_category tbody tr:hover{
+    background-color: #ccc;
+}
+table.table_category td{
+    padding: 10px;
+}
+td.img-cat{
+    width: 10% !important;
+}
+td.name-cat{
+    width: 40% !important;
+}
+td.show-cat{
+    width: 15% !important;
+    text-align: center;
+}
+table.table_category td.bt-cat{
+    text-align: center;
+}
+
+.input-change-name{
+    display: table;
+    width: 100%;
+}
+.input-change-name .input-name{
+    display: table-cell;
+    vertical-align: middle;
+}
+.input-change-name .bt-valider{
+    display: table-cell;
+    vertical-align: middle;
+}
+.input-change-name .bt-annuler{
+    display: table-cell;
+    vertical-align: middle;
+
+}
+.input-change-name .input-name input{
+    width: 92%;
+    height: 35px;
+    padding: 5px 10px;
+}
+/* responsive */
+.category-item{
+    text-align: center;
+    border: 1px solid #ddd;
+    padding: 10px;
+    padding-top: 15px;
+}
+.category-item .option-item{
+    margin-bottom: 10px;
+}
+.category-item .option-item > label{
+    font-weight: bold;
+    float: left;
+}
+.bt-category .bt{
+    display: inline;
+    margin-left: 10px;
+}
+.editNameMobil input {
+    margin-top: 5px;
+    margin-left: -17px;
+}
+.editNameMobil img {
+    margin-left: 5px;
+}
+.moo_itemsimages_oneimg {
+    width: 40%;
+    border: 1px solid black;
+    display: inline-block;
+    text-align: center;
+    height: 250px;
+    margin-left: 6%;
+    margin-top: 18px;
+}
+.moo_editItem {
+    border: 1px solid;
+    margin-top: 25px;
+}
+
+.moo_editItem_left {
+    border: 1px solid;
+    width: 26%;
+    float: left;
+}
+.edit_item_left_holder {
+    margin-top: 10px;
+}
+.nopaddingrow {
+    margin-right: 0px !important;
+    margin-left: 0px !important;
+}
+.moo_editItem_left {
+    border-radius: 10px;
+    background: white;
+    padding-bottom: 20px;
+    border: 1px solid rgba(0,0,0,0.25) !important;
+    -webkit-box-shadow: 0 8px 6px -6px #456c4a;
+    -moz-box-shadow: 0 8px 6px -6px #456c4a;
+    box-shadow: 0 8px 6px -6px #456c4a;
+    padding: 2%;
+}
+.moo_editItem_right {
+    border-radius: 10px;
+    background: white;
+    padding-bottom: 20px;
+    border: 1px solid rgba(0,0,0,0.25) !important;
+    -webkit-box-shadow: 0 8px 6px -6px #456c4a;
+    -moz-box-shadow: 0 8px 6px -6px #456c4a;
+    box-shadow: 0 8px 6px -6px #456c4a;
+    width: 69%;
+    float: right;
+}
+#moo_editItem .moo_pull_right {
+    text-align: center;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+div#moo_uploadImgBtn .button {
+    background-color: #5E7F62 !important;
+    border-color: #1e5429 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    color: #fff !important;
+    height: 35px !important;
+    border-radius: 5px !important;
+    min-width: 120px !important;
+    text-align: center;
+    height: 35px !important;
+    line-height: 34px !important;
+}
+.square_images {
+    font-size: 15px;
+    margin-bottom: 15px;
+}
+.image_item {
+    border: 1px black;
+    border-radius: 5px;
+    height: 280px;
+}
+.image1 {
+    height: 187px !important;
+    width: 100% !important;
+}
+.image_options_holder {
+    margin-top: 18px;
+}
+
+
+.radio, .checkbox {
+    margin-top: 5px !important;
+    margin-bottom: 5px !important;
+}
+.image_item input[type="radio"], .image_item input[type="checkbox"] {
+    margin: 0px !important;
+    vertical-align: baseline !important;
+    -webkit-appearance: normal !important;
+}
+.td_input {
+    width: 100%;
+    text-align: right;
+}
+.label_td {
+    padding-left: 12px;
 }

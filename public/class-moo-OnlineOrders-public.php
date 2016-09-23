@@ -68,7 +68,6 @@ class Moo_OnlineOrders_Public {
 		$this->model       = new moo_OnlineOrders_Model();
 		$this->api         = new moo_OnlineOrders_CallAPI();
 		$this->style       = $MooOptions["default_style"];
-
 	}
     /**
      * Start the session
@@ -105,6 +104,8 @@ class Moo_OnlineOrders_Public {
 
         wp_register_style( 'moo-icheck-css',plugins_url( '/css/icheck-skins/square/blue.css', __FILE__ ),array(), $this->version);
         wp_enqueue_style( 'moo-icheck-css' );
+        wp_register_style( 'moo-sweetalert-css',plugins_url( '/css/sweetalert.css', __FILE__ ),array(), $this->version);
+        wp_enqueue_style( 'moo-sweetalert-css' );
 
         wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/moo-OnlineOrders-public.css', array(), $this->version, 'all' );
 
@@ -128,12 +129,6 @@ class Moo_OnlineOrders_Public {
                 wp_register_style( 'custom-style-items', plugins_url( '/css/items-style3.css', __FILE__ ),'bootstrap-min', $this->version );
                 wp_register_style( 'magnific-popup', plugins_url( '/css/magnific-popup.css', __FILE__ ),array(), $this->version);
             }
-
-
-
-
-
-
 	}
 
 	/**
@@ -152,14 +147,20 @@ class Moo_OnlineOrders_Public {
             );
 
             // Register the script like this for a plugin:
-            wp_register_script('bootstrap-js', plugins_url( '/js/bootstrap.min.js', __FILE__ ));
+            wp_register_script('bootstrap-js', plugins_url( '/js/bootstrap.js', __FILE__ ));
             wp_enqueue_script('bootstrap-js',array('jquery'));
+
+            wp_register_script('image-rotation-js', plugins_url( '/js/jquery.images-rotation.js', __FILE__ ));
+            wp_enqueue_script('image-rotation-js',array('jquery'));
 
             wp_register_script('toastr-js', plugins_url( '/js/toastr.min.js', __FILE__ ));
             wp_enqueue_script('toastr-js',array('jquery'));
 
             wp_register_script('moo-icheck-js', plugins_url( '/js/icheck.min.js', __FILE__ ));
             wp_enqueue_script('moo-icheck-js',array('jquery'));
+
+            wp_register_script('moo-sweetalert-js', plugins_url( '/js/sweetalert.min.js', __FILE__ ));
+            wp_enqueue_script('moo-sweetalert-js',array('jquery'));
 
             wp_register_script('custom-script-checkout', plugins_url( '/js/moo_checkout.js', __FILE__ ),array(), $this->version);
             wp_register_script('display-merchant-map', plugins_url( '/js/moo_map.js', __FILE__ ),array(), $this->version);
@@ -261,7 +262,7 @@ class Moo_OnlineOrders_Public {
 	}
   }
 
-// AJAX Responses
+    // AJAX Responses
 
     /**
      * Add to Cart
@@ -345,7 +346,6 @@ class Moo_OnlineOrders_Public {
             );
             wp_send_json($response);
         }
-
     }
     /**
      * Update the quantity
@@ -372,7 +372,6 @@ class Moo_OnlineOrders_Public {
             );
             wp_send_json($response);
         }
-
     }
     /**
      * Update the Special Instruction for one item
@@ -398,7 +397,6 @@ class Moo_OnlineOrders_Public {
             );
             wp_send_json($response);
         }
-
     }
     /**
      * Get More options for an item in the cart
@@ -426,7 +424,6 @@ class Moo_OnlineOrders_Public {
             );
             wp_send_json($response);
         }
-
     }
     /**
      * Inc the quantity
@@ -449,7 +446,6 @@ class Moo_OnlineOrders_Public {
             );
             wp_send_json($response);
         }
-
     }
     /**
      * Dec the quantity
@@ -475,14 +471,12 @@ class Moo_OnlineOrders_Public {
             );
             wp_send_json($response);
         }
-
     }
     /**
      * Delete Item from the cart
      * @since    1.0.0
      */
-    public function moo_deleteItemFromcart()
-    {
+    public function moo_deleteItemFromcart() {
         $item_uuid = sanitize_text_field($_POST['item']);
         if(isset($_SESSION['items'][$item_uuid]) && !empty($_SESSION['items'][$item_uuid])){
             unset($_SESSION['items'][$item_uuid]);
@@ -499,7 +493,6 @@ class Moo_OnlineOrders_Public {
             );
             wp_send_json($response);
         }
-
     }
     /**
      * Delete Item from the cart
@@ -1143,6 +1136,7 @@ class Moo_OnlineOrders_Public {
 
         wp_send_json($response);
     }
+
 	public function moo_getAllOrderTypes()
     {
         $OrdersTypes = $this->model->getOrderTypes();
@@ -1327,7 +1321,6 @@ public function moo_AddOrderType()
 	           'data'=>$res,
 	           'message'=>$message
            );
-           var_dump($message);
            wp_send_json($response);
        }
 
@@ -1360,7 +1353,7 @@ public function moo_AddOrderType()
    }
     /* Manage Modifiers */
 
-    function moo_ChangeModifierGroupName()
+    public function moo_ChangeModifierGroupName()
     {
         $mg_uuid  = sanitize_text_field($_POST['mg_uuid']);
         $name     = sanitize_text_field($_POST['mg_name']);
@@ -1373,7 +1366,7 @@ public function moo_AddOrderType()
         wp_send_json($response);
 
     }
-    function moo_UpdateModifierGroupStatus()
+    public function moo_UpdateModifierGroupStatus()
     {
         $mg_uuid  = sanitize_text_field($_POST['mg_uuid']);
         $status   = sanitize_text_field($_POST['mg_status']);
@@ -1384,7 +1377,7 @@ public function moo_AddOrderType()
         );
         wp_send_json($response);
     }
-    function moo_ChangeCategoryName()
+    public function moo_ChangeCategoryName()
     {
         $cat_uuid  = sanitize_text_field($_POST['cat_uuid']);
         $name      = sanitize_text_field($_POST['cat_name']);
@@ -1401,7 +1394,7 @@ public function moo_AddOrderType()
      * Function to manage item's images
      * since v1.1.3
      */
-    function moo_getItemWithImages()
+    public function moo_getItemWithImages()
     {
         $item_uuid = sanitize_text_field($_POST['item_uuid']);
         $res = $this->model->getItemWithImage($item_uuid);
@@ -1411,7 +1404,7 @@ public function moo_AddOrderType()
         );
         wp_send_json($response);
     }
-    function moo_saveItemWithImages()
+    public function moo_saveItemWithImages()
     {
         $item_uuid = sanitize_text_field($_POST['item_uuid']);
         $description = sanitize_text_field($_POST['description']);
@@ -1425,7 +1418,7 @@ public function moo_AddOrderType()
         wp_send_json($response);
     }
 
-    function moo_UpdateCategoryStatus()
+    public function moo_UpdateCategoryStatus()
     {
         $cat_uuid  = sanitize_text_field($_POST['cat_uuid']);
         $status   = sanitize_text_field($_POST['cat_status']);
@@ -1449,7 +1442,7 @@ public function moo_AddOrderType()
 
         wp_send_json($response);
     }
-    function moo_StoreIsOpen()
+    public function moo_StoreIsOpen()
     {
         $MooOptions = (array)get_option('moo_settings');
 
@@ -1458,7 +1451,7 @@ public function moo_AddOrderType()
             $res = $this->api->getOpeningStatus(4,30);
             $stat = json_decode($res)->status;
             $response = array(
-                'status'	 => 'Success',
+                'status'     => 'Success',
                 'data'=>$stat,
                 'infos'=>$res
             );
@@ -1467,7 +1460,7 @@ public function moo_AddOrderType()
         else
         {
             $response = array(
-                'status'	 => 'Success',
+                'status'     => 'Success',
                 'data'=>'open'
             );
             wp_send_json($response);
@@ -1479,7 +1472,7 @@ public function moo_AddOrderType()
      * Sync with Clover POS handle
      *
      */
-    function moo_SyncHandle()
+    public function moo_SyncHandle()
     {
       if(isset($_POST['event']))
       {
@@ -1663,6 +1656,49 @@ public function moo_AddOrderType()
                 $message = 'Thank you for your order, You can see your receipt at this link http://www.clover.com/r/'.$orderID;
                 $this->api->sendSmsTo($message,$phone);
             }
+    }
+
+    // visibility category
+    public function visibility_category()
+    {
+        $id = $_POST["id_cat"];
+        $status = $_POST["visiblite"];
+        $ret = $this->model->UpdateCategoryStatus($id,$status);
+        $ret2 = $this->model->saveNewCategoriesorder([]);
+        wp_send_json($ret);
+    }
+
+    public function save_image_category(){
+        $uuid = $_POST["category_uuid"];
+        $url = $_POST["image"];
+        $ret = $this->model->saveImageCategory($uuid,$url);
+        wp_send_json($ret);
+    }
+
+    public function new_order_categories(){
+        $newdata = $_POST["newtable"];
+        $ret = $this->model->saveNewCategoriesorder($newdata);
+        wp_send_json($ret);
+    }
+
+    public function delete_img_category(){
+        $uuid = $_POST["uuid"];
+        $ret = $this->model->moo_DeleteImgCategorie($uuid);
+        wp_send_json($ret);
+    }
+
+    public function change_name_category(){
+        $uuid = $_POST["id_cat"];
+        $newName = $_POST["newName"];
+        $ret = $this->model->moo_UpdateNameCategorie($uuid,$newName);
+        wp_send_json($ret);
+    }
+    public function moo_UpdateCategoryImagesStatus(){
+        $status = $_POST["status"];
+        $DefaultOption = (array)get_option('moo_settings');
+        $DefaultOption['show_categories_images'] = $status;
+        update_option("moo_settings",$DefaultOption);
+        wp_send_json($status);
     }
 
 }

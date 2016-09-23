@@ -22,48 +22,47 @@
  */
 class moo_OnlineOrders_Admin {
 
-	/**
-	 * The ID of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $plugin_name    The ID of this plugin.
-	 */
-	private $plugin_name;
+    /**
+     * The ID of this plugin.
+     *
+     * @since    1.0.0
+     * @access   private
+     * @var      string    $plugin_name    The ID of this plugin.
+     */
+    private $plugin_name;
 
-	/**
-	 * The version of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $version    The current version of this plugin.
-	 */
-	private $version;
+    /**
+     * The version of this plugin.
+     *
+     * @since    1.0.0
+     * @access   private
+     * @var      string    $version    The current version of this plugin.
+     */
+    private $version;
     private $model;
 
-	/**
-	 * Initialize the class and set its properties.
-	 *
-	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
-	 */
-	public function __construct( $plugin_name, $version ) {
+    /**
+     * Initialize the class and set its properties.
+     *
+     * @since    1.0.0
+     * @param      string    $plugin_name       The name of this plugin.
+     * @param      string    $version    The version of this plugin.
+     */
+    public function __construct( $plugin_name, $version ) {
 
         require_once plugin_dir_path( dirname(__FILE__))."admin/model/class-moo-OnlineOrders-model-admin.php";
 
        
-		$this->plugin_name = $plugin_name;
-		$this->version = $version;
+        $this->plugin_name = $plugin_name;
+        $this->version = $version;
 
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action( 'admin_init',  array($this, 'register_mysettings' ));
         add_action( 'admin_bar_menu', array($this, 'toolbar_link_to_settings'), 999 );
         add_action("admin_enqueue_scripts", array($this, 'enq_media_uploader'));
         $this->model = new moo_OnlineOrders_Admin_Model();
-		
 
-	}
+    }
 
   public function page_products()
     {
@@ -75,31 +74,38 @@ class moo_OnlineOrders_Admin {
             if(isset($_GET['item_uuid']) && $_GET['item_uuid'] != '')
             {
                 $item_uuid = $_GET['item_uuid'];
-                
+
               ?>
                 <div class="wrap" xmlns="http://www.w3.org/1999/html">
                     <h2>Edit an Item</h2>
-                    <div id="moo_editItem">
+                    <div id="moo_editItem" style="margin-top: 25px;">
                         <div class="moo_editItem_left">
-                            <h3>Item Name</h3> <p id="moo_item_name"></p>
-                            <h3>Item Price</h3><p id="moo_item_price"></p>
-                            <h3>Item Description</h3>
-                            <div id="titlediv">
-                                <textarea name="" rows="4" id="moo_item_description"></textarea>
-                            </div>
-                            <h3>ADD TO CART BUTTON</h3>
-                            <p>
-                                <code>
-                                    [moo_buy_button id='<?php echo $item_uuid?>']
-                                </code>
-                            </p>
+                            <div class="edit_item_left_holder"><span>Item Name : </span> <strong><p id="moo_item_name"></p></strong></div><hr />
+                            <div class="edit_item_left_holder"><span>Item Price : </span> <strong><p id="moo_item_price"></p></div><strong><hr />
+                            <div class="edit_item_left_holder"><span>Item Description : </span></div>
+                            <div class="edit_item_left_holder" id="titlediv">
+                                <textarea style="width:100%;" name="" rows="4" id="moo_item_description"></textarea>
+                            </div><hr />
+                            <div class="edit_item_left_holder">
+                                <span>Add to cart button : </span>
+                                <p>
+                                    <code>
+                                        [moo_buy_button id='<?php echo $item_uuid?>']
+                                    </code>
+                                </p>
+                            </div><hr />
+                            <div style="text-align: center;">
                             <a href="#" class="button button-primary" onclick="moo_save_item_images('<?php echo $item_uuid?>')">Save item</a>
                             <a href="#" class="button button-secondary" onclick="history.back()">Go back</a>
+                            </div>
                         </div>
                         <div class="moo_editItem_right">
-                            <h3>Images (Square Images for better scaling) </h3>
-                            <span class="moo_pull_right" id="moo_uploadImgBtn" onclick="open_media_uploader_image()">Upload Image</span>
-                            <div class="moo_itemsimages" id="moo_itemimagesection">
+                            
+                            <div class="moo_pull_right" id="moo_uploadImgBtn"> <a class="button" onclick="open_media_uploader_image()">Upload Image</a></div>
+                            <div class="moo_itemsimages" id="moo_itemimagesection" style="margin-left: 4%">
+                            </div>
+                            <div class="square_images" style='margin: 4%;'>
+                                <span style="color: red;">*</span>Images (Square Images for better scaling) 
                             </div>
                         </div>
 
@@ -235,11 +241,19 @@ class moo_OnlineOrders_Admin {
             $MooOptions['item_delivery']='';
         if(!isset($MooOptions['zones_json']))
             $MooOptions['zones_json']='';
+        if(!isset($MooOptions['hide_menu']))
+            $MooOptions['hide_menu']='false';
+        if(!isset($MooOptions['accept_orders_w_closed']))
+            $MooOptions['accept_orders_w_closed']='false';
 
-        update_option('moo_settings',$MooOptions);
+        if(!isset($MooOptions['show_categories_images']))
+            $MooOptions['show_categories_images'] = 'false';
+
 
         $token = $MooOptions["api_key"];
         $merchant_proprites = (json_decode($api->getMerchantProprietes())) ;
+
+        update_option("moo_settings",$MooOptions);
 
         if($token != '')
         {
@@ -313,7 +327,7 @@ class moo_OnlineOrders_Admin {
                         <li id="MooPanel_tab_2" onclick="tab_clicked(2)">Import Items</li>
                         <li id="MooPanel_tab_3" onclick="tab_clicked(3)">Orders Types</li>
                         <li id="MooPanel_tab_4" onclick="tab_clicked(4)">Store interface</li>
-                        <li id="MooPanel_tab_5" onclick="tab_clicked(5)">Categories</li>
+                        <li id="MooPanel_tab_5" onclick="tab_clicked(5)">Categoies</li>
                         <li id="MooPanel_tab_6" onclick="tab_clicked(6)">Modifiers</li>
                         <li id="MooPanel_tab_7" onclick="tab_clicked(7)">Store settings</li>
                         <li id="MooPanel_tab_8" onclick="tab_clicked(8)">Delivery areas</li>
@@ -323,28 +337,16 @@ class moo_OnlineOrders_Admin {
                 </div>
                 <?php if( $errorToken != "( Token valid )" ) { ?>
                         <form method="post" action="options.php">
-                            <?php settings_fields('moo_settings') ?>
-                            <input type="text"  name="moo_settings[lat]"     value="<?php echo $MooOptions['lat']?>" hidden />
-                            <input type="text"  name="moo_settings[lng]"     value="<?php echo $MooOptions['lng']?>" hidden />
-                            <input type="text"  name="moo_settings[hours]"     value="<?php echo $MooOptions['hours']?>" hidden />
-                            <input type="text"  name="moo_settings[default_style]"     value="<?php echo $MooOptions['default_style']?>" hidden />
-                            <input type="text"  name="moo_settings[merchant_email]"     value="<?php echo $MooOptions['merchant_email']?>" hidden/>
-                            <input type="text"  name="moo_settings[thanks_page]"     value="<?php echo $MooOptions['thanks_page']?>" hidden/>
-                            <input type="text"  name="moo_settings[custom_css]"     value="<?php echo $MooOptions['custom_css']?>" hidden/>
-                            <input type="text"  name="moo_settings[custom_js]"     value="<?php echo $MooOptions['custom_js']?>" hidden/>
-                            <input type="text"  name="moo_settings[free_delivery]"     value="<?php echo $MooOptions['free_delivery']?>" hidden/>
-                            <input type="text"  name="moo_settings[fixed_delivery]"     value="<?php echo $MooOptions['fixed_delivery']?>" hidden/>
-                            <input type="text"  name="moo_settings[other_zones_delivery]"     value="<?php echo $MooOptions['other_zones_delivery']?>" hidden/>
-                            <input type="text"  name="moo_settings[item_delivery]"     value="<?php echo $MooOptions['item_delivery']?>" hidden/>
-                            <textarea  name="moo_settings[zones_json]" hidden><?php echo $MooOptions['zones_json']?></textarea>
-                            <input type="text"  name="moo_settings[tips]"     value="<?php echo $MooOptions['tips']?>" hidden/>
-                            <input type="text"  name="moo_settings[payment_cash]"     value="<?php echo $MooOptions['payment_cash']?>" hidden/>
-                            <input type="text"  name="moo_settings[scp]"     value="<?php echo $MooOptions['scp']?>" hidden/>
-                            <input type="text"  name="moo_settings[merchant_phone]"     value="<?php echo $MooOptions['merchant_phone']?>" hidden/>
-                            <input type="text"  name="moo_settings[order_later]"     value="<?php echo $MooOptions['order_later']?>" hidden/>
-                            <input type="text"  name="moo_settings[order_later_days]"     value="<?php echo $MooOptions['order_later_days']?>" hidden/>
-                            <input type="text"  name="moo_settings[order_later_minutes]"     value="<?php echo $MooOptions['order_later_minutes']?>" hidden/>
-                            <div id="MooPanel_tabContent1">
+                            <?php
+
+                                settings_fields('moo_settings');
+                                $fields = array('api_key','zones_json');
+                                foreach ($MooOptions as $option_name=>$option_value)
+                                    if(!in_array($option_name,$fields))
+                                        echo '<input type="text"  name="moo_settings['.$option_name.']" value="'.$option_value.'" hidden/>';
+                            ?>
+                           <textarea  name="moo_settings[zones_json]" hidden><?php echo $MooOptions['zones_json']?></textarea>
+                           <div id="MooPanel_tabContent1">
                                 <h2>Key settings</h2>
                                 <hr>
                                 <div class="MooPanelItem">
@@ -459,8 +461,8 @@ class moo_OnlineOrders_Admin {
                     </h2>
                     <div class="MooPanelItem" >
                         <h3>Choose the default order types</h3>
-							<div id="MooOrderTypesContent" style="margin-bottom: 10px">
-							</div>
+                            <div id="MooOrderTypesContent" style="margin-bottom: 10px">
+                            </div>
                     </div>
                     <div class="MooPanelItem">
                         <h3>Add new order type</h3>
@@ -491,28 +493,15 @@ class moo_OnlineOrders_Admin {
                 <div id="MooPanel_tabContent4">
                     <h2>Store interface</h2><hr>
                     <form method="post" action="options.php">
-                        <?php settings_fields('moo_settings') ?>
-                        <input type="text"  name="moo_settings[api_key]" value="<?php echo $MooOptions['api_key']?>" hidden/>
-                        <input type="text"  name="moo_settings[lat]"     value="<?php echo $MooOptions['lat']?>" hidden />
-                        <input type="text"  name="moo_settings[lng]"     value="<?php echo $MooOptions['lng']?>" hidden />
-                        <input type="text"  name="moo_settings[hours]"     value="<?php echo $MooOptions['hours']?>" hidden />
-                        <input type="text"  name="moo_settings[merchant_email]"     value="<?php echo $MooOptions['merchant_email']?>" hidden/>
-                        <input type="text"  name="moo_settings[thanks_page]"     value="<?php echo $MooOptions['thanks_page']?>" hidden/>
-                        <input type="text"  name="moo_settings[custom_css]"     value="<?php echo $MooOptions['custom_css']?>" hidden/>
-                        <input type="text"  name="moo_settings[custom_js]"     value="<?php echo $MooOptions['custom_js']?>" hidden/>
-                        <input type="text"  name="moo_settings[free_delivery]"     value="<?php echo $MooOptions['free_delivery']?>" hidden/>
-                        <input type="text"  name="moo_settings[fixed_delivery]"     value="<?php echo $MooOptions['fixed_delivery']?>" hidden/>
-                        <input type="text"  name="moo_settings[other_zones_delivery]"     value="<?php echo $MooOptions['other_zones_delivery']?>" hidden/>
-                        <input type="text"  name="moo_settings[item_delivery]"     value="<?php echo $MooOptions['item_delivery']?>" hidden/>
+                        <?php
+                        settings_fields('moo_settings');
+                        $fields = array('default_style','zones_json');
+                        foreach ($MooOptions as $option_name=>$option_value)
+                            if(!in_array($option_name,$fields))
+                                echo '<input type="text"  name="moo_settings['.$option_name.']" value="'.$option_value.'" hidden/>';
+                        ?>
                         <textarea  name="moo_settings[zones_json]" hidden><?php echo $MooOptions['zones_json']?></textarea>
-                        <input type="text"  name="moo_settings[tips]"     value="<?php echo $MooOptions['tips']?>" hidden/>
-                        <input type="text"  name="moo_settings[payment_cash]"     value="<?php echo $MooOptions['payment_cash']?>" hidden/>
-                        <input type="text"  name="moo_settings[scp]"     value="<?php echo $MooOptions['scp']?>" hidden/>
-                        <input type="text"  name="moo_settings[merchant_phone]"     value="<?php echo $MooOptions['merchant_phone']?>" hidden/>
-                        <input type="text"  name="moo_settings[order_later]"     value="<?php echo $MooOptions['order_later']?>" hidden/>
-                        <input type="text"  name="moo_settings[order_later_days]"     value="<?php echo $MooOptions['order_later_days']?>" hidden/>
-                        <input type="text"  name="moo_settings[order_later_minutes]"     value="<?php echo $MooOptions['order_later_minutes']?>" hidden/>
-                    <div class="MooPanelItem">
+                         <div class="MooPanelItem">
                         <h3>Default style</h3>
                         <div class="Moo_option-item">
                             <div>
@@ -525,94 +514,171 @@ class moo_OnlineOrders_Admin {
                                     <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/style3.jpg" ?>" align="middle" />
                                 </label>
                             </div>
-	                     </div>
-	                    <div style="text-align: center; margin: 20px;">
-		                    <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
-	                    </div>
+                         </div>
+                        <div style="text-align: center; margin: 20px;">
+                            <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
+                        </div>
                     </div>
                     </form>
                 </div>
-                <!-- Categories -->
+                <!-- Image categorie -->
                 <div id="MooPanel_tabContent5">
-                    <h2>Categories</h2>
-                    <hr>
+                    <h2>Categories</h2><hr>
                     <div id="display_panel5_on_desktop">
-                        <div class="MooPanelItem">
-                            <h3>Show/Hide category (click save after assigning new names)</h3>
-                            <div id="MooCategoriesContent">
-                                <?php
-                                $show_all_items = get_option("moo-show-allItems");
-                                $nb_items = $model->NbProducts();
-                                if($nb_items[0]->nb == 0){
-                                    echo '<div class="normal_text" >It appears you don\'t have any categories; If you have just imported your inventory, <br/> please refresh this page </div>';
-                                }
-                                else
-                                {
-                                    ?>
-                                    <div class="Moo_option-item">
-                                        <div class="label">All Items (<?php echo $nb_items[0]->nb.' items)'?></div>
-                                        <div class="onoffswitch" onchange="MooChangeCategory_Status('NoCategory')" title="Show/Hide this Category">
-                                            <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_NoCategory" <?php echo ($show_all_items == 'true')?'checked':''?>>
-                                            <label class="onoffswitch-label" for="myonoffswitch_NoCategory"><span class="onoffswitch-inner"></span>
-                                                <span class="onoffswitch-switch"></span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <?php
-                                    foreach ($all_categories as $category) {
-                                        ?>
-                                        <div class="Moo_option-item">
-                                            <div class="label"><?php echo $category->name.' ( '.(count(explode(',',$category->items))-1).' items)'?></div>
-                                            <div class="onoffswitch" onchange="MooChangeCategory_Status('<?php echo $category->uuid?>')" title="Hide/Show this Category">
-                                                <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_<?php echo $category->uuid?>" <?php echo ($category->show_by_default == 1)?'checked':''?>>
-                                                <label class="onoffswitch-label" for="myonoffswitch_<?php echo $category->uuid?>"><span class="onoffswitch-inner"></span>
-                                                    <span class="onoffswitch-switch"></span>
-                                                </label>
-                                            </div>
-                                            <div style="float: right">
-                                                <input type="text" placeholder="The new name" id="Moo_categoryNewName_<?php echo $category->uuid?>">
-                                                <div class="button-small button-primary" onclick="Moo_changeCategoryName('<?php echo $category->uuid?>')">Save</div>
-                                                <div id="Moo_CategorySaveName_<?php echo $category->uuid?>" style="color: #008000;display: none">Saved</div>
-                                            </div>
-                                        </div>
-                                    <?php }  }?>
+                    <div class="MooPanelItem" style="margin-left: 0px;margin-right: 0px;">
+                    <?php
+                    $show_all_items = get_option("moo-show-allItems");
+                    $nb_items = $model->NbProducts();
+                    if($nb_items[0]->nb == 0){
+                        echo '<div class="normal_text" >It appears you don\'t have any categories; If you have just imported your inventory, <br/> please refresh this page </div>';
+                    }
+                    else
+                    { ?>
+                        <div class="Moo_option-item">
+                            <div class="label">All Items (<?php echo $nb_items[0]->nb.' items)'?></div>
+                            <div class="onoffswitch" onchange="MooChangeCategory_Status('NoCategory')" title="Show/Hide this Category">
+                                <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_NoCategory" <?php echo ($show_all_items == 'true')?'checked':''?>>
+                                <label class="onoffswitch-label" for="myonoffswitch_NoCategory"><span class="onoffswitch-inner"></span>
+                                    <span class="onoffswitch-switch"></span>
+                                </label>
                             </div>
+                            <span id="item-cat" class="moo-info-msg"
+                                  data-ot="Show or hide a category for all items"
+                                  data-ot-target="#item-cat">
+                                <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                            </span>
                         </div>
+                        <div class="Moo_option-item">
+                            <div class="label">Show images for categories </div>
+                            <div class="onoffswitch" onchange="MooShowCategoriesImages('myonoffswitch_Visibility')" title="Show category's image">
+                                <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_Visibility" <?php $DefaultOption = (array)get_option('moo_settings');
+                                echo ($DefaultOption['show_categories_images'] == 'true')?'checked':''?> >
+                                <label class="onoffswitch-label" for="myonoffswitch_Visibility"><span class="onoffswitch-inner"></span>
+                                    <span class="onoffswitch-switch"></span>
+                                </label>
+                            </div>
+                            <span id="visib-cat001" class="moo-info-msg"
+                                  data-ot="Hide or show the categories images"
+                                  data-ot-target="#visib-cat001">
+                                <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                            </span>
+                        </div>
+                        <?php } ?>
+                    </div>
+                    <?php if(count($all_categories)>0){ ?>
+                        <p>You can rearrange categories by dragging and dropping</p>
+                    <table class="table_category">
+                        <thead>
+                        <tr>
+                            <th>Picture</th>
+                            <th>Category names </th>
+                            <th>Visible ?</th>
+                            <th colspan="3" style="text-align:center;">Edit</th>
+                        </tr>
+                        </thead>
+                        <tbody id="sortable">
+                        <?php
+                        $this->detail_category()
+                        ?>
+                        </tbody>
+                    </table>
+                    <?php } ?>
                     </div>
                     <div id="display_panel5_on_mobile">
-                        <div class="MooPanelItem">
-                            <h3>Show or hide a category (press save if giving category a new name)</h3>
+                        <div class="MooPanelItem" style="margin-left: 0px;margin-right: 0px;">
                             <?php
                             $show_all_items = get_option("moo-show-allItems");
                             $nb_items = $model->NbProducts();
                             if($nb_items[0]->nb == 0){
-                                echo '<div class="normal_text">It\'s appears you don\'t have any categories. If you have just imported your inventory. <br/> Please refresh this page </div>';
+                                echo '<div class="normal_text" >It appears you don\'t have any categories; If you have just imported your inventory, <br/> please refresh this page </div>';
                             }
                             else
-                            {
-                                ?>
-                                <div class="Moo_option-item" style="text-align: center; border: 1px solid #1e5429;">
-                                    <div><strong>All Items (<?php echo $nb_items[0]->nb.' items)'?></strong></div>
-                                    <div style="margin-top: 10px;" onchange="MooChangeCategory_Status('NoCategory')" title="Show/Hide this Category">
-                                        <input type="checkbox" name="onoffswitch[]" class="" id="myonoffswitch_NoCategory" <?php echo ($show_all_items == 'true')?'checked':''?>>
+                            { ?>
+                                <div class="Moo_option-item">
+                                    <div class="label"><strong>All Items (<?php echo $nb_items[0]->nb.' items)'?></strong></div>
+                                    <div onchange="MooChangeCategory_Status_Mobile('NoCategory')" title="Show/Hide this Category">
+                                        <input type="checkbox" id="myonoffswitch_NoCategory_Mobile" <?php $show_all_items = get_option("moo-show-allItems");
+                                        echo ($show_all_items == 'true')?'checked':''?> style="margin-top: 5px;">
                                     </div>
                                 </div>
-                                <?php
-                                foreach ($all_categories as $category) {
-                                    ?>
-                                    <div class="Moo_option-item" style="text-align: center; border-bottom: 1px solid #1e5429;">
-                                        <div><?php echo $category->name.' ( '.(count(explode(',',$category->items))-1).' items)'?></div>
-                                        <div style="margin-top: 10px;" class="" onchange="MooChangeCategory_Status_Mobile('<?php echo $category->uuid?>')" title="Hide/Show this Category">
-                                            <input type="checkbox" name="onoffswitch[]" class="" id="myonoffswitch_mobile_<?php echo $category->uuid?>" <?php echo ($category->show_by_default == 1)?'checked':''?>>
-                                        </div>
-                                        <div>
-                                            <input style="margin-top: 10px; margin-bottom: 10px;" type="text" placeholder="New name" id="Moo_categoryNewName_mobile_<?php echo $category->uuid?>">
-                                            <div class="button button-primary" onclick="Moo_changeCategoryName_Mobile('<?php echo $category->uuid?>')">Save</div>
-                                            <div id="Moo_CategorySaveName_mobile_<?php echo $category->uuid?>" style="color: #008000;display: none">Saved</div>
-                                        </div>
+                                <div class="Moo_option-item">
+                                    <div class="label">Show category's image</div>
+                                    <div onchange="MooShowCategoriesImages_Mobile('myonoffswitch_Visibility')" title="Show category's image">
+                                        <input type="checkbox" id="myonoffswitch_Visibility_Mobile" <?php $DefaultOption = (array)get_option('moo_settings');
+                                        echo ($DefaultOption['show_categories_images'] == 'true')?'checked':''?> style="margin-top: 5px;">
                                     </div>
-                                <?php }  }?>
+                                </div>
+                            <?php } ?>
+                        </div>
+                        <div class="list-category" id="orderCategory">
+                            <?php $j=0; ?>
+                            <?php foreach ($all_categories as $category) { ?>
+                                <div class="category-item" cat-id-mobil="<?php echo $category->uuid; ?>">
+                                    <div class="option-item img-category" id="id_img_M_<?php echo $category->uuid ?>">
+                                        <?php if ($category->image_url == null) { ?>
+                                            <label>Pecture</label><img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/no-image.png" ?>" style="width: 50px;">
+                                        <?php } else { ?>
+                                            <label>Pecture</label><img src="<?php echo $category->image_url ?>" style="width: 50px;">
+                                        <?php } ?>
+                                    </div>
+                                    <div class="option-item show-category">
+                                        <label>Visible ?</label><input type="checkbox" id="visib<?php echo $category->uuid ?>" onclick="visibility_cat_mobile('<?php echo $category->uuid ?>')" <?php if ($category->show_by_default == 1) {  ?>checked<?php } ?>>
+                                    </div>
+                                    <div class="option-item name-category" id="name_cat_Mobil<?php echo $category->uuid ?>">
+                                        <label>Ctegory's Name</label>
+                                        <?php if ($category->alternate_name == null) {$nameCat = $category->name;} else {$nameCat = $category->alternate_name;} ?>
+                                        <input type="text" value="<?php echo $nameCat; ?>" id="newName<?php echo $category->uuid ?>" disabled>
+                                    </div>
+                                    <div class="option-item bt-category" id="id_bt_M<?php echo $category->uuid ?>">
+                                        <label>Edit</label>
+                                     <?php if ($category->image_url == null) { ?>
+                                        <div class="bt bt-upload">
+                                            <a href="#" onclick="uploader_image_category(event,'<?php echo $category->uuid ?>','M')">
+                                                <span id="moo_epload_img<?php echo $j; ?>"
+                                                      data-ot="Upload Image"
+                                                      data-ot-target="#moo_epload_img<?php echo $j; ?>">
+                                                <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/upload.png" ?>" style='width: 20px;'>
+                                                </span>
+                                            </a>
+                                        </div>
+                                        <div class="bt bt-edit">
+                                            <a href="#" class="edit_N_Mobil" id="name_cat_mobil<?php echo $category->uuid ?>" onclick="edit_name_mobil(event,'<?php echo $category->uuid ?>')" last-name="<?php echo $nameCat; ?>">
 
+                                                <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/edit.png" ?>" style='width: 20px;'>
+
+                                            </a>
+                                        </div>
+                                    <?php } else {?>
+                                         <div class="bt bt-upload">
+                                             <a href="#" onclick="uploader_image_category(event,'<?php echo $category->uuid ?>','M')">
+                                                <span id="moo_epload_img<?php echo $j; ?>"
+                                                      data-ot="change Image"
+                                                      data-ot-target="#moo_epload_img<?php echo $j; ?>">
+                                                <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/upload.png" ?>" style='width: 20px;'>
+                                                </span>
+                                             </a>
+                                         </div>
+                                         <div class="bt bt-edit">
+                                             <a href="#" class="edit_N_Mobil" id="name_cat_mobil<?php echo $category->uuid ?>" onclick="edit_name_mobil(event,'<?php echo $category->uuid ?>')" last-name="<?php echo $nameCat; ?>">
+
+                                                <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/edit.png" ?>" style='width: 20px;'>
+
+                                             </a>
+                                         </div>
+                                         <div class="bt bt-delete">
+                                             <a href="#" onclick="delete_img_category(event,'<?php echo $category->uuid ?>','M')">
+                                                <span id="moo_delete_img<?php echo $j; ?>"
+                                                      data-ot="Delete Image"
+                                                      data-ot-target="#moo_delete_img<?php echo $j; ?>">
+                                                <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/delete.png" ?>" style='width: 20px;'>
+                                                </span>
+                                             </a>
+                                         </div>
+                                    <?php } ?>
+                                    </div>
+
+                                </div>
+                            <?php $j++; } ?>
                         </div>
                     </div>
                 </div>
@@ -675,16 +741,29 @@ class moo_OnlineOrders_Admin {
                         <?php
                         $MooOptions = (array)get_option('moo_settings');
                         settings_fields('moo_settings');
+                        $fields = array(
+                            'merchant_email',
+                            'merchant_phone',
+                            'tips',
+                            'item_delivery',
+                            'payment_cash',
+                            'csp',
+                            'hours',
+                            'hide_menu',
+                            'accept_orders_w_closed',
+                            'order_later',
+                            'order_later_minutes',
+                            'order_later_days',
+                            'thanks_page',
+                            'custom_css',
+                            'custom_js',
+                            'zones_json');
+                        foreach ($MooOptions as $option_name=>$option_value)
+                            if(!in_array($option_name,$fields))
+                                echo '<input type="text"  name="moo_settings['.$option_name.']" value="'.$option_value.'" hidden/>';
+
                         ?>
-                        <input type="text"  name="moo_settings[api_key]" value="<?php echo $MooOptions['api_key']?>" hidden/>
-                        <input type="text"  name="moo_settings[lat]"     value="<?php echo $MooOptions['lat']?>" hidden />
-                        <input type="text"  name="moo_settings[lng]"     value="<?php echo $MooOptions['lng']?>" hidden/>
-                        <input type="text"  name="moo_settings[free_delivery]"     value="<?php echo $MooOptions['free_delivery']?>" hidden/>
-                        <input type="text"  name="moo_settings[fixed_delivery]"     value="<?php echo $MooOptions['fixed_delivery']?>" hidden/>
-                        <input type="text"  name="moo_settings[other_zones_delivery]"     value="<?php echo $MooOptions['other_zones_delivery']?>" hidden/>
-                        <input type="text"  name="moo_settings[item_delivery]"     value="<?php echo $MooOptions['item_delivery']?>" hidden/>
                         <textarea  name="moo_settings[zones_json]" hidden><?php echo $MooOptions['zones_json']?></textarea>
-                        <input type="text"  name="moo_settings[default_style]"     value="<?php echo $MooOptions['default_style']?>" hidden/>
                         <!-- Notifications section -->
                         <div class="MooPanelItem">
                             <h3>Notification when an order is made</h3>
@@ -774,11 +853,11 @@ class moo_OnlineOrders_Admin {
                         <h3>Please choose the Hours your store is available</h3>
                         <div class="Moo_option-item">
                             <div style="float:left; width: 100%;">
-                                <label style="display:block; margin-bottom:8px;">
+                                <label style="display:block; margin-bottom:8px;" onclick="moo_bussinessHours_Details(false)">
                                     <input name="moo_settings[hours]" id="MooDefaultHours" type="radio" value="all" <?php echo ($MooOptions["hours"]=="all")?"checked":""; ?> >
                                     All Hours
                                 </label>
-                                <label style="display:block; margin-bottom:8px;">
+                                <label style="display:block; margin-bottom:8px;" onclick="moo_bussinessHours_Details(true)">
                                     <input name="moo_settings[hours]" id="MooDefaultHours" type="radio" value="business" <?php echo ($MooOptions["hours"]!="all")?"checked":""; ?> >
                                     Business Hours
                                     <span id="moo_info_msg-3" class="moo-info-msg"
@@ -787,6 +866,26 @@ class moo_OnlineOrders_Admin {
                                         <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
                                     </span>
                                 </label>
+                                <div id="moo_bussinessHours_Details" class="<?php echo ($MooOptions["hours"] != "all")?"":"moo_hidden"; ?> ">
+                                    <div class="Moo_option-item">
+                                        <div style="margin-bottom: 14px;" class="label">Hide the menu when the store is closed</div>
+                                        <div class="onoffswitch"  title="Show/hide the menu">
+                                            <input type="checkbox" name="moo_settings[hide_menu]" class="onoffswitch-checkbox" id="myonoffswitch_hide_menu" <?php echo (isset($MooOptions['hide_menu']) && $MooOptions['hide_menu'] == 'on')?'checked':''?>>
+                                            <label class="onoffswitch-label" for="myonoffswitch_hide_menu"><span class="onoffswitch-inner"></span>
+                                                <span class="onoffswitch-switch"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="Moo_option-item">
+                                        <div style="margin-bottom: 14px;" class="label">Allow scheduled orders when the store is closed</div>
+                                        <div class="onoffswitch"  title="Show/hide the menu">
+                                            <input type="checkbox" name="moo_settings[accept_orders_w_closed]" class="onoffswitch-checkbox" id="myonoffswitch_accept_orders" <?php echo (isset($MooOptions['accept_orders_w_closed']) && $MooOptions['accept_orders_w_closed'] == 'on')?'checked':''?>>
+                                            <label class="onoffswitch-label" for="myonoffswitch_accept_orders"><span class="onoffswitch-inner"></span>
+                                                <span class="onoffswitch-switch"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -872,24 +971,13 @@ class moo_OnlineOrders_Admin {
                     <form method="post" action="options.php" onsubmit="return moo_save_changes()">
                         <?php
                         settings_fields('moo_settings');
+                        //This form fields
+                        $fields = array('free_delivery','fixed_delivery','other_zones_delivery','item_delivery','zones_json');
+                        foreach ($MooOptions as $option_name=>$option_value)
+                            if(!in_array($option_name,$fields))
+                                echo '<input type="text"  name="moo_settings['.$option_name.']" value="'.$option_value.'" hidden/>';
                         ?>
-                        <input type="text"  name="moo_settings[api_key]" value="<?php echo $MooOptions['api_key']?>" hidden/>
-                        <input type="text"  name="moo_settings[lat]"     value="<?php echo $MooOptions['lat']?>" hidden />
-                        <input type="text"  name="moo_settings[lng]"     value="<?php echo $MooOptions['lng']?>" hidden />
-                        <input type="text"  name="moo_settings[hours]"     value="<?php echo $MooOptions['hours']?>" hidden />
-                        <input type="text"  name="moo_settings[merchant_email]"     value="<?php echo $MooOptions['merchant_email']?>" hidden/>
-                        <input type="text"  name="moo_settings[thanks_page]"     value="<?php echo $MooOptions['thanks_page']?>" hidden/>
-                        <input type="text"  name="moo_settings[custom_css]"     value="<?php echo $MooOptions['custom_css']?>" hidden/>
-                        <input type="text"  name="moo_settings[custom_js]"     value="<?php echo $MooOptions['custom_js']?>" hidden/>
-                        <input type="text"  name="moo_settings[default_style]"     value="<?php echo $MooOptions['default_style']?>" hidden/>
-                        <input type="text"  name="moo_settings[tips]"     value="<?php echo $MooOptions['tips']?>" hidden/>
-                        <input type="text"  name="moo_settings[payment_cash]"     value="<?php echo $MooOptions['payment_cash']?>" hidden/>
-                        <input type="text"  name="moo_settings[scp]"     value="<?php echo $MooOptions['scp']?>" hidden/>
-                        <input type="text"  name="moo_settings[merchant_phone]"     value="<?php echo $MooOptions['merchant_phone']?>" hidden/>
-                        <input type="text"  name="moo_settings[order_later]"     value="<?php echo $MooOptions['order_later']?>" hidden/>
-                        <input type="text"  name="moo_settings[order_later_days]"     value="<?php echo $MooOptions['order_later_days']?>" hidden/>
-                        <input type="text"  name="moo_settings[order_later_minutes]"     value="<?php echo $MooOptions['order_later_minutes']?>" hidden/>
-                    <div class="MooPanelItem">
+                     <div class="MooPanelItem">
                         <h3>Set Delivery Areas (Click save changes when you create zones) <span class="moo_adding-zone-btn" onclick="moo_show_form_adding_zone()">Add zone</span></h3>
                         <div class="Moo_option-item" id='moo_adding-zone'>
                             <table class="delivery_area_for_mobile" style="margin: 0 auto; width: 55%; border-spacing: 10px;">
@@ -1013,6 +1101,7 @@ class moo_OnlineOrders_Admin {
                 </div>
                 <!-- Feedback -->
                 <div id="MooPanel_tabContent9">
+                    <!-- TEST COMMIT -->
                     <h2>Feedback / Help </h2><hr>
                     <div class="MooPanelItem">
                         <h3>Need Help or Feedback</h3>
@@ -1036,7 +1125,7 @@ class moo_OnlineOrders_Admin {
                                 </div>
                             </div>
                             <div class="button_center">
-                                <a class="button button-primary" href="#" onclick="MooSendFeedBack(event)">Send</a>
+                                <a class="button button-primary" href="#" id="MooSendFeedBackBtn" onclick="MooSendFeedBack(event)">Send</a>
                             </div>
                         </div>
                     </div>
@@ -1076,6 +1165,7 @@ class moo_OnlineOrders_Admin {
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
         <?php
@@ -1088,10 +1178,10 @@ class moo_OnlineOrders_Admin {
         add_submenu_page('moo_index', 'Items/Images', 'Items / Images', 'manage_options', 'moo_items', array($this, 'page_products'));
         add_submenu_page('moo_index', 'Orders', 'Orders', 'manage_options', 'moo_orders', array($this, 'page_orders'));
     }
-	public function enq_media_uploader()
-	{
-	wp_enqueue_media();
-	}
+    public function enq_media_uploader()
+    {
+        wp_enqueue_media();
+    }
 
     function toolbar_link_to_settings( $wp_admin_bar ) {
         $args = array(
@@ -1122,36 +1212,36 @@ class moo_OnlineOrders_Admin {
         $wp_admin_bar->add_node( $args3 );
         $wp_admin_bar->add_node( $args4 );
     }
-	/**
-	 * Register the options.
-	 *
-	 * @since    1.0.0
-	 */
+    /**
+     * Register the options.
+     *
+     * @since    1.0.0
+     */
     public function register_mysettings()
     {
         register_setting('moo_settings', 'moo_settings');
     }
     /**
-	 * Register the stylesheets for the admin area.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_styles() {
+     * Register the stylesheets for the admin area.
+     *
+     * @since    1.0.0
+     */
+    public function enqueue_styles() {
 
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Plugin_Name_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Plugin_Name_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
+        /**
+         * This function is provided for demonstration purposes only.
+         *
+         * An instance of this class should be passed to the run() function
+         * defined in Plugin_Name_Loader as all of the hooks are defined
+         * in that particular class.
+         *
+         * The Plugin_Name_Loader will then create the relationship
+         * between the defined hooks and the functions defined in this
+         * class.
+         */
 
-		wp_enqueue_style( 'moo-OnlineOrders-admin-css', plugin_dir_url( __FILE__ ).'css/moo-OnlineOrders-admin.css', array(), $this->version, 'all');
-		wp_enqueue_style( 'moo-OnlineOrders-admin-small-devices-css', plugin_dir_url( __FILE__ ).'css/moo-OnlineOrders-admin-small-devices.css', array(), $this->version, 'only screen and (max-device-width: 1200px)');
+        wp_enqueue_style( 'moo-OnlineOrders-admin-css', plugin_dir_url( __FILE__ ).'css/moo-OnlineOrders-admin.css', array(), $this->version, 'all');
+        wp_enqueue_style( 'moo-OnlineOrders-admin-small-devices-css', plugin_dir_url( __FILE__ ).'css/moo-OnlineOrders-admin-small-devices.css', array(), $this->version, 'only screen and (max-device-width: 1200px)');
 
         wp_enqueue_style('moo-tooltip-css',   plugin_dir_url( __FILE__ )."css/tooltip.css", array(), $this->version, 'all');
         wp_register_style( 'magnific-popup', plugin_dir_url(dirname(__FILE__))."public/css/magnific-popup.css" );
@@ -1159,32 +1249,33 @@ class moo_OnlineOrders_Admin {
         wp_enqueue_style( 'wp-color-picker' );
     }
 
-	/**
-	 * Register the JavaScript for the admin area.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_scripts() {
+    /**
+     * Register the JavaScript for the admin area.
+     *
+     * @since    1.0.0
+     */
+    public function enqueue_scripts() {
 
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Plugin_Name_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Plugin_Name_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
+        /**
+         * This function is provided for demonstration purposes only.
+         *
+         * An instance of this class should be passed to the run() function
+         * defined in Plugin_Name_Loader as all of the hooks are defined
+         * in that particular class.
+         *
+         * The Plugin_Name_Loader will then create the relationship
+         * between the defined hooks and the functions defined in this
+         * class.
+         */
         $params = array(
             'ajaxurl' => admin_url( 'admin-ajax.php', isset( $_SERVER['HTTPS'] ) ? 'https://' : 'http://' ),
+            'plugin_url'=>plugin_dir_url(dirname(__FILE__))
         );
 
         wp_enqueue_script('jquery');
         wp_enqueue_script( 'wp-color-picker' );
 
-		//wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/moo-OnlineOrders-admin.js', array( 'jquery' ), $this->version, false );
+        //wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/moo-OnlineOrders-admin.js', array( 'jquery' ), $this->version, false );
 
         wp_register_script('moo-publicAdmin-js', plugins_url( 'js/moo-OnlineOrders-admin.js', __FILE__ ),array(), $this->version);
         wp_register_script('moo-tooltip-js', plugins_url( 'js/tooltip.min.js', __FILE__ ),array(), $this->version);
@@ -1205,7 +1296,7 @@ class moo_OnlineOrders_Admin {
 
         wp_localize_script("moo-publicAdmin-js", "moo_params",$params);
 
-	}
+    }
 
     public function moo_update_address()
     {
@@ -1221,26 +1312,17 @@ class moo_OnlineOrders_Admin {
 
        ?>
         <form method="post" action="options.php">
-            <?php settings_fields('moo_settings') ?>
-            <input type="text"  name="moo_settings[api_key]" value="<?php echo $MooOptions['api_key']?>" hidden/>
-            <input type="text"  name="moo_settings[hours]"     value="<?php echo $MooOptions['hours']?>" hidden/>
-            <input type="text"  name="moo_settings[default_style]"     value="<?php echo $MooOptions['default_style']?>" hidden/>
-            <input type="text"  name="moo_settings[merchant_email]"     value="<?php echo $MooOptions['merchant_email']?>" hidden/>
-            <input type="text"  name="moo_settings[thanks_page]"     value="<?php echo $MooOptions['thanks_page']?>" hidden/>
-            <input type="text"  name="moo_settings[custom_css]"     value="<?php echo $MooOptions['custom_css']?>" hidden/>
-            <input type="text"  name="moo_settings[custom_js]"     value="<?php echo $MooOptions['custom_js']?>" hidden/>
-            <input type="text"  name="moo_settings[free_delivery]"     value="<?php echo $MooOptions['free_delivery']?>" hidden/>
-            <input type="text"  name="moo_settings[fixed_delivery]"     value="<?php echo $MooOptions['fixed_delivery']?>" hidden/>
-            <input type="text"  name="moo_settings[other_zones_delivery]"     value="<?php echo $MooOptions['other_zones_delivery']?>" hidden/>
-            <input type="text"  name="moo_settings[item_delivery]"     value="<?php echo $MooOptions['item_delivery']?>" hidden/>
+            <?php
+                settings_fields('moo_settings');
+
+                //This form fields
+                $fields = array('lat','lng','item_delivery');
+                foreach ($MooOptions as $option_name=>$option_value)
+                    if(!in_array($option_name,$fields))
+                        echo '<input type="text"  name="moo_settings['.$option_name.']" value="'.$option_value.'" hidden/>';
+            ?>
             <textarea name="moo_settings[zones_json]" hidden><?php echo $MooOptions['zones_json']?></textarea>
-            <input type="text"  name="moo_settings[tips]"     value="<?php echo $MooOptions['tips']?>" hidden/>
-            <input type="text"  name="moo_settings[payment_cash]"     value="<?php echo $MooOptions['payment_cash']?>" hidden/>
-            <input type="text"  name="moo_settings[scp]"     value="<?php echo $MooOptions['scp']?>" hidden/>
-            <input type="text"  name="moo_settings[merchant_phone]"     value="<?php echo $MooOptions['merchant_phone']?>" hidden/>
-            <input type="text"  name="moo_settings[order_later]"     value="<?php echo $MooOptions['order_later']?>" hidden/>
-            <input type="text"  name="moo_settings[order_later_days]"     value="<?php echo $MooOptions['order_later_days']?>" hidden/>
-            <input type="text"  name="moo_settings[order_later_minutes]"     value="<?php echo $MooOptions['order_later_minutes']?>" hidden/>
+
             <input type="hidden" name="_wp_http_referer" value="<?php echo (esc_url((admin_url('admin.php?page=moo_index')))); ?>" />
             <div id="MooPanel_tabContent1">
             <h2>Set-up your address</h2><hr>
@@ -1265,4 +1347,80 @@ class moo_OnlineOrders_Admin {
         </form>
         <?php
     }
+    public function detail_category()
+    {
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'models/moo-OnlineOrders-Model.php';
+        $model = new moo_OnlineOrders_Model();
+        $all_categories = $model->getCategories();
+        $i=0;
+        foreach ($all_categories as $category) { ?>
+            <tr id="row_id_<?php echo $category->uuid ?>" data-cat-id="<?php echo $category->uuid ?>">
+                <td style="display:none;"><span id='id_cat'><?php echo $category->uuid ?></span></td>
+                <td class="img-cat" id="<?php echo $category->uuid ?>">
+                    <?php if ($category->image_url == null) { ?>
+                        <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/no-image.png" ?>" style="width: 50px;">
+                    <?php } else { ?>
+                        <img src="<?php echo $category->image_url ?>" style="width: 50px;">
+                    <?php } ?>
+                </td>
+                <td class="name-cat" id="name_<?php echo $category->uuid ?>"><?php if ($category->alternate_name == null) {echo $category->name;} else {echo $category->alternate_name;} ?></td>
+                <td class="show-cat">
+                    <div class="onoffswitch" title="Visibility Category">
+                    <input type="checkbox" name="onoffswitch[]" id="myonoffswitch_Visibility_<?php echo $category->uuid ?>" class="onoffswitch-checkbox visib_cat<?php echo $category->uuid ?>" onclick="visibility_cat('<?php echo $category->uuid ?>')" <?php if ($category->show_by_default == 1) {  ?>checked<?php } ?>>
+                        <label class="onoffswitch-label" for="myonoffswitch_Visibility_<?php echo $category->uuid ?>"><span class="onoffswitch-inner"></span>
+                            <span class="onoffswitch-switch"></span>
+                        </label>
+                    </div>
+                </td>
+                <?php if ($category->image_url == null) { ?>
+                    <td class="bt-cat">
+                        <a href="#" onclick="uploader_image_category(event,'<?php echo $category->uuid ?>')">
+                                        <span id="moo_epload_img<?php echo $i; ?>"
+                                              data-ot="Upload Image"
+                                              data-ot-target="#moo_epload_img<?php echo $i; ?>">
+                                        <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/upload.png" ?>">
+                                        </span>
+                        </a>
+                    </td>
+                    <td colspan="2" style="text-align: center;">
+                        <a href="#" class="edit_name">
+                                        <span id="moo_edite_name<?php echo $i; ?>"
+                                              data-ot="Edite Name"
+                                              data-ot-target="#moo_edite_name<?php echo $i; ?>">
+                                        <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/edit.png" ?>">
+                                        </span>
+                        </a>
+                    </td>
+                <?php } else { ?>
+                    <td class="bt-cat">
+                        <a href="#" onclick="uploader_image_category(event,'<?php echo $category->uuid ?>')">
+                                        <span id="moo_change_name<?php echo $i; ?>"
+                                              data-ot="Change Image"
+                                              data-ot-target="#moo_change_name<?php echo $i; ?>">
+                                        <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/upload.png" ?>">
+                                        </span>
+                        </a>
+                    </td>
+                    <td class="bt-cat">
+                        <a href="#" class="edit_name">
+                                        <span id="moo_edite_name<?php echo $i; ?>"
+                                              data-ot="Edite Name"
+                                              data-ot-target="#moo_edite_name<?php echo $i; ?>">
+                                        <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/edit.png" ?>">
+                                        </span>
+                        </a>
+                    </td>
+                    <td class="bt-cat">
+                        <a href="#" onclick="delete_img_category(event,'<?php echo $category->uuid ?>')">
+                                        <span id="moo_delete_img<?php echo $i; ?>"
+                                              data-ot="Delete Image"
+                                              data-ot-target="#moo_delete_img<?php echo $i; ?>">
+                                        <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/delete.png" ?>">
+                                        </span>
+                        </a>
+                    </td>
+                <?php } ?>
+            </tr>
+            <?php $i++; } ?>
+    <?php }
 }

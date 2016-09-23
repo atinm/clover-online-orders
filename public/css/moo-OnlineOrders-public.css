@@ -265,3 +265,40 @@ select
     margin-right: 5px;
     padding: 0px;
 }
+.moo-custom-dialog-class input {
+    display: none !important;
+}
+/*CAROUSEL ITEM CSS*/
+.carrousel_images_item {
+    float: none;
+    width: 100%;
+    margin: 0 auto;
+
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+}
+.carrousel_images_item_top {
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+    width: 100%;
+}
+.img_carousel {
+    height: 331px !important;
+    width: 100% !important;
+}
+.sliders_wrapper {
+    height: 331px;
+}
+.popup_slider {
+    padding: 0px !important;
+}
+.nomarginrow {
+    margin-right: 0px !important;
+    margin-left: 0px !important
+}
+.moo_popup_leftSide {
+    padding-right: 20px !important;
+    padding-left: 20px !important;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}

@@ -431,16 +431,13 @@ class moo_OnlineOrders_CallAPI {
     {
         global $wpdb;
         $wpdb->query('START TRANSACTION');
-
-       // $wpdb->show_errors();
+        $wpdb->show_errors();
         $item = json_decode($res);
-
+        //print_r($item);
         if(isset($item->message) && !isset($item->id) ) return;
 
         /*
-         *
          * I verify if the Item is already in Wordpress DB
-         *
          */
         if($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_item where uuid='{$item->id}'") > 0)
         {
@@ -448,6 +445,7 @@ class moo_OnlineOrders_CallAPI {
             {
                   $this->updateItemGroup($item->itemGroup->id);
             }
+
             $wpdb->delete("{$wpdb->prefix}moo_item_tax_rate",array('item_uuid'=>$item->id));
             $wpdb->delete("{$wpdb->prefix}moo_item_modifier_group",array('item_id'=>$item->id));
             $wpdb->delete("{$wpdb->prefix}moo_item_tag",array('item_uuid'=>$item->id));
@@ -503,7 +501,6 @@ class moo_OnlineOrders_CallAPI {
                     'modified_time' => $item->modifiedTime,
                     'item_group_uuid' => $item->itemGroup->id
                 ));
-
         }
 
 
@@ -727,15 +724,6 @@ class moo_OnlineOrders_CallAPI {
 
         if($res>0) return true;
         return false;
-/*
-        $res = $wpdb->update("{$wpdb->prefix}moo_category",array(
-            'sort_order' => $category->sortOrder,
-            'items' =>  $items_ids
-        ),array('uuid'=>$category->id));
-
-        if($res>0) return true;
-        return false;
-*/
     }
 
     public function update_modifier($modifier)
@@ -759,15 +747,6 @@ class moo_OnlineOrders_CallAPI {
             ));
         if($res>0) return true;
         return false;
-/*
-        $res = $wpdb->update("{$wpdb->prefix}moo_category",array(
-            'sort_order' => $category->sortOrder,
-            'items' =>  $items_ids
-        ),array('uuid'=>$category->id));
-
-        if($res>0) return true;
-        return false;
-*/
     }
 
     private function save_tax_rates($obj)

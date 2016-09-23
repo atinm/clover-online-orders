@@ -3,17 +3,13 @@ var MOO_CART = [];
 jQuery(document).ready(function() {
 
     //accordion
-    jQuery('.moo_accordion').accordion({defaultOpen: 'MooCat_NoCategory'});
+    jQuery('.moo_accordion').accordion({defaultOpen: 'MooCat_NoCategory',cookieName:"MooCategories"});
     
     jQuery('.popup-text').magnificPopup({
         type: 'inline',
         closeBtnInside: true,
         midClick: true,
         overflowY:'scroll'
-    });
-    
-    jQuery('.ajax-popup-link').magnificPopup({
-        type: 'ajax'
     });
 
 });
@@ -122,13 +118,12 @@ function moo_check(event,id)
     jQuery('#moo_checkbox_'+id).prop("checked", !checked);
     
 }
-
 function moo_openFirstModifierG(id)
 {
     jQuery('#'+id).removeClass('accordion-close');
     jQuery('#'+id).addClass('accordion-open');
     jQuery('#'+id).next().show();
-};
+}
 
 moo_updateCart();
 

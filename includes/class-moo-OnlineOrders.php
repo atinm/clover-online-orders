@@ -69,7 +69,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.2.0';
+		$this->version = '1.2.1';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -278,6 +278,9 @@ class moo_OnlineOrders {
 		//Delete a Order type
 		$this->loader->add_action( 'wp_ajax_moo_delete_ot', $plugin_public, 'moo_DeleteOrderType');
 
+        //Show or hide images of categories
+		$this->loader->add_action( 'wp_ajax_moo_update_category_images_status', $plugin_public, 'moo_UpdateCategoryImagesStatus');
+
 		/* Manage modifiers */
         //Change modifier name
 		$this->loader->add_action( 'wp_ajax_moo_change_modifiergroup_name', $plugin_public, 'moo_ChangeModifierGroupName');
@@ -315,15 +318,53 @@ class moo_OnlineOrders {
 		//verify if the store is open according to bussiness hours configured in Clover
 		$this->loader->add_action( 'wp_ajax_moo_store_isopen', $plugin_public, 'moo_StoreIsOpen');
 		$this->loader->add_action( 'wp_ajax_nopriv_moo_store_isopen', $plugin_public, 'moo_StoreIsOpen');
-		
+        /*
+         * category visiblite
+         */
+        $this->loader->add_action( 'wp_ajax_moo_update_visiblite_category', $plugin_public, 'visibility_category');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_update_visiblite_category', $plugin_public, 'visibility_category');
+        /*
+         * category save image
+         */
+        $this->loader->add_action( 'wp_ajax_moo_save_category_image', $plugin_public, 'save_image_category');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_save_category_image', $plugin_public, 'save_image_category');
+        /*
+         * category new order
+         */
+        $this->loader->add_action( 'wp_ajax_moo_new_order_categories', $plugin_public, 'new_order_categories');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_new_order_categories', $plugin_public, 'new_order_categories');
+        /*
+         * delete image category
+         */
+        $this->loader->add_action( 'wp_ajax_moo_delete_img_category', $plugin_public, 'delete_img_category');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_delete_img_category', $plugin_public, 'delete_img_category');
+        /*
+         * change name category
+         */
+        $this->loader->add_action( 'wp_ajax_moo_change_name_category', $plugin_public, 'change_name_category');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_change_name_category', $plugin_public, 'change_name_category');
 
 
-		/*
-		 * Item's images
-		 */
+        /*
+         * Item's images
+         */
 
 		$this->loader->add_action( 'wp_ajax_moo_get_items_with_images', $plugin_public, 'moo_getItemWithImages');
 		$this->loader->add_action( 'wp_ajax_moo_save_items_with_images', $plugin_public, 'moo_saveItemWithImages');
+
+
+
+
+		$this->loader->add_action( 'wp_ajax_moo_set_default_image', $plugin_public, 'moo_setDefaultImage');
+		$this->loader->add_action( 'wp_ajax_moo_enable_items_with_images', $plugin_public, 'moo_enableItemsWithImages');
+
+
+
+		/*
+		 * Suncy handle
+		 */
+		$this->loader->add_action( 'admin_post_moo_sync', $plugin_public, 'moo_SyncHandle');
+		$this->loader->add_action( 'admin_post_nopriv_moo_sync', $plugin_public, 'moo_SyncHandle');
 
 		/*
 		 * Suncy handle

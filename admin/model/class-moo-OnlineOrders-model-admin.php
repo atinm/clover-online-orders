@@ -12,7 +12,7 @@ class moo_OnlineOrders_Admin_Model {
     private $db;
     private $url_api;
 
-    function __construct()
+    public function __construct()
     {
         global $wpdb;
         $this->db = $wpdb;

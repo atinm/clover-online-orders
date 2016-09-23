@@ -80,6 +80,7 @@ class moo_OnlineOrders_Model {
                                     FROM `{$this->db->prefix}moo_item_modifier_group` img,  `{$this->db->prefix}moo_modifier_group` mg
                                     WHERE mg.uuid=img.group_id AND mg.show_by_default='1'
                                     AND img.item_id = '{$item}'
+                                    ORDER BY mg.name
                                     ");
     }
     function getAllModifiersGroup()
@@ -204,7 +205,7 @@ class moo_OnlineOrders_Model {
         );
 
     }
-	function moo_DeleteOrderType($uuid)
+    function moo_DeleteOrderType($uuid)
 {
     $uuid = esc_sql($uuid);
     return $this->db->delete("{$this->db->prefix}moo_order_types",
@@ -299,8 +300,8 @@ class moo_OnlineOrders_Model {
         return $this->db->update(
                         "{$this->db->prefix}moo_order",
                         array(
-                            'paid' => 1,	// string
-                            'refpayment' => $ref	// integer (number)
+                            'paid' => 1,    // string
+                            'refpayment' => $ref    // integer (number)
                         ),
                         array( 'uuid' => $uuid )
                     );
@@ -338,6 +339,14 @@ class moo_OnlineOrders_Model {
                                     WHERE items.uuid = '{$uuid}'
                                     ");
     }
+    function getEnabledItemImages($uuid)
+    {
+        $uuid = esc_sql($uuid);
+        return $this->db->get_results("SELECT *
+                                    FROM {$this->db->prefix}moo_images images
+                                    WHERE images.item_uuid = '{$uuid}' AND images.is_enabled = '1'
+                                    ");
+    }
     function getItemImages($uuid)
     {
         $uuid = esc_sql($uuid);
@@ -346,44 +355,101 @@ class moo_OnlineOrders_Model {
                                     WHERE images.item_uuid = '{$uuid}'
                                     ");
     }
-    function saveItemWithImage($uuid,$description,$images)
+    function getDefaultItemImage($uuid)
     {
-      //  $this->db->show_erros();
+        $uuid = esc_sql($uuid);
+        return $this->db->get_results("SELECT *
+                                    FROM {$this->db->prefix}moo_images images
+                                    WHERE images.item_uuid = '{$uuid}' AND images.is_default = '1'
+                                    ");
+    }
+
+    function saveItemWithImage($uuid,$description,$images) {
+        
         $compteur = 0;
-        // Update the description of the item
         if($description != "")
-        {
-            $this->db->update("{$this->db->prefix}moo_item",
-                array(
-                    'description' => $description
-                ),
-                array( 'uuid' => $uuid ));
-        }
+            $this->db->update("{$this->db->prefix}moo_item", array('description' => $description), array( 'uuid' => $uuid ));
         $this->db->query('START TRANSACTION');
-
         $this->db->query("DELETE FROM {$this->db->prefix}moo_images  WHERE item_uuid = '{$uuid}'");
-
         foreach ($images as $image) {
-            $this->db->insert(
-                "{$this->db->prefix}moo_images",
-                array(
-                    'is_default' => 0,
-                    'is_enabled' => 1,
-                    'item_uuid' => $uuid,
-                    'url' => $image
-                ));
+            $image_url = $image['image_url'];
+            $image_default = intval($image['image_default']);
+            $image_enabled = intval($image['image_enabled']);
+            $this->db->insert("{$this->db->prefix}moo_images", array('is_default' => $image_default, 'is_enabled'=> $image_enabled, 'item_uuid' => $uuid, 'url' => $image_url));
             if($this->db->insert_id) $compteur++;
         }
-       if($compteur == count($images))
-       {
+        if($compteur == count($images)) {
            $this->db->query('COMMIT');
            return true;
-       }
-       else {
+       } else {
            $this->db->query('ROLLBACK');
            return false;
        }
     }
+
+    function saveImageCategory($uuid,$image){
+
+        return $this->db->update("{$this->db->prefix}moo_category",
+            array(
+                'image_url' => $image
+            ),
+            array( 'uuid' => $uuid )
+        );
+    }
+    function saveNewCategoriesorder($tab)
+    {
+        $compteur = 0;
+        //Get the number of categories to compare it with the categories that are changed
+
+        $cats_number = $this->NbCats()[0]->nb;
+
+        $this->db->query('START TRANSACTION');
+
+        foreach ($tab as $key => $value) {
+            $this->db->update("{$this->db->prefix}moo_category",
+                array(
+                    'sort_order' => $key
+                ),
+                array( 'uuid' => $value ));
+
+            $compteur++;
+        }
+        if($compteur == $cats_number)
+        {
+            $this->db->query('COMMIT');
+            return true;
+        }
+        else {
+            $this->db->query('ROLLBACK');
+            return false;
+        }
+
+    }
+
+    function moo_DeleteImgCategorie($uuid)
+    {
+        $uuid = esc_sql($uuid);
+        return $this->db->update("{$this->db->prefix}moo_category",
+            array(
+                'image_url' => null
+            ),
+            array( 'uuid' => $uuid )
+        );
+
+    }
+
+    function moo_UpdateNameCategorie($uuid,$newName)
+    {
+        $uuid = esc_sql($uuid);
+        return $this->db->update("{$this->db->prefix}moo_category",
+            array(
+                'alternate_name' => $newName
+            ),
+            array( 'uuid' => $uuid )
+        );
+
+    }
+
 
 
 }

@@ -76,7 +76,6 @@ function moo_emptyCart(event)
 
 function moo_addModifiers(item_name,item_uuid)
 {
-   //
     jQuery.post(moo_params.ajaxurl,{'action':'moo_check_item_modifiers',"item":item_uuid}, function (data) {
         if(data.status == 'success' )
         {
@@ -85,7 +84,9 @@ function moo_addModifiers(item_name,item_uuid)
             var selected_modifies = jQuery("#moo_form_modifiers").serializeArray();
             var Mgroups = {};
             var Modifiers = [];
+
             jQuery.magnificPopup.close();
+
             for(m in selected_modifies)
             {
                 var modifier = selected_modifies[m];
@@ -117,12 +118,13 @@ function moo_addModifiers(item_name,item_uuid)
             }
             /* verify if required modifier Groups are chooser */
             for(mg in required_modifiers_groups){
-                var element = required_modifiers_groups[mg]
+                var element = required_modifiers_groups[mg];
                 if(element != "")
                 {
                     if(Object.keys(Mgroups).indexOf(element) == -1)
                     {
-                        toastr.error("You didn't choose all required modifiers");
+                       // toastr.error("You didn't choose all required modifiers");
+                        swal({ title: "Error!", text: "You didn't choose all required modifiers",   type: "error",   confirmButtonText: "Try again" });
                         flag=true;
                         return;
                     }
@@ -136,11 +138,13 @@ function moo_addModifiers(item_name,item_uuid)
                     {
                         /* If the min is not null then we display a message if the custmet not choose the minimum */
                         if(data.min != null && data.min != 0 && Mgroups[mg] < data.min) {
-                            toastr.error("You must choose "+data.min+" modifier in "+data.name);
+                            var error_msg = "You must choose "+data.min+" modifier in "+data.name;
+                            swal({ title: "Error!", text: error_msg,   type: "error",   confirmButtonText: "Try again" });
                             flag=true;
                         }
                         if(data.max!= null && data.max != 0 && Mgroups[mg] > data.max) {
-                            toastr.error("You can't choose more than "+ data.max+" modifier in "+data.name);
+                            var error_msg = "You can't choose more than "+ data.max+" modifier in "+data.name;
+                            swal({ title: "Error!", text: error_msg,   type: "error",   confirmButtonText: "Try again" });
                             flag=true;
                         }
                     }
@@ -154,7 +158,8 @@ function moo_addModifiers(item_name,item_uuid)
                     {
                         if(!flag)
                         {
-                            toastr.success(item_name+' added to cart');
+                            //toastr.success(item_name+' added to cart');
+                            swal({ title: item_name, text: 'Added to cart',   type: "success",   confirmButtonText: "OK" });
                             //send the request to the server
                             jQuery.post(moo_params.ajaxurl,{'action':'moo_modifier_add',"modifiers":Modifiers}, function (data) {
                                 if(data.status == 'success' )
@@ -174,6 +179,11 @@ function moo_addModifiers(item_name,item_uuid)
                     }
                 });
             }
+        }
+        else
+        {
+            swal({ title: "Connection error", text: "Please verify your internet connection",   type: "error",   confirmButtonText: "Try again" });
+            jQuery.magnificPopup.close();
         }
     });
 

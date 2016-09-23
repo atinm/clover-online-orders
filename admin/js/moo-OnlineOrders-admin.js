@@ -65,9 +65,231 @@ jQuery(document).ready(function($){
     $("#show_menu").click(function() {
         $("#menu_for_mobile ul").toggle();
     });
+    $("#sortable").sortable({
+        stop: function(event, ui) {
+            var tabNew = new Array();
+            var i = 0;
 
-
+            $("#sortable tr").each(function(i, el){
+                tabNew[i] = $(this).attr("data-cat-id");
+                i++;
+            });
+            jQuery.post(moo_params.ajaxurl,{'action':'moo_new_order_categories','newtable':tabNew},function(data){
+                //console.log(data);
+            })
+        }
+    });
+    //$( "#orderCategory" ).sortable();
+    $("#orderCategory").sortable({
+        stop: function(event, ui) {
+            var tabNew = new Array();
+            var i = 0;
+            $("#orderCategory .category-item").each(function (i, el) {
+                tabNew[i] = $(this).attr("cat-id-mobil");
+                i++;
+            });
+            jQuery.post(moo_params.ajaxurl,{'action':'moo_new_order_categories','newtable':tabNew},function(data){
+                //console.log(data);
+            })
+        }
+    });
+    $('#orderCategory input').bind('click.sortable mousedown.sortable',function(ev){
+        ev.target.focus();
+    });
+   name_cat = "";
+    $(".table_category").on("click",".edit_name",function(event){
+        event.preventDefault();
+        var idCat = $(this).parent().parent().find("td:eq(0)").text();
+        var nameCat = $(this).parent().parent().find("td:eq(2)").text();
+        var id_name = $(this).parent().parent().find("td:eq(2)").attr("id");
+        name_cat = nameCat;
+        var c_html = "";
+        c_html +="<div class='input-change-name'>";
+        c_html += "<div class='input-name'>";
+        c_html += "<input type='text' value='"+nameCat+"' id='newName"+idCat+"' class='newname'>";
+        c_html += "</div>";
+       // c_html += "<div class='button-name'>";
+        c_html += "<div class='bt-valider'>";
+        c_html +='<a href="#" class="vald-change-name" onclick="vald_change_name(event,\''+idCat+'\',\'D\')">';
+        c_html +='<span id="moo_valide_change1" data-ot="valider_change_name" data-ot-target="#moo_valide_change1">';
+        c_html +="<img src='"+moo_params.plugin_url+"/public/img/valider.png' alt='Validate change'>";
+        c_html +="</span>";
+        c_html +="</a>";
+        c_html += "</div>";
+        c_html += "<div class='bt-annuler'>";
+        c_html +='<a href="#" class="annuler-change-name" onclick="annuler_change_name(event,\''+idCat+'\',\'D\')">';
+        c_html += "<img src='"+moo_params.plugin_url+"/public/img/annuler.png' alt='Annuler change'>";
+        c_html +="</a>";
+        c_html += "</div>";
+        //c_html += "</div>";
+        c_html += "</div>";
+        $("#"+id_name).html(c_html);
+    });
 });
+    function vald_change_name(event,uuid,v) {
+        event.preventDefault();
+        var name = jQuery("#name_"+uuid).val();
+        var newname = jQuery("#newName"+uuid).val();
+        if (v=="D"){jQuery("td#name_"+uuid).html(newname);}
+        else{
+            jQuery("#newName"+uuid).prop('disabled', true);
+            jQuery("#bt_MV_"+uuid).remove();
+            jQuery("#bt_MA_"+uuid).remove();
+        }
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_change_name_category','newName':newname,"id_cat":uuid}, function(response){
+            if(response == 1){
+               // console.log(response);
+            }
+            else{
+                jQuery("td#name_"+uuid).html(name_cat);
+            }
+        });
+    }
+
+    function annuler_change_name(event,uuid,v,lastname = ""){
+        event.preventDefault();
+        if (v=="D"){jQuery("td#name_"+uuid).html(name_cat);}
+        else{
+            jQuery("#newName"+uuid).val(lastname);
+            jQuery("#newName"+uuid).prop('disabled', true);
+            jQuery("#bt_MV_"+uuid).remove();
+            jQuery("#bt_MA_"+uuid).remove();
+        }
+    }
+
+function delete_img_category(event,uuid,responsive = 'D'){
+    event.preventDefault();
+    var image = "";
+    if(responsive == 'D'){
+        tr_new(uuid,image);
+         }
+    else {
+        img_row(uuid,image)
+    }
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_delete_img_category',"uuid":uuid}, function(data){
+     if (data == 1) {
+         //console.log(data);
+     }
+     });
+}
+
+function img_row(uuid,img){
+    var html="<label>Operation</label>";
+    html +='<div class="bt bt-upload">';
+    html +='<a href="#" onclick="uploader_image_category(event,\''+uuid+'\',\'M\')">';
+    html +="<img src='"+moo_params.plugin_url+"public/img/upload.png'>";
+    html +='</a>';
+    html +='</div>';
+    html +='<div class="bt bt-edit">';
+    html +='<a href="#" onclick="edit_name_mobil(event,\''+uuid+'\')">';
+    html +="<img src='"+moo_params.plugin_url+"public/img/edit.png'>";
+    html +='</a>';
+    html +='</div>';
+    if(img == ""){
+        jQuery("#id_img_M_"+uuid).html("<label>Pecture</label><img src='"+moo_params.plugin_url+"/public/img/no-image.png' style='width: 50px;'>")
+        jQuery("#id_bt_M"+uuid).html(html);
+    }
+    else{
+        html +='<div class="bt bt-delete">';
+        html +='<a href="#" onclick="delete_img_category(event,\''+uuid+'\',\'M\')">';
+        html +="<img src='"+moo_params.plugin_url+"public/img/delete.png'>";
+        html +='</a>';
+        html +='</div>';
+        jQuery("#id_img_M_"+uuid).html("<label>Pecture</label><label>Pecture</label><img src='"+img+"' style='width: 50px;'>");
+        jQuery("#id_bt_M"+uuid).html(html);
+    }
+}
+function edit_name_mobil(event,uuid){
+    event.preventDefault();
+    var name = jQuery("#newName"+uuid).val();
+    var htmlC = "";
+    htmlC +='<a href="#" class="vald-change-name" onclick="vald_change_name(event,\''+uuid+'\',\'M\')" id="bt_MV_'+uuid+'">';
+    htmlC +="<img src='"+moo_params.plugin_url+"/public/img/valider.png'  alt='Validate change' style='width: 18px;'>";
+    htmlC +="</a>";
+    htmlC +='<a href="#" class="annuler-change-name" onclick="annuler_change_name(event,\''+uuid+'\',\'M\',\''+name+'\')" id="bt_MA_'+uuid+'">';
+    htmlC +="<img src='"+moo_params.plugin_url+"/public/img/annuler.png' alt='annuler change' style='width: 18px;margin-left: 2px;'>";
+    htmlC +="</a>";
+    jQuery("#bt_MV_"+uuid).remove();
+    jQuery("#bt_MA_"+uuid).remove();
+    jQuery("#newName"+uuid).prop('disabled', false);
+    jQuery("#name_cat_Mobil"+uuid).append(htmlC);
+}
+
+// add parametre ,image,name,visibility
+function tr_new(uuid,img){
+    var nameCat = jQuery("td#name_"+uuid).text();
+    var visib_cat = jQuery(".visib_cat"+uuid).is(":checked")? true : false;
+    var input_check = "";
+    if (visib_cat == true){
+        input_check = '<input type="checkbox" name="onoffswitch[]" id="myonoffswitch_Visibility_'+uuid+'" class="onoffswitch-checkbox visib_cat'+uuid+'" onclick="visibility_cat(\''+uuid+'\')" checked>';
+    }
+    else{
+        input_check = '<input type="checkbox" name="onoffswitch[]" id="myonoffswitch_Visibility_'+uuid+'" class="onoffswitch-checkbox visib_cat'+uuid+'" onclick="visibility_cat(\''+uuid+'\')">';
+    }
+    var cont_html = "";
+    cont_html +="<td style='display:none;'><span id='id_cat'>"+uuid+"</span></td>";
+    cont_html +="<td class='img-cat'' style='width: 50px;' id='"+uuid+"'>";
+    if(img == ""){
+        cont_html +="<img src='"+moo_params.plugin_url+"/public/img/no-image.png' style='width: 50px;'>";
+    }
+    else {
+        cont_html +="<img src='"+img+"' style='width: 50px;'>";
+    }
+    cont_html +="</td>";
+    cont_html +="<td class='name_cat' id='name_"+uuid+"'>";
+    cont_html +=nameCat;
+    cont_html +="</td>";
+    cont_html +="<td class='show-cat'>";
+    cont_html +='<div class="onoffswitch" title="Visibility Category">';
+    cont_html +=input_check;
+    cont_html +='<label class="onoffswitch-label" for="myonoffswitch_Visibility_'+uuid+'"><span class="onoffswitch-inner"></span>';
+    cont_html +='<span class="onoffswitch-switch"></span>';
+    cont_html +='</label>';
+    cont_html +="</div>";
+    cont_html +="</td>";
+    if (img == ""){
+        cont_html +="<td class='bt-cat'>";
+        cont_html +='<a href="#" onclick="uploader_image_category(event,\''+uuid+'\')" title="Uploader Image">';
+        cont_html +="<img src='"+moo_params.plugin_url+"/public/img/upload.png'>";
+        cont_html +="</a>";
+        cont_html +="</td>";
+        cont_html +="<td colspan='2' class='bt-cat'>";
+    cont_html +="<a href='#' class='edit_name' title='Edite Name'>";
+    cont_html +="<img src='"+moo_params.plugin_url+"/public/img/edit.png' alt='Edite Name' >";
+    cont_html +="</a>";
+    cont_html +="</td>";
+    }
+    else{
+        cont_html +="<td class='bt-cat'>";
+        cont_html +='<a href="#" onclick="uploader_image_category(event,\''+uuid+'\')" title="Change Image">';
+        cont_html +="<img src='"+moo_params.plugin_url+"/public/img/upload.png'>";
+        cont_html +="</a>";
+        cont_html +="</td>";
+        cont_html +="<td class='bt-cat'>";
+        cont_html +="<a href='#' class='edit_name' title='Edite Name'>";
+        cont_html +="<img src='"+moo_params.plugin_url+"/public/img/edit.png'>";
+        cont_html +="</a>";
+        cont_html +="</td>";
+        cont_html +="<td class='bt-cat'>";
+        cont_html +='<a href="#" onclick="delete_img_category(event,\''+uuid+'\')" title="Delete Image">'
+        cont_html +="<img src='"+moo_params.plugin_url+"/public/img/delete.png'>";
+        cont_html +="</a>";
+        cont_html +="</td>";
+    }
+    jQuery("tr#row_id_"+uuid).html(cont_html);
+}
+function visibility_cat(uuid) {
+    var check = jQuery(".visib_cat"+uuid).is(":checked")? true : false;
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_visiblite_category','visiblite':check,"id_cat":uuid}, function(response){
+        //console.log(response);
+    });
+}
+function visibility_cat_mobile(uuid) {
+    var check = jQuery("#visib"+uuid).is(":checked")? true : false;
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_visiblite_category','visiblite':check,"id_cat":uuid}, function(response){
+        //console.log(response);
+    });
+}
 function tab_clicked(tab)
 {
     var Nb_Tabs=10; // Number for tabs
@@ -345,13 +567,16 @@ function MooSendFeedBack(e)
     if(msg == '')
     {
         alert("Please enter your message");
+
     }
     else
     {
+        jQuery("#MooSendFeedBackBtn").hide();
         jQuery.post(moo_params.ajaxurl,{'action':'moo_send_feedback','message':msg,'email':email}, function (data) {
             if(data.status == "Success"){
                 alert("Thank you for your feedback.");
                 jQuery("#Moofeedback").val("");
+                jQuery("#MooSendFeedBackBtn").show();
             }
         });
     }
@@ -433,6 +658,30 @@ function MooChangeCategory_Status(uuid)
 }
 function MooChangeCategory_Status_Mobile(uuid)
 {
+    var cat_status = jQuery('#myonoffswitch_NoCategory_Mobile').prop('checked');
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_category_status',"cat_uuid":uuid,"cat_status":cat_status}, function (data) {
+            console.log(data);
+        }
+    );
+}
+function MooShowCategoriesImages(id)
+{
+    var status = jQuery('#'+id).prop('checked');
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_category_images_status',"status":status}, function (data) {
+            console.log(data);
+        }
+    );
+}
+function MooShowCategoriesImages_Mobile(id)
+{
+    var status = jQuery('#myonoffswitch_Visibility_Mobile').prop('checked');
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_category_images_status',"status":status}, function (data) {
+            console.log(data);
+        }
+    );
+}
+function MooChangeCategory_Status_Mobile(uuid)
+{
     console.log('I am here');
     var cat_status = jQuery('#myonoffswitch_mobile_'+uuid).prop('checked');
     jQuery.post(moo_params.ajaxurl,{'action':'moo_update_category_status',"cat_uuid":uuid,"cat_status":cat_status}, function (data) {
@@ -440,13 +689,55 @@ function MooChangeCategory_Status_Mobile(uuid)
         }
     );
 }
+/* Start Upload Images Function */
 
-/* Upload Imges function */
 var media_uploader  = null;
-var moo_item_images = [];
+var moo_item_images = [];// {"image_url": "", "image_default": "", "image_enabled": ""}
+var moo_category_images;
 
-function open_media_uploader_image()
+function uploader_image_category(enent,id,responsive = 'D'){
+    event.preventDefault();
+    media_uploader = wp.media({
+        frame:    "post",
+        state:    "insert",
+        multiple: false
+    });
+    // insert image
+    media_uploader.on("insert", function(){
+        var json = media_uploader.state().get("selection").first().toJSON();
+        var image_url = json.url;
+        moo_category_images = image_url;
+        moo_save_category_images(id,responsive);
+    });
+    media_uploader.open();
+}
+
+function moo_save_category_images(uuid,response)
 {
+    if(Object.keys(moo_category_images).length>0)
+    {
+        image = moo_category_images;
+        if(response == 'D'){
+            tr_new(uuid,image);
+        }
+       else {
+            img_row(uuid,image);
+        }
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_save_category_image',"category_uuid":uuid,"image":moo_category_images},function(ret){
+            if (ret == 1) {
+                //console.log(ret);
+            }
+            else
+                alert("Error when saving your changes, please try again")
+        });
+    }
+    else
+    {
+        history.back();
+    }
+}
+function open_media_uploader_image() {
+    console.log("open_media_uploader_image");
     media_uploader = wp.media({
         frame:    "post",
         state:    "insert",
@@ -454,94 +745,134 @@ function open_media_uploader_image()
     });
 
     media_uploader.on("insert", function(){
-        var json = media_uploader.state().get("selection").first().toJSON();
+        json = media_uploader.state().get("selection").first().toJSON();
+        
         var image_url = json.url;
         var image_caption = json.caption;
         var image_title = json.title;
-        moo_item_images[image_title] = image_url;
+        moo_item_images.push({"image_url": image_url, "image_default": "1", "image_enabled": "1"});
         moo_display_item_images();
     });
     media_uploader.open();
 }
 
-function moo_display_item_images()
-{
+function moo_display_item_images() {
+    console.log('moo_display_item_images');
     jQuery('#moo_itemimagesection').html('');
-    for(i in moo_item_images ){
-        var image = moo_item_images[i];
-        var html = '<div class="moo_itemsimages_oneimg">'+
-                   '<div><img src="'+image+'" alt=""></div>'+
-                   '<div class="moo_itemsimages_oneimg_options"><a href="#" onclick="moo_delete_item_images(\''+i+'\')">delete</a></div></div>';
+    for(i in moo_item_images){
+        var image = moo_item_images[i].image_url;
+        var a1 = parseInt(moo_item_images[i].image_default);
+        var b1 = parseInt(moo_item_images[i].image_enabled);
+        var tag = "";
+        var tag1 = "";
+        if (a1 == 1) {
+            tag = "<input id='image_default_id_"+i+"' onchange='moo_default_item_image("+i+")' type='radio' name='image_default' value='image_default' checked><label style='position: relative; top: -4px; right: -10px;' for='image_default_id_"+i+"'>Default Image</label>";
+        } else {
+            tag = "<input id='image_default_id_"+i+"' onchange='moo_default_item_image("+i+")' type='radio' name='image_default' value='image_default'><label style='position: relative; top: -4px; right: -10px;' for='image_default_id_"+i+"'>Default Image</label>";
+        }
+        if (b1 == 1) {
+            tag1 = "<input id='image_enabled_id_"+i+"' onchange='moo_enable_item_image("+i+")' type='checkbox' name='image_enabled"+i+"' value='image_enabled' checked><label style='position: relative; top: -4px; right: -10px;' for='image_default_id_"+i+"'>Image Enabled</label>";
+        } else {
+            tag1 = "<input id='image_enabled_id_"+i+"' onchange='moo_enable_item_image("+i+")' type='checkbox' name='image_enabled"+i+"' value='image_enabled'><label style='position: relative; top: -4px; right: -10px;' for='image_default_id_"+i+"'>Image Enabled</label>";
+        }
+        /*var html = '<table style="margin: 0 auto;">'+
+                    '<tr><td rowspan="3"><img height="200" width="300" src="'+image+'" alt=""></td>'+
+                    '<td><a href="#" onclick="moo_delete_item_images(\''+i+'\')">Delete</a></td>'+
+                    '<tr><td>'+tag+'</td></tr>'+
+                    '<tr><td>'+tag1+'</td></tr></table>';*/
+
+        var html = '<div class="image_item" style="width: 30%; display: inline-block; margin: 1%;">'+
+                    '<img class="img-rounded img-thumbnail img-responsive image1" width="" src="'+image+'" alt="">'+
+                    '<div class="image_options_holder"><div><a href="#" onclick="moo_delete_item_images(\''+i+'\')">Delete</a></div>'+
+                    '<div style="margin-top: 4px;">'+tag+'</div>'+
+                    '<div style="margin-top: 4px;">'+tag1+'</div></div></div>';
         jQuery('#moo_itemimagesection').append(html);
 
     }
-
 }
-function moo_delete_item_images(id)
-{
+function moo_delete_item_images(id) {
     delete(moo_item_images[id]);
     moo_display_item_images();
 }
-function moo_save_item_images(uuid)
-{
-    var description = jQuery('#moo_item_description').val();
-    var images = [];
-    for(i in moo_item_images ){
-        var img = moo_item_images[i];
-        images.push(img);
+function moo_default_item_image(id) {
+    console.log('I am here');
+    jQuery("input[name=image_default]:checked");
+    moo_item_images[id].image_default = "1";
+    for (var i = 0; i < moo_item_images.length; i++) {
+        if(i == id) continue;
+        else moo_item_images[i].image_default = "0";
     }
-    if(description.length>250)
-    {
+}
+function moo_enable_item_image(id) {
+    var b = jQuery("input#image_enabled_id_"+id+"").is(':checked');
+    if (b) {
+        moo_item_images[id].image_enabled = "1";
+        b = false;    
+    } else {
+        moo_item_images[id].image_enabled = "0";
+        b = true;
+    }
+}
+
+function moo_save_item_images(uuid) {
+    console.log('moo_save_item_images');
+    var description = jQuery('#moo_item_description').val();
+    var flag = false;
+    for(var i=0 in moo_item_images) {
+        if (moo_item_images[i].image_default == "1" && flag == false) {
+            flag = true;
+            continue;
+        }
+        if(moo_item_images[i].image_default == "1" && flag == true) {
+            moo_item_images[i].image_default = "0";
+        }
+    }
+    var images = [];
+    for(i in moo_item_images) {
+        images.push({"image_url": moo_item_images[i].image_url, 
+            "image_default": moo_item_images[i].image_default, 
+            "image_enabled": moo_item_images[i].image_enabled
+        });
+    }
+    if(description.length>250) {
         alert("Description too long");
         return
     }
-    if(description != "" || Object.keys(moo_item_images).length>0)
-    {
+    if(description != "" || Object.keys(moo_item_images).length>=0) {
         jQuery.post(moo_params.ajaxurl,{'action':'moo_save_items_with_images',"item_uuid":uuid,"description":description,"images":images}, function (data) {
-                if(data.status == 'Success')
-                {
-                    if(data.data==true)
-                    {
-                        alert("Your changes were saved");
-                        history.back();
-                    }
-
-                    else
-                    // echo error message
-                        alert("Error when saving your changes, please try again")
-                }
-                else
-                // echo error message
-                    alert("Error when saving your changes, please try again")
-            }
+            if(data.status == 'Success') {
+                if(data.data==true) {
+                    alert("Your changes were saved");
+                    history.back();
+                } else alert("Error when saving your changes, please try again");
+            } else alert("Error when saving your changes, please try again");
+        }
         );
-    }
-    else
-    {
-        history.back();
-    }
-
+    } else history.back();
 }
 
-function moo_get_item_with_images(uuid)
-{
+function moo_get_item_with_images(uuid) {
+    console.log(moo_item_images);
     jQuery.post(moo_params.ajaxurl,{'action':'moo_get_items_with_images',"item_uuid":uuid}, function (data) {
         var items = data.data;
         for(i in items ){
             var item = items[i];
-            if(item._id)
-                moo_item_images[item._id] = item.url;
+            if(item._id) {
+                var image_url = item.url;
+                var image_default = item.is_default;
+                var image_enabled = item.is_enabled;
+                moo_item_images.push({"image_url": image_url, "image_default": image_default, "image_enabled": image_enabled});
+            }
         }
         moo_display_item_images();
         jQuery('#moo_item_description').val(items[0].description);
         jQuery('#moo_item_name').text(items[0].name);
         jQuery('#moo_item_price').text("$"+items[0].price/100);
-    }
-    );
+    });
 }
+/*End upload Functions*/
 
-function MooPanel_UpdateItems(event)
-{
+function MooPanel_UpdateItems(event) {
     event.preventDefault();
     window.bar.animate(0.01);
     window.bar.setText('1 %');
@@ -614,4 +945,11 @@ function moo_upadateItemsPerPage(page)
 
         }
     });
+}
+function moo_bussinessHours_Details(status)
+{
+     if(status)
+         jQuery('#moo_bussinessHours_Details').removeClass('moo_hidden');
+    else
+         jQuery('#moo_bussinessHours_Details').addClass('moo_hidden');
 }
