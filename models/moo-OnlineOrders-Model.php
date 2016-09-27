@@ -401,7 +401,8 @@ class moo_OnlineOrders_Model {
         $compteur = 0;
         //Get the number of categories to compare it with the categories that are changed
 
-        $cats_number = $this->NbCats()[0]->nb;
+         $cats_number = $this->NbCats();
+        $cats_number = $cats_number[0]->nb;
 
         $this->db->query('START TRANSACTION');
 
