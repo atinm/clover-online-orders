@@ -1310,7 +1310,7 @@ class Moo_OnlineOrders_Shortcodes {
                     echo '<a class="open-popup-link" href="#moo_popup_item_'.$item->uuid.'" >';
                     echo "<div class='moo_item_flip_container'>";
                     echo "<div class='moo_item_flip_image'>";
-                    $img_array = [];
+                    $img_array = array();
                     array_push($img_array, $default_image_url);
                     foreach ($item_images as $key => $item_img) {
                         array_push($img_array, $item_img->url);

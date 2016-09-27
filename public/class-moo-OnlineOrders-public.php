@@ -1664,7 +1664,6 @@ public function moo_AddOrderType()
         $id = $_POST["id_cat"];
         $status = $_POST["visiblite"];
         $ret = $this->model->UpdateCategoryStatus($id,$status);
-        $ret2 = $this->model->saveNewCategoriesorder([]);
         wp_send_json($ret);
     }
 
