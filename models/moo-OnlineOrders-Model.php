@@ -505,7 +505,8 @@ class moo_OnlineOrders_Model {
         $compteur = 0;
         //Get the number of categories to compare it with the categories that are changed
 
-        $group_number = $this->NbGroupModifier()[0]->nb;
+        $group_number = $this->NbGroupModifier();
+		$group_number = $group_number[0]->nb;
 
         $this->db->query('START TRANSACTION');
 
@@ -534,7 +535,8 @@ class moo_OnlineOrders_Model {
         $compteur = 0;
         //Get the number of categories to compare it with the categories that are changed
 
-        $cats_number = $this->NbModifier($group)[0]->nb;
+        $cats_number = $this->NbModifier($group);
+		$cats_number = $cats_number[0]->nb;
 
         $this->db->query('START TRANSACTION');
 
