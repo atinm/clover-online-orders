@@ -75,7 +75,7 @@ jQuery("#moo_form_address").validate({
         var delivery_amount = document.getElementById('moo_delivery_amount').value;
         if(delivery_amount == 'ERROR')
         {
-            toastr.error('Verify your delivery details');
+            swal({ title: "Verify your delivery details", text: 'please verify your delivery details',   type: "error",   confirmButtonText: "Verify" });
         }
         else
         {
@@ -149,7 +149,14 @@ function moo_OrderTypeChanged(obj)
                     jQuery('#moo-delivery-details').hide();
                     jQuery('#moo-cart-delivery-fee').parent().hide();
                     document.getElementById('moo_delivery_amount').value = "";
-                    jQuery('#moo_paymentOptions_cash_label').text('Pay in Store');
+                    if(moo_cash_in_store == 'on')
+                    {
+                        jQuery('#moo_paymentOptions_cash_div').show();
+                        jQuery('#moo_paymentOptions_cash_label').text('Pay in Store');
+                    }
+                    else
+                        jQuery('#moo_paymentOptions_cash_div').hide();
+
                     moo_update_totals();
                 }
                 else
@@ -159,7 +166,15 @@ function moo_OrderTypeChanged(obj)
                     jQuery('#state').parent().show();
                     jQuery('#country').parent().show();
                     jQuery('#moo-cart-delivery-fee').parent().show();
-                    jQuery('#moo_paymentOptions_cash_label').text('Pay upon Delivery');
+
+                    if(moo_cash_upon_delivery == 'on')
+                    {
+                        jQuery('#moo_paymentOptions_cash_div').show();
+                        jQuery('#moo_paymentOptions_cash_label').text('Pay upon Delivery');
+                    }
+                    else
+                        jQuery('#moo_paymentOptions_cash_div').hide();
+
 
                     if(moo_delivery_areas != null && moo_delivery_areas.length >= 1) jQuery('#moo-delivery-details').show();
                     moo_calculate_delivery_fee();
@@ -231,10 +246,10 @@ function moo_verifyCode(event)
             jQuery('#moo_verifPhone_sending').hide();
             jQuery('#moo_verifPhone_verificatonCode').hide();
             jQuery('#moo_verifPhone_verified').css("display","inline-block");
-            toastr.success('Your phone was verified');
+            swal({ title: 'Phone verified', text: 'Your phone was verified',   type: "success",   confirmButtonText: "OK" });
         }
         else
-            toastr.error('Code invalid, please try again');
+            swal({ title: "Code invalid", text: 'this code is invalid please try again',   type: "error",   confirmButtonText: "Try again" });
     });
 }
 function moo_verifyCodeTryAgain(event)

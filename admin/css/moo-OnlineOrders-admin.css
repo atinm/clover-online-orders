@@ -607,6 +607,7 @@ div#MooPanel_tabContent4 div.MooPanelItem div.Moo_option-item div {
 
 div#MooPanel_tabContent7 div.MooPanelItem div.Moo_option-item div{
     margin-top: 0 !important;
+    color : black;
 }
 
 div#MooPanel_tabContent8 div.MooPanelItem div.Moo_option-item div{
@@ -857,6 +858,7 @@ div#MooPanel_tabContent5 div.MooPanelItem div#bloc_moo_ptions_item div.Moo_optio
 }
 #MooPanel_main .MooPanelItem .label {
     width: 274px;
+    color : black;
 }
 #display_panel5_on_mobile {
     display: none;
@@ -1060,3 +1062,144 @@ div#moo_uploadImgBtn .button {
 .label_td {
     padding-left: 12px;
 }
+/* ---- Modifier Group ---- */
+ul.moo_ModifierGroup li{
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    padding-bottom: 15px;
+    padding-top: 12px;
+    overflow: hidden;
+}
+li.list-group{
+    background: #ddd;
+    cursor: pointer;
+}
+li.list-group:hover{
+    background: #d5d5d5;
+}
+
+.bar-group{
+    /*width: 5%;*/
+    float: right;
+    margin-top: 5px;
+}
+ul.moo_ModifierGroup .label_name{
+    width:50%;
+    font-size: 16px;
+    display: inline-block;
+    text-align: center;
+    font-weight: bold;
+    position: relative;
+    bottom: 4px;
+}
+ul.moo_ModifierGroup .show_group{
+}
+ul.moo_ModifierGroup .saved_new_name{
+    text-align: center;
+    width: 20%;
+    display: inline-block;
+}
+.show-detail-group{
+    width:5%;
+    display: inline-block;
+}
+/* sub-group : Modifier */
+ul.sub-group{
+    background: #CCCCCC;
+    display: none;
+    padding: 0px;
+    margin-top: 18px;
+}
+ul.sub-group > li{
+    margin: 0;
+    background-color: #FFFFFF;
+}
+ul.sub-group .moo_modifier_name{
+    width:50%;
+    display: inline-block;
+    text-align: center;
+    font-size: 15px;
+    position: relative;
+    bottom: 4px;
+    font-weight: bold;
+}
+ul.sub-group .edit_modifer_name{
+    text-align: center;
+    width: 20%;
+    display: inline-block;
+}
+/*============================================================
+    Mobile (Portrait) Design for a width of 320px
+==============================================================*/
+@media only screen and (min-width: 320px) and (max-width: 480px) {
+    ul.moo_ModifierGroup{
+        text-align: center;
+    }
+    ul.moo_ModifierGroup .label_name{
+        display: block;
+        width: auto;
+        margin: 10px 0;
+    }
+    ul.moo_ModifierGroup .saved_new_name{
+        margin-top: 10px;
+        width: auto;
+        display: block;
+    }
+    .saved_new_name > .button-small{
+        margin: 0 10px;
+    }
+    .show-detail-group{
+        width:auto;
+    }
+    ul.moo_ModifierGroup .show_group{
+        /*margin: 10px 0;*/
+    }
+    ul.moo_ModifierGroup .change-name input{
+        width:100%;
+        margin-bottom: 5px;
+    }
+    /* Modifier */
+    ul.sub-group {
+        margin-top: 30px;
+        text-align: center;
+    }
+    ul.sub-group .moo_modifier_name{
+        display: block;
+        width: auto;
+        margin: 10px 0;
+    }
+    ul.sub-group .edit_modifer_name {
+        margin-top: 10px;
+        width: auto;
+        display: block;
+    }
+    ul.sub-group .change-name-modifier input{
+        width: 100%;
+        margin-bottom: 5px;
+    }
+
+}
+
+/*============================================================
+    Mobile (Landscape) Design for a width of 480px
+==============================================================
+@media only screen and (min-width: 480px) and (max-width: 767px) {
+    ul.moo_ModifierGroup{
+        text-align: center;
+    }
+    ul.moo_ModifierGroup .label_name{
+        float: none;
+        width: auto;
+        margin-top: auto;
+    }
+    ul.moo_ModifierGroup .saved_new_name{
+        margin-top: 5px;
+        margin-bottom: 5px;
+        width: auto;
+    }
+    .saved_new_name > .button-small{
+        margin: 10px 0;
+    }
+}
+*/

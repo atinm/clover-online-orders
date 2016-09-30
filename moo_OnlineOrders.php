@@ -14,11 +14,11 @@
  *
  * @wordpress-plugin
  * Plugin Name:       Merchantech Online Orders for Clover
- * Plugin URI:        http://www.merchantech.us
+ * Plugin URI:        http://www.merchantechapps.com
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.2.1
+ * Version:           1.2.2
  * Author:            Merchantech
- * Author URI:        http://www.merchantech.us
+ * Author URI:        http://www.merchantechapps.com
  * License:           Clover app
  * License URI:       http://www.clover.com
  * Text Domain:       moo_OnlineOrders
@@ -139,12 +139,16 @@ function moo_onlineOrders_check_version()
         case '118':
         case '119':
         case '120':
-            //Create customer table
             //Adding new fields in category table
             $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `image_url` VARCHAR(255) NULL");
             $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `alternate_name` VARCHAR(100) NULL");
-            update_option('moo_onlineOrders_version','121');
+
         case '121':
+        	$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_modifier` ADD `sort_order` INT NULL");
+        	$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_modifier` ADD `show_by_default` INT NOT NULL DEFAULT '1'");
+        	$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_modifier_group` ADD `sort_order` INT NULL");
+            update_option('moo_onlineOrders_version','122');
+	    case '122':
             break;
     }
 }

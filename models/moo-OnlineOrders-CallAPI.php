@@ -257,9 +257,13 @@ class moo_OnlineOrders_CallAPI {
     {
         return $this->callApi("opening_hours",$this->Token);
     }
-    function getOpeningStatus($nb_days,$nb_minites)
+    function getOpeningStatus($nb_days,$nb_minites,$mindays)
     {
-        return $this->callApi("is_open/".$nb_days."/".$nb_minites,$this->Token);
+        if($mindays>0)
+            return $this->callApi("is_open/".$nb_days."/".$nb_minites."/".$mindays,$this->Token);
+        else
+            return $this->callApi("is_open/".$nb_days."/".$nb_minites,$this->Token);
+
     }
     function getMerchantProprietes()
     {

@@ -19,13 +19,13 @@ function moo_addToCart(e,item_uuid,name,price)
     if(MOO_CART[item_uuid])
     {
         MOO_CART[item_uuid].quantity++;
-        toastr.success(name+ "'s quantity updated");
+        swal({ title: name+"'s", text: 'quantity updated',   type: "success",   confirmButtonText: "OK" });
         jQuery('#moo_cart_line_'+item_uuid+'>td:nth-child(2)').html(MOO_CART[item_uuid].quantity);
         jQuery('#moo_cart_line_'+item_uuid+'>td:nth-child(3)').html('$'+(parseInt(MOO_CART[item_uuid].quantity)*price/100).toFixed(2));
 
     }
     else {
-        toastr.success(name+ ' added to cart');
+        swal({ title: name, text: 'Added to cart',   type: "success",   confirmButtonText: "OK" });
         addLineToHtmlCart(name,price,item_uuid);
         MOO_CART[item_uuid] = {uuid:item_uuid,name:name,quantity:1,price:price};
     }
@@ -33,7 +33,7 @@ function moo_addToCart(e,item_uuid,name,price)
     jQuery.post(moo_params.ajaxurl,{'action':'moo_add_to_cart',"item":item_uuid}, function (data) {
         if(data.status != 'success')
         {
-            toastr.error('Error, please try again');
+            swal({ title: "Error", text: 'please try again',   type: "error",   confirmButtonText: "Try again" });
         }
         // console.log(data);
     }).done(function() {
@@ -91,19 +91,18 @@ function ChangeQuantity(item_uuid)
                                     }
                                 }).done(function(e){
                                     moo_updateCart();
-                                    toastr.remove();
-                                    toastr.success("Quantity updated")
+                                    swal({ title: "Quantity updated", text: '',   type: "success",   confirmButtonText: "OK" });
 
                                 });
                                 else
                                    if(new_qte != currentQte)
-                                       toastr.error('The quantity should be more than 1');
+                                        swal({ title: "Error", text: 'The quantity should be more than 1',   type: "error",   confirmButtonText: "Try again" });
 
                                 if(new_ins != currentIns )
                                     jQuery.post(moo_params.ajaxurl,{'action':'moo_update_special_ins',"item":item_uuid,"special_ins":new_ins}, function (data) {
                                         if(data.status == 'success')
                                         {
-                                            toastr.success("Special Instructions updated");
+                                            swal({ title: "Special Instructions updated", text: '',   type: "success",   confirmButtonText: "OK" });
                                         }
                                     });
 

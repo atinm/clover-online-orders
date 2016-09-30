@@ -70,8 +70,8 @@ class moo_OnlineOrders_Model {
         $uuid_group = esc_sql($uuid_group);
         return $this->db->get_results("SELECT *
                                     FROM `{$this->db->prefix}moo_modifier` m
-                                    WHERE m.group_id = '{$uuid_group}'
-                                  
+                                    WHERE m.group_id = '{$uuid_group}' AND m.show_by_default='1'
+                                    ORDER BY m.sort_order
                                     ");
     }
     function getModifiersGroup($item)
@@ -80,13 +80,28 @@ class moo_OnlineOrders_Model {
                                     FROM `{$this->db->prefix}moo_item_modifier_group` img,  `{$this->db->prefix}moo_modifier_group` mg
                                     WHERE mg.uuid=img.group_id AND mg.show_by_default='1'
                                     AND img.item_id = '{$item}'
-                                    ORDER BY mg.name
+                                    ORDER BY mg.sort_order
                                     ");
     }
+    /*
     function getAllModifiersGroup()
     {
         return $this->db->get_results("SELECT *
                                     FROM `{$this->db->prefix}moo_modifier_group`");
+    }
+    */
+    function getAllModifiersGroup()
+    {
+        return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_modifier_group ORDER BY `sort_order` ASC");
+    }
+    function getAllModifiers($uuid_group)
+    {
+        $uuid_group = esc_sql($uuid_group);
+        return $this->db->get_results("SELECT *
+                                    FROM `{$this->db->prefix}moo_modifier` m
+                                    WHERE m.group_id = '{$uuid_group}'
+                                    ORDER BY m.sort_order
+                                    ");
     }
     function itemHasModifiers($item)
     {
@@ -166,7 +181,21 @@ class moo_OnlineOrders_Model {
                                 array( 'uuid' => $uuid )
         );
         
-    } 
+    }
+
+    function ChangeModifierName($m_uuid,$name)
+    {
+        $uuid = esc_sql($m_uuid);
+        $name = esc_sql($name);
+        return $this->db->update("{$this->db->prefix}moo_modifier",
+            array(
+                'alternate_name' => $name
+            ),
+            array( 'uuid' => $uuid )
+        );
+
+    }
+
     function UpdateModifierGroupStatus($mg_uuid,$status)
     {
         $uuid = esc_sql($mg_uuid);
@@ -179,6 +208,19 @@ class moo_OnlineOrders_Model {
                                 array( 'uuid' => $uuid )
         );
         
+    }
+    function UpdateModifierStatus($mg_uuid,$status)
+    {
+        $uuid = esc_sql($mg_uuid);
+        $st = ($status == "true")? 1:0;
+
+        return $this->db->update("{$this->db->prefix}moo_modifier",
+            array(
+                'show_by_default' => $st
+            ),
+            array( 'uuid' => $uuid )
+        );
+
     }
     function ChangeCategoryName($cat_uuid,$name)
     {
@@ -325,6 +367,14 @@ class moo_OnlineOrders_Model {
     {
         return $this->db->get_results("SELECT count(*) as nb FROM {$this->db->prefix}moo_item");
     }
+    function NbGroupModifier()
+    {
+        return $this->db->get_results("SELECT count(*) as nb FROM {$this->db->prefix}moo_modifier_group");
+    }
+    function NbModifier($group)
+    {
+        return $this->db->get_results("SELECT count(*) as nb FROM {$this->db->prefix}moo_modifier where group_id = '{$group}'");
+    }
 
     /*
      * Manage Item's image
@@ -401,7 +451,7 @@ class moo_OnlineOrders_Model {
         $compteur = 0;
         //Get the number of categories to compare it with the categories that are changed
 
-         $cats_number = $this->NbCats();
+        $cats_number = $this->NbCats();
         $cats_number = $cats_number[0]->nb;
 
         $this->db->query('START TRANSACTION');
@@ -451,6 +501,64 @@ class moo_OnlineOrders_Model {
 
     }
 
+    function saveNewOrderGroupModifier($tab){
+        $compteur = 0;
+        //Get the number of categories to compare it with the categories that are changed
+
+        $group_number = $this->NbGroupModifier()[0]->nb;
+
+        $this->db->query('START TRANSACTION');
+
+        foreach ($tab as $key => $value) {
+            $this->db->update("{$this->db->prefix}moo_modifier_group",
+                array(
+                    'sort_order' => $key
+                ),
+                array( 'uuid' => $value ));
+
+            $compteur++;
+        }
+        if($compteur == $group_number)
+        {
+            $this->db->query('COMMIT');
+            return true;
+        }
+        else {
+            $this->db->query('ROLLBACK');
+            return false;
+        }
+
+    }
+
+    function saveNewOrderModifier($group,$tab){
+        $compteur = 0;
+        //Get the number of categories to compare it with the categories that are changed
+
+        $cats_number = $this->NbModifier($group)[0]->nb;
+
+        $this->db->query('START TRANSACTION');
+
+        foreach ($tab as $key => $value) {
+            $this->db->update("{$this->db->prefix}moo_modifier",
+                array(
+                    'sort_order' => $key
+                ),
+                array( 'uuid' => $value ));
+
+            $compteur++;
+        }
+
+        if($compteur == $cats_number)
+        {
+            $this->db->query('COMMIT');
+            return true;
+        }
+        else {
+            $this->db->query('ROLLBACK');
+            return false;
+        }
+
+    }
 
 
 }

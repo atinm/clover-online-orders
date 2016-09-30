@@ -117,7 +117,7 @@ jQuery(document).ready(function($){
         c_html +="</a>";
         c_html += "</div>";
         c_html += "<div class='bt-annuler'>";
-        c_html +='<a href="#" class="annuler-change-name" onclick="annuler_change_name(event,\''+idCat+'\',\'D\')">';
+        c_html +='<a href="#" class="annuler-change-name" onclick="annuler_change_name(event,\''+idCat+'\',\'D\',\''+nameCat+'\')">';
         c_html += "<img src='"+moo_params.plugin_url+"/public/img/annuler.png' alt='Annuler change'>";
         c_html +="</a>";
         c_html += "</div>";
@@ -125,7 +125,107 @@ jQuery(document).ready(function($){
         c_html += "</div>";
         $("#"+id_name).html(c_html);
     });
+    /* --- Modifier Group --- */
+    $(".moo_ModifierGroup").sortable({
+        stop: function(event, ui) {
+            var tabNew = new Array();
+            var i = 0;
+            $(".moo_ModifierGroup .list-group").each(function (i, el) {
+                tabNew[i] = $(this).attr("group-id");
+                i++;
+            });
+            $.post(moo_params.ajaxurl,{'action':'moo_new_order_group_modifier','newtable':tabNew},function(data){
+                console.log(data);
+            })
+        }
+    });
+    $('.moo_ModifierGroup input').bind('click.sortable mousedown.sortable',function(ev){
+        ev.target.focus();
+    });
+    $(".sub-group").sortable({
+        stop: function(event, ui) {
+            var group = $(this).attr("GM");
+            var tabNew = new Array();
+            var i = 0;
+            $(".moo_ModifierGroup .list-GModifier_"+group).each(function (i, el) {
+                tabNew[i] = $(this).attr("group-id");
+                i++;
+            });
+            //var NB = tabNew.length;
+            $.post(moo_params.ajaxurl,{'action':'moo_new_order_modifier','group_id':group,'newtable':tabNew},function(data){
+                console.log(data);
+            })
+        }
+    });
+    $('.sub-group input').bind('click.sortable mousedown.sortable',function(ev){
+        ev.target.focus();
+    });
+   /* --- Modifier Group --- */
+
 });
+
+/* --- Modifier Group --- */
+    function edit_name_GGroup(event,id){
+        event.preventDefault();
+        jQuery("#label_"+id+" .getname").css("display","none");
+        jQuery("#label_"+id+" .change-name").css("display","block");
+    }
+    function validerChangeNameGG(event,id){
+        event.preventDefault();
+        var newName = jQuery("#newName_"+id).val();
+        //
+        jQuery("#label_"+id+" .getname").css("display","block");
+        jQuery("#label_"+id+" .change-name").css("display","none");
+        jQuery("#label_"+id+" .getname").text(newName);
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_change_modifiergroup_name',"mg_uuid":id,"mg_name":newName}, function (data) {
+            //console.log(data);
+            }
+        );
+    }
+    function annulerChangeNameGG(event,id,name){
+        event.preventDefault();
+        var name = jQuery("#label_"+id+" .getname").text();
+        jQuery("#label_"+id+" .getname").css("display","block");
+        jQuery("#label_"+id+" .change-name").css("display","none");
+        jQuery("#label_"+id+" .change-name input").val(name);
+    }
+
+    function show_sub(event,id){
+        event.preventDefault();
+        jQuery('#detail_group_'+id).slideToggle('slow', function() {
+            if (jQuery(this).is(':visible')) {
+                jQuery("#plus_"+id).attr('src',moo_params.plugin_url+'/public/img/substract.png');
+            } else {
+                jQuery("#plus_"+id).attr('src',moo_params.plugin_url+'/public/img/add.png');
+            }
+        });
+        //jQuery('#detail_group_'+id).slideToggle();
+    }
+    function edit_name_GModifer(event,id){
+        event.preventDefault();
+        jQuery("#label_"+id+" .getname").css("display","none");
+        jQuery("#label_"+id+" .change-name-modifier").css("display","block");
+    }
+    function validerChangeNameModifier(event,id){
+        event.preventDefault();
+        var newName = jQuery("#newName_"+id).val();
+        //
+        jQuery("#label_"+id+" .getname").css("display","block");
+        jQuery("#label_"+id+" .change-name-modifier").css("display","none");
+        jQuery("#label_"+id+" .getname").text(newName);
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_change_modifier_name',"m_uuid":id,"m_name":newName}, function (data) {
+                //console.log(data);
+            }
+        );
+    }
+    function annulerChangeNameModifier(event,id,name){
+        event.preventDefault();
+        var name = jQuery("#label_"+id+" .getname").text();
+        jQuery("#label_"+id+" .getname").css("display","block");
+        jQuery("#label_"+id+" .change-name-modifier").css("display","none");
+        jQuery("#label_"+id+" .change-name-modifier input").val(name);
+    }
+/* --- Modifier Group --- */
     function vald_change_name(event,uuid,v) {
         event.preventDefault();
         var name = jQuery("#name_"+uuid).val();
@@ -146,7 +246,8 @@ jQuery(document).ready(function($){
         });
     }
 
-    function annuler_change_name(event,uuid,v,lastname = ""){
+
+    function annuler_change_name(event,uuid,v,lastname){
         event.preventDefault();
         if (v=="D"){jQuery("td#name_"+uuid).html(name_cat);}
         else{
@@ -157,7 +258,16 @@ jQuery(document).ready(function($){
         }
     }
 
-function delete_img_category(event,uuid,responsive = 'D'){
+    function MooChangeM_Status(uuid)
+    {
+        var mg_status = jQuery('#myonoffswitch_'+uuid).prop('checked');
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_update_modifier_status',"mg_uuid":uuid,"mg_status":mg_status}, function (data) {
+                console.log(data);
+            }
+        );
+    }
+
+function delete_img_category(event,uuid,responsive){
     event.preventDefault();
     var image = "";
     if(responsive == 'D'){
@@ -177,12 +287,12 @@ function img_row(uuid,img){
     var html="<label>Operation</label>";
     html +='<div class="bt bt-upload">';
     html +='<a href="#" onclick="uploader_image_category(event,\''+uuid+'\',\'M\')">';
-    html +="<img src='"+moo_params.plugin_url+"public/img/upload.png'>";
+    html +="<img src='"+moo_params.plugin_url+"public/img/upload.png' style='width: 20px;'>";
     html +='</a>';
     html +='</div>';
     html +='<div class="bt bt-edit">';
     html +='<a href="#" onclick="edit_name_mobil(event,\''+uuid+'\')">';
-    html +="<img src='"+moo_params.plugin_url+"public/img/edit.png'>";
+    html +="<img src='"+moo_params.plugin_url+"public/img/edit.png' style='width: 20px;'>";
     html +='</a>';
     html +='</div>';
     if(img == ""){
@@ -192,10 +302,10 @@ function img_row(uuid,img){
     else{
         html +='<div class="bt bt-delete">';
         html +='<a href="#" onclick="delete_img_category(event,\''+uuid+'\',\'M\')">';
-        html +="<img src='"+moo_params.plugin_url+"public/img/delete.png'>";
+        html +="<img src='"+moo_params.plugin_url+"public/img/delete.png' style='width: 20px;'>";
         html +='</a>';
         html +='</div>';
-        jQuery("#id_img_M_"+uuid).html("<label>Pecture</label><label>Pecture</label><img src='"+img+"' style='width: 50px;'>");
+        jQuery("#id_img_M_"+uuid).html("<label>Pecture</label><img src='"+img+"' style='width: 50px;'>");
         jQuery("#id_bt_M"+uuid).html(html);
     }
 }
@@ -249,7 +359,7 @@ function tr_new(uuid,img){
     cont_html +="</td>";
     if (img == ""){
         cont_html +="<td class='bt-cat'>";
-        cont_html +='<a href="#" onclick="uploader_image_category(event,\''+uuid+'\')" title="Uploader Image">';
+        cont_html +='<a href="#" onclick="uploader_image_category(event,\''+uuid+'\',\'D\')" title="Uploader Image">';
         cont_html +="<img src='"+moo_params.plugin_url+"/public/img/upload.png'>";
         cont_html +="</a>";
         cont_html +="</td>";
@@ -261,7 +371,7 @@ function tr_new(uuid,img){
     }
     else{
         cont_html +="<td class='bt-cat'>";
-        cont_html +='<a href="#" onclick="uploader_image_category(event,\''+uuid+'\')" title="Change Image">';
+        cont_html +='<a href="#" onclick="uploader_image_category(event,\''+uuid+'\',\'D\')" title="Change Image">';
         cont_html +="<img src='"+moo_params.plugin_url+"/public/img/upload.png'>";
         cont_html +="</a>";
         cont_html +="</td>";
@@ -271,7 +381,7 @@ function tr_new(uuid,img){
         cont_html +="</a>";
         cont_html +="</td>";
         cont_html +="<td class='bt-cat'>";
-        cont_html +='<a href="#" onclick="delete_img_category(event,\''+uuid+'\')" title="Delete Image">'
+        cont_html +='<a href="#" onclick="delete_img_category(event,\''+uuid+'\',\'D\')" title="Delete Image">'
         cont_html +="<img src='"+moo_params.plugin_url+"/public/img/delete.png'>";
         cont_html +="</a>";
         cont_html +="</td>";
@@ -695,7 +805,7 @@ var media_uploader  = null;
 var moo_item_images = [];// {"image_url": "", "image_default": "", "image_enabled": ""}
 var moo_category_images;
 
-function uploader_image_category(enent,id,responsive = 'D'){
+function uploader_image_category(enent,id,responsive){
     event.preventDefault();
     media_uploader = wp.media({
         frame:    "post",

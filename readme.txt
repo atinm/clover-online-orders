@@ -1,10 +1,10 @@
 ﻿=== Merchantech Online Orders for Clover ===
 Contributors: merchantech
-Donate link: http://merchantech.us/
+Donate link: http://www.merchantapps.com/
 Tags: clover,online orders for clover,merchantech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover
 Requires at least: 3.0.1
 Tested up to: 4.0
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,10 +90,13 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 7. An other example of menu
 
 == Changelog ==
+= 1.2.2 =
+* Ability to rearrange modifiers & modifiers group
+* Ability to change modifiers names
 = 1.2.1 =
 * Prevent customer from ordering outside of business hours and days
-* Added Category's image
-* Added changing order for categories
+* Option to add image to any category
+* Ability to rearrange categories
 * Added multiple images for item
 * Improved order later
 * Improved manually sync

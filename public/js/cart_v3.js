@@ -245,7 +245,8 @@ function moo_updateQuantity(quantityInput,item_uuid)
     jQuery.post(moo_params.ajaxurl,{'action':'moo_update_qte',"item":item_uuid,"qte":quantity}, function (data) {
         if(data.status != 'success')
         {
-            toastr.error('Please refresh the page and try again');
+            swal({ title: "Connection error", text: 'Please refresh the page and try again',   type: "error",   confirmButtonText: "Try again " });
+
         }
     });
     /* Update line price display and recalc cart totals */
@@ -263,7 +264,7 @@ function moo_removeItem(removeButton,item_uuid)
     /* remove from session */
     jQuery.post(moo_params.ajaxurl,{'action':'moo_deleteItemFromcart',"item":item_uuid}, function (data) {
         if(data.status != "success"){
-            toastr.error('Please refresh the page and try again');
+            swal({ title: "Connection error", text: 'Please refresh the page and try again',   type: "error",   confirmButtonText: "Try again " });
         };
     });
     /* Remove row from DOM and recalc cart total */

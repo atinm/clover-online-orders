@@ -302,3 +302,9 @@ select
     margin-top: 10px;
     margin-bottom: 20px;
 }
+.moo_category_page_title
+{
+    font-size:20px;
+    text-transform: uppercase;
+    color: #000;
+}

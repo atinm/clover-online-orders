@@ -3,7 +3,7 @@
 /**
  * Fired during plugin deactivation
  *
- * @link       http://merchantech.us
+ * @link       http://merchantechapps.com
  * @since      1.0.0
  *
  * @package    Moo_OnlineOrders

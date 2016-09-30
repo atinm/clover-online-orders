@@ -3,7 +3,7 @@
 /**
  * Fired during plugin activation
  *
- * @link       http://merchantech.us
+ * @link       http://merchantechapps.com
  * @since      1.0.0
  *
  * @package    Moo_OnlineOrders
@@ -188,6 +188,7 @@ class Moo_OnlineOrders_Activator {
                       `show_by_default` INT NULL ,
                       `min_required` INT NULL ,
                       `max_allowd` INT NULL ,
+                      `sort_order` INT NULL ,
                       PRIMARY KEY (`_id`),
                       UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC))
                     ENGINE = InnoDB;");
@@ -205,6 +206,8 @@ class Moo_OnlineOrders_Activator {
                       `name` VARCHAR(100) NULL,
                       `price` VARCHAR(45) NULL,
                       `alternate_name` MEDIUMTEXT NULL,
+                      `sort_order` INT NULL ,
+                      `show_by_default` INT NOT NULL DEFAULT '1',
                       `group_id` VARCHAR(100) NOT NULL ,
                       PRIMARY KEY (`_id`)  ,
                       INDEX `{$wpdb->prefix}fk_modifier_modifier_group1_idx` (`group_id` ASC) ,
@@ -465,9 +468,10 @@ class Moo_OnlineOrders_Activator {
         $defaultOptions = get_option( 'moo_settings' );
 
         if( !isset($defaultOptions["default_style"]) || $defaultOptions["default_style"] == "" || $defaultOptions["default_style"] == "style2" ) $defaultOptions["default_style"] = "style1";
-        if( !isset($defaultOptions["default_style"]) || $defaultOptions["hours"] == "") $defaultOptions["hours"] = "business";
-        if( !isset($defaultOptions["default_style"]) || $defaultOptions["payment_cash"] == "") $defaultOptions["payment_cash"] = "on";
-
+        if( !isset($defaultOptions["hours"]) || $defaultOptions["hours"] == "") $defaultOptions["hours"] = "business";
+        if( !isset($defaultOptions["payment_cash"]) || $defaultOptions["payment_cash"] == "") $defaultOptions["payment_cash"] = "on";
+        if( !isset($defaultOptions["payment_cash_delivery"]) || $defaultOptions["payment_cash_delivery"] == "") $defaultOptions["payment_cash_delivery"] = "on";
+        if( !isset($defaultOptions["scp"]) || $defaultOptions["scp"] == "") $defaultOptions["scp"] = "on";
 
         update_option('moo_settings', $defaultOptions );
             

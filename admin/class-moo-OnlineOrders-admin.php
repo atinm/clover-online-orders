@@ -247,6 +247,8 @@ class moo_OnlineOrders_Admin {
             $MooOptions['accept_orders_w_closed']='on';
         if(!isset($MooOptions['show_categories_images']))
             $MooOptions['show_categories_images'] = 'false';
+        if(!isset($MooOptions['payment_cash_delivery']))
+            $MooOptions['payment_cash_delivery'] = '';
 
 
         $token = $MooOptions["api_key"];
@@ -294,7 +296,7 @@ class moo_OnlineOrders_Admin {
         wp_localize_script("moo-map-da", "moo_merchantLng",$MooOptions['lng']);
         /* Fin map Delivery area section*/
         ?>
-        <div id="MooPanel" class="wrap">
+        <div id="MooPanel">
             <div id="MooPanel_sidebar">
                 <div id="Moopanel_logo">
                     <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/woo_100x100.png";?>" alt=""/>
@@ -306,7 +308,7 @@ class moo_OnlineOrders_Admin {
                     <li id="MooPanel_tab3" onclick="tab_clicked(3)">Orders Types</li>
                     <li id="MooPanel_tab4" onclick="tab_clicked(4)">Store interface</li>
                     <li id="MooPanel_tab5" onclick="tab_clicked(5)">Categories</li>
-                    <li id="MooPanel_tab6" onclick="tab_clicked(6)">Modifiers</li>
+                    <li id="MooPanel_tab6" onclick="tab_clicked(6)">Modifier groups</li>
                     <li id="MooPanel_tab7" onclick="tab_clicked(7)">Store settings</li>
                     <li id="MooPanel_tab8" onclick="tab_clicked(8)">Delivery areas</li>
                     <li id="MooPanel_tab9" onclick="tab_clicked(9)">Feedback / Help</li>
@@ -327,7 +329,7 @@ class moo_OnlineOrders_Admin {
                         <li id="MooPanel_tab_3" onclick="tab_clicked(3)">Orders Types</li>
                         <li id="MooPanel_tab_4" onclick="tab_clicked(4)">Store interface</li>
                         <li id="MooPanel_tab_5" onclick="tab_clicked(5)">Categoies</li>
-                        <li id="MooPanel_tab_6" onclick="tab_clicked(6)">Modifiers</li>
+                        <li id="MooPanel_tab_6" onclick="tab_clicked(6)">Modifier groups</li>
                         <li id="MooPanel_tab_7" onclick="tab_clicked(7)">Store settings</li>
                         <li id="MooPanel_tab_8" onclick="tab_clicked(8)">Delivery areas</li>
                         <li id="MooPanel_tab_9" onclick="tab_clicked(9)">Feedback/Help</li>
@@ -683,53 +685,91 @@ class moo_OnlineOrders_Admin {
                 </div>
                 <!-- Modifiers -->
                 <div id="MooPanel_tabContent6">
-                    <h2>Modifiers</h2>
+                    <h2>Modifier Groups</h2>
                     <hr>
                     <div class="MooPanelItem">
                         <h3>Hide or change modifier group names so they are easy to understand</h3>
                         <?php
-                        if(count($modifier_groups)==0) echo "<div class=\"normal_text\">It's appears you don't have any Modifier Group, please import your data by clicking on <b>Import Items from sidebar then import inventory</b></div>";
+                        if(count($modifier_groups)==0) echo "<div class=\"normal_text\">It appears you don't have any Modifier Group, please import your data by clicking on <b>Import Items from sidebar then import inventory</b></div>";
                         ?>
-                        <div id="show_hide_modifer_desktop">
-                            <div id="MooCategoriesContent">
-                                <?php
-                                foreach ($modifier_groups as $mg) {
-                                    ?>
-                                    <div class="Moo_option-item">
-                                        <div class="label"><?php echo $mg->name?></div>
-                                        <div class="onoffswitch" onchange="MooChangeModifier_Status('<?php echo $mg->uuid?>')" title="Show/Hide this Modifier Group">
-                                            <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_<?php echo $mg->uuid?>" <?php echo ($mg->show_by_default)?'checked':''?>>
-                                            <label class="onoffswitch-label" for="myonoffswitch_<?php echo $mg->uuid?>"><span class="onoffswitch-inner"></span>
-                                                <span class="onoffswitch-switch"></span>
-                                            </label>
-                                        </div>
-                                        <div style="float: right">
-                                            <input type="text" value="<?php echo $mg->alternate_name?>" id="Moo_ModifierGroupNewName_<?php echo $mg->uuid?>">
-                                            <div class="button-small button-primary" onclick="Moo_changeModifierGroupName('<?php echo $mg->uuid?>')">Save</div>
-                                            <div id="Moo_ModifierGroupSaveName_<?php echo $mg->uuid?>" style="color: #008000;display: none">Saved</div>
-                                        </div>
-                                    </div>
-                                <?php }?>
-                            </div>
-
-                    </div>
-                        <div id="show_hide_modifer_mobile" style="text-align: center;">
+                        <ul class="moo_ModifierGroup">
                             <?php
-                            foreach ($modifier_groups as $mg) {
-                                ?>
-                                <div class="Moo_option-item" style="border-bottom: 1px solid #1e5429">
-                                    <div><?php echo $mg->name?></div>
-                                    <div style="margin-top: 10px;" onchange="MooChangeModifier_Status_Mobile('<?php echo $mg->uuid?>')" title="Show/Hide this Modifier Group">
-                                        <input type="checkbox" name="onoffswitch[]" class="" id="myonoffswitch_mobile_<?php echo $mg->uuid?>" <?php echo ($mg->show_by_default)?'checked':''?>>
-                                    </div>
-                                    <div>
-                                        <input style="margin-top: 10px; margin-bottom: 10px;" type="text" value="<?php echo $mg->alternate_name?>" id="Moo_ModifierGroupNewName_mobile_<?php echo $mg->uuid?>">
-                                        <div class="button button-primary" onclick="Moo_changeModifierGroupName_Mobile('<?php echo $mg->uuid?>')">Save</div>
-                                        <div id="Moo_ModifierGroupSaveName_mobile_<?php echo $mg->uuid?>" style="color: #008000;display: none">Saved</div>
-                                    </div>
+                            $i=0;
+                            $j=0;
+                           foreach ($modifier_groups as $mg) { ?>
+                            <li class="list-group" group-id="<?php echo $mg->uuid?>">
+                               <span class="show-detail-group">
+                                   <?php
+                                   $modifiers = $model->getAllModifiers($mg->uuid);
+                                   $Nb_MG = count($modifiers);
+                                   if($Nb_MG != 0){
+                                   ?>
+                                    <a href="#" onclick="show_sub(event,'<?php echo $mg->uuid ?>')">
+                                      <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/add.png" ?>" id="plus_<?php echo $mg->uuid ?>" style="width: 20px;">
+                                    </a>
+                                   <?php } ?>
+                                </span>
+                                <div class="label_name" id="label_<?php echo $mg->uuid?>">
+                                    <label class="getname"><?php if ($mg->alternate_name == null) {$name = $mg->name;} else {$name = $mg->alternate_name;} echo $name;?></label>
+                                    <span class="change-name" style="display: none;">
+                                        <input type="text" value="<?php echo $name;?>" class="nameGGroup" id="newName_<?php echo $mg->uuid?>">
+                                        <a href="#" onclick="validerChangeNameGG(event,'<?php echo $mg->uuid?>')"> <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/valider.png" ?>" style="width: 18px;"></a>
+                                        <a href="#" onclick="annulerChangeNameGG(event,'<?php echo $mg->uuid?>','<?php echo $name?>')"> <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/annuler.png" ?>" style="width: 18px;"></a>
+                                    </span>
                                 </div>
-                            <?php } ?>
-                        </div>
+                                <div class="onoffswitch show_group" onchange="MooChangeModifier_Status('<?php echo $mg->uuid?>')" title="Show/Hide this Modifier Group">
+                                    <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_<?php echo $mg->uuid?>" <?php echo ($mg->show_by_default)?'checked':''?>>
+                                    <label class="onoffswitch-label" for="myonoffswitch_<?php echo $mg->uuid?>"><span class="onoffswitch-inner"></span>
+                                        <span class="onoffswitch-switch"></span>
+                                    </label>
+                                </div>
+                                <div class="saved_new_name">
+                                    <a href="#" class="bt-eidt-GGroup" onclick="edit_name_GGroup(event,'<?php echo $mg->uuid ?>')">
+                                        <span id="moo_edit_nameGG<?php echo $i; ?>"
+                                              data-ot="Edit the modifier group name"
+                                              data-ot-target="#moo_edit_nameGG<?php echo $i; ?>">
+                                            <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/edit.png" ?>" style="width: 24px;">
+                                        </span>
+                                    </a>
+                                </div>
+                                <span class="bar-group">
+                                    <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/menu.png" ?>" style="width: 18px;">
+                                </span>
+                                <ul id="detail_group_<?php echo $mg->uuid ?>" class="sub-group" GM="<?php echo $mg->uuid?>">
+                                   <?php foreach ($modifiers as $value){?>
+                                        <li class="list-GModifier_<?php echo $mg->uuid?>" group-id="<?php echo $value->uuid?>">
+                                            <span class="moo_modifier_name" id="label_<?php echo $value->uuid?>">
+                                                <label class="getname"><?php if ($value->alternate_name == null) {$name = $value->name;} else {$name = $value->alternate_name;} echo $name;?></label>
+                                                <span class="change-name-modifier" style="display: none;">
+                                                    <input type="text" value="<?php echo $name;?>" class="nameGGroup" id="newName_<?php echo $value->uuid?>">
+                                                    <a href="#" onclick="validerChangeNameModifier(event,'<?php echo $value->uuid?>')"> <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/valider.png" ?>" style="width: 18px;"></a>
+                                                    <a href="#" onclick="annulerChangeNameModifier(event,'<?php echo $value->uuid?>')"> <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/annuler.png" ?>" style="width: 18px;"></a>
+                                                </span>
+                                            </span>
+                                            <div class="onoffswitch show_group" onchange="MooChangeM_Status('<?php echo $value->uuid?>')" title="Show/Hide this Modifier">
+                                                <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_<?php echo $value->uuid?>" <?php echo ($value->show_by_default)?'checked':''?>>
+                                                <label class="onoffswitch-label" for="myonoffswitch_<?php echo $value->uuid?>"><span class="onoffswitch-inner"></span>
+                                                    <span class="onoffswitch-switch"></span>
+                                                </label>
+                                            </div>
+                                            <div class="edit_modifer_name">
+                                                <a href="#" class="bt-eidt-GGroup" onclick="edit_name_GModifer(event,'<?php echo $value->uuid ?>')">
+                                                <span id="moo_edit_nameGM<?php echo $j; ?>"
+                                                      data-ot="Edit the modifier name"
+                                                      data-ot-target="#moo_edit_nameGM<?php echo $j; ?>">
+                                                    <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/edit.png" ?>" style="width: 24px;">
+                                                </span>
+                                                </a>
+                                            </div>
+                                            <span class="bar-group">
+                                                <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/menu.png" ?>" style="width: 18px;">
+                                            </span>
+                                        </li>
+                                    <?php $j++; } ?>
+                                </ul>
+                            </li>
+                           <?php $i++; }?>
+                        </ul>
 
                     </div>
                 </div>
@@ -746,12 +786,14 @@ class moo_OnlineOrders_Admin {
                             'tips',
                             'item_delivery',
                             'payment_cash',
-                            'csp',
+                            'payment_cash_delivery',
+                            'scp',
                             'hours',
                             'hide_menu',
                             'accept_orders_w_closed',
                             'order_later',
                             'order_later_minutes',
+                            'order_later_min_days',
                             'order_later_days',
                             'thanks_page',
                             'custom_css',
@@ -828,6 +870,20 @@ class moo_OnlineOrders_Admin {
                                 </div>
                                 <span id="moo_info_msg-1" class="moo-info-msg"
                                       data-ot="Allow customer to order online and then pay at store"
+                                      data-ot-target="#moo_info_msg-1">
+                                    <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                </span>
+                            </div>
+                            <div class="Moo_option-item">
+                                <div style="margin-bottom: 14px;" class="label">Pay upon delivery</div>
+                                <div class="onoffswitch"  title="Accept cash payment">
+                                    <input type="checkbox" name="moo_settings[payment_cash_delivery]" class="onoffswitch-checkbox" id="myonoffswitch_payment_cash_delivery" <?php echo ($MooOptions['payment_cash_delivery'] == 'on')?'checked':''?>>
+                                    <label class="onoffswitch-label" for="myonoffswitch_payment_cash_delivery"><span class="onoffswitch-inner"></span>
+                                        <span class="onoffswitch-switch"></span>
+                                    </label>
+                                </div>
+                                <span id="moo_info_msg-1" class="moo-info-msg"
+                                      data-ot="Allow customer to order online and then pay upon delivery"
                                       data-ot-target="#moo_info_msg-1">
                                     <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
                                 </span>
@@ -911,6 +967,19 @@ class moo_OnlineOrders_Admin {
                                         <div class="iwl_label_holder"><label for="yourephone">min in advance</label></div>
                                         <div class="iwl_input_holder">
                                             <input name="moo_settings[order_later_minutes]" id="MooOrderLaterMinutes" type="text" value="<?php echo (isset($MooOptions['order_later_minutes']))?$MooOptions['order_later_minutes']:""; ?>" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="Moo_option-item" >
+                                    <div class="normal_text">
+                                        Minimum time in days customers can choose when ordering in advance. Default is 0 day
+                                    </div>
+                                </div>
+                                <div class="Moo_option-item">
+                                    <div class="iwl_holder">
+                                        <div class="iwl_label_holder"><label for="yourephone">days in advance</label></div>
+                                        <div class="iwl_input_holder">
+                                            <input name="moo_settings[order_later_min_days]" id="MooOrderLaterDays" type="text" value="<?php echo (isset($MooOptions['order_later_min_days']))?$MooOptions['order_later_min_days']:"" ?>" />
                                         </div>
                                     </div>
                                 </div>
@@ -1373,7 +1442,7 @@ class moo_OnlineOrders_Admin {
                 </td>
                 <?php if ($category->image_url == null) { ?>
                     <td class="bt-cat">
-                        <a href="#" onclick="uploader_image_category(event,'<?php echo $category->uuid ?>')">
+                        <a href="#" onclick="uploader_image_category(event,'<?php echo $category->uuid ?>','D')">
                                         <span id="moo_epload_img<?php echo $i; ?>"
                                               data-ot="Upload Image"
                                               data-ot-target="#moo_epload_img<?php echo $i; ?>">
@@ -1384,7 +1453,7 @@ class moo_OnlineOrders_Admin {
                     <td colspan="2" style="text-align: center;">
                         <a href="#" class="edit_name">
                                         <span id="moo_edite_name<?php echo $i; ?>"
-                                              data-ot="Edite Name"
+                                              data-ot="Edit Name"
                                               data-ot-target="#moo_edite_name<?php echo $i; ?>">
                                         <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/edit.png" ?>">
                                         </span>
@@ -1392,7 +1461,7 @@ class moo_OnlineOrders_Admin {
                     </td>
                 <?php } else { ?>
                     <td class="bt-cat">
-                        <a href="#" onclick="uploader_image_category(event,'<?php echo $category->uuid ?>')">
+                        <a href="#" onclick="uploader_image_category(event,'<?php echo $category->uuid ?>','D')">
                                         <span id="moo_change_name<?php echo $i; ?>"
                                               data-ot="Change Image"
                                               data-ot-target="#moo_change_name<?php echo $i; ?>">
@@ -1403,14 +1472,14 @@ class moo_OnlineOrders_Admin {
                     <td class="bt-cat">
                         <a href="#" class="edit_name">
                                         <span id="moo_edite_name<?php echo $i; ?>"
-                                              data-ot="Edite Name"
+                                              data-ot="Edit Name"
                                               data-ot-target="#moo_edite_name<?php echo $i; ?>">
                                         <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/edit.png" ?>">
                                         </span>
                         </a>
                     </td>
                     <td class="bt-cat">
-                        <a href="#" onclick="delete_img_category(event,'<?php echo $category->uuid ?>')">
+                        <a href="#" onclick="delete_img_category(event,'<?php echo $category->uuid ?>','D')">
                                         <span id="moo_delete_img<?php echo $i; ?>"
                                               data-ot="Delete Image"
                                               data-ot-target="#moo_delete_img<?php echo $i; ?>">

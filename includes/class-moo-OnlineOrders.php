@@ -6,7 +6,7 @@
  * A class definition that includes attributes and functions used across both the
  * public-facing side of the site and the admin area.
  *
- * @link       http://merchantech.us
+ * @link       http://merchantechapps.com
  * @since      1.0.0
  *
  * @package    merchantech_OnlineOrders
@@ -69,7 +69,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.2.1';
+		$this->version = '1.2.2';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -282,12 +282,19 @@ class moo_OnlineOrders {
 		$this->loader->add_action( 'wp_ajax_moo_update_category_images_status', $plugin_public, 'moo_UpdateCategoryImagesStatus');
 
 		/* Manage modifiers */
-        //Change modifier name
+        //Change modifier Group name
 		$this->loader->add_action( 'wp_ajax_moo_change_modifiergroup_name', $plugin_public, 'moo_ChangeModifierGroupName');
-        //update modifier status
+
+        //Change modifier name
+        $this->loader->add_action( 'wp_ajax_moo_change_modifier_name', $plugin_public, 'moo_ChangeModifierName');
+
+        //update modifier group status
 		$this->loader->add_action( 'wp_ajax_moo_update_modifiergroup_status', $plugin_public, 'moo_UpdateModifierGroupStatus');
 
-		//Change modifier name
+        //update modifier status
+        $this->loader->add_action( 'wp_ajax_moo_update_modifier_status', $plugin_public, 'moo_UpdateModifierStatus');
+
+        //Change modifier name
 		$this->loader->add_action( 'wp_ajax_moo_change_category_name', $plugin_public, 'moo_ChangeCategoryName');
 		//update category status
 		$this->loader->add_action( 'wp_ajax_moo_update_category_status', $plugin_public, 'moo_UpdateCategoryStatus');
@@ -344,6 +351,13 @@ class moo_OnlineOrders {
         $this->loader->add_action( 'wp_ajax_moo_change_name_category', $plugin_public, 'change_name_category');
         $this->loader->add_action( 'wp_ajax_nopriv_moo_change_name_category', $plugin_public, 'change_name_category');
 
+        // New order Modifiers Group
+        $this->loader->add_action( 'wp_ajax_moo_new_order_group_modifier', $plugin_public, 'moo_NewOrderGroupModifier');
+        $this->loader->add_action( 'wp_ajax_moo_new_order_group_modifier', $plugin_public, 'moo_NewOrderGroupModifier');
+
+        // New order Modifiers Group
+        $this->loader->add_action( 'wp_ajax_moo_new_order_modifier', $plugin_public, 'moo_NewOrderModifier');
+        $this->loader->add_action( 'wp_ajax_moo_new_order_modifier', $plugin_public, 'moo_NewOrderModifier');
 
         /*
          * Item's images

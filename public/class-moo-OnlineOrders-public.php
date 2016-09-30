@@ -3,7 +3,7 @@
 /**
  * The public-facing functionality of the plugin.
  *
- * @link       http://merchantech.us
+ * @link       http://merchantechapps.com
  * @since      1.0.0
  *
  * @package    Moo_OnlineOrders
@@ -1366,7 +1366,20 @@ public function moo_AddOrderType()
         wp_send_json($response);
 
     }
-    public function moo_UpdateModifierGroupStatus()
+    function moo_ChangeModifierName()
+    {
+        $m_uuid  = sanitize_text_field($_POST['m_uuid']);
+        $name     = sanitize_text_field($_POST['m_name']);
+        $res = $this->model->ChangeModifierName($m_uuid,$name);
+
+        $response = array(
+            'status'	 => 'Success',
+            'data'=>$res
+        );
+        wp_send_json($response);
+
+    }
+    function moo_UpdateModifierGroupStatus()
     {
         $mg_uuid  = sanitize_text_field($_POST['mg_uuid']);
         $status   = sanitize_text_field($_POST['mg_status']);
@@ -1377,7 +1390,14 @@ public function moo_AddOrderType()
         );
         wp_send_json($response);
     }
-    public function moo_ChangeCategoryName()
+
+    function moo_UpdateModifierStatus(){
+        $mg_uuid  = sanitize_text_field($_POST['mg_uuid']);
+        $status   = sanitize_text_field($_POST['mg_status']);
+        $res = $this->model->UpdateModifierStatus($mg_uuid,$status);
+        wp_send_json($res);
+    }
+    function moo_ChangeCategoryName()
     {
         $cat_uuid  = sanitize_text_field($_POST['cat_uuid']);
         $name      = sanitize_text_field($_POST['cat_name']);
@@ -1448,7 +1468,7 @@ public function moo_AddOrderType()
 
         if($MooOptions['hours'] == 'business')
         {
-            $res = $this->api->getOpeningStatus(4,30);
+            $res = $this->api->getOpeningStatus(4,30,0);
             $stat = json_decode($res)->status;
             $response = array(
                 'status'     => 'Success',
@@ -1698,6 +1718,19 @@ public function moo_AddOrderType()
         $DefaultOption['show_categories_images'] = $status;
         update_option("moo_settings",$DefaultOption);
         wp_send_json($status);
+    }
+
+    public function moo_NewOrderGroupModifier(){
+        $newdata = $_POST["newtable"];
+        $ret = $this->model->saveNewOrderGroupModifier($newdata);
+        wp_send_json($ret);
+    }
+
+    public function moo_NewOrderModifier(){
+        $group = sanitize_text_field($_POST["group_id"]);
+        $newdata = $_POST["newtable"];
+        $ret = $this->model->saveNewOrderModifier($group,$newdata);
+        wp_send_json($ret);
     }
 
 }
