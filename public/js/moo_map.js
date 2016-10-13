@@ -209,12 +209,16 @@ function moo_address_SetOnMap(event)
 function moo_calculate_delivery_fee()
 {
     toastr.remove();
-
     var order_total             = parseFloat(moo_Total.sub_total);
     var delivery_free_after     = parseFloat(moo_delivery_free_amount)  ; //Free delivery after this amount
     var delivery_fixed_amount   = parseFloat(moo_delivery_fixed_amount) ; //Fixed delivery amount
     var delivery_for_other_zone = parseFloat(moo_delivery_other_zone_fee) ; //Amount of delivery for other zones
     var moo_delivery_areas = null;
+    // console.log(order_total);
+    // console.log(delivery_free_after);
+    // console.log(delivery_fixed_amount);
+    // console.log(delivery_for_other_zone);
+    // console.log(moo_delivery_areas);
 
     try {
         moo_delivery_areas  = JSON.parse(moo_delivery_zones);
@@ -235,11 +239,15 @@ function moo_calculate_delivery_fee()
     {
         if(isNaN(delivery_free_after) || delivery_free_after > order_total )
         {
+            if(!isNaN(delivery_free_after))
+            {
+                var amoutToAdd = delivery_free_after-order_total;
+              swal({ title: 'Spend $'+delivery_free_after.toFixed(2)+" to get free delivery",text:'Add $'+(amoutToAdd.toFixed(2))+' to your order to enjoy free delivery',   type: "warning",   showCancelButton: true,  confirmButtonColor: "#DD6B55",   confirmButtonText: "Continue shopping",cancelButtonText: "Checkout",   closeOnConfirm: false },function(){ window.history.back() });
+            }
             //Customer coordinate
             if(customer_lat != '' && customer_lng != '')
             {
                 var zones_contain_point = new Array();
-
 
                 for(i in moo_delivery_areas)
                 {
@@ -265,8 +273,8 @@ function moo_calculate_delivery_fee()
                          }
                 }
                 // If the selected point on the map exists in at least one merchant's zones
-                // Then we we update the delivry amount by this zone fee
-                // else we verify if the mercahnt allow other zones
+                // Then we we update the delivery amount by this zone fee
+                // else we verify if the merchant allow other zones
                 if( zones_contain_point.length>=1 )
                 {
                     var delivery_final_amount = zones_contain_point[0].zone_fee;
@@ -293,7 +301,8 @@ function moo_calculate_delivery_fee()
                     }
                     else
                     {
-                        toastr.success('Delivery amount is : $'+ delivery_for_other_zone.toFixed(2));
+                        //toastr.success('Delivery amount is : $'+ delivery_for_other_zone.toFixed(2));
+                        swal({ title: 'Delivery amount for other zones is : $'+ delivery_for_other_zone.toFixed(2), text: 'your address is in other zone not drawn in map',   type: "success",   confirmButtonText: "OK" });
                         moo_update_delivery_amount(delivery_for_other_zone,'-1')
                     }
 
@@ -306,15 +315,17 @@ function moo_calculate_delivery_fee()
         {
             if(delivery_free_after <= order_total )
             {
-                toastr.success('Free Delivery For This Zone');
+                swal({ title: 'Free Delivery for your order', type: "success",   confirmButtonText: "OK" });
                 moo_update_delivery_amount('FREE','-1')
 
             }
+
         }
     }
     else
     {
-        toastr.success('Delivery amount is : $'+ delivery_fixed_amount.toFixed(2));
+      //  toastr.success('Delivery amount is : $'+ delivery_fixed_amount.toFixed(2));
+        swal({ title: 'Delivery amount is : $'+ delivery_fixed_amount.toFixed(2), text: 'It\'s a fixed amount by the store',   type: "success",   confirmButtonText: "OK" });
         moo_update_delivery_amount(delivery_fixed_amount,'-1')
     }
 }
@@ -331,7 +342,7 @@ function moo_update_delivery_amount(amount,zone_id)
     {
         document.getElementById('moo_delivery_amount').value = 'ERROR';
         moo_update_totals();
-        toastr.error('Zone Not Supported');
+        swal({ title: 'Sorry, zone not supported',text:'We not deliver to your address',   type: "error",  confirmButtonColor: "#DD6B55",   confirmButtonText: "Change the address" });
         return;
     }
 
@@ -361,11 +372,12 @@ function moo_update_delivery_amount(amount,zone_id)
                     {
                         document.getElementById('moo_delivery_amount').value = 'ERROR';
                         jQuery('#moo-cart-delivery-fee').html(0.00);
-                        toastr.error("The minimum order's total for the selected zone is $"+parseFloat(el.minAmount).toFixed(2));
+                        swal({ title: "The minimum order's total for the selected zone is $"+parseFloat(el.minAmount).toFixed(2),   type: "error",  confirmButtonColor: "#DD6B55",   confirmButtonText: "Change the address" });
+
                     }
                     else
                     {
-                        toastr.success('Delivery amount is : $'+amount.toFixed(2));
+                        swal({ title: "Delivery amount is : $"+amount.toFixed(2),   type: "success",   confirmButtonText: "OK" });
                         document.getElementById('moo_delivery_amount').value = parseFloat(amount);
                         moo_update_totals();
                     }
@@ -378,22 +390,30 @@ function moo_update_delivery_amount(amount,zone_id)
 
 }
 
- function moo_update_totals()
+function moo_update_totals()
  {
      var delivery_amount = parseFloat(document.getElementById('moo_delivery_amount').value);
      if(document.getElementById('moo_tips') != null)
          var tips_amount     = parseFloat(document.getElementById('moo_tips').value);
      else
          var tips_amount = 0;
+    if(document.getElementById('OrderType') != null)
+    {
+        var orderTypes_id   = document.getElementById('OrderType').value;
+        var orderType = null;
 
-     var orderTypes_id   = document.getElementById('OrderType').value;
-     var orderType = null;
+        for(i in moo_OrderTypes)
+        {
+            if(orderTypes_id == moo_OrderTypes[i].ot_uuid)
+                orderType =  moo_OrderTypes[i];
+        }
+    }
+    else
+    {
+        var orderType = {};
+            orderType.taxable = '1';
+    }
 
-     for(i in moo_OrderTypes)
-     {
-         if(orderTypes_id == moo_OrderTypes[i].ot_uuid)
-             orderType =  moo_OrderTypes[i];
-     }
 
      if(isNaN(delivery_amount) || delivery_amount < 0)
          delivery_amount = 0.00;

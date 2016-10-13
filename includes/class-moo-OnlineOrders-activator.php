@@ -398,6 +398,7 @@ class Moo_OnlineOrders_Activator {
                           `taxable` INT(1),
                           `status` INT(1),
                           `show_sa` INT(1),
+                          `type` INT(1),
                           PRIMARY KEY (`ot_uuid`))
                         ENGINE = InnoDB;");
 
@@ -454,7 +455,7 @@ class Moo_OnlineOrders_Activator {
             'post_content' => '[moo_cart]'
         );
         // Save the version of the plugin in the Database
-         update_option('moo_onlineOrders_version', '121');
+         update_option('moo_onlineOrders_version', '123');
         //insert page and save the id
         $store_page_id    =  wp_insert_post( $post_store, false );
         $checkout_page_id =  wp_insert_post( $post_checkout, false );

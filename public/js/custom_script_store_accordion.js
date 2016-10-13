@@ -19,13 +19,13 @@ function moo_addToCart(e,item_uuid,name,price)
     if(MOO_CART[item_uuid])
     {
         MOO_CART[item_uuid].quantity++;
-        swal({ title: name+"'s", text: 'quantity updated',   type: "success",   confirmButtonText: "OK" });
+        swal({ title:  name+' added to cart', text: 'To add special instructions to this item or change the quantity, select this item from the cart',    type: "success",   confirmButtonText: "OK" });
         jQuery('#moo_cart_line_'+item_uuid+'>td:nth-child(2)').html(MOO_CART[item_uuid].quantity);
         jQuery('#moo_cart_line_'+item_uuid+'>td:nth-child(3)').html('$'+(parseInt(MOO_CART[item_uuid].quantity)*price/100).toFixed(2));
 
     }
     else {
-        swal({ title: name, text: 'Added to cart',   type: "success",   confirmButtonText: "OK" });
+        swal({ title: name+' added to cart', text: 'To add special instructions to this item or change the quantity, select this item from the cart',   type: "success",   confirmButtonText: "OK" });
         addLineToHtmlCart(name,price,item_uuid);
         MOO_CART[item_uuid] = {uuid:item_uuid,name:name,quantity:1,price:price};
     }
@@ -86,13 +86,9 @@ function ChangeQuantity(item_uuid)
                                 jQuery.post(moo_params.ajaxurl,{'action':'moo_update_qte',"item":item_uuid,"qte":new_qte}, function (data) {
                                     if(data.status == 'success')
                                     {
-                                        toastr.warning("Updating the quantity...");
-
+                                        moo_updateCart();
+                                        swal({ title: "Quantity updated", text: '',   type: "success",   confirmButtonText: "OK" });
                                     }
-                                }).done(function(e){
-                                    moo_updateCart();
-                                    swal({ title: "Quantity updated", text: '',   type: "success",   confirmButtonText: "OK" });
-
                                 });
                                 else
                                    if(new_qte != currentQte)

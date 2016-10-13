@@ -308,3 +308,17 @@ select
     text-transform: uppercase;
     color: #000;
 }
+
+.btn-primary:hover,.btn-danger:hover {
+    color: #fff !important;
+}
+.btn-primary{
+    color: #fff !important;
+}
+.BtnCheckout,.btn-danger{
+    color: #fff !important;
+    margin: 10px !important;
+}
+.BtnCheckout:visited{
+    color: #fff !important;
+}

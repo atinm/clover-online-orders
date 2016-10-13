@@ -10,18 +10,15 @@ class moo_OnlineOrders_CallAPI {
     {
         $MooSettings = (array) get_option("moo_settings");
         $this->Token = $MooSettings['api_key'];
-
 		//Put the API URL here and don't forget the last slash
         $this->url_api = "http://api.smartonlineorders.com/";
-
-
     }
     /*
      * This functions import data from Clover POS and call the save functions
      * for example : getCategories get JSON object of categories from Clover POS and call the function save_categories
      * to save the this categories in Wordpress DB
      */
-	function getCategories()
+    public function getCategories()
     {
         $res = $this->callApi("categories",$this->Token);
         if($res){
@@ -33,7 +30,7 @@ class moo_OnlineOrders_CallAPI {
        }
 
     }
-    function getItemGroups()
+    public function getItemGroups()
     {
         $res = $this->callApi("item_groups",$this->Token);
         if($res){
@@ -44,7 +41,7 @@ class moo_OnlineOrders_CallAPI {
            return "Please verify your Key in page settings";
        }
     }
-    function getModifierGroups()
+    public function getModifierGroups()
     {
         $res = $this->callApi("modifier_groups",$this->Token);
         if($res){
@@ -55,7 +52,7 @@ class moo_OnlineOrders_CallAPI {
            return "Please verify your Key in page settings";
        }
     }
-    function getOneModifierGroups($uuid)
+    public function getOneModifierGroups($uuid)
     {
         global $wpdb;
         $res = $this->callApi("modifier_groups/".$uuid,$this->Token);
@@ -73,7 +70,7 @@ class moo_OnlineOrders_CallAPI {
         $this->save_modifiers($modifier_groups->modifiers);
         return true;
     }
-    function getItems()
+    public function getItems()
     {
         $res = $this->callApi("items_expanded",$this->Token);
         if($res){
@@ -84,25 +81,7 @@ class moo_OnlineOrders_CallAPI {
            return "Please verify your Key in page settings";
        }
     }
-    function getItemsWithoutSaving($page)
-    {
-       $res = $this->callApi("items_expanded/".$page."/20",$this->Token);
-       return $res;
-    }
-    function getCategoriesWithoutSaving()
-    {
-       return  $this->callApi("categories",$this->Token);
-    }
-    function getModifiersGroupsWithoutSaving()
-    {
-       return $this->callApi("modifier_groups",$this->Token);
-    }
-    function getModifiersWithoutSaving()
-    {
-       return $this->callApi("modifiers",$this->Token);
-
-    }
-    function getModifiers()
+    public function getModifiers()
     {
         $res = $this->callApi("modifiers",$this->Token);
         if($res){
@@ -113,7 +92,7 @@ class moo_OnlineOrders_CallAPI {
            return "Please verify your Key in page settings";
        }
     }
-    function getAttributes()
+    public function getAttributes()
     {
         $res = $this->callApi("attributes",$this->Token);
         if($res){
@@ -124,7 +103,7 @@ class moo_OnlineOrders_CallAPI {
            return "Please verify your Key in page settings";
        }
     }
-    function getOptions()
+    public function getOptions()
     {
         $res = $this->callApi("options",$this->Token);
         if($res){
@@ -135,7 +114,100 @@ class moo_OnlineOrders_CallAPI {
            return "Please verify your Key in page settings";
        }
     }
-    function updateItemGroup($uuid)
+    public function getTags()
+    {
+        $res = $this->callApi("tags",$this->Token);
+        if($res){
+            $saved = $this->save_tags($res);
+            return "$saved Labels imported";
+        }
+       else{
+           return "Please verify your Key in page settings";
+       }
+    }
+    public function getTaxRates()
+    {
+        $res = $this->callApi("tax_rates",$this->Token);
+        if($res){
+            $saved = $this->save_tax_rates($res);
+            return "$saved Taxes rates imported";
+        }
+       else{
+           return "Please verify your Key in page settings";
+       }
+    }
+    public function getOrderTypes()
+    {
+        $res = $this->callApi("order_types",$this->Token);
+        if($res){
+            $saved = $this->save_order_types($res);
+            return "$saved Order type saved in your DB";
+        }
+       else{
+           return "Please verify your Key in page settings";
+       }
+    }
+    //Functions to call the API for make Orders and payments
+    public function getPayKey()
+    {
+        return $this->callApi("paykey",$this->Token);
+    }
+    //Functions to call get the merchant logos
+    public function getMerchantLogos()
+    {
+        return $this->callApi("logo",$this->Token);
+    }
+    public function getMerchantAddress()
+    {
+        return $this->callApi("address",$this->Token);
+    }
+    public function getOpeningHours()
+    {
+        $result = array();
+        $days_names = array('monday','tuesday','wednesday','thursday','friday','saturday','sunday');
+        $res =  json_decode($this->callApi("opening_hours",$this->Token));
+        $string = "";
+        if(isset($res->elements))
+        {
+            $days = $res->elements;
+            $days = $days[0];
+            foreach ($days_names as $days_name)
+            {
+                $string = "";
+                $Theday = $days->{$days_name};
+                if(count($Theday->elements)>0)
+                    foreach ($Theday->elements as $time)
+                    {
+                        $startTime   =  ($time->start!=0)?substr_replace(((strlen($time->start) == 4)?$time->start:((strlen($time->start) == 2)?'00'.$time->start:'0'.$time->start)), ':', 2, 0):'00:00';
+                        $endTime     =  ($time->end!=2400)?substr_replace(((strlen($time->end) == 4)?$time->end:((strlen($time->end) == 2)?'00'.$time->end:'0'.$time->end)), ':', 2, 0):'24:00';
+                        $string  .= date('h:ia', strtotime($startTime)).' to '.date('h:ia', strtotime($endTime)). ' AND ';
+                        $result[ucfirst($days_name)] = substr($string,0,-5);
+                    }
+                else
+                    $result[ucfirst($days_name)] = 'Closed';
+
+            }
+            return $result;
+        }
+        else
+            return "Please setup you business hours on Clover";
+
+    }
+    public function getOpeningStatus($nb_days,$nb_minites,$mindays)
+    {
+        if($mindays>0)
+            return $this->callApi("is_open/".$nb_days."/".$nb_minites."/".$mindays,$this->Token);
+        else
+            return $this->callApi("is_open/".$nb_days."/".$nb_minites,$this->Token);
+
+    }
+    public function getMerchantProprietes()
+    {
+        return $this->callApi("properties",$this->Token);
+    }
+
+    //Function to update existing data
+    public function updateItemGroup($uuid)
     {
         $res = $this->callApi("attributes/".$uuid,$this->Token);
         if($res){
@@ -151,47 +223,32 @@ class moo_OnlineOrders_CallAPI {
             return "Please verify your Key in page settings";
         }
     }
-    function getTags()
+    public function getItemsWithoutSaving($page)
     {
-        $res = $this->callApi("tags",$this->Token);
-        if($res){
-            $saved = $this->save_tags($res);
-            return "$saved Labels imported";
-        }
-       else{
-           return "Please verify your Key in page settings";
-       }
+        $res = $this->callApi("items_expanded/".$page."/20",$this->Token);
+        return $res;
     }
-    function getTaxRates()
+    public function getCategoriesWithoutSaving()
     {
-        $res = $this->callApi("tax_rates",$this->Token);
-        if($res){
-            $saved = $this->save_tax_rates($res);
-            return "$saved Taxes rates imported";
-        }
-       else{
-           return "Please verify your Key in page settings";
-       }
+        return  $this->callApi("categories",$this->Token);
     }
-    function getOrderTypes()
+    public function getModifiersGroupsWithoutSaving()
     {
-        $res = $this->callApi("order_types",$this->Token);
-        if($res){
-            $saved = $this->save_order_types($res);
-            return "$saved Order type saved in your DB";
-        }
-       else{
-           return "Please verify your Key in page settings";
-       }
+        return $this->callApi("modifier_groups",$this->Token);
+    }
+    public function getModifiersWithoutSaving()
+    {
+        return $this->callApi("modifiers",$this->Token);
+
+    }
+    public function updateOrderNote($orderId,$note)
+    {
+        return $this->callApi_Post("update_order/".$orderId,$this->Token,'note='.$note);
     }
 
-    //Functions to call the API for make Orders and payments
-    function getPayKey()
-    {
-        return $this->callApi("paykey",$this->Token);
-    }
-    //create the order
-    function createOrder($total,$orderType,$paymentmethod)
+
+    //manage orders
+    public function createOrder($total,$orderType,$paymentmethod)
     {
         if($orderType=='default')
         {
@@ -202,77 +259,66 @@ class moo_OnlineOrders_CallAPI {
 
         return $res;
     }
-    //create the order
-    function addlineToOrder($oid,$item_uuid,$qte,$special_ins)
+    public function addlineToOrder($oid,$item_uuid,$qte,$special_ins)
     {
         return $this->callApi_Post("create_line_in_order",$this->Token,'oid='.$oid.'&item='.$item_uuid.'&qte='.$qte.'&special_ins='.$special_ins);
     }
-    function addlineWithPriceToOrder($oid,$item_uuid,$qte,$special_ins,$price)
+    public function addlineWithPriceToOrder($oid,$item_uuid,$qte,$special_ins,$price)
     {
         return $this->callApi_Post("create_line_in_order",$this->Token,'oid='.$oid.'&item='.$item_uuid.'&qte='.$qte.'&special_ins='.$special_ins.'&itemprice='.$price);
     }
-    //create the order
-    function addModifierToLine($oid,$lineId,$modifer_uuid)
+    public function addModifierToLine($oid,$lineId,$modifer_uuid)
     {
         return $this->callApi_Post("add_modifier_to_line",$this->Token,'oid='.$oid.'&lineid='.$lineId.'&modifier='.$modifer_uuid);
     }
     //Pay the order
-    function payOrder($oid,$taxAmount,$amount,$zip,$expMonth,$cvv,$last4,$expYear,$first6,$cardEncrypted,$tipAmount)
+    public function payOrder($oid,$taxAmount,$amount,$zip,$expMonth,$cvv,$last4,$expYear,$first6,$cardEncrypted,$tipAmount)
     {
         return $this->callApi_Post("pay_order",$this->Token,'orderId='.$oid.'&taxAmount='.$taxAmount.'&amount='.$amount.'&zip='.$zip.'&expMonth='.$expMonth.
             '&cvv='.$cvv.'&last4='.$last4.'&first6='.$first6.'&expYear='.$expYear.'&cardEncrypted='.$cardEncrypted.'&tipAmount='.$tipAmount);
     }
     //Send Notification to the merchant when a new order is registered
-    function NotifyMerchant($oid,$instructions,$customer,$pickup_time,$paymentMethode)
+    public function NotifyMerchant($oid,$instructions,$customer,$pickup_time,$paymentMethode)
     {
         return $this->callApi_Post("notify",$this->Token,'orderId='.$oid.'&instructions='.$instructions.'&pickup_time='.$pickup_time.'&paymentmethod='.$paymentMethode.'&customer='.json_encode($customer));
     }
     // OrderTypes
-    function GetOneOrdersTypes($uuid)
+    public function GetOneOrdersTypes($uuid)
     {
         return $this->callApi("order_types/".$uuid,$this->Token);
     }
-    function GetOrdersTypes()
+    public function GetOrdersTypes()
     {
         return $this->callApi("order_types",$this->Token);
     }
-	function addOrderType($label,$taxable)
+    public function addOrderType($label,$taxable)
 	{
 		return $this->callApi_Post("order_types",$this->Token,'label='.$label.'&taxable='.$taxable);
 	}
     //Updtae the website for the merchant
-    function updateWebsite($url)
+    public function updateWebsite($url)
     {
         return $this->callApi_Post("addsite",$this->Token,'website='.$url);
     }
-    function updateWebsiteHooks($url)
+    public function updateWebsiteHooks($url)
     {
         return $this->callApi_Post("addsite_webhooks",$this->Token,'website='.$url);
     }
-    function getMerchantAddress()
-    {
-        return $this->callApi("address",$this->Token);
-    }
-    function getOpeningHours()
-    {
-        return $this->callApi("opening_hours",$this->Token);
-    }
-    function getOpeningStatus($nb_days,$nb_minites,$mindays)
-    {
-        if($mindays>0)
-            return $this->callApi("is_open/".$nb_days."/".$nb_minites."/".$mindays,$this->Token);
-        else
-            return $this->callApi("is_open/".$nb_days."/".$nb_minites,$this->Token);
-
-    }
-    function getMerchantProprietes()
-    {
-        return $this->callApi("properties",$this->Token);
-    }
     //Create default Orders Types
-    function CreateOrdersTypes()
+    public function CreateOrdersTypes()
+        {
+            return $this->callApi("create_default_ot",$this->Token);
+        }
+    public function sendSms($code,$phone)
     {
-        return $this->callApi("create_default_ot",$this->Token);
+        $phone = str_replace('+','%2B',$phone);
+        $message = 'Your verification code is : '.$code;
+        return $this->callApi_Post("sendsms",$this->Token,'to='.$phone.'&body='.$message);
+    }
+    public function sendSmsTo($message,$phone)
+    {
+        $phone = str_replace('+','%2B',$phone);
+        return $this->callApi_Post("sendsms",$this->Token,'to='.$phone.'&body='.$message);
     }
 
     /*
@@ -291,11 +337,6 @@ class moo_OnlineOrders_CallAPI {
             return false;
         }
     }
-    function updateOrderNote($orderId,$note)
-    {
-        return $this->callApi_Post("update_order/".$orderId,$this->Token,'note='.$note);
-    }
-
     public function delete_item($uuid)
     {
         if($uuid=="") return;
@@ -386,22 +427,20 @@ class moo_OnlineOrders_CallAPI {
     }
     public function update_order_types()
     {
-        update_option('moo_store_openingHours',$this->getOpeningHours());
         global $wpdb;
         $result=array();
        // $wpdb->show_errors();
         $wpdb->query('START TRANSACTION');
-
         $res = $this->callApi("order_types",$this->Token);
         $res = json_decode($res)->elements;
-
         if(count($res)==0) return false;
 
         // Get the actual status from the database for example if a merchant is already enable an order type
         // So when importing the order types they will be enabled
-        foreach ( $wpdb->get_results("SELECT ot_uuid,status,show_sa FROM {$wpdb->prefix}moo_order_types") as $st) {
+        foreach ( $wpdb->get_results("SELECT ot_uuid,status,show_sa,type FROM {$wpdb->prefix}moo_order_types") as $st) {
             $status[$st->ot_uuid]['status']  = $st->status;
             $status[$st->ot_uuid]['show_sa'] = $st->show_sa;
+            $status[$st->ot_uuid]['type'] = $st->type;
         };
 
         //Delete all ordertypes from wordpress database
@@ -414,7 +453,8 @@ class moo_OnlineOrders_CallAPI {
                     'label' => $ot->label,
                     'taxable' => $ot->taxable,
                     'show_sa' => (isset($status[$ot->id]['show_sa']) && $status[$ot->id]['show_sa']==1 )?1:0,
-                    'status' => (isset($status[$ot->id]['status']) && $status[$ot->id]['status']==1 )?1:0
+                    'status' => (isset($status[$ot->id]['status']) && $status[$ot->id]['status']==1 )?1:0,
+                    'type' => (isset($status[$ot->id]['type']))?$status[$ot->id]['type']:null
             ));
 
         }
@@ -428,7 +468,6 @@ class moo_OnlineOrders_CallAPI {
             $wpdb->query('ROLLBACK'); // // something went wrong, Rollback
             return false;
         }
-
 
     }
     public function save_one_item($res)
@@ -685,12 +724,12 @@ class moo_OnlineOrders_CallAPI {
         global $wpdb;
         $items_ids="";
 
-        foreach($category->items->elements as $item)
+        foreach($category->items->elements
+                as $item)
             $items_ids.=$item->id.",";
         if($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_category where uuid='{$category->id}'") > 0)
             $res = $wpdb->update("{$wpdb->prefix}moo_category",array(
                 'name' => $category->name,
-                'sort_order' => $category->sortOrder,
                 'items' =>  $items_ids
             ),array('uuid'=>$category->id));
         else
@@ -729,7 +768,6 @@ class moo_OnlineOrders_CallAPI {
         if($res>0) return true;
         return false;
     }
-
     public function update_modifier($modifier)
     {
         global $wpdb;
@@ -742,7 +780,7 @@ class moo_OnlineOrders_CallAPI {
 
             ),array('uuid' => $modifier->id));
         else
-            $res = $wpdb->insert("{$wpdb->prefix}moo_modifier_group",array(
+            $res = $wpdb->insert("{$wpdb->prefix}moo_modifier",array(
                 'uuid' => $modifier->id,
                 'name' => $modifier->name,
                 'alternate_name' => $modifier->alternateName,
@@ -752,6 +790,12 @@ class moo_OnlineOrders_CallAPI {
         if($res>0) return true;
         return false;
     }
+    public function send_an_email($order_id,$emails,$customer,$instructions,$pickup_time)
+    {
+        return $this->callApi_Post("sendemails",$this->Token,"order_id=".$order_id."&merchant_emails=".$emails."&customer=".$customer."&instructions=".$instructions."&pickup_time=".$pickup_time);
+    }
+
+    //Funciton to save DATA in db
 
     private function save_tax_rates($obj)
     {
@@ -1009,17 +1053,9 @@ class moo_OnlineOrders_CallAPI {
             ));
         return $res;
     }
-    public function sendSms($code,$phone)
-    {
-        $phone = str_replace('+','%2B',$phone);
-        $message = 'Your verification code is : '.$code;
-        return $this->callApi_Post("sendsms",$this->Token,'to='.$phone.'&body='.$message);
-    }
-    public function sendSmsTo($message,$phone)
-    {
-        $phone = str_replace('+','%2B',$phone);
-        return $this->callApi_Post("sendsms",$this->Token,'to='.$phone.'&body='.$message);
-    }
+
+
+
     private function callApi($url,$accesstoken)
     {
 
@@ -1043,8 +1079,8 @@ class moo_OnlineOrders_CallAPI {
         }
         $info = curl_getinfo($crl);
         curl_close($crl);
-	    //echo 'GET : '.$url;
-       // var_dump($reply);
+	  //  echo 'GET : '.$url;
+      //  var_dump($reply);
         if($info['http_code']==200)return $reply;
         return false;
     }
@@ -1072,8 +1108,8 @@ class moo_OnlineOrders_CallAPI {
 
         $info = curl_getinfo($crl);
         curl_close($crl);
-	   // echo $url." ---- ";
-       // var_dump($reply);
+	   //echo $url." ---- ";
+      // var_dump($reply);
         if($info['http_code'] == 200)
             return $reply;
         return false;

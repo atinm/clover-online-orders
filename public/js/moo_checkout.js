@@ -75,7 +75,7 @@ jQuery("#moo_form_address").validate({
         var delivery_amount = document.getElementById('moo_delivery_amount').value;
         if(delivery_amount == 'ERROR')
         {
-            swal({ title: "Verify your delivery details", text: 'please verify your delivery details',   type: "error",   confirmButtonText: "Verify" });
+            swal({ title: "Verify your delivery details", text: 'please verify your delivery details by clicking on Calculate Delivery fee',   type: "error",   confirmButtonText: "Verify" });
         }
         else
         {
@@ -246,7 +246,7 @@ function moo_verifyCode(event)
             jQuery('#moo_verifPhone_sending').hide();
             jQuery('#moo_verifPhone_verificatonCode').hide();
             jQuery('#moo_verifPhone_verified').css("display","inline-block");
-            swal({ title: 'Phone verified', text: 'Your phone was verified',   type: "success",   confirmButtonText: "OK" });
+            swal({ title: 'Phone verified', text: 'Please have your payment ready when picking up from the store and don\'t forget to finalize your order below',   type: "success",   confirmButtonText: "OK" });
         }
         else
             swal({ title: "Code invalid", text: 'this code is invalid please try again',   type: "error",   confirmButtonText: "Try again" });

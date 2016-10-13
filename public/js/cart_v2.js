@@ -237,7 +237,9 @@ function moo_addModifiers(event,item_name,item_uuid,item_price)
                     {
                         if(!flag)
                         {
-                            swal({ title: item_name, text: 'Added to cart',   type: "success",   confirmButtonText: "OK" });
+                          //  swal({ title: item_name, text: 'Added to cart',   type: "success",   confirmButtonText: "OK" });
+                            swal({ title: item_name+' added to cart', text: 'To add special instructions to this item or change the quantity, select this item from the cart',   type: "success",   confirmButtonText: "OK" });
+
                             //send the request to the server
                             jQuery.post(moo_params.ajaxurl,{'action':'moo_modifier_add',"modifiers":Modifiers}, function (data) {
                                 if(data.status == 'success' )

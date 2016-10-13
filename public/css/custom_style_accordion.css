@@ -115,6 +115,10 @@
 {
     width: 50%;
 }
+.moo_cart table thead th:last-child
+{
+    width: 36%;
+}
 .moo_cart table tbody
 {
     color: #000000;
@@ -318,7 +322,7 @@ border-bottom: none;
 }
 .Moo_modifiergroupMessage
 {
-    font-size: 10px;
+    font-size: 14px;
     color: red;
 }
 #moo_form_address

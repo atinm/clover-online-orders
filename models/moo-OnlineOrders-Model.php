@@ -92,7 +92,7 @@ class moo_OnlineOrders_Model {
     */
     function getAllModifiersGroup()
     {
-        return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_modifier_group ORDER BY `sort_order` ASC");
+        return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_modifier_group WHERE uuid in (SELECT group_id from {$this->db->prefix}moo_modifier) ORDER BY `sort_order`,name ASC");
     }
     function getAllModifiers($uuid_group)
     {
@@ -369,7 +369,7 @@ class moo_OnlineOrders_Model {
     }
     function NbGroupModifier()
     {
-        return $this->db->get_results("SELECT count(*) as nb FROM {$this->db->prefix}moo_modifier_group");
+        return $this->db->get_results("SELECT count(*) as nb FROM {$this->db->prefix}moo_modifier_group WHERE uuid in (SELECT group_id from {$this->db->prefix}moo_modifier)");
     }
     function NbModifier($group)
     {
@@ -412,6 +412,16 @@ class moo_OnlineOrders_Model {
                                     FROM {$this->db->prefix}moo_images images
                                     WHERE images.item_uuid = '{$uuid}' AND images.is_default = '1'
                                     ");
+    }
+    function getOrderDetails($uuid)
+    {
+        $uuid = esc_sql($uuid);
+        return $this->db->get_results("SELECT *
+                                   FROM {$this->db->prefix}moo_item I
+                                   INNER JOIN {$this->db->prefix}moo_item_order IO
+                                   ON IO.`item_uuid` = I.uuid
+                                   WHERE IO.order_uuid = '{$uuid}'
+                                   ");
     }
 
     function saveItemWithImage($uuid,$description,$images) {
@@ -504,12 +514,9 @@ class moo_OnlineOrders_Model {
     function saveNewOrderGroupModifier($tab){
         $compteur = 0;
         //Get the number of categories to compare it with the categories that are changed
-
         $group_number = $this->NbGroupModifier();
-		$group_number = $group_number[0]->nb;
-
+        $group_number = $group_number[0]->nb;
         $this->db->query('START TRANSACTION');
-
         foreach ($tab as $key => $value) {
             $this->db->update("{$this->db->prefix}moo_modifier_group",
                 array(
@@ -536,7 +543,7 @@ class moo_OnlineOrders_Model {
         //Get the number of categories to compare it with the categories that are changed
 
         $cats_number = $this->NbModifier($group);
-		$cats_number = $cats_number[0]->nb;
+        $cats_number = $cats_number[0]->nb;
 
         $this->db->query('START TRANSACTION');
 

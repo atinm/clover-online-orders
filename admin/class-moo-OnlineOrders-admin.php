@@ -253,6 +253,8 @@ class moo_OnlineOrders_Admin {
 
         $token = $MooOptions["api_key"];
         $merchant_proprites = (json_decode($api->getMerchantProprietes())) ;
+        $current_hours = $api->getOpeningHours() ;
+
 
         update_option("moo_settings",$MooOptions);
 
@@ -597,7 +599,7 @@ class moo_OnlineOrders_Admin {
                             { ?>
                                 <div class="Moo_option-item">
                                     <div class="label"><strong>All Items (<?php echo $nb_items[0]->nb.' items)'?></strong></div>
-                                    <div onchange="MooChangeCategory_Status_Mobile('NoCategory')" title="Show/Hide this Category">
+                                    <div onchange="MooChangeCategory_Status_M('NoCategory')" title="Show/Hide this Category">
                                         <input type="checkbox" id="myonoffswitch_NoCategory_Mobile" <?php $show_all_items = get_option("moo-show-allItems");
                                         echo ($show_all_items == 'true')?'checked':''?> style="margin-top: 5px;">
                                     </div>
@@ -940,6 +942,19 @@ class moo_OnlineOrders_Admin {
                                             </label>
                                         </div>
                                     </div>
+                                    <div class="Moo_option-item">
+                                        <div style="margin-bottom: 14px;" class="label">Your current business hours
+                                            <span id="moo_info_msg-4" class="moo-info-msg"
+                                                  data-ot="  <?php foreach ($current_hours as $key=>$value) {
+                                                      echo '<strong><dt>'.$key.'</dt></strong>';
+                                                      echo '<dd>'.$value.'</dd>';
+                                                  }; ?>"
+                                                  data-ot-target="#moo_info_msg-4">
+                                        <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                        </span>
+                                        </div>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1117,7 +1132,7 @@ class moo_OnlineOrders_Admin {
                         <h3>Other options</h3>
                         <div class="Moo_option-item" >
                             <div class="normal_text">
-                                <strong>Free Delivery</strong> : if customer spends over this dollar amount, then delivery fee is free, Keep empty if you don't want to offer free delivery
+                                <strong>Free Delivery</strong> : if customer spends over this dollar amount, then delivery fee is free, Keep empty if you don't want to offer free delivery (you should draw your delivery zones)
                             </div>
                             <div class="iwl_holder">
                                 <div class="iwl_label_holder"><label for="minamount">Min Amount</label></div>
@@ -1388,9 +1403,9 @@ class moo_OnlineOrders_Admin {
                 foreach ($MooOptions as $option_name=>$option_value)
                     if(!in_array($option_name,$fields))
                         echo '<input type="text"  name="moo_settings['.$option_name.']" value="'.$option_value.'" hidden/>';
+
             ?>
             <textarea name="moo_settings[zones_json]" hidden><?php echo $MooOptions['zones_json']?></textarea>
-
             <input type="hidden" name="_wp_http_referer" value="<?php echo (esc_url((admin_url('admin.php?page=moo_index')))); ?>" />
             <div id="MooPanel_tabContent1">
             <h2>Set-up your address</h2><hr>

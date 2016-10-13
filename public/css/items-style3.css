@@ -233,7 +233,8 @@
     color: #ffffff;
     background-color: rgba(0, 0, 0, 0.5);
     bottom: 5px;
-    width: 96%;
+    left: 5px;
+    right: 5px;
     padding:0 10px;
     font-weight: 100;
     text-transform: uppercase;

@@ -868,9 +868,8 @@ class Moo_OnlineOrders_Public {
 
                             $this->api->NotifyMerchant($orderCreated['OrderId'],$_POST['form']['instructions'],$customer,$pickup_time,$paymentmethod);
 
-                            $this->sendEmail($_POST['form']['email'],$_POST['form']['name'],$orderCreated['OrderId']);
-                            $this->sendEmail2merchant($MooOptions['merchant_email'],$orderCreated['OrderId'],$otherInformations,$deliveryFee,$pickup_time);
-
+                            $this->sendEmail2customer($orderCreated['OrderId'],$_POST['form']['email'],$_POST['form']['instructions'],$pickup_time);
+                            $this->sendEmail2merchant($orderCreated['OrderId'],$MooOptions['merchant_email'],$customer,$_POST['form']['instructions'],$pickup_time);
                             unset($_SESSION['items']);
 
                             $response = array(
@@ -900,8 +899,8 @@ class Moo_OnlineOrders_Public {
                                 $this->SendSmsToCustomer($orderCreated['OrderId'],$customer['phone']);
                                 $this->model->updateOrder($orderCreated['OrderId'],json_decode($paid)->paymentId);
                                 $this->api->NotifyMerchant($orderCreated['OrderId'],$_POST['form']['instructions'],$customer,$pickup_time,$paymentmethod);
-                                $this->sendEmail($_POST['form']['email'],$_POST['form']['name'],$orderCreated['OrderId']);
-                                $this->sendEmail2merchant($MooOptions['merchant_email'],$orderCreated['OrderId'],$otherInformations,$deliveryFee,$pickup_time);
+                                $this->sendEmail2customer($orderCreated['OrderId'],$_POST['form']['email'],$_POST['form']['instructions'],$pickup_time);
+                                $this->sendEmail2merchant($orderCreated['OrderId'],$MooOptions['merchant_email'],$customer,$_POST['form']['instructions'],$pickup_time);
                                 unset($_SESSION['items']);
                                 wp_send_json($response);
                             }
@@ -926,12 +925,13 @@ class Moo_OnlineOrders_Public {
                             if(isset($MooOptions['scp']) && $MooOptions['scp'] =='on')
                             {
                                     /* Update order note */
-                                    $merchant_website = get_option( 'moo_store_page');
+                                    $merchant_website = get_option('moo_store_page');
                                     $note = array(
                                         'tipAmount'=>$tipAmount,
                                         'taxAmount'=>$orderCreated['taxamount'],
                                         'customer'=>$customer,
                                         'merchantPhone'=>$MooOptions['merchant_phone'],
+                                        'merchantEmails'=>$MooOptions['merchant_email'],
                                         'pickuptime'=>$pickup_time,
                                         'instructions'=>$_POST['form']['instructions'],
                                         'site_url'=>esc_url(get_permalink($merchant_website))
@@ -1114,6 +1114,7 @@ class Moo_OnlineOrders_Public {
         $res = $this->api->sendSms($verification_code,$phone_number);
         $response = array(
             'status'	=> 'success',
+            //'code'	=> $verification_code,
             'result'    => $res
         );
         wp_send_json($response);
@@ -1605,60 +1606,14 @@ public function moo_AddOrderType()
         );
         wp_send_json($response);
     }
-    private function sendEmail($email,$name,$orderID)
+    private function sendEmail2customer($order_id,$customer_email,$instructions,$pickup_time)
     {
-        $MooOptions = (array)get_option('moo_settings');
-        $emails = explode(",",$MooOptions['merchant_email']);
-        $headers[] = 'Content-Type: text/html; charset=UTF-8';
-        $headers[] = 'From: '. $emails[0]. "\r\n";
-
-       // $order = $this->model->getOrder($orderID);
-
-        $message    =  'Dear '.$name;
-        $message   .=  '<br/><br/>Thank you for placing your order with us ';
-        $message   .=  '<br/><br/>You can see your receipt at this <a href="https://www.clover.com/r/'.$orderID.'" target="_blanck">link</a> ( https://www.clover.com/r/'.$orderID.' )';
-        wp_mail($email, 'Thank you for your order', $message,$headers);
+        @$this->api->send_an_email($order_id,$customer_email,null,$instructions,$pickup_time);
     }
-    private function sendEmail2merchant($email,$orderID,$otherInformations,$deliveryFee,$pickuptime)
+    private function sendEmail2merchant($order_id,$merchant_emails,$customer,$instructions,$pickup_time)
     {
-        if($email != null && $email != '')
-        {
-            $headers[] = 'Content-Type: text/html; charset=UTF-8';
-            $order = $this->model->getOrder($orderID);
-            $order = $order[0];
-            $emails = explode(',',$email);
-            $message    =  'Hello';
-            $message   .=  '<br/>You have received a new order on your website ';
-            $message   .=  '<br/><br/><b>Customer Information</b>';
-            $message   .=  '<br/>Name : '.$order->p_name;
-            $message   .=  '<br/>Address : '.$order->p_address;
-            $message   .=  '<br/>City : '.$order->p_city;
-            $message   .=  '<br/>State : '.$order->p_state;
-            $message   .=  '<br/>ZipCode : '.$order->p_zipcode;
-            $message   .=  '<br/>Email : '.$order->p_email;
-            $message   .=  '<br/>Phone : '.$order->p_phone;
-            if($order->instructions != '')
-                $message   .=  '<br/><b>Special Instructions</b>';
-            $message   .=  '<br/>'.$order->instructions;
-
-            if($deliveryFee != 0)
-                $message   .=  '<br/><b>Delivery Fee : $'.$deliveryFee.'</b>';
-
-            if($pickuptime != '')
-                $message   .=  '<br/>'.$pickuptime;
-
-            $message   .=  '<br/><br/><b><a href="https://www.clover.com/r/'.$orderID.'" target="_blanck">Order receipt</a></b>';
-
-            $message    .= $otherInformations;
-
-            foreach ($emails as $email) {
-                wp_mail(trim($email), 'New order received', $message,$headers);
-            }
-
-        }
-
+        @$this->api->send_an_email($order_id,$merchant_emails,json_encode($customer),$instructions,$pickup_time);
     }
-
     private function SendSmsToMerchant($orderID,$PaymentMethod,$pickuptime)
     {
             $MooOptions = (array)get_option('moo_settings');

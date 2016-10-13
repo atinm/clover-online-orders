@@ -529,7 +529,7 @@ function Moo_GetOrderTypes()
                         html +='<div  style="float: right"><a href="#" title="Delete this order types from the wordpress Database" onclick="Moo_deleteOrderType(event,\''+$ot.ot_uuid+'\')">DELETE</a></div></div>';
 
                         html_m  += "<div style='border-bottom: 1px solid'><div style='margin-bottom: 7px;'><strong>Name</strong> : "+($ot.label)+"</div>";
-                        html_m +='<div style="display: block; margin-bottom: 7px;" class="" onchange="MooChangeOT_Status_Mobile(\''+$ot.ot_uuid +'\')" title="'+(($ot.status==1)?"Disable":"Enable")+' this order types"><strong>Disable/Enable</strong> : ';
+                        html_m +='<div style="display: block; margin-bottom: 7px;" class="" onchange="MooChangeOT_Status_Mobile(\''+$ot.ot_uuid +'\')" title="'+(($ot.status==1)?"Disable":"Enable")+' this order types"><strong>Enabled</strong> : ';
                         html_m +='<input type="checkbox" name="onoffswitch[]" class="" id="myonoffswitch_mobile_'+$ot.ot_uuid+'"'+(($ot.status==1)?"checked":"")+'>';
                         html_m +='<label class="" for="myonoffswitch_'+$ot.ot_uuid +'">';
                         html_m +='<span class=""></span> <span class=""></span></label></div>';
@@ -766,7 +766,7 @@ function MooChangeCategory_Status(uuid)
         }
     );
 }
-function MooChangeCategory_Status_Mobile(uuid)
+function MooChangeCategory_Status_Mo(uuid)
 {
     var cat_status = jQuery('#myonoffswitch_NoCategory_Mobile').prop('checked');
     jQuery.post(moo_params.ajaxurl,{'action':'moo_update_category_status',"cat_uuid":uuid,"cat_status":cat_status}, function (data) {
@@ -792,7 +792,6 @@ function MooShowCategoriesImages_Mobile(id)
 }
 function MooChangeCategory_Status_Mobile(uuid)
 {
-    console.log('I am here');
     var cat_status = jQuery('#myonoffswitch_mobile_'+uuid).prop('checked');
     jQuery.post(moo_params.ajaxurl,{'action':'moo_update_category_status',"cat_uuid":uuid,"cat_status":cat_status}, function (data) {
             console.log(data);
