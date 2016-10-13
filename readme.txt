@@ -91,6 +91,11 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 
 == Changelog ==
 = 1.2.3 =
+* Improved and increased font size for required modifier
+* Updated email receipts with more information 
+* Shows special instructions on checkout page and on email receipt 
+* Ability to show item description for store interface 1
+* Fixed various bugs and other issues
 = 1.2.2 =
 * Ability to rearrange modifiers & modifiers group
 * Ability to change modifiers names
