@@ -76,17 +76,10 @@ function moo_emptyCart(event)
 
 function moo_addModifiers(item_name,item_uuid)
 {
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_check_item_modifiers',"item":item_uuid}, function (data) {
-        if(data.status == 'success' )
-        {
-            var required_modifiers_groups = "";
-            required_modifiers_groups = data.uuids.split(';');
             var selected_modifies = jQuery("#moo_form_modifiers").serializeArray();
             var Mgroups = {};
             var Modifiers = [];
-
             jQuery.magnificPopup.close();
-
             for(m in selected_modifies)
             {
                 var modifier = selected_modifies[m];
@@ -109,27 +102,34 @@ function moo_addModifiers(item_name,item_uuid)
                     };
                     Modifiers.push(modifier);
                 }
+                else
+                {
+                    var name = modifier.name; //the format is : moo_modifiers['item','modifierGroup']
+                    var string = name.split(','); // the new format is a table
+                    var item = string[0].substr(15);  // 15 is the length of moo_modifiers['
+                    item = item.substr(0,item.length-1); // remove the last '
+                    var modifierGroup = string[1].substr(1);
+                    modifierGroup = modifierGroup.substr(0,modifierGroup.length-2);
+                    var modif = modifier.value;
+                    if(item == '' || modifierGroup == '' || modif == '') continue;
+                    if(typeof Mgroups[modifierGroup] === 'undefined') Mgroups[modifierGroup] = 1;
+                    else Mgroups[modifierGroup] +=1;
+                    var modifier = {
+                        "item":item,
+                        "modifier": modif,
+                        "modifierGroup": modifierGroup
+                    };
+                    Modifiers.push(modifier);
+                }
             }
+
             var flag = false;
-            if(Object.keys(Mgroups).length == 0 && Object.keys(required_modifiers_groups).length <= 1) {
+            if(Object.keys(Mgroups).length == 0) {
                 jQuery.magnificPopup.close();
                 moo_cartv3_addtocart(item_uuid,item_name);
                 return false;
             }
-            /* verify if required modifier Groups are chooser */
-            for(mg in required_modifiers_groups){
-                var element = required_modifiers_groups[mg];
-                if(element != "")
-                {
-                    if(Object.keys(Mgroups).indexOf(element) == -1)
-                    {
-                       // toastr.error("You didn't choose all required modifiers");
-                        swal({ title: "Error!", text: "You didn't choose all required modifiers",   type: "error",   confirmButtonText: "Try again" });
-                        flag=true;
-                        return;
-                    }
-                }
-            }
+
             /* verify the min and max in modifier Group */
             var compteur = 0;
             for(mg in Mgroups){
@@ -137,13 +137,13 @@ function moo_addModifiers(item_name,item_uuid)
                     if(data.status == 'success' )
                     {
                         /* If the min is not null then we display a message if the custmet not choose the minimum */
-                        if(data.min != null && data.min != 0 && Mgroups[mg] < data.min) {
-                            var error_msg = "You must choose "+data.min+" modifier in "+data.name;
+                        if(data.min != null && data.min != 0 && Mgroups[data.uuid] < data.min) {
+                            var error_msg = "Please choose "+data.min+" options in "+data.name;
                             swal({ title: "Error!", text: error_msg,   type: "error",   confirmButtonText: "Try again" });
                             flag=true;
                         }
-                        if(data.max!= null && data.max != 0 && Mgroups[mg] > data.max) {
-                            var error_msg = "You can't choose more than "+ data.max+" modifier in "+data.name;
+                        if(data.max!= null && data.max != 0 && Mgroups[data.uuid] > data.max) {
+                            var error_msg = "You can't choose more than "+ data.max+" options in "+data.name;
                             swal({ title: "Error!", text: error_msg,   type: "error",   confirmButtonText: "Try again" });
                             flag=true;
                         }
@@ -179,14 +179,6 @@ function moo_addModifiers(item_name,item_uuid)
                     }
                 });
             }
-        }
-        else
-        {
-            swal({ title: "Connection error", text: "Please verify your internet connection",   type: "error",   confirmButtonText: "Try again" });
-            jQuery.magnificPopup.close();
-        }
-    });
-
 
 }
 function moo_addItemWithModifiersToCart(event,item_uuid,item_name,item_price)

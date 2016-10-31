@@ -70,6 +70,7 @@ class Moo_OnlineOrders_Activator {
                       `item_group_uuid` VARCHAR(100) NULL,
                       `visible` INT(1) DEFAULT '1',
                       `outofstock` INT(1) NOT NULL DEFAULT '0',
+                      `sort_order` INT NULL ,
                       PRIMARY KEY (`_id`),
                       UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC),
                       INDEX `{$wpdb->prefix}fk_item_item_group_idx` (`item_group_uuid` ASC),
@@ -455,7 +456,7 @@ class Moo_OnlineOrders_Activator {
             'post_content' => '[moo_cart]'
         );
         // Save the version of the plugin in the Database
-         update_option('moo_onlineOrders_version', '123');
+         update_option('moo_onlineOrders_version', '124');
         //insert page and save the id
         $store_page_id    =  wp_insert_post( $post_store, false );
         $checkout_page_id =  wp_insert_post( $post_checkout, false );

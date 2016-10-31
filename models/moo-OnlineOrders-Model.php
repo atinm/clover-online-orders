@@ -125,6 +125,7 @@ class moo_OnlineOrders_Model {
                                     AND item_mg.group_id =  mg.uuid
                                     AND item.uuid = '{$uuid}'
                                     AND mg.min_required >= 1
+				                    AND mg.show_by_default = 1
                                     ");
     }
     function getModifier($uuid)
@@ -132,6 +133,13 @@ class moo_OnlineOrders_Model {
     return $this->db->get_row("SELECT *
                                     FROM `{$this->db->prefix}moo_modifier` m
                                     WHERE m.uuid = '{$uuid}'
+                                    ");
+}
+function getItemsWithVariablePrice()
+{
+    return $this->db->get_results("SELECT *
+                                    FROM `{$this->db->prefix}moo_item` 
+                                    WHERE price_type = 'VARIABLE'
                                     ");
 }
     function getOrderTypes()
@@ -445,6 +453,25 @@ class moo_OnlineOrders_Model {
            $this->db->query('ROLLBACK');
            return false;
        }
+    }
+    function saveItemDescription($uuid,$description)
+    {
+        if($description != "")
+            $this->db->update("{$this->db->prefix}moo_item", array('description' => $description), array( 'uuid' => $uuid ));
+        return true;
+    }
+
+    function reOrderItems($tab){
+        $compteur = 0;
+        foreach ($tab as $key => $value) {
+            $this->db->update("{$this->db->prefix}moo_item",
+                array(
+                    'sort_order' => $key
+                ),
+                array( 'uuid' => $value ));
+            $compteur++;
+        }
+        return $compteur;
     }
 
     function saveImageCategory($uuid,$image){

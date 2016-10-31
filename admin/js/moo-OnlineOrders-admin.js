@@ -6,6 +6,32 @@ jQuery(document).ready(function($){
         // Show or hide the next element
         clicked.toggle();
     });
+    $('.moo-edit-description-button').magnificPopup({
+        type:'inline',
+        closeBtnInside: true,
+        midClick: true // Allow opening popup on middle mouse click. Always set it to true if you don't provide alternative source in href.
+    });
+
+    $('.moo-open-popupItems').magnificPopup({
+        type:'inline',
+        closeBtnInside: true,
+        midClick: true // Allow opening popup on middle mouse click. Always set it to true if you don't provide alternative source in href.
+    });
+
+    $(".moo_listItem").sortable({
+        stop: function(event, ui) {
+            var category = $(this).attr("id-cat");
+            var tabNew = new Array();
+            var i = 0;
+            $(".moo_listItem li.cat"+category).each(function(i, el){
+                tabNew[i] = $(this).attr("uuid_item");
+                i++;
+            });
+            jQuery.post(moo_params.ajaxurl,{'action':'moo_reorder_items','newtable':tabNew},function(data){
+                console.log(data);
+            });
+        }
+    });
 
     window.moo_loading = '<svg xmlns="http://www.w3.org/2000/svg" width="44px" height="44px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="uil-default"><rect x="0" y="0" width="100" height="100" fill="none" class="bk"></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(0 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(30 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.08333333333333333s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(60 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.16666666666666666s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(90 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.25s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(120 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.3333333333333333s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(150 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.4166666666666667s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(180 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(210 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5833333333333334s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(240 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.6666666666666666s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(270 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.75s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(300 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.8333333333333334s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(330 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.9166666666666666s" repeatCount="indefinite"></animate></rect></svg>';
     window.moo_first_time = true; // this variable is used to make sure the an action is happen only one time
@@ -386,6 +412,16 @@ function tr_new(uuid,img){
         cont_html +="</a>";
         cont_html +="</td>";
     }
+    cont_html +="<td class='items_cat'>";
+    cont_html +="<a href='#detailCat"+uuid+"' class='moo-open-popupItems'>";
+    cont_html +="<img src='"+moo_params.plugin_url+"/public/img/plusIT.png' style='width: 20px;'>";
+    cont_html +="</a>";
+    cont_html +="</td>";
+    jQuery("tr#row_id_"+uuid).html(cont_html);
+    jQuery('.moo-open-popupItems').magnificPopup({
+        type:'inline',
+        midClick: true // Allow opening popup on middle mouse click. Always set it to true if you don't provide alternative source in href.
+    });
     jQuery("tr#row_id_"+uuid).html(cont_html);
 }
 function visibility_cat(uuid) {
@@ -631,7 +667,8 @@ function moo_addordertype(e)
 
     var label   = document.querySelector('#Moo_AddOT_label').value;
     var taxable = document.querySelector('#Moo_AddOT_taxable_oui').checked ;
-    if(label == "") alert("Please enter a label for your order Type")
+    if(label == "")
+        swal("Error","Please enter a label for your order Type","error");
     else
     {
         jQuery('#Moo_AddOT_loading').html(window.moo_loading);
@@ -676,15 +713,14 @@ function MooSendFeedBack(e)
     var email =  jQuery("#MoofeedbackEmail").val();
     if(msg == '')
     {
-        alert("Please enter your message");
-
+        swal("Error","Please enter your message","error");
     }
     else
     {
         jQuery("#MooSendFeedBackBtn").hide();
         jQuery.post(moo_params.ajaxurl,{'action':'moo_send_feedback','message':msg,'email':email}, function (data) {
             if(data.status == "Success"){
-                alert("Thank you for your feedback.");
+                swal("Tank you","your feedback was sent","success");
                 jQuery("#Moofeedback").val("");
                 jQuery("#MooSendFeedBackBtn").show();
             }
@@ -837,7 +873,8 @@ function moo_save_category_images(uuid,response)
                 //console.log(ret);
             }
             else
-                alert("Error when saving your changes, please try again")
+                swal("Error","Error when saving your changes, please try again","error");
+
         });
     }
     else
@@ -944,20 +981,25 @@ function moo_save_item_images(uuid) {
         });
     }
     if(description.length>250) {
-        alert("Description too long");
+        swal("Error","Description too long","error");
         return
     }
-    if(description != "" || Object.keys(moo_item_images).length>=0) {
+    if(description != "" || Object.keys(moo_item_images).length>=0)
+    {
         jQuery.post(moo_params.ajaxurl,{'action':'moo_save_items_with_images',"item_uuid":uuid,"description":description,"images":images}, function (data) {
             if(data.status == 'Success') {
                 if(data.data==true) {
-                    alert("Your changes were saved");
+                    swal("Your changes were saved");
                     history.back();
-                } else alert("Error when saving your changes, please try again");
-            } else alert("Error when saving your changes, please try again");
+                }
+                else
+                    swal("Error","Description too longError when saving your changes, please try again","error");
+            } else
+                swal("Error","Error when saving your changes, please try again","error");
         }
         );
-    } else history.back();
+    }
+    else history.back();
 }
 
 function moo_get_item_with_images(uuid) {
@@ -999,7 +1041,7 @@ function MooPanel_UpdateCategories(event)
             window.bar.setText('50 %');
         }
     ).done(function () {
-            alert("Categories updated");
+            swal("Categories updated");
             window.bar.animate(1.0);
             window.bar.setText('100 %');
 
@@ -1022,7 +1064,7 @@ function MooPanel_UpdateModifiers(event)
                 window.bar.setText('100 %');
             }
         ).done(function () {
-            alert("Modifiers updated");
+            swal("Modifiers updated");
             window.bar.animate(1.0);
             window.bar.setText('100 %');
 
@@ -1047,7 +1089,7 @@ function moo_upadateItemsPerPage(page)
             moo_upadateItemsPerPage(page+1)
         else
         {
-            alert("Items updated");
+            swal("Items updated");
             window.bar.animate(1.0);
             window.bar.setText('100 %');
             moo_Update_stats();
@@ -1061,4 +1103,47 @@ function moo_bussinessHours_Details(status)
          jQuery('#moo_bussinessHours_Details').removeClass('moo_hidden');
     else
          jQuery('#moo_bussinessHours_Details').addClass('moo_hidden');
+
+}
+function moo_filtrer_by_category(e)
+{
+    e.preventDefault();
+    var cat_id = jQuery('#moo_cat_filter').val();
+    if(cat_id != '')
+    {
+        document.location.href = 'admin.php?page=moo_items'+cat_id;
+    }
+    else
+    {
+        document.location.href = 'admin.php?page=moo_items';
+    }
+}
+function moo_editItemDescription(event,item_uuid)
+{
+    event.preventDefault();
+    var new_description = jQuery('#edit-description-content-'+item_uuid).val();
+    if(new_description != "")
+    {
+        if(new_description.length>250) {
+            swal("Error","Description too long","error");
+            return
+        }
+        else
+            jQuery.magnificPopup.close();
+
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_save_items_description',"item_uuid":item_uuid,"description":new_description}, function (data) {
+                if(data.status == 'Success') {
+                    if(data.data==true) {
+                        swal("The description was updated");
+                    }
+                    else
+                        swal("Error when saving your changes, please try again","","error");
+
+                }
+                else
+                    swal("Error when saving your changes, please try again","","error");
+
+            }
+        );
+    }
 }

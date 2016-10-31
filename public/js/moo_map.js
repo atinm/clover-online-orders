@@ -47,13 +47,6 @@ function moo_initMapDZ(myLatLng) {
         zoom: 10,
         center: myLatLng
     });
-
-   /* var marker = new google.maps.Marker({
-        position: myLatLng,
-        editable:true,
-        map: map
-    });
-    */
     moo_draw_zones();
 }
 
@@ -72,7 +65,7 @@ function moo_draw_zones()
         {
             var element = moo_delivery_areas[i];
 
-            if(element.type=='circle')
+            if(element.type == 'circle')
             {
                 var Circle =  new google.maps.Circle({
                     strokeColor: element.color,
@@ -290,6 +283,13 @@ function moo_calculate_delivery_fee()
                         }
                     }
 
+                    if(!isNaN(delivery_free_after))
+                    {
+                        var amoutToAdd = delivery_free_after-order_total;
+                        if(amoutToAdd > 0 && amoutToAdd < delivery_final_amount)
+                            delivery_final_amount = amoutToAdd;
+                    }
+
                     moo_update_delivery_amount(parseFloat(delivery_final_amount),delivery_zone_id)
 
                 }
@@ -301,7 +301,13 @@ function moo_calculate_delivery_fee()
                     }
                     else
                     {
-                        //toastr.success('Delivery amount is : $'+ delivery_for_other_zone.toFixed(2));
+                        if(!isNaN(delivery_free_after))
+                        {
+                            var amoutToAdd = delivery_free_after-order_total;
+                            if(amoutToAdd > 0 && amoutToAdd < delivery_for_other_zone)
+                                delivery_for_other_zone = amoutToAdd;
+                        }
+
                         swal({ title: 'Delivery amount for other zones is : $'+ delivery_for_other_zone.toFixed(2), text: 'your address is in other zone not drawn in map',   type: "success",   confirmButtonText: "OK" });
                         moo_update_delivery_amount(delivery_for_other_zone,'-1')
                     }
@@ -317,7 +323,6 @@ function moo_calculate_delivery_fee()
             {
                 swal({ title: 'Free Delivery for your order', type: "success",   confirmButtonText: "OK" });
                 moo_update_delivery_amount('FREE','-1')
-
             }
 
         }
@@ -342,7 +347,7 @@ function moo_update_delivery_amount(amount,zone_id)
     {
         document.getElementById('moo_delivery_amount').value = 'ERROR';
         moo_update_totals();
-        swal({ title: 'Sorry, zone not supported',text:'We not deliver to your address',   type: "error",  confirmButtonColor: "#DD6B55",   confirmButtonText: "Change the address" });
+        swal({ title: 'Sorry, zone not supported',text:'We do not deliver to this address at this time',   type: "error",  confirmButtonColor: "#DD6B55",   confirmButtonText: "Change the address" });
         return;
     }
 
@@ -372,7 +377,7 @@ function moo_update_delivery_amount(amount,zone_id)
                     {
                         document.getElementById('moo_delivery_amount').value = 'ERROR';
                         jQuery('#moo-cart-delivery-fee').html(0.00);
-                        swal({ title: "The minimum order's total for the selected zone is $"+parseFloat(el.minAmount).toFixed(2),   type: "error",  confirmButtonColor: "#DD6B55",   confirmButtonText: "Change the address" });
+                        swal({ title: "The minimum order total for this selected zone is $"+parseFloat(el.minAmount).toFixed(2),   type: "error",  confirmButtonColor: "#DD6B55",   confirmButtonText: "Change the address" });
 
                     }
                     else

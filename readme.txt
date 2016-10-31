@@ -4,7 +4,7 @@ Donate link: http://www.merchantapps.com/
 Tags: clover,online orders for clover,merchantech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover
 Requires at least: 3.0.1
 Tested up to: 4.0
-Stable tag: 1.2.3
+Stable tag: 1.2.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -46,9 +46,9 @@ You can add your menu in a new post/page or an existing one using this shortcode
 
 `[moo_all_items]`
 
-With the 2nd style you can use this shortcode to display item for one category
+To display items for one category
 
-`[moo_all_items category='cat_id']` : replace the vat_id with the category's id
+`[moo_all_items category='cat_id']` : replace the cat_id with the category's id
 
 = VIDEO =
 [youtube https://www.youtube.com/watch?v=DHw2oppC6IU]
@@ -90,10 +90,21 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 7. An other example of menu
 
 == Changelog ==
+= 1.2.4 =
+* Improved process to make adding descriptions easier
+* Ability to rearrange items
+* In edit items page (filter by category)
+* Dropdown menu in modifiers when one modifier is required
+* All prices with $0.00 will be hidden
+* Fixed taxes for delivery
+* Added price per unit in store interface one
+* Added the short-code [moo_all _items category='uuid'] for store interface 1. This allows to place categories on different pages by using the short code. Also possible for store interface 2
+* Fixed partial payment issue
+* Fixed other bugs and made improvements
 = 1.2.3 =
 * Improved and increased font size for required modifier
-* Updated email receipts with more information 
-* Shows special instructions on checkout page and on email receipt 
+* Updated email receipts with more information
+* Shows special instructions on checkout page and on email receipt
 * Ability to show item description for store interface 1
 * Fixed various bugs and other issues
 = 1.2.2 =

@@ -1181,6 +1181,34 @@ ul.sub-group .edit_modifer_name{
 
 }
 
+.white-popup {
+    position: relative;
+    background: #FFF;
+    padding: 20px;
+    width: auto;
+    max-width: 500px;
+    margin: 20px auto;
+}
+.listItems{
+    overflow-y: scroll;
+    max-height:400px;
+}
+ul.moo_listItem{
+    margin-top: 18px;
+    margin-bottom: 18px;
+}
+.moo_listItem li{
+    border: 1px solid #dddddd ;
+    padding: 5px 10px;
+    cursor: move;
+    background-color: #FAFAFA ;
+}
+.moo_listItem li:hover{
+    border-color: #999;
+}
+.items_cat{
+    text-align: center;
+}
 /*============================================================
     Mobile (Landscape) Design for a width of 480px
 ==============================================================

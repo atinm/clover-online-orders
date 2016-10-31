@@ -26,13 +26,36 @@ class Products_List_Moo extends WP_List_Table_MOO {
      */
     public static function get_items( $per_page = 20, $page_number = 1 ) {
         global $wpdb;
+        $category_id="";
+        if(isset($_GET['category']) && !empty($_GET['category']))
+        {
+            $category_id = esc_sql($_GET['category']);
+            $category = $wpdb->get_row("SELECT items from {$wpdb->prefix}moo_category WHERE uuid='{$category_id}'",'ARRAY_A');
+            $category_items = explode(',',$category['items']);
+        }
         if(isset($_POST) && !empty($_POST['s']))
         {
             $sql = "SELECT * FROM {$wpdb->prefix}moo_item where name like '%".esc_sql($_POST['s'])."%'";
         }
         else
         {
-            $sql = "SELECT * FROM {$wpdb->prefix}moo_item";
+            if($category_id!="")
+            {
+                if(count($category_items)>0)
+                {
+                    $items_txt = implode("','", $category_items);
+                    $items_txt = "'".$items_txt;
+                    $items_txt =  substr($items_txt, 0, -2);;
+                    $sql = "SELECT * FROM {$wpdb->prefix}moo_item where uuid in ({$items_txt})";
+                }
+                else
+                {
+                    $sql = "SELECT * FROM {$wpdb->prefix}moo_item where 1=-1')";
+                }
+
+            }
+            else
+                $sql = "SELECT * FROM {$wpdb->prefix}moo_item";
         }
 
 
@@ -44,7 +67,6 @@ class Products_List_Moo extends WP_List_Table_MOO {
         $sql .= " LIMIT $per_page";
 
         $sql .= ' OFFSET ' . ( $page_number - 1 ) * $per_page;
-
 
         $result = $wpdb->get_results( $sql, 'ARRAY_A' );
         return $result;
@@ -106,9 +128,15 @@ class Products_List_Moo extends WP_List_Table_MOO {
      */
     public static function record_count() {
         global $wpdb;
-
         $per_page = 20;
         $page_number = 1;
+        $category_id="";
+        if(isset($_GET['category']) && !empty($_GET['category']))
+        {
+            $category_id = esc_sql($_GET['category']);
+            $category = $wpdb->get_row("SELECT items from {$wpdb->prefix}moo_category WHERE uuid='{$category_id}'",'ARRAY_A');
+            $category_items = explode(',',$category['items']);
+        }
 
         if(isset($_POST) && !empty($_POST['s']))
         {
@@ -116,7 +144,24 @@ class Products_List_Moo extends WP_List_Table_MOO {
         }
         else
         {
-            $sql = "SELECT count(*) FROM {$wpdb->prefix}moo_item";
+            if($category_id!="")
+            {
+                if(count($category_items)>0)
+                {
+                    $items_txt = implode("','", $category_items);
+                    $items_txt = "'".$items_txt;
+                    $items_txt =  substr($items_txt, 0, -2);;
+                    $sql = "SELECT count(*) FROM {$wpdb->prefix}moo_item where uuid in ({$items_txt})";
+                }
+                else
+                {
+                    $sql = "SELECT count(*) FROM {$wpdb->prefix}moo_item where 1=-1')";
+                }
+
+            }
+            else
+                $sql = "SELECT count(*) FROM {$wpdb->prefix}moo_item";
+
         }
 
 
@@ -161,8 +206,10 @@ class Products_List_Moo extends WP_List_Table_MOO {
             $actions['enable_ot']  = sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Enable out of stock</a>',
                 'moo_items', 'enable_ot',esc_attr($item['uuid']), $enable_ot_nonce,$this->get_pagenum());
 
-        $actions['edit'] = sprintf( '<a href="?page=%s&action=%s&item_uuid=%s">Edit Item</a>',
+        $actions['edit'] = sprintf( '<a href="?page=%s&action=%s&item_uuid=%s">Edit Images</a>',
             'moo_items', 'update_item',esc_attr($item['uuid']));
+        $actions['edit_description'] = sprintf( '<a class="moo-edit-description-button" href="#edit-description-popup-%s">Edit description</a><div id="edit-description-popup-%s" class="white-popup mfp-hide"><textarea id="edit-description-content-%s" style="width: 100&#37;"  rows="5">%s</textarea><button class="button" onclick="moo_editItemDescription(event,\'%s\')">Save</button></div>',
+            esc_attr($item['uuid']),esc_attr($item['uuid']),esc_attr($item['uuid']),esc_attr($item['description']),esc_attr($item['uuid']));
 
         return $title . $this->row_actions( $actions );
     }
@@ -406,5 +453,41 @@ class Products_List_Moo extends WP_List_Table_MOO {
             echo '<tr>';
         $this->single_row_columns( $item );
         echo '</tr>';
+    }
+    function extra_tablenav( $which ) {
+        global $wpdb;
+        $move_on_url = '&category=';
+        if ( $which == "top" ){
+            ?>
+            <div class="alignleft actions bulkactions">
+                <?php
+                $cats = $wpdb->get_results("select * from {$wpdb->prefix}moo_category order by sort_order asc", ARRAY_A);
+                if( $cats ){
+                    ?>
+                    <select id="moo_cat_filter" class="ewc-filter-cat">
+                        <option value="">All categories</option>
+                        <?php
+                        foreach( $cats as $cat ){
+                            $selected = '';
+                            if( $_GET['category'] == $cat['uuid'] ){
+                                $selected = ' selected = "selected"';
+                            }
+                            ?>
+                                <option value="<?php echo $move_on_url . $cat['uuid']; ?>" <?php echo $selected; ?>><?php echo $cat['name']; ?></option>
+                                <?php
+                        }
+                        ?>
+                    </select>
+                    <input type="button" name="filter_action" onclick="moo_filtrer_by_category(event)" class="button" value="Filter">
+                    <?php
+                }
+                ?>
+            </div>
+            <?php
+        }
+        if ( $which == "bottom" ){
+            //The code that goes after the table is there
+
+        }
     }
 }

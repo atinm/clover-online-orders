@@ -20,6 +20,9 @@
      font-weight: bold !important;
      margin: 0 !important;
      text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .moo_category_title span
 {
@@ -46,9 +49,10 @@
     display: block;
     background: url(../img/shadow_1.png) no-repeat center top;
     background-size: 100% 19px;
-    margin: 5px 0 0 0;
+    margin: 5px 0px 0px 0px;
     padding: 0;
     list-style: none;
+    margin-left: 0px !important;
  }
 .moo_accordion_content ul li {
       overflow: hidden;
@@ -117,7 +121,7 @@
 }
 .moo_cart table thead th:last-child
 {
-    width: 36%;
+    width: 40%;
 }
 .moo_cart table tbody
 {
@@ -133,6 +137,7 @@
     overflow-y: auto;
     overflow-x: hidden;
    /* margin-bottom: 15px; */
+    font-size: 13px;
 }
 .Fixedthecart
 {
@@ -245,6 +250,9 @@
     text-align: center;
     border-top-right-radius: 12px;
     border-top-left-radius: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .moo_modifier-box .moo_checkbox
 {

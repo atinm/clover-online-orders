@@ -141,7 +141,6 @@ function moo_OrderTypeChanged(obj)
         {
             if(OrderTypeID == moo_OrderTypes[i].ot_uuid) {
                 if( moo_OrderTypes[i].show_sa == "0"){
-
                     jQuery('#city').parent().hide();
                     jQuery('#address').parent().hide();
                     jQuery('#state').parent().hide();
@@ -149,6 +148,7 @@ function moo_OrderTypeChanged(obj)
                     jQuery('#moo-delivery-details').hide();
                     jQuery('#moo-cart-delivery-fee').parent().hide();
                     document.getElementById('moo_delivery_amount').value = "";
+
                     if(moo_cash_in_store == 'on')
                     {
                         jQuery('#moo_paymentOptions_cash_div').show();
@@ -176,9 +176,15 @@ function moo_OrderTypeChanged(obj)
                         jQuery('#moo_paymentOptions_cash_div').hide();
 
 
-                    if(moo_delivery_areas != null && moo_delivery_areas.length >= 1) jQuery('#moo-delivery-details').show();
-                    moo_calculate_delivery_fee();
-                    moo_update_totals();
+                    if(moo_delivery_areas != null && moo_delivery_areas.length >= 1)
+                    {
+                        document.getElementById('moo_delivery_amount').value = "ERROR";
+                        jQuery('#moo-delivery-details').show();
+                        moo_InitZones();
+                        moo_calculate_delivery_fee();
+                        moo_update_totals();
+                    }
+
                 }
                 moo_update_totals();
             }

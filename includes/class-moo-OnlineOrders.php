@@ -69,7 +69,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.2.3';
+		$this->version = '1.2.4';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -326,7 +326,7 @@ class moo_OnlineOrders {
 		$this->loader->add_action( 'wp_ajax_moo_store_isopen', $plugin_public, 'moo_StoreIsOpen');
 		$this->loader->add_action( 'wp_ajax_nopriv_moo_store_isopen', $plugin_public, 'moo_StoreIsOpen');
         /*
-         * category visiblite
+         * category visibility
          */
         $this->loader->add_action( 'wp_ajax_moo_update_visiblite_category', $plugin_public, 'visibility_category');
         $this->loader->add_action( 'wp_ajax_nopriv_moo_update_visiblite_category', $plugin_public, 'visibility_category');
@@ -360,15 +360,17 @@ class moo_OnlineOrders {
         $this->loader->add_action( 'wp_ajax_moo_new_order_modifier', $plugin_public, 'moo_NewOrderModifier');
 
         /*
+         * Reorder items
+         */
+        $this->loader->add_action( 'wp_ajax_moo_reorder_items', $plugin_public, 'moo_reorder_items');
+
+        /*
          * Item's images
          */
 
 		$this->loader->add_action( 'wp_ajax_moo_get_items_with_images', $plugin_public, 'moo_getItemWithImages');
 		$this->loader->add_action( 'wp_ajax_moo_save_items_with_images', $plugin_public, 'moo_saveItemWithImages');
-
-
-
-
+		$this->loader->add_action( 'wp_ajax_moo_save_items_description', $plugin_public, 'moo_saveItemDescription');
 		$this->loader->add_action( 'wp_ajax_moo_set_default_image', $plugin_public, 'moo_setDefaultImage');
 		$this->loader->add_action( 'wp_ajax_moo_enable_items_with_images', $plugin_public, 'moo_enableItemsWithImages');
 

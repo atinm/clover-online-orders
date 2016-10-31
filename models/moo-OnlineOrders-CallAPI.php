@@ -724,9 +724,9 @@ class moo_OnlineOrders_CallAPI {
         global $wpdb;
         $items_ids="";
 
-        foreach($category->items->elements
-                as $item)
+        foreach($category->items->elements as $item)
             $items_ids.=$item->id.",";
+
         if($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_category where uuid='{$category->id}'") > 0)
             $res = $wpdb->update("{$wpdb->prefix}moo_category",array(
                 'name' => $category->name,

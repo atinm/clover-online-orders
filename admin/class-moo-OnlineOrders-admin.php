@@ -126,6 +126,10 @@ class moo_OnlineOrders_Admin {
             <div id="poststuff">
                 <div id="post-body" class="metabox-holder">
                     <div id="post-body-content">
+                        <div id="test-popup" class="white-popup mfp-hide">
+                            Popup content
+                        </div>
+                        <a href="#test-popup" class="open-popup-link">Show inline popup</a>
                         <div class="meta-box-sortables ui-sortable">
                             <!-- Search Form -->
                             <form method="post">
@@ -133,7 +137,6 @@ class moo_OnlineOrders_Admin {
                                 <?php $products->search_box('search', 'search_id'); ?>
                             </form>
                             <form method="post">
-
                                 <?php $products->display(); ?>
                             </form>
                         </div>
@@ -250,13 +253,14 @@ class moo_OnlineOrders_Admin {
         if(!isset($MooOptions['payment_cash_delivery']))
             $MooOptions['payment_cash_delivery'] = '';
 
+        update_option("moo_settings",$MooOptions);
 
         $token = $MooOptions["api_key"];
         $merchant_proprites = (json_decode($api->getMerchantProprietes())) ;
         $current_hours = $api->getOpeningHours() ;
+        $itemsWithVariablePrice = $model->getItemsWithVariablePrice();
 
 
-        update_option("moo_settings",$MooOptions);
 
         if($token != '')
         {
@@ -435,7 +439,7 @@ class moo_OnlineOrders_Admin {
                                 </div>
                                 <div class="stat">
                                     <div class="value" id="MooPanelStats_Taxes">0</div>
-                                    <div class="type">Taxes rates</div>
+                                    <div class="type">Tax rates</div>
                                 </div>
                             </div>
                         </div>
@@ -561,7 +565,7 @@ class moo_OnlineOrders_Admin {
                                 </label>
                             </div>
                             <span id="visib-cat001" class="moo-info-msg"
-                                  data-ot="Hide or show the categories images"
+                                  data-ot="Store interface 2 must be selected for images to appear on website"
                                   data-ot-target="#visib-cat001">
                                 <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
                             </span>
@@ -576,7 +580,7 @@ class moo_OnlineOrders_Admin {
                             <th>Picture</th>
                             <th>Category names </th>
                             <th>Visible ?</th>
-                            <th colspan="3" style="text-align:center;">Edit</th>
+                            <th colspan="4" style="text-align:center;">Edit</th>
                         </tr>
                         </thead>
                         <tbody id="sortable">
@@ -945,10 +949,13 @@ class moo_OnlineOrders_Admin {
                                     <div class="Moo_option-item">
                                         <div style="margin-bottom: 14px;" class="label">Your current business hours
                                             <span id="moo_info_msg-4" class="moo-info-msg"
-                                                  data-ot="  <?php foreach ($current_hours as $key=>$value) {
-                                                      echo '<strong><dt>'.$key.'</dt></strong>';
-                                                      echo '<dd>'.$value.'</dd>';
-                                                  }; ?>"
+                                                  data-ot="<?php
+                                                  if(count($current_hours)>0)
+                                                      foreach ($current_hours as $key=>$value) {
+                                                          echo '<strong><dt>'.$key.'</dt></strong>';
+                                                          echo '<dd>'.$value.'</dd>';
+                                                      };
+                                                  ?>"
                                                   data-ot-target="#moo_info_msg-4">
                                         <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
                                         </span>
@@ -1143,7 +1150,7 @@ class moo_OnlineOrders_Admin {
                         </div>
                         <div class="Moo_option-item" >
                             <div class="normal_text">
-                                <strong>Fixed Delivery amount</strong> :  This fee will be applied towards any delivered order (order types with shipping address must be enabled) Keep empty if you don"t want to charge a fixed delivery fee
+                                <strong>Fixed Delivery amount</strong> :  This fee will be applied towards any delivered order (order types with shipping address must be enabled) Keep empty if you don"t want to charge a fixed delivery fee. This will override any delivery fees you added when drawing the map
                             </div>
                             <div class="iwl_holder">
                                 <div class="iwl_label_holder"><label for="fixeddeliveryamount">Fixed Delivery amount</label></div>
@@ -1164,12 +1171,29 @@ class moo_OnlineOrders_Admin {
                         </div>
                         <div class="Moo_option-item" >
                             <div class="normal_text">
-                                <strong>Delivery taxes & Delivery amount on receipt</strong> :  To set taxes for delivery or to show the delivery amount on the receipt, you should create an item on your clover account with variable price, and affect appropriate taxes to it
+                                <strong>Delivery taxes & Delivery amount on receipt</strong> :  To set taxes for delivery or to show the delivery amount on the receipt, select the appropriate item from the drop down menu (with appropriate tax rates) If you don't see the item from the drop down menu ("Delivery Fee" for example) go to your inventory app in Clover and create an item called "Delivery Fee" and make it a variable price, then apply the appropriate tax rate (if you don't want to charge taxes on Delivery fee don't add any taxes rate) afterwards press save. Then press manual sync under import items and select the item you just created from the Drop down menu.
                             </div>
                             <div class="iwl_holder">
-                                <div class="iwl_label_holder"><label for="otherzonesdeliveryfees">The item's uuid</label></div>
+                                <div class="iwl_label_holder"><label for="otherzonesdeliveryfees">The item</label></div>
                                 <div class="iwl_input_holder">
-                                    <input placeholder="$" id="otherzonesdeliveryfees" name="moo_settings[item_delivery]" type="text" value="<?php echo (isset($MooOptions['item_delivery']))?$MooOptions['item_delivery']:"";?>" />
+                                    <?php
+                                   if(count($itemsWithVariablePrice)>0)
+                                    {
+                                        echo '<select style="width: 100%;" name="moo_settings[item_delivery]">';
+                                        foreach ($itemsWithVariablePrice as $item)
+                                            {
+                                                if( $item->uuid == $MooOptions['item_delivery'])
+                                                    echo '<option value="'.$item->uuid.'" selected>'.$item->name.'</option>';
+                                                else
+                                                    echo '<option value="'.$item->uuid.'">'.$item->name.'</option>';
+                                            }
+                                        echo '</select>';
+                                    }
+                                    else
+                                    {
+                                        echo "<strong>you don't have any item with variable price please create an item on your clover station then click update items from</strong>";
+                                    }
+                                    ?>
                                 </div>
                             </div>
                         </div>
@@ -1329,6 +1353,10 @@ class moo_OnlineOrders_Admin {
         wp_enqueue_style('moo-tooltip-css',   plugin_dir_url( __FILE__ )."css/tooltip.css", array(), $this->version, 'all');
         wp_register_style( 'magnific-popup', plugin_dir_url(dirname(__FILE__))."public/css/magnific-popup.css" );
         wp_enqueue_style( 'magnific-popup');
+
+        wp_register_style( 'moo-sweetalert-css',plugin_dir_url(dirname(__FILE__))."public/css/sweetalert.css",array(), $this->version);
+        wp_enqueue_style( 'moo-sweetalert-css' );
+
         wp_enqueue_style( 'wp-color-picker' );
     }
 
@@ -1370,6 +1398,10 @@ class moo_OnlineOrders_Admin {
         
         wp_register_script('magnific-modal', plugin_dir_url(dirname(__FILE__))."public/js/magnific.min.js");
         wp_enqueue_script('magnific-modal',array('jquery'));
+
+
+        wp_register_script('moo-sweetalert-js', plugin_dir_url(dirname(__FILE__))."public/js/sweetalert.min.js");
+        wp_enqueue_script('moo-sweetalert-js',array('jquery'));
 
         wp_enqueue_script('progressbar-js',array('jquery'));
         wp_enqueue_script("moo-tooltip-js",array('jquery'));
@@ -1503,7 +1535,60 @@ class moo_OnlineOrders_Admin {
                         </a>
                     </td>
                 <?php } ?>
+                <td class="items_cat">
+                    <a href="#detailCat<?php echo $category->uuid; ?>" class="moo-open-popupItems">
+                         <span id="moo_items_get<?php echo $i; ?>"
+                               data-ot="Reorder items"
+                               data-ot-target="#moo_items_get<?php echo $i; ?>">
+                              <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/plusIT.png" ?>" style="width: 20px;">
+                         </span>
+                    </a>
+                </td>
             </tr>
+            <div id="detailCat<?php echo $category->uuid; ?>" class="white-popup mfp-hide listItems" style="overflow-y: scroll;max-height:400px;">
+                <?php
+                    $this->moo_getItemsByCategory($category->uuid,$category->items);
+                ?>
+            </div>
             <?php $i++; } ?>
-    <?php }
+    <?php
+    }
+
+    public function moo_getItemsByCategory($idcat,$items){
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'models/moo-OnlineOrders-Model.php';
+        $model = new moo_OnlineOrders_Model();
+        $elements = explode(",", $items);
+        $tab_items = array();
+        if (count($elements) > 0)
+        {
+            for ($i = 0; $i < count($elements); $i++)
+            {
+                if($elements[$i] == "") continue;
+                $item = $model->getItem($elements[$i]);
+                if(!$item) continue;
+                $tab_items[] = $item;
+            }
+            usort($tab_items, function($a, $b)
+            {
+                return $a->sort_order>$b->sort_order;
+            });
+            if (!empty($tab_items)){
+                echo "<ul class='moo_listItem' id-cat='$idcat'>";
+                foreach ($tab_items as $value){
+                    echo "<li class='cat$idcat' uuid_item='".$value->uuid."'>";
+                    echo $value->name;
+                    echo '<img src="'.plugin_dir_url(dirname(__FILE__)).'public/img/menu.png" style="width: 14px;float: right;margin-top: 2px;">';
+                    echo "</li>";
+                }
+                echo "</ul>";
+            }
+            else{
+                echo "<span>No items found</span>";
+            }
+
+        }
+        else
+            echo "<span>No items found</span>";
+
+    }
 }

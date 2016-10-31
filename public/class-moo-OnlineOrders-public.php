@@ -633,52 +633,6 @@ class Moo_OnlineOrders_Public {
         }
 
     }
-	/**
-     * Get the total of an Item
-     * @since    1.0.0
-     */
-    public function moo_cart_getItemTotal()
-    {
-        $item_uuid = sanitize_text_field($_POST['item']);
-
-        if(isset($_SESSION['items'][$item_uuid]) && !empty($_SESSION['items'][$item_uuid])){
-            $sub_total = 0;
-            $total_of_taxes = 0;
-            $item = $_SESSION['items'][$item_uuid];
-
-            $price = $item['item']->price * $item['quantity'];
-            $sub_total += $price;
-            $total_of_taxes += $item['tax_rate'] * $price / 100;
-
-            if(count($item['modifiers'])>0){
-                foreach ($item['modifiers'] as $m) {
-                    $m_price = $item['quantity'] * $m['price'];
-                    $sub_total += $m_price;
-                    $total_of_taxes += $item['tax_rate'] * $m_price / 100;
-                }
-            }
-            $sub_total = $sub_total/100; // Conversion to dollar
-            $total_of_taxes = $total_of_taxes/100; // Conversion to dollar
-
-            $response = array(
-                'status'	=> 'success',
-                'sub_total'	=> round($sub_total, 2),
-                'total_of_taxes'	=> round($total_of_taxes, 2),
-                'total'	=> round(($total_of_taxes+$sub_total), 2)
-            );
-            wp_send_json($response);
-        }
-        else
-        {
-            $response = array(
-                'status'	=> 'error',
-                'message'   => 'Not exist'
-            );
-            wp_send_json($response);
-        }
-
-    }
-
     /**
      * Modifiers Group : get limits
      * @since    1.0.0
@@ -823,6 +777,24 @@ class Moo_OnlineOrders_Public {
                     else
                         $_POST['form']['phone'] = $_SESSION['moo_phone_number'];
                 }
+                //Add delivery Item (with variable price
+                $deliveryFeeTmp = $deliveryFee;
+                if(isset($MooOptions['item_delivery']) && $MooOptions['item_delivery'] != "" && $deliveryFee>0)
+                {
+                    $item = $this->model->getItem($MooOptions['item_delivery']);
+                   // var_dump($item);
+                    $item->price = ($deliveryFee*100);
+                    $_SESSION['items'][$MooOptions['item_delivery']] = array(
+                        'item'=>$item,
+                        'quantity'=>1,
+                        'special_ins'=>'',
+                        'tax_rate'=>$this->model->getItemTax_rate($MooOptions['item_delivery']),
+                        'modifiers'=>array()
+                    );
+                    $deliveryFee = 0;
+                }
+
+
                 //Create the Order
                 if(!empty($_POST['form']['OrderType'])){
                     $OrderTpe_UUID = sanitize_text_field($_POST['form']['OrderType']);
@@ -833,13 +805,13 @@ class Moo_OnlineOrders_Public {
 
                 if($orderCreated != false)
                 {
-                    $this->model->addOrder($orderCreated['OrderId'],$orderCreated['taxamount'],$orderCreated['amount'],$_POST['form']['name'],$_POST['form']['address'], $_POST['form']['city'],$_POST['form']['zipcode'],$_POST['form']['phone'],$_POST['form']['email'],$_POST['form']['instructions'],$_POST['form']['state'],$_POST['form']['country'],$deliveryFee,$tipAmount,$shippingFee,$customer_lat,$customer_lng,json_decode($orderType)->label);
+                    $this->model->addOrder($orderCreated['OrderId'],$orderCreated['taxamount'],$orderCreated['amount'],$_POST['form']['name'],$_POST['form']['address'], $_POST['form']['city'],$_POST['form']['zipcode'],$_POST['form']['phone'],$_POST['form']['email'],$_POST['form']['instructions'],$_POST['form']['state'],$_POST['form']['country'],$deliveryFeeTmp,$tipAmount,$shippingFee,$customer_lat,$customer_lng,json_decode($orderType)->label);
                     $this->model->addLinesOrder($orderCreated['OrderId'],$_SESSION['items']);
 
                     // Add the delivery charges
-                    if(isset($MooOptions['item_delivery']) && $MooOptions['item_delivery'] != "" && $deliveryFee>0)
+                    if(isset($MooOptions['item_delivery']) && $MooOptions['item_delivery'] != "" && $deliveryFeeTmp>0)
                     {
-                        $this->api->addlineWithPriceToOrder($orderCreated['OrderId'],$MooOptions['item_delivery'],1,'',$deliveryFee);
+                        $this->api->addlineWithPriceToOrder($orderCreated['OrderId'],$MooOptions['item_delivery'],1,'',$deliveryFeeTmp);
                     }
 
 
@@ -1027,7 +999,6 @@ class Moo_OnlineOrders_Public {
                 {
                     // If the item is empty skip to the next iteration of the loop
                     if(!isset($item['item'])) continue;
-
                     // Create line item
                     if(count($item['modifiers']) > 0) {
                         for($i=0;$i<$item['quantity'];$i++){
@@ -1437,6 +1408,17 @@ public function moo_AddOrderType()
             'data'=>$res
         );
         wp_send_json($response);
+    } public function moo_saveItemDescription()
+    {
+        $item_uuid = sanitize_text_field($_POST['item_uuid']);
+        $description = sanitize_text_field($_POST['description']);
+
+        $res = $this->model->saveItemDescription($item_uuid,$description);
+        $response = array(
+            'status'	 => 'Success',
+            'data'=>$res
+        );
+        wp_send_json($response);
     }
 
     public function moo_UpdateCategoryStatus()
@@ -1686,6 +1668,11 @@ public function moo_AddOrderType()
         $newdata = $_POST["newtable"];
         $ret = $this->model->saveNewOrderModifier($group,$newdata);
         wp_send_json($ret);
+    }
+    public function moo_reorder_items(){
+        $OrderedItems = $_POST["newtable"];
+        $res = $this->model->reOrderItems($OrderedItems);
+        wp_send_json($res);
     }
 
 }
