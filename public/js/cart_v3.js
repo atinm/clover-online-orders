@@ -76,6 +76,11 @@ function moo_emptyCart(event)
 
 function moo_addModifiers(item_name,item_uuid)
 {
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_check_item_modifiers',"item":item_uuid}, function (data) {
+        if(data.status == 'success')
+        {
+            var required_modifiers_groups = "";
+            required_modifiers_groups = data.uuids.split(';');
             var selected_modifies = jQuery("#moo_form_modifiers").serializeArray();
             var Mgroups = {};
             var Modifiers = [];
@@ -124,10 +129,24 @@ function moo_addModifiers(item_name,item_uuid)
             }
 
             var flag = false;
-            if(Object.keys(Mgroups).length == 0) {
+            if(Object.keys(Mgroups).length == 0 && Object.keys(required_modifiers_groups).length <= 1) {
                 jQuery.magnificPopup.close();
                 moo_cartv3_addtocart(item_uuid,item_name);
                 return false;
+            }
+
+            /* verify if required modifier Groups are chooses */
+            for(mg in required_modifiers_groups){
+                var element = required_modifiers_groups[mg];
+                if(element != "")
+                {
+                    if(Object.keys(Mgroups).indexOf(element) == -1)
+                    {
+                        swal({ title: "Error!", text: "You didn't choose all required modifiers",   type: "error",   confirmButtonText: "Try again" });
+                        flag=true;
+                        return;
+                    }
+                }
             }
 
             /* verify the min and max in modifier Group */
@@ -179,7 +198,8 @@ function moo_addModifiers(item_name,item_uuid)
                     }
                 });
             }
-
+        }
+    });
 }
 function moo_addItemWithModifiersToCart(event,item_uuid,item_name,item_price)
 {
