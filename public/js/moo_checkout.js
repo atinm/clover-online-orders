@@ -10,7 +10,7 @@ var MooIsDeliveryError = true;
 
 if(typeof moo_checkout_login != 'undefined')
 {
-    MooIsDisabled =(moo_checkout_login == "enabled")?true:false;
+    MooIsDisabled =(moo_checkout_login == "disabled")?true:false;
 }
 else
     MooIsDisabled = true;
