@@ -129,7 +129,7 @@ function moo_cart_DeleteItem(item)
     }
     else
     {
-        jQuery(".moo_cart .CartContent>table>tbody").html('<tr><td colspan="4">Your Cart is empty</td></tr>');
+        jQuery(".moo_cart .CartContent>table>tbody").html('<tr><td colspan="4" style="text-align: center">Your cart is empty</td></tr>');
         jQuery(".moo_cart_total").remove();
     }
 
@@ -150,8 +150,7 @@ function moo_addModifiers(event,item_name,item_uuid,item_price)
     jQuery.post(moo_params.ajaxurl,{'action':'moo_check_item_modifiers',"item":item_uuid}, function (data) {
         if(data.status == 'success')
         {
-            var required_modifiers_groups = "";
-            required_modifiers_groups = data.uuids.split(';');
+            var required_modifiers_groups = data.uuids.split(';');
             var selected_modifies = jQuery("#moo_form_modifiers").serializeArray();
             var Mgroups = {};
             var Modifiers = [];
@@ -168,7 +167,7 @@ function moo_addModifiers(event,item_name,item_uuid,item_price)
                     modifierGroup = modifierGroup.substr(0,modifierGroup.length-1);
                     var modif = string[2].substr(1);
                     modif = modif.substr(0,modif.length-2);
-                    if(item == '' || modifierGroup == '' || modif == '') continue;
+                    if(item == '' || modifierGroup == '' || modif == '' || item != item_uuid) continue;
                     if(typeof Mgroups[modifierGroup] === 'undefined') Mgroups[modifierGroup] = 1;
                     else Mgroups[modifierGroup] +=1;
                     var modifier = {
@@ -176,7 +175,7 @@ function moo_addModifiers(event,item_name,item_uuid,item_price)
                         "modifier": modif,
                         "modifierGroup": modifierGroup
                     };
-                    Modifiers.push(modifier);
+                     Modifiers.push(modifier);
                 }
                 else
                 {
@@ -187,7 +186,7 @@ function moo_addModifiers(event,item_name,item_uuid,item_price)
                     var modifierGroup = string[1].substr(1);
                     modifierGroup = modifierGroup.substr(0,modifierGroup.length-2);
                     var modif = modifier.value;
-                    if(item == '' || modifierGroup == '' || modif == '') continue;
+                    if(item == '' || modifierGroup == '' || modif == '' || item != item_uuid) continue;
                     if(typeof Mgroups[modifierGroup] === 'undefined') Mgroups[modifierGroup] = 1;
                     else Mgroups[modifierGroup] +=1;
                     var modifier = {
@@ -202,7 +201,7 @@ function moo_addModifiers(event,item_name,item_uuid,item_price)
             var flag = false;
             if(Object.keys(Mgroups).length == 0 && Object.keys(required_modifiers_groups).length <= 1) {
                 jQuery.magnificPopup.close();
-                moo_cartv3_addtocart(item_uuid,item_name);
+                moo_addToCart(event,item_uuid,item_name,item_price);
                 return false;
             }
 
@@ -213,7 +212,7 @@ function moo_addModifiers(event,item_name,item_uuid,item_price)
                 {
                     if(Object.keys(Mgroups).indexOf(element) == -1)
                     {
-                        swal({ title: "Error!", text: "You didn't choose all required modifiers",   type: "error",   confirmButtonText: "Try again" });
+                        swal({ title: "Error!", text: "You didn't choose all required options",   type: "error",   confirmButtonText: "Try again" });
                         flag=true;
                         return;
                     }

@@ -37,13 +37,12 @@ class Orders_List_Moo extends WP_List_Table_MOO {
         }
         else
         {
-            $sql .= ' ORDER BY date desc';
+            $sql .= ' ORDER BY _id desc';
         }
 
         $sql .= " LIMIT $per_page";
 
         $sql .= ' OFFSET ' . ( $page_number - 1 ) * $per_page;
-
 
         $result = $wpdb->get_results( $sql, 'ARRAY_A' );
         return $result;
@@ -76,19 +75,38 @@ class Orders_List_Moo extends WP_List_Table_MOO {
 
         return $wpdb->get_var( $sql );
     }
+    /*
+     * Get the first Item for an Order
+     */
+    function  getFirstItemFromOrder($order_uuid){
+        global $wpdb;
+        $sql = "SELECT name FROM `{$wpdb->prefix}moo_item` WHERE uuid = (SELECT item_uuid FROM {$wpdb->prefix}moo_item_order WHERE order_uuid = '".$order_uuid."' limit 1)";
+        $itemName =  $wpdb->get_var( $sql );
+        return $itemName;
+    }
+    function column_p_name( $order ) {
+        // create a nonce
+        $delete_nonce = wp_create_nonce( 'moo_delete_order' );
+        $title = '<strong>' . $order['p_name'] . '</strong>';
+        $actions = array(
+            'Delete' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s">Delete Order</a>', esc_attr( $_REQUEST['page'] ), 'delete',$order['uuid'], $delete_nonce ),
+            'Show' => sprintf( '<a href="https://www.clover.com/r/%s" target="_blank">Show Receipt</a>',$order['uuid']),
+            'Show_detail' => sprintf( '<a href="?page=%s&action=%s&order_uuid=%s">Show Detail</a>', esc_attr( $_REQUEST['page'] ), 'show_order_detail',$order['uuid'] ),
+        );
+        return
+            sprintf( '<a target="_blank" href="https://www.clover.com/r/%s">%s</a>',$order['uuid'],$title) . $this->row_actions( $actions );
+    }
     /**
      * Method for name column
      *
      * @param array $item an array of DB data
      *
      * @return string
-     */
+
     function column_p_name( $item ) {
         // create a nonce
 
         $delete_nonce = wp_create_nonce( 'moo_delete_order' );
-        $show_nonce = wp_create_nonce( 'moo_show_order' );
-
         $title = '<strong>' . $item['p_name'] . '</strong>';
             $actions = array(
                 'Delete' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s">Delete Order</a>', esc_attr( $_REQUEST['page'] ), 'delete',$item['uuid'], $delete_nonce ),
@@ -97,7 +115,7 @@ class Orders_List_Moo extends WP_List_Table_MOO {
 
         return
             sprintf( '<a target="_blank" href="https://www.clover.com/r/%s">%s</a>',$item['uuid'],$title) . $this->row_actions( $actions );
-    }
+    }*/
     /**
      * Render a column when no column specific method exists.
      *
@@ -107,22 +125,30 @@ class Orders_List_Moo extends WP_List_Table_MOO {
      * @return mixed
      */
     public function column_default( $item, $column_name ) {
+
         switch ( $column_name ) {
             case 'p_name':
             case 'p_email':
             case 'ordertype':
-            case 'date':
             case 'p_phone':
             case 'instructions':
                 return stripslashes($item[$column_name]);
             case 'p_address':
                 return stripslashes($item['p_address'].' '.$item['p_city'].' '.$item['p_state'].' '.$item['p_country']);
             case 'amount':
-                return 'Total : $'.(floatval($item['amount'])+floatval($item['tipAmount'])).'<br/>'.'TAX : $'.$item['taxAmount'].'<br/>'.'TIP : $'.$item['tipAmount'];
+                return 'Total : $'.number_format((floatval($item['amount'])+floatval($item['tipAmount'])),2).'<br/>'.'TAX : $'.number_format($item['taxAmount'],2).'<br/>'.'TIP : $'.number_format($item['tipAmount'],2);
             case 'deliveryfee':
-                return '$'.$item['deliveryfee'];
+                return '$'.number_format($item['deliveryfee'],2);
             case 'paid':
                 return ($item['paid'])?(($item['refpayment']=='CASH')?'CASH':(($item['refpayment']=='SCP')?'SCP':'PAID')):'FAILED';
+            case 'items':
+                return $this->getFirstItemFromOrder($item['uuid']);
+            case 'state':
+                return $item['p_state'];
+            case 'orderID':
+                return $item['uuid'];
+            case 'date':
+                return $item['date'].' UTC';
             default:
                 return print_r( $item, true ); //Show the whole array for troubleshooting purposes
         }
@@ -147,14 +173,10 @@ class Orders_List_Moo extends WP_List_Table_MOO {
     function get_columns() {
         $columns = array(
             'cb'      => '<input type="checkbox" />',
-            'p_name'    => __( 'By'),
+            'p_name'    => __( 'Customer Name'),
             'amount' => __( 'Totals'),
-            'deliveryfee' => __( 'DeliveryFee'),
-            'paid' => __( 'Payment'),
+            'items'    => __( 'The first Item'),
             'ordertype' => __( 'OrderType'),
-            'p_address' => __( 'Address'),
-            'p_phone' => __( 'Phone'),
-            'p_email' => __( 'Email'),
             'date' => __( 'Date'),
             'instructions' => __( 'Special instructions')
         );
@@ -168,7 +190,7 @@ class Orders_List_Moo extends WP_List_Table_MOO {
      */
     public function get_sortable_columns() {
         $sortable_columns = array(
-            'p_name' => array( 'p_name', true ),
+            '_id' => array( '_id', false ),
             'date' => array( 'date', false ),
             'amount' => array( 'amount', false ),
         );

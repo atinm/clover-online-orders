@@ -143,17 +143,26 @@ function getItemsWithVariablePrice()
                                     ");
 }
     function getOrderTypes()
-{
-    return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_order_types");
-}
-    function getOrder($orderId)
-{
-    return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_order where uuid='".$orderId."'");
-}
+    {
+        return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_order_types order by sort_order,status,label");
+    }
+    function getOneOrderTypes($uuid)
+    {
+        $uuid = esc_sql($uuid);
+        return $this->db->get_row("SELECT * FROM {$this->db->prefix}moo_order_types where ot_uuid='{$uuid}'");
+    }
+    function getOneOrder($orderId)
+    {
+        return $this->db->get_row("SELECT * FROM {$this->db->prefix}moo_order where uuid='".$orderId."'");
+    }
+    function getItemsOrder($uuid)
+    {
+        return $this->db->get_results("SELECT IO.* ,I.* FROM {$this->db->prefix}moo_item_order IO ,{$this->db->prefix}moo_item I WHERE I.uuid = IO.item_uuid and IO.order_uuid = '$uuid' ORDER BY IO.`_id` DESC");
+    }
     function getVisibleOrderTypes()
-{
-    return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_order_types where status=1");
-}
+    {
+        return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_order_types where status=1 order by sort_order,label");
+    }
 
     function updateOrderTypes($uuid,$status)
     {
@@ -166,15 +175,46 @@ function getItemsWithVariablePrice()
                                 array( 'ot_uuid' => $uuid )
         );
     }
-    function updateOrderTypesSA($uuid,$bool)
+
+    function saveNewOrderOfOrderTypes($data){
+        $compteur = 0;
+        //Get the number OrderType
+        $group_number = $this->NbOrderTypes();
+        $group_number = $group_number[0]->nb;
+        $this->db->query('START TRANSACTION');
+        foreach ($data as $key => $value) {
+            $this->db->update("{$this->db->prefix}moo_order_types",
+                array(
+                    'sort_order' => $key
+                ),
+                array( 'ot_uuid' => $value ));
+            $compteur++;
+        }
+        if($compteur == $group_number)
+        {
+            $this->db->query('COMMIT');
+            return true;
+        }
+        else {
+            $this->db->query('ROLLBACK');
+            return false;
+        }
+    }
+    function updateOrderType($uuid,$name,$enable,$taxable,$type)
     {
         $uuid = esc_sql($uuid);
-        $st = ($bool == "true")? 1:0;
+        $label = esc_sql($name);
+        $taxable = esc_sql($taxable);
+        $status = esc_sql($enable);
+        $type = esc_sql($type);
         return $this->db->update("{$this->db->prefix}moo_order_types",
-                                array(
-                                    'show_sa' => $st
-                                ),
-                                array( 'ot_uuid' => $uuid )
+            array(
+                'label' => $label,
+                'taxable' => $taxable,
+                'status' => $status,
+                'show_sa' => $type,
+            ),
+            array( 'ot_uuid' => $uuid )
         );
     }
 
@@ -263,7 +303,7 @@ function getItemsWithVariablePrice()
     );
 }
 
-    function addOrder($uuid,$tax,$total,$name,$address, $city,$zipcode,$phone,$email,$instructions,$state,$country,$deliveryFee,$tipAmount,$shippingFee,$customer_lat,$customer_lng,$ordertype)
+    function addOrder($uuid,$tax,$total,$name,$address, $city,$zipcode,$phone,$email,$instructions,$state,$country,$deliveryFee,$tipAmount,$shippingFee,$customer_lat,$customer_lng,$ordertype,$datetime)
     {
         $uuid         = esc_sql($uuid);
         $tax          = esc_sql($tax);
@@ -276,16 +316,17 @@ function getItemsWithVariablePrice()
         $email        = esc_sql($email);
         $instructions = esc_sql($instructions);
         $ordertype    = esc_sql($ordertype);
-
-        $state       = esc_sql($state);
-        $country     = esc_sql($country);
+        $datetime     = esc_sql($datetime);
+        $state        = esc_sql($state);
+        $country      = esc_sql($country);
 
         $deliveryFee     = esc_sql($deliveryFee);
         $tipAmount       = esc_sql($tipAmount);
         $shippingFee     = esc_sql($shippingFee);
         $customer_lat    = esc_sql($customer_lat);
         $customer_lng    = esc_sql($customer_lng);
-        $this->db->show_errors();
+
+        $date = date('Y/m/d H:i:s', $datetime);
         $this->db->insert(
             "{$this->db->prefix}moo_order",
             array(
@@ -309,6 +350,7 @@ function getItemsWithVariablePrice()
                 'deliveryfee' => $deliveryFee,
                 'tipAmount' => $tipAmount,
                 'instructions' => $instructions,
+                'date' => $date,
             ));
         return $this->db->insert_id;
     }
@@ -383,6 +425,10 @@ function getItemsWithVariablePrice()
     {
         return $this->db->get_results("SELECT count(*) as nb FROM {$this->db->prefix}moo_modifier where group_id = '{$group}'");
     }
+    function NbOrderTypes()
+    {
+        return $this->db->get_results("SELECT count(*) as nb FROM {$this->db->prefix}moo_order_types");
+    }
 
     /*
      * Manage Item's image
@@ -403,6 +449,7 @@ function getItemsWithVariablePrice()
         return $this->db->get_results("SELECT *
                                     FROM {$this->db->prefix}moo_images images
                                     WHERE images.item_uuid = '{$uuid}' AND images.is_enabled = '1'
+                                    ORDER by images.is_default desc
                                     ");
     }
     function getItemImages($uuid)
@@ -435,8 +482,10 @@ function getItemsWithVariablePrice()
     function saveItemWithImage($uuid,$description,$images) {
         
         $compteur = 0;
+
         if($description != "")
             $this->db->update("{$this->db->prefix}moo_item", array('description' => $description), array( 'uuid' => $uuid ));
+
         $this->db->query('START TRANSACTION');
         $this->db->query("DELETE FROM {$this->db->prefix}moo_images  WHERE item_uuid = '{$uuid}'");
         foreach ($images as $image) {

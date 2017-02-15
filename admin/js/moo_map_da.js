@@ -265,7 +265,6 @@ function moo_validate_selected_zone()
 function moo_update_selected_zone()
 {
     var zone_id = jQuery('#moo_dz_id_for_update').val();
-    console.log(zone_id);
     if(zone_id != "")
     {
         var color = jQuery('#moo_dz_color').val();
@@ -282,7 +281,6 @@ function moo_update_selected_zone()
                 moo_delivery_areas[i].minAmount  = minAmount;
                 moo_delivery_areas[i].fee  = fee;
                 moo_delivery_areas[i].shape.fillColor = color;
-                console.log(moo_delivery_areas[i]);
             }
         }
         moo_hide_form_adding_zone();
@@ -343,7 +341,6 @@ function moo_da_edit_zone(event,ZoneId)
     }
 
     moo_show_form_updating_zone();
-    console.log(ZoneToEdit);
     jQuery('#moo_dz_name').val(ZoneToEdit.name);
     jQuery('#moo_dz_min').val(ZoneToEdit.minAmount);
     jQuery('#moo_dz_fee').val(ZoneToEdit.fee);
@@ -393,7 +390,6 @@ function moo_save_changes()
              var center = element.shape.getCenter();
              zone.center = center;
              zone.radius = radius;
-             console.log(zone.center);
          }
          else
          {
@@ -437,7 +433,6 @@ function moo_setup_existing_zones() {
                 radius: tmp_zone.radius
             });
             google.maps.event.addListener(tmp_zone.shape, 'radius_changed', function() {
-                console.log('radius changed for :'+tmp_zone.id);
                 document.querySelector('#moo_Circleradius').innerText = "Radius : "+(tmp_zone.shape.getRadius()/1609.34).toFixed(3)+" Miles / "+(tmp_zone.shape.getRadius()/1000).toFixed(3)+" Kilometers";
             });
         }

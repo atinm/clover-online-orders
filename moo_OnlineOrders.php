@@ -83,8 +83,8 @@ add_filter( 'wp_mail_content_type', function( $content_type ) {
     return 'text/html';
 });
 */
-
-add_action('plugins_loaded', 'moo_onlineOrders_check_version');
+if(get_option('moo_onlineOrders_version')!='125')
+    add_action('plugins_loaded', 'moo_onlineOrders_check_version');
 
 /*
  * This function for updating the database structure when the version changed and updated it automatically
@@ -148,13 +148,37 @@ function moo_onlineOrders_check_version()
         	$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_modifier` ADD `sort_order` INT NULL");
         	$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_modifier` ADD `show_by_default` INT NOT NULL DEFAULT '1'");
         	$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_modifier_group` ADD `sort_order` INT NULL");
-
 	    case '122':
 	        $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `type` INT(1) NULL");
         case '123':
             $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_item` ADD `sort_order` INT NULL");
-            update_option('moo_onlineOrders_version','124');
         case '124':
+            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `sort_order` INT NULL");
+            $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_item_order` (
+                          `_id` INT NOT NULL AUTO_INCREMENT,
+                          `item_uuid` VARCHAR(100) NOT NULL,
+                          `order_uuid` VARCHAR(100) NOT NULL,
+                          `quantity` VARCHAR(100) NOT NULL,
+                          `modifiers` TEXT NOT NULL,
+                          `special_ins` VARCHAR(255) NOT NULL,
+                          PRIMARY KEY (`_id`, `item_uuid`, `order_uuid`)
+                            )
+                        ENGINE = InnoDB;");
+
+            $store_page     = get_option('moo_store_page');
+            $chekcout_page  = get_option('moo_checkout_page');
+            $cart_page      = get_option('moo_cart_page');
+            $defaultOptions = get_option( 'moo_settings' );
+
+            if( !isset($defaultOptions["store_page"]) || $defaultOptions["store_page"] == "" ) $defaultOptions["store_page"] = $store_page;
+            if( !isset($defaultOptions["checkout_page"]) || $defaultOptions["checkout_page"] == "") $defaultOptions["checkout_page"] = $chekcout_page;
+            if( !isset($defaultOptions["cart_page"]) || $defaultOptions["cart_page"] == "") $defaultOptions["cart_page"] = $cart_page;
+            if( !isset($defaultOptions["checkout_login"]) || $defaultOptions["checkout_login"] == "") $defaultOptions["checkout_login"] = "disabled";
+
+            update_option('moo_settings', $defaultOptions );
+            update_option('moo_onlineOrders_version','125');
+            break;
+        case '125':
             break;
     }
 }

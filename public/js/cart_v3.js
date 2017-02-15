@@ -84,6 +84,9 @@ function moo_addModifiers(item_name,item_uuid)
             var selected_modifies = jQuery("#moo_form_modifiers").serializeArray();
             var Mgroups = {};
             var Modifiers = [];
+            var qte = jQuery('#moo_popup_quantity').val();
+            var special_instruction = jQuery('#moo_popup_si').val();
+
             jQuery.magnificPopup.close();
             for(m in selected_modifies)
             {
@@ -97,7 +100,7 @@ function moo_addModifiers(item_name,item_uuid)
                     modifierGroup = modifierGroup.substr(0,modifierGroup.length-1);
                     var modif = string[2].substr(1);
                     modif = modif.substr(0,modif.length-2);
-                    if(item == '' || modifierGroup == '' || modif == '') continue;
+                    if(item == '' || modifierGroup == '' || modif == '' || item != item_uuid) continue;
                     if(typeof Mgroups[modifierGroup] === 'undefined') Mgroups[modifierGroup] = 1;
                     else Mgroups[modifierGroup] +=1;
                     var modifier = {
@@ -116,7 +119,7 @@ function moo_addModifiers(item_name,item_uuid)
                     var modifierGroup = string[1].substr(1);
                     modifierGroup = modifierGroup.substr(0,modifierGroup.length-2);
                     var modif = modifier.value;
-                    if(item == '' || modifierGroup == '' || modif == '') continue;
+                    if(item == '' || modifierGroup == '' || modif == '' || item != item_uuid) continue;
                     if(typeof Mgroups[modifierGroup] === 'undefined') Mgroups[modifierGroup] = 1;
                     else Mgroups[modifierGroup] +=1;
                     var modifier = {
@@ -142,7 +145,7 @@ function moo_addModifiers(item_name,item_uuid)
                 {
                     if(Object.keys(Mgroups).indexOf(element) == -1)
                     {
-                        swal({ title: "Error!", text: "You didn't choose all required modifiers",   type: "error",   confirmButtonText: "Try again" });
+                        swal({ title: "Error!", text: "You didn't choose all required options",   type: "error",   confirmButtonText: "Try again" });
                         flag=true;
                         return;
                     }
@@ -187,7 +190,7 @@ function moo_addModifiers(item_name,item_uuid)
                                     return true;
                                 }
                             }).done(function () {
-                                moo_updateQuantityAndSI(item_uuid);
+                                moo_updateQuantityAndSI(item_uuid,qte,special_instruction);
                             })
                         }
                         else
@@ -203,24 +206,24 @@ function moo_addModifiers(item_name,item_uuid)
 }
 function moo_addItemWithModifiersToCart(event,item_uuid,item_name,item_price)
 {
+    event.preventDefault();
     moo_addModifiers(item_name,item_uuid);
 }
-function moo_updateQuantityAndSI(item_uuid)
+function moo_updateQuantityAndSI(item_uuid,qte,special_instruction)
 {
-    var qte = jQuery('#moo_popup_quantity').val();
-    var special_instruction = jQuery('#moo_popup_si').val();
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_qte',"item":item_uuid,"qte":qte}, function (data) {
-        if(data.status == 'success')
-        {
-            jQuery.magnificPopup.close();
-        }
-    });
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_special_ins',"item":item_uuid,"special_ins":special_instruction});
+    // var qte = jQuery('#moo_popup_quantity').val();
+    // var special_instruction = jQuery('#moo_popup_si').val();
+
+    if(qte>1)
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_update_qte',"item":item_uuid,"qte":qte});
+    if(special_instruction!="")
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_update_special_ins',"item":item_uuid,"special_ins":special_instruction});
 }
 
 /* Recalculate cart */
 function moo_recalculateCart()
 {
+    jQuery('#moo-cart-total').html("Updating the total...");
     jQuery.post(moo_params.ajaxurl,{'action':'moo_cart_getTotal'}, function (data) {
         if(data.status=="success")
         {

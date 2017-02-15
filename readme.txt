@@ -3,8 +3,8 @@ Contributors: merchantech
 Donate link: http://www.merchantapps.com/
 Tags: clover,online orders for clover,merchantech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover
 Requires at least: 3.0.1
-Tested up to: 4.0
-Stable tag: 1.2.4
+Tested up to: 4.7.2
+Stable tag: 1.2.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -23,7 +23,7 @@ This plugin is the ideal solution to get your business on-line in less than 10 m
 After installing the **Merchantech Online Orders for Clover** plugin, add the pages 'Order Online' and 'Checkout' to your Home menu, or you can add the shortcode in a new post/page or an existing one. Then sync your website with your Clover station
 
 
-[Example 1](https://apizzaheaven.com)
+[Example 1](saruzzosnypizzeria.com)
 [Example 2](http://troygrille.com/store/?category=0V3GZEEKYE1GE)
 [Example 3](http://getittoasted.smartonlineorder.com)
 
@@ -90,6 +90,20 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 7. An other example of menu
 
 == Changelog ==
+= 1.2.5 =
+* Added login/signup feature
+* Ability to save customer address for future purchases
+* Improved the checkout process
+* Added order details
+* Ability to re-arrange the order types
+* Improved order types and functionality
+* Improved e-mail receipt with more attention to detail
+* Ability to track inventory count
+* Fixed duplicated pages issue
+* Improved feedback section
+* Improved delivery fee calculation
+* Improved layout so more description can be added
+* Fixed various bugs and made improvements
 = 1.2.4 =
 * Improved process to make adding descriptions easier
 * Ability to rearrange items

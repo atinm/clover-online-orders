@@ -42,7 +42,7 @@ function moo_initMap(myLatLng,zoom) {
     var marker = new google.maps.Marker({
         position: myLatLng,
         map: map,
-        draggable:true,
+        draggable:true
     });
     google.maps.event.addListener(marker, 'drag', function() {
         moo_updateMarkerPosition(marker.getPosition());

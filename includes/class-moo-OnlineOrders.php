@@ -69,7 +69,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.2.4';
+		$this->version = '1.2.5';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -185,13 +185,6 @@ class moo_OnlineOrders {
         $this->loader->add_action( 'wp_ajax_moo_add_to_cart', $plugin_public, 'moo_add_to_cart');
         $this->loader->add_action( 'wp_ajax_nopriv_moo_add_to_cart', $plugin_public, 'moo_add_to_cart');
 
-        //inc quantity btn
-        $this->loader->add_action( 'wp_ajax_moo_cart_incQuantity', $plugin_public, 'moo_cart_incQuantity');
-        $this->loader->add_action( 'wp_ajax_nopriv_moo_cart_incQuantity', $plugin_public, 'moo_cart_incQuantity');
-        //dec quantity btn
-        $this->loader->add_action( 'wp_ajax_moo_cart_decQuantity', $plugin_public, 'moo_cart_decQuantity');
-        $this->loader->add_action( 'wp_ajax_nopriv_moo_cart_decQuantity', $plugin_public, 'moo_cart_decQuantity');
-
         //Delete Item form Cart
         $this->loader->add_action( 'wp_ajax_moo_deleteItemFromcart', $plugin_public, 'moo_deleteItemFromcart');
         $this->loader->add_action( 'wp_ajax_nopriv_moo_deleteItemFromcart', $plugin_public, 'moo_deleteItemFromcart');
@@ -267,8 +260,9 @@ class moo_OnlineOrders {
         $this->loader->add_action( 'wp_ajax_moo_get_stats', $plugin_public, 'moo_GetStats');
 
         //Change the status and show/hide shipping address of an OrderType
-        $this->loader->add_action( 'wp_ajax_moo_update_ot_status', $plugin_public, 'moo_UpdateOrdertypesStatus');
+        // $this->loader->add_action( 'wp_ajax_moo_update_ot_status', $plugin_public, 'moo_UpdateOrdertypesStatus');
         $this->loader->add_action( 'wp_ajax_moo_update_ot_showSa', $plugin_public, 'moo_UpdateOrdertypesShowSa');
+
         //Get list of saved OrderTypes
         $this->loader->add_action( 'wp_ajax_moo_getAllOrderTypes', $plugin_public, 'moo_getAllOrderTypes');
 
@@ -277,6 +271,12 @@ class moo_OnlineOrders {
 
 		//Delete a Order type
 		$this->loader->add_action( 'wp_ajax_moo_delete_ot', $plugin_public, 'moo_DeleteOrderType');
+
+		// Reorder Order Types
+		$this->loader->add_action( 'wp_ajax_moo_reorder_ordertypes', $plugin_public, 'moo_ReorderOrderTypes');
+
+		// Update Order Type
+		$this->loader->add_action( 'wp_ajax_moo_update_ordertype', $plugin_public, 'moo_UpdateOrdertype');
 
         //Show or hide images of categories
 		$this->loader->add_action( 'wp_ajax_moo_update_category_images_status', $plugin_public, 'moo_UpdateCategoryImagesStatus');
@@ -305,10 +305,6 @@ class moo_OnlineOrders {
         // Filtering Items
         $this->loader->add_action( 'wp_ajax_moo_getitemsfiltered', $plugin_public, 'moo_GetItemsFiltered');
         $this->loader->add_action( 'wp_ajax_nopriv_moo_getitemsfiltered', $plugin_public, 'moo_GetItemsFiltered');
-
-         // Get Item's Modifiers
-        $this->loader->add_action( 'wp_ajax_moo_getitemmodifiers', $plugin_public, 'moo_ModifiersForAnItem');
-        $this->loader->add_action( 'wp_ajax_nopriv_moo_getitemmodifiers', $plugin_public, 'moo_ModifiersForAnItem');
 
         // Update the quantity
         $this->loader->add_action( 'wp_ajax_moo_update_qte', $plugin_public, 'moo_UpdateQuantity');
@@ -374,11 +370,42 @@ class moo_OnlineOrders {
 		$this->loader->add_action( 'wp_ajax_moo_set_default_image', $plugin_public, 'moo_setDefaultImage');
 		$this->loader->add_action( 'wp_ajax_moo_enable_items_with_images', $plugin_public, 'moo_enableItemsWithImages');
 
+        /*
+         * Custmer login & sign-up
+         */
+
+        $this->loader->add_action( 'wp_ajax_moo_customer_login', $plugin_public, 'moo_CustomerLogin');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_customer_login', $plugin_public, 'moo_CustomerLogin');
+
+        $this->loader->add_action( 'wp_ajax_moo_customer_fblogin', $plugin_public, 'moo_CustomerFbLogin');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_customer_fblogin', $plugin_public, 'moo_CustomerFbLogin');
+
+        $this->loader->add_action( 'wp_ajax_moo_customer_signup', $plugin_public, 'moo_CustomerSignup');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_customer_signup', $plugin_public, 'moo_CustomerSignup');
+
+        $this->loader->add_action( 'wp_ajax_moo_customer_resetpassword', $plugin_public, 'moo_ResetPassword');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_customer_resetpassword', $plugin_public, 'moo_ResetPassword');
+
+        $this->loader->add_action( 'wp_ajax_moo_customer_getAddresses', $plugin_public, 'moo_GetAddresses');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_customer_getAddresses', $plugin_public, 'moo_GetAddresses');
+
+        $this->loader->add_action( 'wp_ajax_moo_customer_addAddress', $plugin_public, 'moo_AddAddress');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_customer_addAddress', $plugin_public, 'moo_AddAddress');
+
+        $this->loader->add_action( 'wp_ajax_moo_customer_deleteAddresses', $plugin_public, 'moo_DeleteAddresses');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_customer_deleteAddresses', $plugin_public, 'moo_DeleteAddresses');
+
+        $this->loader->add_action( 'wp_ajax_moo_customer_setDefaultAddresses', $plugin_public, 'moo_setDefaultAddresses');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_customer_setDefaultAddresses', $plugin_public, 'moo_setDefaultAddresses');
+
+        $this->loader->add_action( 'wp_ajax_moo_customer_updateAddresses', $plugin_public, 'moo_updateAddresses');
+        $this->loader->add_action( 'wp_ajax_nopriv_moo_customer_updateAddresses', $plugin_public, 'moo_updateAddresses');
 
 
-		/*
-		 * Suncy handle
-		 */
+
+        /*
+         * Suncy handle
+         */
 		$this->loader->add_action( 'admin_post_moo_sync', $plugin_public, 'moo_SyncHandle');
 		$this->loader->add_action( 'admin_post_nopriv_moo_sync', $plugin_public, 'moo_SyncHandle');
 

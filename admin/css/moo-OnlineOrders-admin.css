@@ -1038,7 +1038,6 @@ div#moo_uploadImgBtn .button {
     height: 280px;
 }
 .image1 {
-    height: 187px !important;
     width: 100% !important;
 }
 .image_options_holder {
@@ -1209,25 +1208,99 @@ ul.moo_listItem{
 .items_cat{
     text-align: center;
 }
-/*============================================================
-    Mobile (Landscape) Design for a width of 480px
-==============================================================
-@media only screen and (min-width: 480px) and (max-width: 767px) {
-    ul.moo_ModifierGroup{
-        text-align: center;
-    }
-    ul.moo_ModifierGroup .label_name{
-        float: none;
-        width: auto;
-        margin-top: auto;
-    }
-    ul.moo_ModifierGroup .saved_new_name{
-        margin-top: 5px;
-        margin-bottom: 5px;
-        width: auto;
-    }
-    .saved_new_name > .button-small{
-        margin: 10px 0;
-    }
+
+li.moo_orderType{
+    padding: 10px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+    cursor: move;
+    background-color: #eee;
+    overflow: hidden;
 }
-*/
+.Detail_OrderType{
+    overflow: hidden;
+    padding: 10px;
+    border: 1px solid #ddd;
+    max-width: 100%;
+    margin: 10px;
+    display: none;
+    margin-top: 30px;
+    background-color: #fff;
+}
+.champ_order{margin-bottom: 15px;}
+.label_Torder{
+    width: 20%;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+}
+/* -- Detail Order -- */
+div.moo_order_detail{
+    width: 30%;
+    float: left;
+}
+div.moo_order_detail div.detail {
+    margin: 10px 0;
+    background: #fff;
+    padding: 5px 20px;
+    margin-right: 10px;
+    border: 2px solid #ddd;
+    box-shadow: 0 8px 6px -6px #9E9E9E;
+}
+div.list_itemsOrder{
+    width: 65%;
+    float: left;
+}
+div.list_itemsOrder > div{
+    margin: 10px 0;
+    background: #fff;
+    padding: 10px;
+    border: 2px double #ddd;
+    box-shadow: 0 8px 6px -6px #9E9E9E;
+}
+div.table_items {
+    height: 300px;
+    overflow-y: scroll;
+    overflow-x:auto;
+}
+table.main_table{
+    border-collapse: collapse;
+    width: 100%;
+    background-color: #eee;
+    border: 1px solid #ddd;
+}
+table.main_table tr.top_table{
+    background-color: #1e5429 !important;
+    color: #fff;
+}
+table.main_table th{
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-transform: uppercase;
+}
+table.main_table td{
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+}
+.paymentTable td{
+    text-align: center;
+}
+.detail order_Customer
+{
+    min-height: 140px;
+}
+#mooCustomerMap
+{
+    width: 100%;
+    min-height: 300px;
+    display: none;
+}
+.moo_order_status
+{
+    text-align: center;
+    font-size: 30px;
+    margin: 0;
+    padding-bottom: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+}

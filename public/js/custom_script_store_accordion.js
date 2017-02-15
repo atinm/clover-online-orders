@@ -33,7 +33,8 @@ function moo_addToCart(e,item_uuid,name,price)
     jQuery.post(moo_params.ajaxurl,{'action':'moo_add_to_cart',"item":item_uuid}, function (data) {
         if(data.status != 'success')
         {
-            swal({ title: "Error", text: 'please try again',   type: "error",   confirmButtonText: "Try again" });
+            moo_updateCart();
+            swal({ title: "Error", text: data.message,   type: "error",   confirmButtonText: "OK" });
         }
         // console.log(data);
     }).done(function() {
@@ -83,13 +84,17 @@ function ChangeQuantity(item_uuid)
                                 var new_ins = jQuery('#MooItemSpecialInstructions').val();
 
                                if(new_qte>0 && new_qte != currentQte )
-                                jQuery.post(moo_params.ajaxurl,{'action':'moo_update_qte',"item":item_uuid,"qte":new_qte}, function (data) {
-                                    if(data.status == 'success')
-                                    {
-                                        moo_updateCart();
-                                        swal({ title: "Quantity updated", text: '',   type: "success",   confirmButtonText: "OK" });
-                                    }
-                                });
+                                    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_qte',"item":item_uuid,"qte":new_qte}, function (data) {
+                                        if(data.status == 'success')
+                                        {
+                                            moo_updateCart();
+                                            swal({ title: "Quantity updated", text: '',   type: "success",   confirmButtonText: "OK" });
+                                        }
+                                        else
+                                        {
+                                            swal({ title: "Error", text: data.message,   type: "error",   confirmButtonText: "OK" });
+                                        }
+                                    });
                                 else
                                    if(new_qte != currentQte)
                                         swal({ title: "Error", text: 'The quantity should be more than 1',   type: "error",   confirmButtonText: "Try again" });
@@ -100,8 +105,11 @@ function ChangeQuantity(item_uuid)
                                         {
                                             swal({ title: "Special Instructions updated", text: '',   type: "success",   confirmButtonText: "OK" });
                                         }
+                                        else
+                                        {
+                                            swal({ title: "Special Instructions Not updated", text: '',   type: "error",   confirmButtonText: "Tru again" });
+                                        }
                                     });
-
                                }
     }).showModal();
 }

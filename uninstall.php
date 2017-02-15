@@ -33,9 +33,10 @@ else
 {
 
 	global $wpdb;
-	$store_page_id = get_option('moo_store_page');
-	$cart_page_id = get_option('moo_cart_page');
-	$checkout_page_id = get_option('moo_checkout_page');
+    $defaultOptions = get_option( 'moo_settings' );
+	$store_page_id  = $defaultOptions['store_page'];
+	$cart_page_id   = $defaultOptions['cart_page'];
+	$checkout_page_id = $defaultOptions['checkout_page'];
 
 	if($store_page_id) wp_delete_post($store_page_id,true);
 	if($checkout_page_id) wp_delete_post($checkout_page_id,true);

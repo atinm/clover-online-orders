@@ -33,6 +33,21 @@ jQuery(document).ready(function($){
         }
     });
 
+    $("#MooOrderTypesContent").sortable({
+        stop: function(event, ui) {
+            var tabNew = new Array();
+            var i = 0;
+            $("#MooOrderTypesContent li").each(function(i, el){
+                tabNew[i] = $(this).attr("ot_uuid");
+                i++;
+            });
+            jQuery.post(moo_params.ajaxurl,{'action':'moo_reorder_ordertypes','newtable':tabNew},function(data){
+                if(data===false)
+                    swal('Order Not changed, please contact us to fix that');
+            })
+        }
+    });
+
     window.moo_loading = '<svg xmlns="http://www.w3.org/2000/svg" width="44px" height="44px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="uil-default"><rect x="0" y="0" width="100" height="100" fill="none" class="bk"></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(0 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(30 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.08333333333333333s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(60 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.16666666666666666s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(90 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.25s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(120 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.3333333333333333s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(150 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.4166666666666667s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(180 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(210 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5833333333333334s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(240 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.6666666666666666s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(270 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.75s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(300 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.8333333333333334s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(330 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.9166666666666666s" repeatCount="indefinite"></animate></rect></svg>';
     window.moo_first_time = true; // this variable is used to make sure the an action is happen only one time
     window.moo_nb_allItems =0;
@@ -521,75 +536,89 @@ function Moo_ImportItems()
             jQuery('#MooPanelSectionImport').html("All of your data was successfully imported from Clover POS"+'<br/> ');
             moo_Update_stats();
             Moo_GetOrderTypes();
+            window.location.reload();
         });
 }
-function Moo_GetOrderTypes()
-    {
-        if(document.querySelector('#MooOrderTypesContent') != null)
-            jQuery.post(moo_params.ajaxurl,{'action':'moo_getAllOrderTypes'}, function (data) {
-            if(data.status == 'success')
-            {
-                var orderTypes = {};
-                try {
-                    orderTypes = JSON.parse(data.data);
-                } catch (e) {
-                    console.log("Parsing error: orderTypes");
-                }
-                var html='';
-                html +='<div class="display_order_types_desktop"><div class="Moo_option-title">';
 
-                var html_m ="";
-                html_m += "<div class='display_order_types_mobile'><div>";
+function Moo_GetOrderTypes(){
+    if( document.querySelector('#MooOrderTypesContent') != null )
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_getAllOrderTypes'}, function (data) {
+        if(data.status == 'success') {
+            var orderTypes = {};
+            try {
+                orderTypes = JSON.parse(data.data);
+            } catch (e) {
+                console.log("Parsing error: orderTypes");
+            }
+            var html='';
+            if(orderTypes.length>0) {
+                for(var i=0;i<orderTypes.length;i++) {
+                    var $ot = orderTypes[i];
+                    if($ot.label == "") continue;
+                    html += '<li class="moo_orderType" ot_uuid="'+$ot.ot_uuid+'">';
+                    html +='<div class="moo_item_order">';
+                    html +='<spam style="float: left">';
+                    html +="<img src='"+moo_params.plugin_url+"/public/img/menu.png' style='width: 15px;padding-right: 10px;'>";
+                    html += $ot.label;
+                    html +='</spam>';
+                    html +='<spam style="float: right;font-size: 12px;" id="top-bt-'+$ot.ot_uuid+'">';
+                    html += '<a href="#" onclick="moo_showOrderTypeDetails(event,\''+$ot.ot_uuid+'\')">Edit</a> | <a href="#" title="Delete this order types from the wordpress Database" onclick="Moo_deleteOrderType(event,\''+$ot.ot_uuid+'\')">DELETE</a>';
+                    html +='</spam>';
+                    html += '</div>';
+                    html +='<div class="Detail_OrderType" id="detail_'+$ot.ot_uuid+'">';
+                    html +='<div class="champ_order name_order"><spam class="label_Torder">Order Type Name </spam><input type="text" id="label_'+$ot.ot_uuid+'" value="'+$ot.label+'" style="width: 160px;"></div>'
+                    //enable/disable
 
-                if(orderTypes.length>0){
-                    html += '<div class="label"><strong>Name</strong></div><div class="onoffswitch"><strong>Disable/Enable</strong></div>';
-                    html += '<div class="onoffswitch" style="margin-left: 60px;width: 150px;">';
-                    html += '<strong>Show customer address</strong></div><div style="float: right"><strong>DELETE</strong></div></div>';
+                    html +='<div class="champ_order IsEnabled_order"><spam class="label_Torder">Disable / Enabled </spam>';
 
-                    for(var i=0;i<orderTypes.length;i++) {
-                        var $ot = orderTypes[i];
-                        if($ot.label == "") continue;
-                        html +='<div class="Moo_option-item">';
-                        html +="<div class='label'>"+($ot.label)+"</div>";
-                        //enable/disable
-                        html +='<div class="onoffswitch" onchange="MooChangeOT_Status(\''+$ot.ot_uuid +'\')" title="'+(($ot.status==1)?"Disable":"Enable")+' this order types">';
-                        html +='<input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_'+$ot.ot_uuid+'"'+(($ot.status==1)?"checked":"")+'>';
-                        html +='<label class="onoffswitch-label" for="myonoffswitch_'+$ot.ot_uuid +'">';
-                        html +='<span class="onoffswitch-inner"></span> <span class="onoffswitch-switch"></span></label></div>';
-                        //show shipping adress
-                        html +='<div class="onoffswitch" onchange="MooChangeOT_showSa(\''+$ot.ot_uuid +'\')" style="margin-left: 100px" title="Hide/Show the shipping address for this order types">';
-                        html +='<input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_sa_'+$ot.ot_uuid+'"'+(($ot.show_sa==1)?"checked":"")+'>';
-                        html +='<label class="onoffswitch-label" for="myonoffswitch_sa_'+$ot.ot_uuid +'">';
-                        html +='<span class="onoffswitch-inner"></span> <span class="onoffswitch-switch"></span></label></div>';
-                        //delete
-                        html +='<div  style="float: right"><a href="#" title="Delete this order types from the wordpress Database" onclick="Moo_deleteOrderType(event,\''+$ot.ot_uuid+'\')">DELETE</a></div></div>';
+                    html +='<div class="onoffswitch" title="Enable or disable this order type">';
 
-                        html_m  += "<div style='border-bottom: 1px solid'><div style='margin-bottom: 7px;'><strong>Name</strong> : "+($ot.label)+"</div>";
-                        html_m +='<div style="display: block; margin-bottom: 7px;" class="" onchange="MooChangeOT_Status_Mobile(\''+$ot.ot_uuid +'\')" title="'+(($ot.status==1)?"Disable":"Enable")+' this order types"><strong>Enabled</strong> : ';
-                        html_m +='<input type="checkbox" name="onoffswitch[]" class="" id="myonoffswitch_mobile_'+$ot.ot_uuid+'"'+(($ot.status==1)?"checked":"")+'>';
-                        html_m +='<label class="" for="myonoffswitch_'+$ot.ot_uuid +'">';
-                        html_m +='<span class=""></span> <span class=""></span></label></div>';
-
-                        html_m +='<div class="" onchange="MooChangeOT_showSa_Mobile(\''+$ot.ot_uuid +'\')" style="margin-bottom: 7px;" title="Hide/Show the shipping address for this order types"><strong>Show customer address</strong> : ';
-                        html_m +='<input type="checkbox" name="onoffswitch[]" class="" id="myonoffswitch_sa_mobile_'+$ot.ot_uuid+'"'+(($ot.show_sa==1)?"checked":"")+'>';
-                        html_m +='<label class="" for="myonoffswitch_sa_'+$ot.ot_uuid +'">';
-                        html_m +='<span class=""></span> <span class=""></span></label></div>';
-                        html_m +='<div style="margin-bottom: 8px;"><strong>Delete</strong> : <a href="#" title="Delete this order types from the wordpress Database" onclick="Moo_deleteOrderType(event,\''+$ot.ot_uuid+'\')">DELETE</a></div></div>';
+                    if ($ot.status==1){
+                        html += '<input type="checkbox" name="onoffswitch[]" id="select_En_'+$ot.ot_uuid+'" class="onoffswitch-checkbox" checked>';
                     }
-                    html += "</div>";
-                    html_m += "</div>";
-                }
-                else
-                  html = "<div class='normal_text' >You don't have any OrderTypes,<br/> please import your data by clicking on <b>Import Items</b></div>";
+                    else{
+                        html += '<input type="checkbox" name="onoffswitch[]" id="select_En_'+$ot.ot_uuid+'" class="onoffswitch-checkbox" >';
+                    }
+                    html +='<label class="onoffswitch-label" for="select_En_'+$ot.ot_uuid+'"><span class="onoffswitch-inner"></span>';
+                    html +='<span class="onoffswitch-switch"></span>';
+                    html +='</label>';
+                    html +="</div>";
 
-               document.querySelector('#MooOrderTypesContent').innerHTML = html;
-               document.querySelector('#MooOrderTypesContent').innerHTML += html_m;
+                    // html +='<select style="width: 160px;" id="select_En_'+$ot.ot_uuid+'">';
+                    // html +='<option value="1" '+(($ot.status==1)?"selected":"")+'>Yes</option>';
+                    // html +='<option value="0" '+(($ot.status==0)?"selected":"")+'>No</option>';
+                    // html +='</select>';
+                    html += '</div>';
+                    //show Taxable
+                    html +='<div class="champ_order Taxable_order"><spam class="label_Torder">Taxable </spam>';
+                    html +='<select style="width: 160px;" id="select_Tax_'+$ot.ot_uuid+'">';
+                    html +='<option value="1" '+(($ot.taxable==1)?"selected":"")+'>Yes</option>';
+                    html +='<option value="0" '+(($ot.taxable==0)?"selected":"")+'>No</option>';
+                    html +='</select>';
+                    html += '</div>';
+                    html +='<div class="champ_order type_order"><spam class="label_Torder">Delivery Order </spam>';
+                    html +='<select style="width: 160px;" id="select_type_'+$ot.ot_uuid+'">';
+                    html +='<option value="1" '+(($ot.show_sa==1)?"selected":"")+'>Yes</option>';
+                    html +='<option value="0" '+(($ot.show_sa==0)?"selected":"")+'>No</option>';
+                    html +='</select>';
+                    html +='<br/><small>Selecting Yes Will require customers to provide their delivery address</small>';
+                    html +='<div class="bt_update_order" style="float: right;">';
+                    html +='<a class="button" style="min-width: 70px !important;margin-right: 5px;" onclick="moo_saveOrderType(event,\''+$ot.ot_uuid+'\')">Save</a>';
+                    html +='<a class="button" style="min-width: 70px !important;" onclick="Moo_GetOrderTypes()">Cancel</a>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</li>';
+                }
             }
             else
-                document.querySelector('#MooOrderTypesContent').innerHTML  ="<div style='text-align: center'>Please verify your API Key<br/></div>";
-
+                html = "<div class='normal_text' >You don't have any OrderTypes,<br/> please import your data by clicking on <b>Import Items</b></div>";
+            document.querySelector('#MooOrderTypesContent').innerHTML = html;
         }
-    );
+        else
+            document.querySelector('#MooOrderTypesContent').innerHTML  ="<div style='text-align: center'>Please verify your API Key<br/></div>";
+
+    });
 }
 
 function moo_Update_stats()
@@ -711,16 +740,29 @@ function MooSendFeedBack(e)
     e.preventDefault();
     var msg =  jQuery("#Moofeedback").val();
     var email =  jQuery("#MoofeedbackEmail").val();
+    var name  =  jQuery("#MoofeedBackFullName").val();
+    var bname =  jQuery("#MoofeedBackBusinessName").val();
+    var phone =  jQuery("#MoofeedBackPhone").val();
+    var website =  jQuery("#MoofeedBackWebsiteName").val();
+
     if(msg == '')
     {
         swal("Error","Please enter your message","error");
     }
     else
     {
+        var data = {
+            'name':name,
+            'bname':bname,
+            'message':msg,
+            'email':email,
+            'phone':phone,
+            'website':website,
+        };
         jQuery("#MooSendFeedBackBtn").hide();
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_send_feedback','message':msg,'email':email}, function (data) {
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_send_feedback','data':data}, function (data) {
             if(data.status == "Success"){
-                swal("Tank you","your feedback was sent","success");
+                swal("Thank you","Your feedback has been sent. We will get back to you shortly","success");
                 jQuery("#Moofeedback").val("");
                 jQuery("#MooSendFeedBackBtn").show();
             }
@@ -984,22 +1026,19 @@ function moo_save_item_images(uuid) {
         swal("Error","Description too long","error");
         return
     }
-    if(description != "" || Object.keys(moo_item_images).length>=0)
-    {
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_save_items_with_images',"item_uuid":uuid,"description":description,"images":images}, function (data) {
-            if(data.status == 'Success') {
-                if(data.data==true) {
-                    swal("Your changes were saved");
-                    history.back();
-                }
-                else
-                    swal("Error","Description too longError when saving your changes, please try again","error");
-            } else
-                swal("Error","Error when saving your changes, please try again","error");
-        }
-        );
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_save_items_with_images',"item_uuid":uuid,"description":description,"images":images}, function (data) {
+        if(data.status == 'Success') {
+            if(data.data==true) {
+                swal("Your changes were saved");
+                history.back();
+            }
+            else
+                swal("Error","Description too longError when saving your changes, please try again","error");
+        } else
+            swal("Error","Error when saving your changes, please try again","error");
     }
-    else history.back();
+    );
+
 }
 
 function moo_get_item_with_images(uuid) {
@@ -1016,9 +1055,6 @@ function moo_get_item_with_images(uuid) {
             }
         }
         moo_display_item_images();
-        jQuery('#moo_item_description').val(items[0].description);
-        jQuery('#moo_item_name').text(items[0].name);
-        jQuery('#moo_item_price').text("$"+items[0].price/100);
     });
 }
 /*End upload Functions*/
@@ -1082,7 +1118,10 @@ function moo_upadateItemsPerPage(page)
         if(percent_loaded == null)
             percent_loaded = 1;
         window.bar.animate(bar.value()+percent_loaded/100);
-        window.bar.setText(Math.round(percent_loaded+bar.value()*100) + ' %');
+        if(window.moo_nb_allItems!=0)
+            window.bar.setText(Math.round(percent_loaded+bar.value()*100) + ' %');
+        else
+            window.bar.setText('Please wait...');
     }
     ).done(function () {
         if(received>0)
@@ -1146,4 +1185,55 @@ function moo_editItemDescription(event,item_uuid)
             }
         );
     }
+}
+
+function moo_showOrderTypeDetails(e,id) {
+    e.preventDefault();
+    //jQuery('#detail_'+id).slideToggle( "slow" );
+    jQuery('#detail_'+id).slideToggle('slow', function() {
+        if (jQuery(this).is(':visible')) {
+            jQuery("#top-bt-"+id).css('display','none');
+        } else {
+            jQuery("#top-bt-"+id).css('display','block');
+        }
+    });
+}
+function moo_saveOrderType(e,uuid) {
+    e.preventDefault();
+    var name = jQuery('#label_'+ uuid).val();
+    var isEnabled = jQuery('#select_En_' + uuid).prop('checked')?'1':'0';
+    //var isEnabled = jQuery('#select_En_'+ uuid).val();
+    var taxable = jQuery('#select_Tax_'+ uuid).val();
+    var type = jQuery('#select_type_'+ uuid).val();
+
+    var data = {'action':'moo_update_ordertype',"name":name,"enable":isEnabled,"taxable":taxable,"type":type,"uuid":uuid};
+    jQuery.post(moo_params.ajaxurl,data, function (data) {
+            if(data.data=="1")
+            {
+                swal('The order type "'+name+'" was updated');
+                Moo_GetOrderTypes();
+            }
+        }
+    );
+
+}
+function moo_showCustomerMap(event,lat,lng)
+{
+    event.preventDefault();
+    var location = {};
+    location.lat = parseFloat(lat) ;
+    location.lng = parseFloat(lng) ;
+
+    jQuery('#mooCustomerMap').show();
+
+    var map = new google.maps.Map(document.getElementById('mooCustomerMap'), {
+        zoom: 15,
+        center: location
+    });
+
+    var marker = new google.maps.Marker({
+        position: location,
+        map: map
+    });
+
 }

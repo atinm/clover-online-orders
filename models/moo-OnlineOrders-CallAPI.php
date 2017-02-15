@@ -4,14 +4,19 @@ class moo_OnlineOrders_CallAPI {
 
     public $Token;
     public $url_api;
+    public $debug;
 
 
     function __construct()
     {
         $MooSettings = (array) get_option("moo_settings");
         $this->Token = $MooSettings['api_key'];
-		//Put the API URL here and don't forget the last slash
+        //Put the API URL here and don't forget the last slash
         $this->url_api = "http://api.smartonlineorders.com/";
+       // $this->url_api = "http://localhost/api/";
+
+        $this->debug = false;
+
     }
     /*
      * This functions import data from Clover POS and call the save functions
@@ -193,17 +198,42 @@ class moo_OnlineOrders_CallAPI {
             return "Please setup you business hours on Clover";
 
     }
-    public function getOpeningStatus($nb_days,$nb_minites,$mindays)
+    public function getOpeningStatus($nb_days,$nb_minites)
     {
-        if($mindays>0)
-            return $this->callApi("is_open/".$nb_days."/".$nb_minites."/".$mindays,$this->Token);
-        else
-            return $this->callApi("is_open/".$nb_days."/".$nb_minites,$this->Token);
-
+        return $this->callApi("is_open/".intval($nb_days)."/".intval($nb_minites),$this->Token);
     }
     public function getMerchantProprietes()
     {
-        return $this->callApi("properties",$this->Token);
+        if(isset($_SESSION['merchantProp']) && $_SESSION['merchantProp'] != "")
+        {
+            return $_SESSION['merchantProp'];
+        }
+        else
+        {
+            $res = $this->callApi("properties",$this->Token);
+            $_SESSION['merchantProp'] = $res;
+            return $res;
+        }
+    }
+    public function getTrackingStockStatus()
+    {
+        $MooOptions = (array)get_option("moo_settings");
+        if(isset($MooOptions["track_stock"]) && $MooOptions["track_stock"]=="enabled")
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    public function getItemStocks()
+    {
+        $res = $this->callApi("item_stocks",$this->Token);
+        $res = json_decode($res);
+        if(isset($res->elements))
+            return $res->elements;
+        return array();
     }
 
     //Function to update existing data
@@ -248,14 +278,14 @@ class moo_OnlineOrders_CallAPI {
 
 
     //manage orders
-    public function createOrder($total,$orderType,$paymentmethod)
+    public function createOrder($total,$orderType,$paymentmethod,$taxAmount,$deliveryfee,$tipAmount,$isDelivery)
     {
         if($orderType=='default')
         {
-            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType=default&paymentmethod='.$paymentmethod);
+            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType=default&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery);
         }
         else
-            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod);
+            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery);
 
         return $res;
     }
@@ -263,6 +293,7 @@ class moo_OnlineOrders_CallAPI {
     {
         return $this->callApi_Post("create_line_in_order",$this->Token,'oid='.$oid.'&item='.$item_uuid.'&qte='.$qte.'&special_ins='.$special_ins);
     }
+
     public function addlineWithPriceToOrder($oid,$item_uuid,$qte,$special_ins,$price)
     {
         return $this->callApi_Post("create_line_in_order",$this->Token,'oid='.$oid.'&item='.$item_uuid.'&qte='.$qte.'&special_ins='.$special_ins.'&itemprice='.$price);
@@ -271,6 +302,7 @@ class moo_OnlineOrders_CallAPI {
     {
         return $this->callApi_Post("add_modifier_to_line",$this->Token,'oid='.$oid.'&lineid='.$lineId.'&modifier='.$modifer_uuid);
     }
+
     //Pay the order
     public function payOrder($oid,$taxAmount,$amount,$zip,$expMonth,$cvv,$last4,$expYear,$first6,$cardEncrypted,$tipAmount)
     {
@@ -295,7 +327,8 @@ class moo_OnlineOrders_CallAPI {
 	{
 		return $this->callApi_Post("order_types",$this->Token,'label='.$label.'&taxable='.$taxable);
 	}
-    //Updtae the website for the merchant
+
+	//Updtae the website for the merchant
     public function updateWebsite($url)
     {
         return $this->callApi_Post("addsite",$this->Token,'website='.$url);
@@ -321,6 +354,48 @@ class moo_OnlineOrders_CallAPI {
         return $this->callApi_Post("sendsms",$this->Token,'to='.$phone.'&body='.$message);
     }
 
+    public function moo_CustomerVerifPhone($token,$phone)
+    {
+        return $this->callApi_Post("customers/verifphone",$this->Token,'phone='.$phone.'&token='.$token);
+    }
+
+    public function moo_CustomerLogin($email,$password)
+    {
+        return $this->callApi_Post('customers/login',$this->Token,'email='.$email.'&password='.$password);
+    }
+    public function moo_CustomerFbLogin($email,$fbid,$name,$gender)
+    {
+        return $this->callApi_Post('customers/fblogin',$this->Token,'email='.$email.'&id='.$fbid.'&name='.$name.'&gender='.$gender);
+    }
+    public function moo_CustomerSignup($title,$full_name,$email,$phone,$password)
+    {
+        return $this->callApi_Post('customers/signup',$this->Token,'email='.$email.'&password='.$password.'&title='.$title.'&full_name='.$full_name.'&phone='.$phone);
+    }
+    public function moo_ResetPassword($email)
+    {
+        return $this->callApi_Post('customers/resetpassword',$this->Token,'email='.$email);
+    }
+    public function moo_GetAddresses($token)
+    {
+        return $this->callApi_Post('customers/getaddress',$this->Token,'token='.$token);
+    }
+    public function moo_AddAddress($address,$city,$state,$country,$zipcode,$lat,$lng,$token)
+    {
+        return $this->callApi_Post('customers/setaddress',$this->Token,'token='.$token.'&address='.$address.'&city='.$city.'&state='.$state.'&country='.$country.'&zipcode='.$zipcode.'&lat='.$lat.'&lng='.$lng);
+    }
+    public function moo_DeleteAddresses($address_id,$token)
+    {
+        return $this->callApi_Post('customers/deleteaddress',$this->Token,'token='.$token.'&address_id='.$address_id);
+
+    }
+    public function moo_setDefaultAddresses()
+    {
+
+    }
+    public function moo_updateAddresses()
+    {
+
+    }
     /*
      * Sync functions
      * @since 1.0.6
@@ -790,9 +865,141 @@ class moo_OnlineOrders_CallAPI {
         if($res>0) return true;
         return false;
     }
-    public function send_an_email($order_id,$emails,$customer,$instructions,$pickup_time)
+    public function send_an_email($order_id,$emails,$customer,$instructions,$pickup_time,$tipAmount,$taxAmount,$deliveryAmount)
     {
-        return $this->callApi_Post("sendemails",$this->Token,"order_id=".$order_id."&merchant_emails=".$emails."&customer=".$customer."&instructions=".$instructions."&pickup_time=".$pickup_time);
+        return $this->callApi_Post("sendemails",$this->Token,"order_id=".$order_id."&merchant_emails=".$emails."&customer=".$customer."&instructions=".$instructions."&pickup_time=".$pickup_time."&tipAmount=".$tipAmount."&taxAmount=".$taxAmount."&deliveryAmount=".$deliveryAmount);
+    }
+    public function checkToken()
+    {
+        $url = "checktoken";
+        return $this->callApi($url,$this->Token);
+    }
+    public function checkIpBlackListed()
+    {
+        return $this->checkIP($this->Token);
+    }
+    public function getOrderDetails($order)
+    {
+        $result = array();
+        $url='orders/'.$order->uuid;
+        $orderFromServer = json_decode($this->callApi($url,$this->Token));
+
+        if(isset($orderFromServer))
+        {
+            $result['uuid_order']=$orderFromServer->order->uuid;
+            $result['amount_order']=$orderFromServer->order->amount/100;
+            $result['order_type']=$orderFromServer->order->order_type;
+            $result['special_instruction']=$orderFromServer->order->special_instruction;
+
+            if($orderFromServer->order->date != "")
+            {
+                $result['date_order']= date('d/m/Y H:i:s', $orderFromServer->order->date/1000);
+            }
+            if (isset($orderFromServer->order->paymentMethode) && $orderFromServer->order->paymentMethode != ""){
+                $result['paymentMethode']=$orderFromServer->order->paymentMethode;
+            }
+            else{
+                $result['paymentMethode']="No";
+            }
+            if (isset($orderFromServer->order->taxAmount) && $orderFromServer->order->taxAmount != ""){
+                $result['taxAmount']=$orderFromServer->order->taxAmount/100;
+            }
+            else{
+                $result['taxAmount']=$order->taxAmount;
+            }
+            if (isset($orderFromServer->order->deliveryAmount) && $orderFromServer->order->deliveryAmount != ""){
+                $result['deliveryAmount']=$orderFromServer->order->deliveryAmount/100;
+            }
+            else {
+                $result['deliveryAmount']=$order->deliveryfee;
+            }
+            if (isset($orderFromServer->order->tipAmount) && $orderFromServer->order->tipAmount != ""){
+                $result['tipAmount']=$orderFromServer->order->tipAmount/100;
+            }
+            else{
+                $result['tipAmount']=$order->tipAmount;
+            }
+            if (isset($orderFromServer->customer->name) && $orderFromServer->customer->name != ""){
+                $result['name_customer']=$orderFromServer->customer->name;
+            }
+            else{
+                $result['name_customer']=$order->p_name;
+            }
+            if (isset($orderFromServer->customer->email) && $orderFromServer->customer->email != ""){
+                $result['email_customer'] = $orderFromServer->customer->email;
+            }
+            else{
+                $result['email_customer']=$order->p_email;
+            }
+            if (isset($orderFromServer->customer->phone) && $orderFromServer->customer->phone != ""){
+                $result['phone_customer']=$orderFromServer->customer->phone;
+            }
+            else {
+                $result['phone_customer']=$order->p_phone;
+            }
+            if (isset($orderFromServer->customer->address)&& $orderFromServer->customer->address == ""){
+                $result['address_customer']= $orderFromServer->customer->address;
+            }
+            else{
+                $result['address_customer']=$order->p_address;
+            }
+            if (isset($orderFromServer->customer->city) && $orderFromServer->customer->city != ""){
+                $result['city_customer']=$orderFromServer->customer->city;
+            }
+            else{
+                $result['city_customer']=$order->p_city;
+            }
+            if ($orderFromServer->customer->state && $orderFromServer->customer->state != ""){
+                $result['state_customer']=$orderFromServer->customer->state;
+            }
+            else {
+                $result['state_customer']=$order->p_state;
+            }
+            if (isset($orderFromServer->customer->zipcode) && $orderFromServer->customer->zipcode != ""){
+                $result['zipcode']=$orderFromServer->customer->zipcode;
+            }
+            else {
+                $result['zipcode']=$order->p_zipcode;
+            }
+            if (isset($orderFromServer->customer->lat) && $orderFromServer->customer->lat != ""){
+                $result['lat']=$orderFromServer->customer->lat;
+            }
+            else {
+                $result['lat']=$order->p_lat;
+            }
+            if (isset($orderFromServer->customer->lng) && $orderFromServer->customer->lng != ""){
+                $result['lng']=$orderFromServer->customer->lng;
+            }
+            else {
+                $result['lng']=$order->p_lng;
+            }
+            $result['payments']=$orderFromServer->payments;
+        }
+        else
+        {
+            $result['uuid_order']=$order->uuid;
+            $result['amount_order']=$order->amount;
+            $result['order_type']=$order->ordertype;
+            $result['special_instruction']=$order->instructions;
+            $result['date_order']=$order->date;
+            $result['paymentMethode']=$orderFromServer->order['paymentMethode'];
+            $result['taxAmount']=$order->taxAmount;
+            $result['deliveryAmount']=$order->deliveryfee;
+            $result['tipAmount']=$order->tipAmount;
+            $result['name_customer']=$order->p_name;
+            $result['email_customer']=$order->p_email;
+            $result['phone_customer']=$order->p_phone;
+            $result['address_customer']=$order->p_address;
+            $result['city_customer']=$order->p_city;
+            $result['state_customer']=$order->p_state;
+            $result['zipcode']=$order->p_zipcode;
+            $result['lat']=$order->p_lat;
+            $result['lng']=$order->p_lng;
+            $result['payments']=$orderFromServer->payments;
+        }
+        //return json_decode($orderFromServer);
+        //var_dump($result);
+        return $result;
     }
 
     //Funciton to save DATA in db
@@ -1054,7 +1261,29 @@ class moo_OnlineOrders_CallAPI {
         return $res;
     }
 
+    private function checkIP($accesstoken)
+    {
 
+        $headr = array();
+        $headr[] = 'Accept: application/json';
+        $headr[] = 'X-Authorization: '.$accesstoken;
+        $url=  $this->url_api.'checktoken';
+        //cURL starts
+        $crl = curl_init();
+        curl_setopt($crl, CURLOPT_URL, $url);
+        curl_setopt($crl, CURLOPT_HTTPHEADER,$headr);
+        curl_setopt($crl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($crl, CURLOPT_HTTPGET,true);
+        curl_setopt($crl, CURLOPT_SSL_VERIFYPEER,false);
+        $reply = curl_exec($crl);
+        //error handling for cURL
+        if ($reply === false) {
+            print_r('Curl error: ' . curl_error($crl));
+            return $reply;
+        }
+        curl_close($crl);
+        return $reply;
+    }
 
     private function callApi($url,$accesstoken)
     {
@@ -1079,9 +1308,12 @@ class moo_OnlineOrders_CallAPI {
         }
         $info = curl_getinfo($crl);
         curl_close($crl);
-	  //  echo 'GET : '.$url;
-      //  var_dump($reply);
-        if($info['http_code']==200)return $reply;
+        if($this->debug)
+        {
+            echo $url." GET ---- ";
+            var_dump($reply);
+        }
+        if( $info['http_code']==200 )return $reply;
         return false;
     }
     private function callApi_Post($url,$accesstoken,$fields_string)
@@ -1108,8 +1340,11 @@ class moo_OnlineOrders_CallAPI {
 
         $info = curl_getinfo($crl);
         curl_close($crl);
-	   //echo $url." ---- ";
-      // var_dump($reply);
+        if($this->debug)
+        {
+            echo $url." POST ---- ";
+            var_dump($reply);
+        }
         if($info['http_code'] == 200)
             return $reply;
         return false;

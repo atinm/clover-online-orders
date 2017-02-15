@@ -47,7 +47,7 @@ div.MooPanelItem span.moo_adding-zone-btn {
 
 /* Force table to not be like tables anymore */
 table,thead,tbody,th,td,tr {
-	display: block;
+	/* display: block;*/
 }
 /* Hide table headers (but not display: none;, for accessibility) */
 thead tr {
@@ -156,4 +156,22 @@ div#MooOrderTypesContent {
 }
 .tr_for_mobile {
 	border: none !important;
+}
+.label_Torder{
+	display: block;
+	font-size: 12px;
+	padding-bottom: 10px;
+}
+.bt_update_order{
+	margin-top: 10px;
+	float: left !important;
+}
+/* -- Detail Order -- */
+div.moo_order_detail{
+	width: 90% !important;
+	float: inherit !important;
+}
+div.list_itemsOrder {
+	width: 80% !important;
+	float: inherit !important;
 }

@@ -36,7 +36,7 @@ function moo_btn_addToCart(event,item,name)
     jQuery.post(moo_params.ajaxurl,{'action':'moo_add_to_cart',"item":item}, function (data) {
         if(data.status != 'success')
         {
-            toastr.error('Error, please try again');
+            toastr.error(data.message);
         }
     })
 }

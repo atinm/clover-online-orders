@@ -37,21 +37,21 @@ Side note: I know that this style of nesting in SASS doesn't result in the most 
 }
 
 /* This is used as the traditional .clearfix class */
-.moo-group:before, .moo-shopping-cart:before, .moo-column-labels:before, .moo-product:before, .moo-totals-item:before,
+.moo-group:before, .moo-shopping-cart:before, .moo-column-labels:before,.moo-column-labels-checkout:before, .moo-product:before, .moo-totals-item:before,
 .moo-group:after,
 .moo-shopping-cart:after,
-.moo-column-labels:after,
+.moo-column-labels:after,.moo-column-labels-checkout:after,
 .moo-product:after,
 .moo-totals-item:after {
     content: '';
     display: table;
 }
 
-.moo-group:after, .moo-shopping-cart:after, .moo-column-labels:after, .moo-product:after, .moo-totals-item:after {
+.moo-group:after, .moo-shopping-cart:after, .moo-column-labels:after,.moo-column-labels-checkout:after, .moo-product:after, .moo-totals-item:after {
     clear: both;
 }
 
-.moo-group, .moo-shopping-cart, .moo-column-labels, .moo-product, .moo-totals-item {
+.moo-group, .moo-shopping-cart, .moo-column-labels,.moo-column-labels-checkout, .moo-product, .moo-totals-item {
     zoom: 1;
 }
 
@@ -69,7 +69,7 @@ Side note: I know that this style of nesting in SASS doesn't result in the most 
 }
 
 /* Column headers */
-.moo-column-labels {
+.moo-column-labels,.moo-column-labels-checkout {
     font-weight: bold;
 }
 .moo-column-labels label {
@@ -77,13 +77,13 @@ Side note: I know that this style of nesting in SASS doesn't result in the most 
     margin-bottom: 15px;
     border-bottom: 1px solid #eee;
 }
-.moo-column-labels .product-image, .column-labels .product-details, .column-labels .product-removal {
+.moo-column-labels .product-image,.moo-column-labels-checkout .product-image, .column-labels .product-details, .column-labels .product-removal {
     text-indent: -9999px;
 }
 
 /* Product entries */
 .moo-product {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     padding-bottom: 10px;
     border-bottom: 1px solid #eee;
 }
@@ -179,6 +179,9 @@ Side note: I know that this style of nesting in SASS doesn't result in the most 
     .moo-column-labels {
         display: none;
     }
+    .moo-column-labels-checkout {
+        margin-top: 10px;
+    }
 
     .moo-product-image {
         float: right;
@@ -193,10 +196,16 @@ Side note: I know that this style of nesting in SASS doesn't result in the most 
         margin-bottom: 10px;
         width: auto;
     }
+    .moo-product-details-checkout {
+        float: left !important;
+    }
 
     .moo-product-price {
         clear: both;
         width: 70px;
+    }
+    .moo-product-price-checkout {
+        clear: none !important;
     }
 
     .moo-product-quantity {
@@ -208,6 +217,9 @@ Side note: I know that this style of nesting in SASS doesn't result in the most 
 
     .moo-product-quantity:before {
         content: 'x';
+    }
+    .moo-product-quantity-checkout:before {
+        content: '' !important;
     }
 
     .moo-product-removal {
@@ -264,3 +276,26 @@ Side note: I know that this style of nesting in SASS doesn't result in the most 
         border-radius: 3px;
     }
 }
+
+.moo-product-removal-checkout {
+    float: right;
+}
+
+.moo-product-line-price-checkout {
+    float: right;
+    clear: left;
+    width: auto;
+    margin-top: 10px;
+}
+
+.moo-product .moo-product-line-price-checkout:before {
+    content: 'Item Total: $';
+}
+
+.moo-totals .moo-totals-item-checkout label {
+    width: 60%;
+}
+.moo-totals .moo-totals-item .moo-totals-value-checkout {
+    width: 40%;
+}
+

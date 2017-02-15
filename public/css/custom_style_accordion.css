@@ -68,7 +68,7 @@
     border: 0px;
     color: #252525;
     font-size: 19px;
-    line-height: 15px;
+    line-height: 18px;
     font-weight: normal;
     font-family: 'ProximaNovaAltExtraCondensedBold';
     margin: 0;
@@ -320,6 +320,7 @@ border-bottom: none;
     line-height: 31px;
     padding: 0px;
     color : #000000;
+    font-size: 14px;
 }
 .moo_modifier-box2 .moo_label_onclick
 {

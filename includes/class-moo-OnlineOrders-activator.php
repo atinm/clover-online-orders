@@ -26,11 +26,13 @@ class Moo_OnlineOrders_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate() {
+
         // Add option to db
-        update_option("moo_first_use", "true");
+        update_option("use_proxy", "false");
         // Install DB
         global $wpdb;
-       $wpdb->hide_errors();
+        $wpdb->hide_errors();
+       // $wpdb->show_errors();
 
 /*      -- -----------------------------------------------------
         -- Table `item_group`
@@ -123,7 +125,7 @@ class Moo_OnlineOrders_Activator {
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_category` (
                        `_id` INT NOT NULL AUTO_INCREMENT,
                       `uuid` VARCHAR(100) NOT NULL ,
-                      `name` VARCHAR(45) NULL ,
+                      `name` VARCHAR(250) NULL ,
                       `sort_order` INT NULL ,
                       `show_by_default` INT(1) NOT NULL DEFAULT '1' ,
                       `items` TEXT NULL ,
@@ -363,6 +365,7 @@ class Moo_OnlineOrders_Activator {
 -- -----------------------------------------------------
 -- Table `item_order`
 -- -----------------------------------------------------
+* remove the UNIQUE(`item_uuid`,`order_uuid`,`modifiers`) and the FOREIGN KEY on the version 124
 */
 
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_item_order` (
@@ -370,22 +373,10 @@ class Moo_OnlineOrders_Activator {
                           `item_uuid` VARCHAR(100) NOT NULL,
                           `order_uuid` VARCHAR(100) NOT NULL,
                           `quantity` VARCHAR(100) NOT NULL,
-                          `modifiers` VARCHAR(255) NOT NULL,
+                          `modifiers` TEXT NOT NULL,
                           `special_ins` VARCHAR(255) NOT NULL,
-                          PRIMARY KEY (`_id`, `item_uuid`, `order_uuid`),
-                          INDEX `{$wpdb->prefix}fk_order_has_items_idx1` (`order_uuid` ASC) ,
-                          INDEX `{$wpdb->prefix}fk_order_has_items_idx2` (`item_uuid` ASC)  ,
-                          CONSTRAINT `{$wpdb->prefix}fk_order_has_items_item`
-                            FOREIGN KEY (`item_uuid`)
-                            REFERENCES `{$wpdb->prefix}moo_item` (`uuid`)
-                            ON DELETE NO ACTION
-                            ON UPDATE NO ACTION,
-                          CONSTRAINT `{$wpdb->prefix}fk_order_has_items_order`
-                            FOREIGN KEY (`order_uuid`)
-                            REFERENCES `{$wpdb->prefix}moo_order` (`uuid`)
-                            ON DELETE NO ACTION
-                            ON UPDATE NO ACTION,
-                            UNIQUE(`item_uuid`,`order_uuid`,`modifiers`))
+                          PRIMARY KEY (`_id`, `item_uuid`, `order_uuid`)
+                            )
                         ENGINE = InnoDB;");
 
         /*
@@ -399,7 +390,7 @@ class Moo_OnlineOrders_Activator {
                           `taxable` INT(1),
                           `status` INT(1),
                           `show_sa` INT(1),
-                          `type` INT(1),
+                          `sort_order` INT NULL,
                           PRIMARY KEY (`ot_uuid`))
                         ENGINE = InnoDB;");
 
@@ -423,57 +414,66 @@ class Moo_OnlineOrders_Activator {
                         ENGINE = InnoDB;");
 
 // Add the page :
+        $pages = array(
+            'store'=>array(
+                'comment_status' => 'closed',
+                'ping_status' =>  'closed' ,
+                'post_author' => 1,
+                'post_name' => 'Store',
+                'post_status' => 'publish' ,
+                'post_title' => 'Order Online',
+                'post_type' => 'page',
+                'post_content' => '[moo_all_items]'
+            ),
+            'checkout'=>array(
+                'comment_status' => 'closed',
+                'ping_status' =>  'closed' ,
+                'post_author' => 1,
+                'post_name' => 'Checkout',
+                'post_status' => 'publish' ,
+                'post_title' => 'Checkout',
+                'post_type' => 'page',
+                'post_content' => '[moo_checkout]'
+            ),
+            'cart'=>array(
+                'comment_status' => 'closed',
+                'ping_status' =>  'closed' ,
+                'post_author' => 1,
+                'post_name' => 'Cart',
+                'post_status' => 'publish' ,
+                'post_title' => 'Cart',
+                'post_type' => 'page',
+                'post_content' => '[moo_cart]'
+            )
+        );
+        $defaultOptions = (array)get_option( 'moo_settings' );
 
-        //post status and options
-        $post_store = array(
-            'comment_status' => 'closed',
-            'ping_status' =>  'closed' ,
-            'post_author' => 1,
-            'post_name' => 'Store',
-            'post_status' => 'publish' ,
-            'post_title' => 'Order Online',
-            'post_type' => 'page',
-            'post_content' => '[moo_all_items]'
-        );
-        $post_checkout = array(
-            'comment_status' => 'closed',
-            'ping_status' =>  'closed' ,
-            'post_author' => 1,
-            'post_name' => 'Checkout',
-            'post_status' => 'publish' ,
-            'post_title' => 'Checkout',
-            'post_type' => 'page',
-            'post_content' => '[moo_checkout]'
-        );
-         $post_cart = array(
-            'comment_status' => 'closed',
-            'ping_status' =>  'closed' ,
-            'post_author' => 1,
-            'post_name' => 'Cart',
-            'post_status' => 'publish' ,
-            'post_title' => 'Cart',
-            'post_type' => 'page',
-            'post_content' => '[moo_cart]'
-        );
+        if(!isset($defaultOptions['store_page']) || $defaultOptions['store_page'] == "" )
+        {
+            $store_page_id =  wp_insert_post( $pages['store'], false );
+            $defaultOptions['store_page'] = $store_page_id ;
+        }
+        if(!isset($defaultOptions['checkout_page']) || $defaultOptions['checkout_page'] == "")
+        {
+            $checkout_page_id =  wp_insert_post( $pages['checkout'], false );
+            $defaultOptions['checkout_page'] =  $checkout_page_id;
+        }
+        if(!isset($defaultOptions['cart_page']) || $defaultOptions['cart_page'] == "")
+        {
+            $cart_page_id  =  wp_insert_post( $pages['cart'], false );
+            $defaultOptions['store_page'] = $cart_page_id ;
+        }
+
         // Save the version of the plugin in the Database
-         update_option('moo_onlineOrders_version', '124');
-        //insert page and save the id
-        $store_page_id    =  wp_insert_post( $post_store, false );
-        $checkout_page_id =  wp_insert_post( $post_checkout, false );
-        $cart_page_id     =  wp_insert_post( $post_cart, false );
-
-        //save the id in the database
-        update_option( 'moo_store_page', $store_page_id );
-        update_option( 'moo_checkout_page', $checkout_page_id );
-        update_option( 'moo_cart_page', $cart_page_id );
-
-        $defaultOptions = get_option( 'moo_settings' );
+         update_option('moo_onlineOrders_version', '125');
 
         if( !isset($defaultOptions["default_style"]) || $defaultOptions["default_style"] == "" || $defaultOptions["default_style"] == "style2" ) $defaultOptions["default_style"] = "style1";
         if( !isset($defaultOptions["hours"]) || $defaultOptions["hours"] == "") $defaultOptions["hours"] = "business";
         if( !isset($defaultOptions["payment_cash"]) || $defaultOptions["payment_cash"] == "") $defaultOptions["payment_cash"] = "on";
         if( !isset($defaultOptions["payment_cash_delivery"]) || $defaultOptions["payment_cash_delivery"] == "") $defaultOptions["payment_cash_delivery"] = "on";
         if( !isset($defaultOptions["scp"]) || $defaultOptions["scp"] == "") $defaultOptions["scp"] = "on";
+        if( !isset($defaultOptions["checkout_login"]) || $defaultOptions["checkout_login"] == "") $defaultOptions["checkout_login"] = "disabled";
+
 
         update_option('moo_settings', $defaultOptions );
             

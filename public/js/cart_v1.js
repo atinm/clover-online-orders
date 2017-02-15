@@ -194,7 +194,7 @@ function moo_incQte(productPrice,item)
 
     jQuery("#moo_itemqte_"+item).text(qte);
 
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_cart_incQuantity','item':item}, function (data) {
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_qte','item':item,'qte':qte}, function (data) {
         if(data.status == "success"){
             if( jQuery("#moo_cart_line_"+item).hasClass('warning'))
             {
