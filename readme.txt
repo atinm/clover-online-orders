@@ -23,8 +23,8 @@ This plugin is the ideal solution to get your business on-line in less than 10 m
 After installing the **Merchantech Online Orders for Clover** plugin, add the pages 'Order Online' and 'Checkout' to your Home menu, or you can add the shortcode in a new post/page or an existing one. Then sync your website with your Clover station
 
 
-[Example 1](saruzzosnypizzeria.com)
-[Example 2](http://troygrille.com/store/?category=0V3GZEEKYE1GE)
+[Example 1](https://thaihotsushi.com/store)
+[Example 2](http://deafghanan.com/store)
 [Example 3](http://getittoasted.smartonlineorder.com)
 
 
