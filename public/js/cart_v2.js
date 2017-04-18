@@ -1,7 +1,10 @@
+/* Cart of standard style*/
 function moo_updateCart()
 {
     jQuery(".moo_cart .CartContent").html('<img src="'+moo_params.plugin_img+'/loading.gif" style="text-align: center;margin: 15px auto 0px;display: block;width: 50px;" />');
     jQuery.post(moo_params.ajaxurl,{'action':'moo_get_cart'}, function (data) {
+
+
         var html = ''+
                     '<table class="table"><thead>'+
                     '<tr>'+
@@ -10,6 +13,12 @@ function moo_updateCart()
                     '<th colspan="2">Sub-total</th>'+
                     '</tr>'+
                     '</thead><tbody>';
+
+        /*
+        if(typeof data === "undefined")
+        return;
+         */
+
         if(data.status=="success")
         {
             var nb_items = 0;
@@ -19,7 +28,7 @@ function moo_updateCart()
                 var product = data.data[item];
                 if(product.item == null ) continue;
                 var price = (product.item.price*product.quantity/100);
-                var tax = price*product.tax_rate/100;
+               // var tax = price*product.tax_rate/100;
                 var subtotal = price;
                 nb_items++;
                 if(Object.keys(product.modifiers).length>0){
@@ -42,13 +51,13 @@ function moo_updateCart()
                 }
                 else
                 {
-                    tax = Math.ceil(tax*100)/100;
-                    total = Math.ceil((subtotal+tax)*100)/100;
+                  //  tax = Math.ceil(tax*100)/100;
+                  //  total = Math.ceil((subtotal+tax)*100)/100;
 
                     html +="<tr id='moo_cart_line_"+item+"' >";
                     html +="<td onclick=\"ChangeQuantity('"+item+"')\" style='cursor:pointer;'><strong>"+product.item.name+"</strong></td>"; //The name of the item
                     html +="<td>"+product.quantity+"</td>"; // The quantiy
-                    html +='<td id="moo_itemsubtotal_'+item+'">$'+subtotal.toFixed(2)+'</td>'; //Sub total  ( price + taxes )
+                    html +='<td id="moo_itemsubtotal_'+item+'">$'+subtotal.toFixed(2)+'</td>';
                     html +='<td><i class="fa fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item+'\')"></i></td>'; //Controlles Btn
                     html +="</tr>";
                 }
@@ -70,6 +79,11 @@ function moo_updateCart()
         }
         else
         {
+            /*
+            if(typeof data.message === "undefined")
+             return;
+             */
+
             html += "<tr><td colspan='4' style='text-align: center'>"+data.message+"</td></tr>";
             html += "</tbody></table>";
             jQuery(".moo_cart .CartContent").html(html);
@@ -82,18 +96,42 @@ function moo_updateCartTotal()
         jQuery.post(moo_params.ajaxurl,{'action':'moo_cart_getTotal'}, function (data) {
                 if(data.status=="success")
                 {
-                    if(data.total == 0 || Object.keys(MOO_CART).length == 0 ){
+                    if(data.nb_items < 1 ){
                         jQuery(".moo_cart_total").remove();
                         return;
                     }
+
+
                     html ="<tr class='moo_cart_total'>";
                     html +="<td colspan='1' style='text-align: right;'>Subtotal:</td>";
                     html +="<td colspan='3'>$"+data.sub_total+"</td>";
                     html +="</tr>";
-                    html +="<tr  class='moo_cart_total'>";
-                    html +="<td colspan='1' style='text-align: right;'>Tax:</td>";
-                    html +="<td colspan='3'>$"+data.total_of_taxes+"</td>";
-                    html +="</tr>";
+
+
+
+                    if(typeof data.coupon == "object" && data.coupon != null)
+                    {
+                        html +="<tr  class='moo_cart_total'>";
+                        html +="<td colspan='1' style='text-align: right;'>Tax:</td>";
+                        html +="<td colspan='3'>$"+data.total_of_taxes+"</td>";
+                        html +="</tr>";
+
+                        html +="<tr  class='moo_cart_total'>";
+                        html +="<td colspan='1' style='text-align: right;'>"+data.coupon.name+"</td>";
+                        if(data.coupon.type=="amount")
+                            html +="<td colspan='3'>-$"+data.coupon.value+"</td>";
+                        else
+                            html +="<td colspan='3'>-$"+(data.coupon.value*data.sub_total/100)+"</td>";
+                        html +="</tr>";
+                    }
+                    else
+                    {
+                        html +="<tr  class='moo_cart_total'>";
+                        html +="<td colspan='1' style='text-align: right;'>Tax:</td>";
+                        html +="<td colspan='3'>$"+data.total_of_taxes_without_discounts+"</td>";
+                        html +="</tr>";
+                    }
+
                     html +="<tr  class='moo_cart_total'>";
                     html +="<td colspan='1' style='text-align: right;'>Total:</td>";
                     html +="<td colspan='3'>$"+data.total+"</td>";

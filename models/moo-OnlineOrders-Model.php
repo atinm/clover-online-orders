@@ -14,6 +14,10 @@ class moo_OnlineOrders_Model {
     {
         return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_category ORDER BY 4");
     }
+    function getCategories4wigdets()
+    {
+        return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_category where show_by_default ='1' ORDER BY 4");
+    }
     function getItems()
     {
         return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_item");
@@ -200,18 +204,20 @@ function getItemsWithVariablePrice()
             return false;
         }
     }
-    function updateOrderType($uuid,$name,$enable,$taxable,$type)
+    function updateOrderType($uuid,$name,$enable,$taxable,$type,$minAmount)
     {
         $uuid = esc_sql($uuid);
         $label = esc_sql($name);
         $taxable = esc_sql($taxable);
         $status = esc_sql($enable);
         $type = esc_sql($type);
+        $minAmount = esc_sql($minAmount);
         return $this->db->update("{$this->db->prefix}moo_order_types",
             array(
                 'label' => $label,
                 'taxable' => $taxable,
                 'status' => $status,
+                'minAmount' => $minAmount,
                 'show_sa' => $type,
             ),
             array( 'ot_uuid' => $uuid )
@@ -358,9 +364,11 @@ function getItemsWithVariablePrice()
     {
         $order    = esc_sql($order);
         foreach ($items as $uuid=>$item) {
+            if($item['item']->uuid=="delivery_fees")
+                continue;
+
             $string = "";
             if(count($item['modifiers'])) foreach ($item['modifiers'] as $key=>$mod) $string .=$key.",";
-
             $item_id        = esc_sql($item['item']->uuid);
             $quantity       = esc_sql($item['quantity']);
             $special_ins    = esc_sql($item['special_ins']);
@@ -428,6 +436,12 @@ function getItemsWithVariablePrice()
     function NbOrderTypes()
     {
         return $this->db->get_results("SELECT count(*) as nb FROM {$this->db->prefix}moo_order_types");
+    }
+    function getBestSellingProducts($limit)
+    {
+        if($limit==0 || $limit<0)
+            $limit = 10;
+        return $this->db->get_results("SELECT COUNT(*),item_uuid,item.* FROM `{$this->db->prefix}moo_item_order` ligne,{$this->db->prefix}moo_item item where item.uuid=ligne.item_uuid  GROUP by item_uuid ORDER by 1 desc limit ".$limit);
     }
 
     /*

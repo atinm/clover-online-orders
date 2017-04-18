@@ -6,6 +6,7 @@ var MooIsGuest = false;
 var MooIsDisabled;
 var MooPhoneIsVerified = false;
 var MooOrderTypeIsTaxable = true;
+var MooOrderTypeMinAmount = 0;
 var MooIsDeliveryError = true;
 
 if(typeof moo_checkout_login != 'undefined')
@@ -77,28 +78,27 @@ function moo_OrderTypeChanged(OrderTypeID)
     if(!(typeof moo_OrderTypes === 'undefined'))
         for(i in moo_OrderTypes)
         {
-            if(OrderTypeID == moo_OrderTypes[i].ot_uuid) {
-                if(moo_OrderTypes[i].show_sa == "1")
+            if(OrderTypeID == moo_OrderTypes[i].ot_uuid)
+            {
+                var selectedOrderType = moo_OrderTypes[i];
+
+                if(selectedOrderType.show_sa == "1")
                 {
                     jQuery('#MooDeliveryfeesInTotalsSection').show();
                     if(MooCustomerChoosenAddress != null)
                     {
-                        var delivery_fees = null;
+
                         var html ='<strong>Delivery to:</strong><br />';
                         var address_string="";
 
                         if(MooCustomerChoosenAddress.address != '')
                             address_string += MooCustomerChoosenAddress.address+' ';
-
                         if(MooCustomerChoosenAddress.city != '')
                             address_string += MooCustomerChoosenAddress.city+', ';
-
                         if(MooCustomerChoosenAddress.state != '')
                             address_string += MooCustomerChoosenAddress.state+' ';
                         if(MooCustomerChoosenAddress.zipcode != '')
                             address_string += MooCustomerChoosenAddress.zipcode;
-
-                       // html += Object.keys(MooCustomerChoosenAddress).map(function(k){if( k=='address' || k == 'city' ||k=='state' || k == 'country' ||k == 'zipcode') return MooCustomerChoosenAddress[k]+", "}).join("");
                         html += address_string;
 
                         html += '<br/>';
@@ -115,12 +115,6 @@ function moo_OrderTypeChanged(OrderTypeID)
                     {
                         var html ='<strong>No address selected</strong><br /><br />';
                         html += '<a class="MooSimplButon" href="#" onclick="moo_show_chooseaddressform(event)">Add/Edit address</a>';
-
-                        if(MooIsGuest || MooIsDisabled)
-                        {
-                            html = '<a class="MooSimplButon" href="#" onclick="moo_show_chooseaddressform(event)">Add/Edit address</a>';
-                        }
-
                         jQuery('#moo-checkout-form-ordertypes>.moo-checkout-bloc-message').html(html);
                         jQuery('#moo-checkout-form-ordertypes>.moo-checkout-bloc-message').show();
                         MooDeliveryfees = 0.00;
@@ -155,10 +149,16 @@ function moo_OrderTypeChanged(OrderTypeID)
                     }
                 }
 
-                if(moo_OrderTypes[i].taxable=='1')
+                if(selectedOrderType.taxable == "1")
                     MooOrderTypeIsTaxable = true;
                 else
                     MooOrderTypeIsTaxable = false;
+
+                if(selectedOrderType.minAmount != "0")
+                    MooOrderTypeMinAmount = selectedOrderType.minAmount;
+                else
+                    MooOrderTypeMinAmount = 0;
+
                 moo_update_totals();
             }
         }
@@ -307,7 +307,7 @@ function moo_pickup_day_changed(element)
 function moo_order_approved(orderId)
 {
     if(moo_thanks_page != '' && moo_thanks_page != null )
-        window.location.href = moo_thanks_page+'?OrderId='+orderId;
+        window.location.href = moo_thanks_page+'?order_id='+orderId;
     else
     {
         if(orderId == '')
@@ -897,7 +897,10 @@ function moo_verify_form(form)
         for(i in moo_OrderTypes)
         {
           if(form.ordertype == moo_OrderTypes[i].ot_uuid)
-                    selectedOrderType = moo_OrderTypes[i];
+          {
+              selectedOrderType = moo_OrderTypes[i];
+          }
+
         }
     //check the name
     if(form.name == "")
@@ -924,8 +927,30 @@ function moo_verify_form(form)
             swal('Please choose the ordering method','How you want your order to be served ?','error');
             return false;
         }
-    //Check the delivery address
+
+    //Check the delivery address and min amount per Order Type
     if(selectedOrderType != null)
+    {
+        if(selectedOrderType.minAmount !='0')
+        {
+            if(parseFloat(selectedOrderType.minAmount) > parseFloat(moo_Total.sub_total))
+            {
+               // swal('You did not meet the minimum purchase requirement',"this ordering method requires a subtotal greater than $"+selectedOrderType.minAmount ,'error');
+                swal({
+                    title: 'You did not meet the minimum purchase requirement',
+                    text:"this ordering method requires a subtotal greater than $"+selectedOrderType.minAmount,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Continue shopping",
+                    cancelButtonText: "Checkout",
+                    closeOnConfirm: false },
+                    function(){ window.history.back() });
+
+                return false;
+            }
+        }
+
         if(selectedOrderType.show_sa =='1')
         {
             if(MooCustomerChoosenAddress!=null)
@@ -950,6 +975,7 @@ function moo_verify_form(form)
                 return false;
             }
         }
+    }
 
     //check the payment info with the phone verification
     if(typeof form.payments === 'undefined')
@@ -1043,9 +1069,9 @@ function moo_get_form(callback)
 {
     var form={};
     form._wpnonce   =  jQuery('#_wpnonce').val();
-    form.name   =  jQuery('#MooContactName').val();
-    form.email  =  jQuery('#MooContactEmail').val();
-    form.phone  =  jQuery('#MooContactPhone').val();
+    form.name   =  jQuery('#MooContactName').val().trim();
+    form.email  =  jQuery('#MooContactEmail').val().trim();
+    form.phone  =  jQuery('#MooContactPhone').val().trim();
     form.cardNumber  =  jQuery('#Moo_cardNumber').val();
     form.expiredDateMonth  =  jQuery('#MooexpiredDateMonth').val();
     form.expiredDateYear  =  jQuery('#MooexpiredDateYear').val();
@@ -1081,4 +1107,57 @@ function moo_phone_to_verif_changed()
     if(MooCustomer != null && MooCustomer[0] != null)
        MooCustomer[0].phone = phone;
     moo_filling_CustomerInformation();
+}
+function mooCouponApply(e)
+{
+    e.preventDefault();
+    var coupon_code = jQuery('#moo_coupon').val();
+    jQuery
+        .post(moo_params.ajaxurl,{'action':'moo_coupon_apply','moo_coupon_code':coupon_code}, function (data) {
+            if(data!=null && data.status=="success")
+            {
+                moo_Total = data.total;
+                if(data.type=="amount")
+                    swal({ title: "Coupon applied", text: "You have got $"+data.value+" off",   type: "success",   confirmButtonText: "Ok" });
+                else
+                    swal({ title: "Coupon applied", text: "You have got "+data.value+"% off",   type: "success",   confirmButtonText: "Ok" });
+
+                jQuery("#moo_remove_coupon_code").html(coupon_code);
+                jQuery("#moo_enter_coupon").hide();
+                jQuery("#moo_remove_coupon").show();
+
+                moo_update_totals();
+            }
+            else
+            {
+                jQuery("#moo_remove_coupon").hide();
+                jQuery("#moo_enter_coupon").show();
+                swal({ title: "Error", text: data.message,   type: "error",   confirmButtonText: "Try again" });
+            }
+
+        })
+        .fail(function(data) {
+            console.log('FAIL');
+            console.log(data.responseText);
+        });
+}
+function mooCouponRemove(e)
+{
+    e.preventDefault();
+    jQuery
+        .post(moo_params.ajaxurl,{'action':'moo_coupon_remove'}, function (data) {
+            if(data.status=="success")
+            {
+                moo_Total = data.total;
+                jQuery("#moo_remove_coupon_code").html("");
+                jQuery('#moo_coupon').val('');
+                jQuery("#moo_enter_coupon").show();
+                jQuery("#moo_remove_coupon").hide();
+                moo_update_totals();
+            }
+        })
+        .fail(function(data) {
+            console.log('FAIL');
+            console.log(data.responseText);
+        });
 }

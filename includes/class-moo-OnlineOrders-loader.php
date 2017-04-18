@@ -50,7 +50,6 @@ class Moo_OnlineOrders_Loader {
 
 		$this->actions = array();
 		$this->filters = array();
-
 	}
 
 	/**

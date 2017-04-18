@@ -4,7 +4,7 @@ Donate link: http://www.merchantapps.com/
 Tags: clover,online orders for clover,merchantech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover
 Requires at least: 3.0.1
 Tested up to: 4.7.2
-Stable tag: 1.2.5
+Stable tag: 1.2.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,16 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 7. An other example of menu
 
 == Changelog ==
+= 1.2.6 =
+* Added a new feature called coupon codes
+* Fixed issue where duplicate cart pages were being created
+* Added a widget so it displays business hours during checkout
+* Added support for additional themes
+* Increased the speed of the checkout page
+* Fixed various bugs and other improvements
+* Added script to send print command multiple times to merchants that experienced poor wifi connectivity
+* Improved the functionality of how delivery fees are registered on the receipt
+
 = 1.2.5 =
 * Added login/signup feature
 * Ability to save customer address for future purchases

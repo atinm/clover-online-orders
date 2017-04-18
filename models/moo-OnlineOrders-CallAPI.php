@@ -13,8 +13,7 @@ class moo_OnlineOrders_CallAPI {
         $this->Token = $MooSettings['api_key'];
         //Put the API URL here and don't forget the last slash
         $this->url_api = "http://api.smartonlineorders.com/";
-       // $this->url_api = "http://localhost/api/";
-
+     //   $this->url_api = "http://192.168.1.10/api/";
         $this->debug = false;
 
     }
@@ -278,14 +277,14 @@ class moo_OnlineOrders_CallAPI {
 
 
     //manage orders
-    public function createOrder($total,$orderType,$paymentmethod,$taxAmount,$deliveryfee,$tipAmount,$isDelivery)
+    public function createOrder($total,$orderType,$paymentmethod,$taxAmount,$deliveryfee,$tipAmount,$isDelivery,$couponCode)
     {
         if($orderType=='default')
         {
-            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType=default&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery);
+            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType=default&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode);
         }
         else
-            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery);
+            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode);
 
         return $res;
     }
@@ -396,6 +395,47 @@ class moo_OnlineOrders_CallAPI {
     {
 
     }
+	 public function moo_checkCoupon($couponCode)
+    {
+        return $this->callApi('coupons/'.$couponCode,$this->Token);
+    }
+    public function getCoupons($per_page,$page_number)
+    {
+        return $this->callApi('coupons/'.$page_number."/".$per_page,$this->Token);
+    }
+    public function getCoupon($code)
+    {
+        return $this->callApi('coupons/get/'.$code,$this->Token);
+    }
+    public function getNbCoupons()
+    {
+        return $this->callApi('coupons/count',$this->Token);
+    }
+    public function deleteCoupon($code)
+    {
+        return $this->callApi_Post('/coupons/'.$code.'/remove',$this->Token);
+    }
+    public function enableCoupon($code,$status)
+    {
+        return $this->callApi_Post('/coupons/'.$code.'/enable',$this->Token,'status='.$status);
+    }
+    public function addCoupon($coupon)
+    {
+        $params = "";
+        foreach ($coupon as $key=>$value) {
+            $params .= $key."=".$value."&";
+        }
+        return $this->callApi_Post('/coupons/add',$this->Token,$params);
+    }
+    public function updateCoupon($code,$coupon)
+    {
+        $params = "";
+        foreach ($coupon as $key=>$value) {
+            $params .= $key."=".$value."&";
+        }
+        return $this->callApi_Post('/coupons/'.$code.'/update',$this->Token,$params);
+    }
+
     /*
      * Sync functions
      * @since 1.0.6
@@ -516,6 +556,7 @@ class moo_OnlineOrders_CallAPI {
             $status[$st->ot_uuid]['status']  = $st->status;
             $status[$st->ot_uuid]['show_sa'] = $st->show_sa;
             $status[$st->ot_uuid]['type'] = $st->type;
+            $status[$st->ot_uuid]['minAmount'] = $st->minAmount;
         };
 
         //Delete all ordertypes from wordpress database
@@ -529,7 +570,8 @@ class moo_OnlineOrders_CallAPI {
                     'taxable' => $ot->taxable,
                     'show_sa' => (isset($status[$ot->id]['show_sa']) && $status[$ot->id]['show_sa']==1 )?1:0,
                     'status' => (isset($status[$ot->id]['status']) && $status[$ot->id]['status']==1 )?1:0,
-                    'type' => (isset($status[$ot->id]['type']))?$status[$ot->id]['type']:null
+                    'type' => (isset($status[$ot->id]['type']))?$status[$ot->id]['type']:null,
+                    'minAmount' => (isset($status[$ot->id]['minAmount']))?$status[$ot->id]['minAmount']:null,
             ));
 
         }
@@ -865,9 +907,9 @@ class moo_OnlineOrders_CallAPI {
         if($res>0) return true;
         return false;
     }
-    public function send_an_email($order_id,$emails,$customer,$instructions,$pickup_time,$tipAmount,$taxAmount,$deliveryAmount)
+    public function send_an_email($order_id,$emails,$customer,$instructions,$pickup_time)
     {
-        return $this->callApi_Post("sendemails",$this->Token,"order_id=".$order_id."&merchant_emails=".$emails."&customer=".$customer."&instructions=".$instructions."&pickup_time=".$pickup_time."&tipAmount=".$tipAmount."&taxAmount=".$taxAmount."&deliveryAmount=".$deliveryAmount);
+        return $this->callApi_Post("sendemails",$this->Token,"order_id=".$order_id."&merchant_emails=".$emails."&customer=".$customer."&instructions=".$instructions."&pickup_time=".$pickup_time);
     }
     public function checkToken()
     {
@@ -883,18 +925,25 @@ class moo_OnlineOrders_CallAPI {
         $result = array();
         $url='orders/'.$order->uuid;
         $orderFromServer = json_decode($this->callApi($url,$this->Token));
-
         if(isset($orderFromServer))
         {
             $result['uuid_order']=$orderFromServer->order->uuid;
             $result['amount_order']=$orderFromServer->order->amount/100;
             $result['order_type']=$orderFromServer->order->order_type;
             $result['special_instruction']=$orderFromServer->order->special_instruction;
+            $result['coupon']=$orderFromServer->coupon;
 
             if($orderFromServer->order->date != "")
             {
                 $result['date_order']= date('d/m/Y H:i:s', $orderFromServer->order->date/1000);
             }
+            if($orderFromServer->order->taxRemoved == "1")
+            {
+                $result['taxRemoved']= true;
+            }
+            else
+                $result['taxRemoved']= false;
+
             if (isset($orderFromServer->order->paymentMethode) && $orderFromServer->order->paymentMethode != ""){
                 $result['paymentMethode']=$orderFromServer->order->paymentMethode;
             }
@@ -982,7 +1031,7 @@ class moo_OnlineOrders_CallAPI {
             $result['order_type']=$order->ordertype;
             $result['special_instruction']=$order->instructions;
             $result['date_order']=$order->date;
-            $result['paymentMethode']=$orderFromServer->order['paymentMethode'];
+            $result['paymentMethode']="";
             $result['taxAmount']=$order->taxAmount;
             $result['deliveryAmount']=$order->deliveryfee;
             $result['tipAmount']=$order->tipAmount;
@@ -995,7 +1044,9 @@ class moo_OnlineOrders_CallAPI {
             $result['zipcode']=$order->p_zipcode;
             $result['lat']=$order->p_lat;
             $result['lng']=$order->p_lng;
-            $result['payments']=$orderFromServer->payments;
+            $result['payments']=array();
+            $result['coupon']=array();
+            $result['taxRemoved']=false;
         }
         //return json_decode($orderFromServer);
         //var_dump($result);
@@ -1241,22 +1292,27 @@ class moo_OnlineOrders_CallAPI {
                                                 'ot_uuid' => $ot->id,
                                                 'label' => $ot->label,
                                                 'taxable' => $ot->taxable,
-                                                'show_sa' => ($ot->label=='Delivery')?1:0,
-                                                'status' => ($ot->label=='Delivery' || $ot->label == 'Pickup')?1:0
+                                                'minAmount' => 0,
+                                                'show_sa' => ($ot->label=='Online Order Delivery')?1:0,
+                                                'status' => ($ot->label=='Online Order Delivery' || $ot->label == 'Online Order Pick Up')?1:0
                 ));
 
-            if($res == 1) $count++;
+            if($res == 1)
+                $count++;
         }
         return $count;
     }
-	public function  save_One_orderType($ot)
+	public function  save_One_orderType($uuid,$label,$taxable,$minAmount,$show_sa)
     {
         global $wpdb;
+
         $res = $wpdb->insert("{$wpdb->prefix}moo_order_types",array(
-                                            'ot_uuid' => $ot->id,
-                                            'label' => $ot->label,
-                                            'taxable' => $ot->taxable,
-                                            'status' => 0
+                                            'ot_uuid' => $uuid,
+                                            'label' => esc_sql($label),
+                                            'taxable' => (($taxable)?"1":"0"),
+                                            'status' => 1,
+                                            'show_sa' => (($show_sa)?"1":"0"),
+                                            'minAmount' => floatval($minAmount),
             ));
         return $res;
     }

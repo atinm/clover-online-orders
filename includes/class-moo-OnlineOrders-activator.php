@@ -1,16 +1,6 @@
 <?php
 
 /**
- * Fired during plugin activation
- *
- * @link       http://merchantechapps.com
- * @since      1.0.0
- *
- * @package    Moo_OnlineOrders
- * @subpackage Moo_OnlineOrders/includes
- */
-
-/**
  * Fired during plugin activation.
  *
  * This class defines all code necessary to run during the plugin's activation.
@@ -390,6 +380,7 @@ class Moo_OnlineOrders_Activator {
                           `taxable` INT(1),
                           `status` INT(1),
                           `show_sa` INT(1),
+                          `minAmount` VARCHAR(100) NULL DEFAULT '0',
                           `sort_order` INT NULL,
                           PRIMARY KEY (`ot_uuid`))
                         ENGINE = InnoDB;");
@@ -461,11 +452,11 @@ class Moo_OnlineOrders_Activator {
         if(!isset($defaultOptions['cart_page']) || $defaultOptions['cart_page'] == "")
         {
             $cart_page_id  =  wp_insert_post( $pages['cart'], false );
-            $defaultOptions['store_page'] = $cart_page_id ;
+            $defaultOptions['cart_page'] = $cart_page_id ;
         }
 
         // Save the version of the plugin in the Database
-         update_option('moo_onlineOrders_version', '125');
+         update_option('moo_onlineOrders_version', '126');
 
         if( !isset($defaultOptions["default_style"]) || $defaultOptions["default_style"] == "" || $defaultOptions["default_style"] == "style2" ) $defaultOptions["default_style"] = "style1";
         if( !isset($defaultOptions["hours"]) || $defaultOptions["hours"] == "") $defaultOptions["hours"] = "business";
@@ -473,6 +464,7 @@ class Moo_OnlineOrders_Activator {
         if( !isset($defaultOptions["payment_cash_delivery"]) || $defaultOptions["payment_cash_delivery"] == "") $defaultOptions["payment_cash_delivery"] = "on";
         if( !isset($defaultOptions["scp"]) || $defaultOptions["scp"] == "") $defaultOptions["scp"] = "on";
         if( !isset($defaultOptions["checkout_login"]) || $defaultOptions["checkout_login"] == "") $defaultOptions["checkout_login"] = "disabled";
+        if( !isset($defaultOptions["use_coupons"]) || $defaultOptions["use_coupons"] == "") $defaultOptions["use_coupons"] = "disabled";
 
 
         update_option('moo_settings', $defaultOptions );

@@ -1,19 +1,7 @@
 <?php
 
 /**
- * Fired during plugin activation
- *
- * @link       http://merchantechapps.com
- * @since      1.0.0
- *
- * @package    Moo_OnlineOrders
- * @subpackage Moo_OnlineOrders/includes
- */
-
-/**
- * Fired during plugin activation.
- *
- * This class defines all code necessary to run during the plugin's activation.
+ * This class defines all code necessary to for shortcodes
  *
  * @since      1.0.0
  * @package    Moo_OnlineOrders
@@ -286,6 +274,7 @@ class Moo_OnlineOrders_Shortcodes {
                     $categories = $model->getCategories();
                     $all_items  = $model->getItems();
                     $track_stock = $api->getTrackingStockStatus();
+
                     if($track_stock == true)
                     {
                         $itemStocks = $api->getItemStocks();
@@ -296,10 +285,10 @@ class Moo_OnlineOrders_Shortcodes {
                     }
 
 
-                    if(count($categories)==0 && count($all_items)==0 )
+                    if(count($categories)==0 && count($all_items) == 0 )
                         echo "<h1>You don't have any Items, please import your inventory from Clover</h1>";
                     else
-                        if(count($categories)==0)
+                        if(count($categories) == 0)
                         {
                             $categories = array((object)array(
                                 "name"=>'All Items',
@@ -315,11 +304,16 @@ class Moo_OnlineOrders_Shortcodes {
                         array_push($categories,(object)array("name"=>'All Items',"uuid"=>'NoCategory'));
                     }
                     foreach ($categories as $category ){
-
                         if(isset($atts['category']) && $atts['category']!="")
                         {
                             if($category->uuid != $atts['category'] ) continue;
                         }
+                        else
+                            if(isset($_GET['category']) && $_GET['category']!="")
+                            {
+                                if($category->uuid != $_GET['category'] ) continue;
+                            }
+
                         if($category->uuid == 'NoCategory')
                         {
                             $category_name = $category->name;
@@ -338,7 +332,7 @@ class Moo_OnlineOrders_Shortcodes {
                         <div class="moo_category">
                             <div class="moo_accordion" id="MooCat_<?php if(isset($atts['category']) && $atts['category']!="")  echo 'NoCategory'; else echo $category->uuid;?>">
                                 <div class="moo_category_title">
-                                    <div class="moo_title"><?php echo ucfirst(strtolower($category_name))?></div>
+                                    <div class="moo_title"><?php echo $category_name?></div>
                                     <span></span>
                                 </div>
                             </div>
@@ -367,7 +361,6 @@ class Moo_OnlineOrders_Shortcodes {
 
                                     foreach($tab_items as $item)
                                     {
-
                                         if($item)
                                         {
                                             if($item->visible == 0 || $item->hidden == 1 || $item->price_type=='VARIABLE') continue;
@@ -458,15 +451,16 @@ class Moo_OnlineOrders_Shortcodes {
                                                                     </div>
                                                                 </div>
                                                                 <div class="moo_accordion_content moo_modifier-box2" style="display: none;">
-                                                                    <ul>
+                                                                    <ul  class="MooModifierGroup_<?php echo $mg->uuid ?>">
                                                                         <?php  foreach ( $modifiers as $m) {
+                                                                           // echo '<li onclick="moo_check(event,\''.$m->uuid.'\',\''.$item->uuid.'\',\''.$mg->uuid.'\',\''.$mg->max_allowd .'\')">';
                                                                             echo '<li>';
                                                                             ?>
-                                                                            <a href="#" onclick="moo_check(event,'<?php echo $m->uuid ?>')">
+                                                                            <a href="#" onclick="moo_check(event,'<?php echo $m->uuid ?>','<?php echo $item->uuid ?>','<?php echo $mg->uuid ?>','<?php echo $mg->max_allowd ?>',false)">
                                                                                 <div class="detail" >
-                                                                       <span class="moo_checkbox" >
-                                                                          <input type="checkbox" onclick="event.stopPropagation();" name="<?php echo 'moo_modifiers[\''.$item->uuid.'\',\''.$mg->uuid.'\',\''.$m->uuid.'\']' ?>" id="moo_checkbox_<?php echo $m->uuid ?>" />
-                                                                       </span>
+                                                                                    <span class="moo_checkbox" >
+                                                                                      <input type="checkbox"  onclick="moo_check(event,'<?php echo $m->uuid ?>','<?php echo $item->uuid ?>','<?php echo $mg->uuid ?>','<?php echo $mg->max_allowd ?>',true)" name="<?php echo 'moo_modifiers[\''.$item->uuid.'\',\''.$mg->uuid.'\',\''.$m->uuid.'\']' ?>" id="moo_checkbox_<?php echo $m->uuid ?>" />
+                                                                                    </span>
                                                                                     <p class="moo_label"><?php echo ($m->alternate_name=="")?$m->name:$m->alternate_name;?></p>
                                                                                 </div>
                                                                                 <div class="moo_price">
@@ -478,8 +472,8 @@ class Moo_OnlineOrders_Shortcodes {
                                                                         }
                                                                         if($mg->min_required != null || $mg->max_allowd != null ){
                                                                             echo '<li class="Moo_modifiergroupMessage">';
-                                                                            if($mg->min_required==1 && $mg->max_allowd==1)
-                                                                                echo' Select 1 ';
+                                                                            if(($mg->min_required == $mg->max_allowd)&& $mg->max_allowd>0)
+                                                                                echo' Select '.$mg->max_allowd;
                                                                             else
                                                                             {
                                                                                 if($mg->min_required != null && $mg->min_required != 0 ) echo 'Must choose at least '.$mg->min_required;
@@ -600,7 +594,6 @@ class Moo_OnlineOrders_Shortcodes {
 
         $orderTypes = $model->getVisibleOrderTypes();
         $MooOptions = (array)get_option('moo_settings');
-
         if($MooOptions['scp'] == "on")
         {
             $key = array();
@@ -621,11 +614,23 @@ class Moo_OnlineOrders_Shortcodes {
 
         $total  =   Moo_OnlineOrders_Public::moo_cart_getTotal(true);
 
+        //Coupons
+        if(isset($_SESSION['coupon']) && !empty($_SESSION['coupon']))
+        {
+            $coupon = $_SESSION['coupon'];
+            if($coupon['minAmount']>$total['sub_total'])
+                $coupon = null;
+        }
+        else
+            $coupon = null;
+
+
+
         //Include custom css
         if($custom_css != null)
            echo '<style type="text/css">'.$custom_css.'</style>';
 
-        if($total === false || !isset($total['total']) || $total['total'] == 0){
+        if($total === false || !isset($total['nb_items']) || $total['nb_items'] < 1){
 
            echo '<div class="moo_emptycart"><p>Your cart is empty</p><span><a class="btn btn-default" href="'.get_page_link($MooOptions['store_page']).'">Back to Main Menu</a></span></div>';
            return ob_get_clean();
@@ -701,7 +706,7 @@ class Moo_OnlineOrders_Shortcodes {
                         <div class="col-md-6">
                             <ul>
                                 <li>View your past orders (coming soon)</li>
-                                <li>Get exclusive deals and coupons  (coming soon)</li>
+                                <li>Get exclusive deals and coupons</li>
                             </ul>
                         </div>
                     </div>
@@ -735,9 +740,9 @@ class Moo_OnlineOrders_Shortcodes {
                                 </p>
                                 <div class="row">
                                     <div class="col-xs-8 col-sm-6 col-md-6 col-md-offset-3 col-sm-offset-3 col-xs-offset-2">
-                                        <a href="#" class="btn btn-lg btn-primary btn-block" onclick="moo_loginAsguest(event)"> Login As Guest</a>
+                                        <a href="#" class="btn btn-lg btn-primary btn-block" onclick="moo_loginAsguest(event)" style="margin-top: 12px;"> Login As Guest</a>
                                     </div>
-                                    <div class="col-xs-12 col-sm-6 col-md-6 col-md-offset-3">
+                                    <div class="col-xs-12 col-sm-6 col-md-8 col-md-offset-2">
                                         <div class="login-or">
                                             <hr class="hr-or">
                                             <span class="span-or">or</span>
@@ -803,7 +808,7 @@ class Moo_OnlineOrders_Shortcodes {
                                 <input type="password" class="form-control" id="inputMooPassword">
                             </div>
                             <p>
-                                By clicking the button bellow you agree to our <a href="http://www.merchantechapps.com/pages/merchantech-eula" target="_blank">TOS</a>
+                                By clicking the button below you agree to our <a href="http://www.merchantechapps.com/pages/merchantech-eula" target="_blank">Terms Of Service</a>
                             </p>
                             <a class="btn btn-primary" onclick="moo_signin(event)">
                                Submit
@@ -877,7 +882,7 @@ class Moo_OnlineOrders_Shortcodes {
                 <div id="moo-checkout-form" class="col-md-12" <?php if($MooOptions['checkout_login']=="disabled") echo 'style="display:block;"'?>>
                     <div class="col-md-7 moo-checkout-form-leftside">
                         <div id="moo-checkout-form-customer">
-                            <div class="moo-checkout-bloc-title">
+                            <div class="moo-checkout-bloc-title moo-checkoutText-contact">
                                 contact
                                 <span class="moo-checkout-edit-icon" onclick="moo_checkout_edit_contact()"><svg enable-background="new 0 0 40 40" height="15px" id="Layer_1" version="1.1" viewBox="0 0 48 48" width="15px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path clip-rule="evenodd" d="M44.929,14.391c-0.046,0.099-0.102,0.194-0.183,0.276L16.84,42.572  c-0.109,0.188-0.26,0.352-0.475,0.434l-13.852,3.88c-0.029,0.014-0.062,0.016-0.094,0.026l-0.047,0.014  c-0.008,0.003-0.017,0.001-0.024,0.004c-0.094,0.025-0.187,0.046-0.286,0.045c-0.098,0.003-0.189-0.015-0.282-0.041  c-0.021-0.006-0.04-0.002-0.061-0.009c-0.008-0.003-0.013-0.01-0.021-0.013c-0.088-0.033-0.164-0.083-0.24-0.141  c-0.039-0.028-0.08-0.053-0.113-0.086s-0.058-0.074-0.086-0.113c-0.058-0.075-0.107-0.152-0.141-0.24  c-0.004-0.008-0.01-0.013-0.013-0.021c-0.007-0.02-0.003-0.04-0.009-0.061c-0.025-0.092-0.043-0.184-0.041-0.281  c0-0.1,0.02-0.193,0.045-0.287c0.004-0.008,0.001-0.016,0.004-0.023l0.014-0.049c0.011-0.03,0.013-0.063,0.026-0.093l3.88-13.852  c0.082-0.216,0.246-0.364,0.434-0.475l27.479-27.48c0.04-0.045,0.087-0.083,0.128-0.127l0.299-0.299  c0.015-0.015,0.034-0.02,0.05-0.034C34.858,1.87,36.796,1,38.953,1C43.397,1,47,4.603,47,9.047  C47,11.108,46.205,12.969,44.929,14.391z M41.15,15.5l-3.619-3.619L13.891,35.522c0.004,0.008,0.014,0.011,0.018,0.019l2.373,4.827  L41.15,15.5z M3.559,44.473l2.785-0.779l-2.006-2.005L3.559,44.473z M4.943,39.53l3.558,3.559l6.12-1.715  c0,0-2.586-5.372-2.59-5.374l-5.374-2.59L4.943,39.53z M12.49,34.124c0.008,0.004,0.011,0.013,0.019,0.018L36.15,10.5l-3.619-3.619  L7.663,31.749L12.49,34.124z M38.922,3c-1.782,0-3.372,0.776-4.489,1.994l-0.007-0.007L33.912,5.5l8.619,8.619l0.527-0.528  l-0.006-0.006c1.209-1.116,1.979-2.701,1.979-4.476C45.031,5.735,42.296,3,38.922,3z" fill-rule="evenodd"/></svg></span>
                             </div>
@@ -887,19 +892,19 @@ class Moo_OnlineOrders_Shortcodes {
                                 <div id="moo-checkout-contact-form">
                                     <div class="row">
                                         <div class="form-group">
-                                            <label for="name">Full Name:</label>
+                                            <label for="name" class="moo-checkoutText-fullName">Full Name:</label>
                                             <input class="form-control" name="name" id="MooContactName">
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="form-group">
-                                            <label for="MooContactEmail">Email</label>
+                                            <label for="MooContactEmail" class="moo-checkoutText-email">Email</label>
                                             <input type="text" class="form-control" id="MooContactEmail">
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="form-group">
-                                            <label for="MooContactPhone">Phone number:</label>
+                                            <label for="MooContactPhone" class="moo-checkoutText-phoneNumber">Phone number:</label>
                                             <input class="form-control" name="phone" id="MooContactPhone" onchange="moo_phone_changed()">
                                         </div>
                                     </div>
@@ -910,7 +915,7 @@ class Moo_OnlineOrders_Shortcodes {
                         <div class="moo_chekout_border_bottom"></div>
                         <?php if(count($orderTypes)>0){?>
                         <div id="moo-checkout-form-ordertypes">
-                            <div class="moo-checkout-bloc-title">
+                            <div class="moo-checkout-bloc-title moo-checkoutText-orderingMethod">
                                 ORDERING METHOD
                             </div>
                             <div class="moo-checkout-bloc-content">
@@ -929,7 +934,7 @@ class Moo_OnlineOrders_Shortcodes {
                         <?php  } ?>
         <?php if(isset($MooOptions['order_later']) && $MooOptions['order_later'] == 'on' && count($oppening_status->pickup_time)>0){ ?>
                         <div id="moo-checkout-form-orderdate">
-                            <div class="moo-checkout-bloc-title">
+                            <div class="moo-checkout-bloc-title moo-checkoutText-ChooseATime">
                                 CHOOSE A TIME
                             </div>
                             <div class="moo-checkout-bloc-content">
@@ -971,7 +976,7 @@ class Moo_OnlineOrders_Shortcodes {
                         <div class="moo_chekout_border_bottom"></div>
         <?php } ?>
                         <div id="moo-checkout-form-payments">
-                            <div class="moo-checkout-bloc-title">
+                            <div class="moo-checkout-bloc-title moo-checkoutText-payment" >
                                 PAYMENT  <?php if($MooOptions['payment_cash'] == 'on' || $MooOptions['payment_cash_delivery'] == 'on'){ echo 'METHOD';}?>
                             </div>
                             <div class="moo-checkout-bloc-content">
@@ -991,7 +996,7 @@ class Moo_OnlineOrders_Shortcodes {
                                             <div class="row">
                                                 <div class="col-md-12">
                                                     <div class="form-group">
-                                                        <label for="Moo_cardNumber" class="control-label">Card number</label>
+                                                        <label for="Moo_cardNumber" class="control-label moo-checkoutText-cardNumber">Card number</label>
                                                         <input class="form-control" name="cardNumber" id="Moo_cardNumber" placeholder="Debit/Credit Card Number" pattern="[0-9]{13,16}">
                                                     </div>
                                                 </div>
@@ -1032,7 +1037,7 @@ class Moo_OnlineOrders_Shortcodes {
                                             <div class="row">
                                                 <div class="col-md-12">
                                                     <div class="form-group">
-                                                        <label for="moo_cardcvv" class="control-label">Card CVV</label>
+                                                        <label for="moo_cardcvv" class="control-label moo-checkoutText-cardCvv">Card CVV</label>
                                                         <input class="form-control" name="cvv" id="moo_cardcvv" placeholder="Security Code">
                                                     </div>
                                                 </div>
@@ -1040,7 +1045,7 @@ class Moo_OnlineOrders_Shortcodes {
                                             <div class="row">
                                                 <div class="col-md-12">
                                                     <div class="form-group">
-                                                        <label for="moo_zipcode" class="control-label">ZIP Code</label>
+                                                        <label for="moo_zipcode" class="control-label moo-checkoutText-zipCode">ZIP Code</label>
                                                         <input class="form-control" name="zipcode" id="moo_zipcode" placeholder="zip code">
                                                     </div>
                                                 </div>
@@ -1055,7 +1060,7 @@ class Moo_OnlineOrders_Shortcodes {
                                         </div>
                                         <div class="row" id="moo_verifPhone_sending">
                                             <div class="form-group form-inline">
-                                                <label for="Moo_PhoneToVerify">Your phone</label>
+                                                <label for="Moo_PhoneToVerify moo-checkoutText-yourPhone">Your phone</label>
                                                 <input class="form-control" id="Moo_PhoneToVerify" style="margin-bottom: 10px" onchange="moo_phone_to_verif_changed()"/>
                                                 <a class="btn btn-primary" href="#" style="margin-bottom: 10px" onclick="moo_verifyPhone(event)">Verify via SMS</a>
                                                 <label for="Moo_PhoneToVerify" class="error" style="display: none;"></label>
@@ -1082,7 +1087,7 @@ class Moo_OnlineOrders_Shortcodes {
                         <div class="moo_chekout_border_bottom"></div>
                         <?php if($MooOptions['tips'] == 'enabled'){?>
                         <div id="moo-checkout-form-tips">
-                            <div class="moo-checkout-bloc-title">
+                            <div class="moo-checkout-bloc-title moo-checkoutText-tip">
                                 tip
                             </div>
                             <div class="moo-checkout-bloc-content">
@@ -1108,9 +1113,9 @@ class Moo_OnlineOrders_Shortcodes {
                             </div>
                         </div>
                         <div class="moo_chekout_border_bottom"></div>
-                        <?php  }?>
+                        <?php  } ?>
                         <div id="moo-checkout-form-instruction">
-                            <div class="moo-checkout-bloc-title">
+                            <div class="moo-checkout-bloc-title moo-checkoutText-instructions">
                                 Special instructions
                             </div>
                             <div class="moo-checkout-bloc-content">
@@ -1118,21 +1123,49 @@ class Moo_OnlineOrders_Shortcodes {
                                 *additional charges may apply and not all changes are possible
                             </div>
                         </div>
-<!--                        <div id="moo-checkout-form-instruction">-->
-<!--                            <div class="moo-checkout-bloc-title">-->
-<!--                                Do you have a Coupon code ?-->
-<!--                            </div>-->
-<!--                            <div class="moo-checkout-bloc-content">-->
-<!--                                <input type="text" style="background-color: #fff"><a href="#" class="btn btn-default">Apply</a>-->
-<!--                            </div>-->
-<!--                        </div>-->
+                        <?php
+                        //Check if coupons are enabled
+                        if($MooOptions['use_coupons']=="enabled")
+                        {
+                            ?>
+                            <div class="moo_chekout_border_bottom"></div>
+                            <div id="moo-checkout-form-coupon">
+                                <div class="moo-checkout-bloc-title moo-checkoutText-couponCode">
+                                    Coupon code
+                                </div>
+                                <div class="moo-checkout-bloc-content" id="moo_enter_coupon" style="<?php if($coupon != null) echo 'display:none';?>">
+                                    <div class="col-md-8">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="moo_coupon" style="background-color: #ffffff">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <a href="#" class="btn btn-primary" onclick="mooCouponApply(event)">Apply</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="moo-checkout-bloc-content" id="moo_remove_coupon" style="<?php if($coupon == null) echo 'display:none'; ?>">
+                                    <div class="col-md-8">
+                                        <div class="form-group">
+                                            <p style="font-size: 20px" id="moo_remove_coupon_code"><?php if($coupon != null) echo $coupon['code'];?></p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <a href="#" class="btn btn-primary" onclick="mooCouponRemove(event)">Remove</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php  }?>
                     </div>
                     <div class="col-md-5">
                         <div class="moo-shopping-cart MooCartInCheckout">
                             <div class="moo-column-labels-checkout">
-                                <label class="moo-product-quantity moo-product-quantity-checkout" style="width: 15%">Qty</label>
-                                <label class="moo-product-details moo-product-details-checkout" style="width: 67%">Product</label>
-                                <label class="moo-product-price moo-product-price-checkout" style="width: 18%">Price</label>
+                                <label class="moo-product-quantity moo-product-quantity-checkou moo-checkoutText-qtyt" style="width: 15%">Qty</label>
+                                <label class="moo-product-details moo-product-details-checkout moo-checkoutText-product" style="width: 67%">Product</label>
+                                <label class="moo-product-price moo-product-price-checkout moo-checkoutText-price" style="width: 18%">Price</label>
                             </div>
                             <?php foreach ($_SESSION['items'] as $key=>$line) {
                                 $modifiers_price=0;
@@ -1164,15 +1197,23 @@ class Moo_OnlineOrders_Shortcodes {
 
                             <div class="moo-totals" style="padding-right: 10px;">
                                 <div class="moo-totals-item">
-                                    <label>Subtotal</label>
-                                    <div class="moo-totals-value" id="moo-cart-subtotal"><?php echo $total['sub_total']?></div>
+                                    <label class="moo-checkoutText-subtotal">Subtotal</label>
+                                    <div class="moo-totals-value" id="moo-cart-subtotal"><?php echo $total['sub_total'];?></div>
                                 </div>
                                 <div class="moo-totals-item">
-                                    <label>Tax</label>
-                                    <div class="moo-totals-value" id="moo-cart-tax"><?php echo $total['total_of_taxes']?></div>
+                                    <label class="moo-checkoutText-tax" >Tax</label>
+                                    <div class="moo-totals-value" id="moo-cart-tax">
+                                        <?php
+                                       // var_dump($total);
+                                        if($coupon == null)
+                                            echo $total['total_of_taxes_without_discounts'];
+                                        else
+                                            echo $total['total_of_taxes'];
+                                        ?>
+                                    </div>
                                 </div>
                                 <div class="moo-totals-item" id="MooDeliveryfeesInTotalsSection">
-                                    <label>Delivery fee</label>
+                                    <label class="moo-checkoutText-deliveryFees">Delivery fee</label>
                                     <div class="moo-totals-value" id="moo-cart-delivery-fee">
                                         <?php
                                         if(is_double($MooOptions['fixed_delivery']))
@@ -1188,14 +1229,28 @@ class Moo_OnlineOrders_Shortcodes {
                                         ?>
                                     </div>
                                 </div>
+                                <?php if($MooOptions['use_coupons']=="enabled"){//check if coupons are enabled ?>
+                                    <div class="moo-totals-item" id="MooCouponInTotalsSection" style="<?php if($coupon == null) echo 'display:none;';?>">
+                                        <label id="mooCouponName"><?php echo $coupon['name'];?></label>
+                                        <div class="moo-totals-value" id="mooCouponValue">
+                                            <?php
+                                            if($coupon['type']=='amount')
+                                                echo '-'.number_format($coupon['value'],2);
+                                            else
+                                                echo "-".$coupon['value']*$total['sub_total']/100;
+                                            ?>
+                                        </div>
+                                    </div>
+                                <?php } ?>
+
                                 <?php if($MooOptions['tips']=='enabled'){?>
                                     <div class="moo-totals-item" id="MooTipsInTotalsSection">
-                                        <label>Tip</label>
+                                        <label class="moo-checkoutText-tipAmount">Tip</label>
                                         <div class="moo-totals-value" id="moo-cart-tip">0.00</div>
                                     </div>
                                 <?php } ?>
                                 <div class="moo-totals-item moo-totals-item-total">
-                                    <label>Grand Total</label>
+                                    <label class="moo-checkoutText-grandTotal">Grand Total</label>
                                     <div class="moo-totals-value" id="moo-cart-total"><?php echo $grand_total?></div>
                                 </div>
                             </div>
@@ -1203,7 +1258,7 @@ class Moo_OnlineOrders_Shortcodes {
 
                     </div>
                     <div style="text-align: center;text-decoration: none;">
-                        <a href="<?php echo $cart_page_url?>" >Update cart</a> | <a href="<?php echo $store_page_url?>" >Continue shopping</a>
+                        <a href="<?php echo $cart_page_url?>" class="moo-checkoutText-updateCart">Update cart</a> | <a href="<?php echo $store_page_url?>" class="moo-checkoutText-continueShopping">Continue shopping</a>
                     </div>
 
                     <div id="moo-checkout-form-btnActions">
@@ -1273,7 +1328,7 @@ class Moo_OnlineOrders_Shortcodes {
                                 </rect>
                             </svg>
                         </div>
-                        <a href="#"  id="moo_btn_submit_order" onclick="moo_finalize_order(event)" class="btn btn-primary moo-finalize-order-btn">
+                        <a href="#"  id="moo_btn_submit_order" onclick="moo_finalize_order(event)" class="btn btn-primary moo-finalize-order-btn moo-checkoutText-finalizeOrder">
                             FINALIZE ORDER
                         </a>
                     </div>
@@ -1293,7 +1348,6 @@ class Moo_OnlineOrders_Shortcodes {
      * The store interface 2
      */
     public static function ItemsWithImages($atts,$content) {
-        error_reporting(E_ALL ^ E_WARNING);
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-Model.php";
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-CallAPI.php";
 
@@ -1302,7 +1356,7 @@ class Moo_OnlineOrders_Shortcodes {
         
 
 
-        wp_enqueue_style( 'bootstrap-css' );
+        //wp_enqueue_style( 'bootstrap-css' );
         wp_enqueue_style( 'font-awesome' );
         wp_enqueue_script( 'custom-script-items' );
         wp_enqueue_script( 'jquery-accordion',array( 'jquery' ));
@@ -1376,6 +1430,7 @@ class Moo_OnlineOrders_Shortcodes {
 
                    // $default_images = $model->getDefaultItemImage($item->uuid);
                     $no_image_url =  plugin_dir_url(dirname(__FILE__))."public/img/no-image.jpg";
+
                     $nb_modifiers = $model->itemHasModifiers($item->uuid)->total;
 
                     $item_name = $item->name;
@@ -1386,6 +1441,7 @@ class Moo_OnlineOrders_Shortcodes {
                     foreach ($item_images as $key => $item_img) {
                         array_push($img_array, $item_img->url);
                     }
+
                     echo '<div class="col-md-4 col-sm-6 col-xs-12 moo_item_flip">';
                     echo '<a class="open-popup-link" href="#moo_popup_item_'.$item->uuid.'" >';
                     echo "<div class='moo_item_flip_container'>";
@@ -1397,9 +1453,9 @@ class Moo_OnlineOrders_Shortcodes {
                         echo "</div>";
                     } else {
                         if(count($img_array)==1)
-                            echo "<img class='img-responsive img-thumbnail' style='height: 245px; width: 100%;' src='".$img_array[0]."'>";
+                            echo "<img class='img-responsive img-thumbnail' style='height: 245px; width: 100%;' src='".$img_array[0]."' />";
                         else
-                            echo "<img class='img-responsive img-thumbnail' style='height: 245px; width: 100%;' src='".$no_image_url."'>";
+                            echo "<img class='img-responsive img-thumbnail' style='height: 245px; width: 100%;' src='".$no_image_url."' />";
                     }
 
                     echo "</div>";
@@ -1435,10 +1491,10 @@ class Moo_OnlineOrders_Shortcodes {
                                         <div class="carousel-inner sliders_wrapper" role="listbox">
                                             <?php foreach ($item_images as $key => $image) {
                                                 if ($key == 0) {
-                                                    echo "<div class='item active'><img class='img-responsive img_carousel' style='max-width: 300px;margin: 0 auto;' src='".$image->url."'></div>";
+                                                    echo "<div class='item active'><img class='img-responsive img_carousel'  src='".$image->url."' style='max-width: 300px;margin: 0 auto;' ></div>";
                                                     continue;
                                                 }
-                                                echo "<div class='item'><img class='img-responsive img_carousel' src='".$image->url."' style='max-width: 300px;margin: 0 auto;height: 370px;'></div>";
+                                                echo "<div class='item'><img class='img-responsive img_carousel' src='".$image->url."' style='max-width: 300px;margin: 0 auto;'></div>";
                                             }
                                             ?>
                                         </div>
@@ -1452,7 +1508,8 @@ class Moo_OnlineOrders_Shortcodes {
                                             <span class="sr-only">Next</span>
                                         </a>
                                     </div>
-                                <?php }
+                                <?php
+                                }
                                 else
                                 {
                                     if(count($item_images)==1) {
@@ -1525,14 +1582,13 @@ class Moo_OnlineOrders_Shortcodes {
                                                             }
                                                             if($mg->min_required != null || $mg->max_allowd != null ){
                                                                 echo '<li class="Moo_modifiergroupMessage">';
-                                                                if($mg->min_required==1 && $mg->max_allowd==1)
-                                                                    echo' Select 1 ';
+                                                                if(($mg->min_required == $mg->max_allowd)&& $mg->max_allowd>0)
+                                                                    echo' Select '.$mg->max_allowd;
                                                                 else
                                                                 {
                                                                     if($mg->min_required != null && $mg->min_required != 0 ) echo 'Must choose at least '.$mg->min_required;
                                                                     if($mg->max_allowd != null && $mg->max_allowd != 0 ) echo "<br/> Select up to  ".$mg->max_allowd;
                                                                 }
-
                                                                 echo '</li>';
                                                             }
                                                             ?>
@@ -1587,7 +1643,7 @@ class Moo_OnlineOrders_Shortcodes {
                             </div>
                         <?php } else { // If we don't have modifiers ?>
                             <?php if (count($item_images)>1) { ?>
-                                <div class=" col-md-6 carousel slide carrousel_images_item" id="carrousel_images_item" data-ride="carousel">
+                                <div class=" col-md-6 carousel slide " id="carrousel_images_item" data-ride="carousel">
                                         <ol class="carousel-indicators">
                                             <?php foreach ($item_images as $key => $image) {
                                                 if ($key == 0) {
@@ -1601,10 +1657,10 @@ class Moo_OnlineOrders_Shortcodes {
                                         <div class="carousel-inner sliders_wrapper" role="listbox">
                                             <?php foreach ($item_images as $key => $image) {
                                                 if ($key == 0) {
-                                                    echo "<div class='item active'><img class='img-responsive img_carousel' src='".$image->url."'></div>";
+                                                    echo "<div class='item active'><img class='img-responsive img_carousel' src='".$image->url."' style='max-width: 300px;margin: 0 auto;'></div>";
                                                     continue;
                                                 }
-                                                echo "<div class='item'><img class='img-responsive img_carousel' src='".$image->url."' style='height: 370px;' width='100%'></div>";
+                                                echo "<div class='item'><img class='img-responsive img_carousel' src='".$image->url."' style='max-width: 300px;margin: 0 auto;'></div>";
                                             }
                                              ?>   
                                         </div> 
@@ -1621,14 +1677,14 @@ class Moo_OnlineOrders_Shortcodes {
                             <?php }
                             else {
                                     if(count($item_images)==1) {
-                                        echo '<div class="col-md-6 carrousel_images_item">';
+                                        echo '<div class="col-md-6" style="padding-left: 0px;">';
                                         echo "<img class='img-responsive img_carousel'  src='".$item_images[0]->url."'>";
                                         echo '</div>';
                                     }
                                     else
                                     {
-                                        echo '<div class="col-md-6 carrousel_images_item">';
-                                        echo "<img class='img-responsive img_carousel' src='".$no_image_url."'>";
+                                        echo '<div class="col-md-6" style="padding-left: 0px;">';
+                                        echo "<img class='img-responsive hidden-xs' src='".$no_image_url."'>";
                                         echo '</div>';
                                     }
 
@@ -1697,7 +1753,7 @@ class Moo_OnlineOrders_Shortcodes {
                     {
                         if(get_option("moo-show-allItems") == 'true')
                         {
-                            array_unshift($categories,(object)array("name"=>'All Items',"uuid"=>'NoCategory'));
+                            array_unshift($categories,(object)array("name"=>'All Items',"uuid"=>'NoCategory',"image_url"=>plugin_dir_url(dirname(__FILE__))."public/img/all-items-img.jpg"));
                         }
 
                         if(count($categories)>0)
@@ -1807,7 +1863,7 @@ class Moo_OnlineOrders_Shortcodes {
         }
         if($MooOptions['hours'] != 'all' && $MooOptions['hide_menu'] == 'on' && $oppening_status->status == 'close')
         {
-            return '<div id="moo_OnlineStoreContainer" class="moo_loading">'.$oppening_msg.'</div>';
+            return '<div id="moo_OnlineStoreContainer" >'.$oppening_msg.'</div>';
         }
 
         $html_code  = '';
@@ -1819,7 +1875,7 @@ class Moo_OnlineOrders_Shortcodes {
         if($custom_css != null)
             $html_code .= '<style type="text/css">'.$custom_css.'</style>';
 
-        $html_code .=  '<div id="moo_OnlineStoreContainer" class="moo_loading">';
+        $html_code .=  '<div id="moo_OnlineStoreContainer">';
         $html_code .=  $oppening_msg;
 
         $style = $MooOptions["default_style"];
@@ -1832,7 +1888,7 @@ class Moo_OnlineOrders_Shortcodes {
             else
                 $html_code .= self::ItemsWithImages($atts, $content);
 
-        $html_code .=  '<div class="row Moo_Copyright">Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v'. get_option('moo_onlineOrders_version').'">Smart Merchantapps</a></div></div>';
+        $html_code .=  '<div class="row Moo_Copyright">Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v'. get_option('moo_onlineOrders_version').'">Smart Online Order</a></div></div>';
 
         //Include custom js
         if($custom_js != null)
@@ -1858,7 +1914,6 @@ class Moo_OnlineOrders_Shortcodes {
 
 
         $store_page_url    =  get_page_link($store_page_id);
-
         $checkout_page_url =  get_page_link($checkout_page_id);
 
         ob_start();
@@ -1881,6 +1936,15 @@ class Moo_OnlineOrders_Shortcodes {
         {
             $itemStocks = $api->getItemStocks();
         }
+        //Coupons
+        if(isset($_SESSION['coupon']) && !empty($_SESSION['coupon']))
+        {
+            $coupon = $_SESSION['coupon'];
+            if($coupon['minAmount']>$total['sub_total'])
+                $coupon = null;
+        }
+        else
+            $coupon = null;
 
     ?>
         <div class="moo-shopping-cart">
@@ -1950,8 +2014,29 @@ class Moo_OnlineOrders_Shortcodes {
                 </div>
                 <div class="moo-totals-item">
                     <label>Tax</label>
-                    <div class="moo-totals-value" id="moo-cart-tax"><?php echo $total['total_of_taxes'] ?></div>
+                    <div class="moo-totals-value" id="moo-cart-tax">
+
+                        <?php
+                        if($coupon == null)
+                            echo $total['total_of_taxes_without_discounts'];
+                        else
+                            echo $total['total_of_taxes'];
+                        ?>
+                    </div>
                 </div>
+                <?php if($MooOptions['use_coupons']=="enabled"){//check if coupons are enabled ?>
+                    <div class="moo-totals-item" id="MooCouponInTotalsSection" style="<?php if($coupon == null) echo 'display:none;';?>">
+                        <label id="mooCouponName"><?php echo $coupon['name'];?></label>
+                        <div class="moo-totals-value" id="mooCouponValue">
+                            <?php
+                            if($coupon['type']=='amount')
+                                echo '-'.number_format($coupon['value'],2);
+                            else
+                                echo '-'.$coupon['value']*$total['sub_total'];
+                            ?>
+                        </div>
+                    </div>
+                <?php } ?>
 <!--                <div class="moo-totals-item">-->
 <!--                    <label>Shipping</label>-->
 <!--                    <div class="moo-totals-value" id="moo-cart-shipping">15.00</div>-->

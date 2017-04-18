@@ -485,7 +485,9 @@ select
     border: none;
     color: #fff;
     border-radius: 0;
-}#mooButonLogin:hover,#mooButonAddAddress:hover,#mooButonResetPasswrod:hover,#mooButonLoginAsGuest:hover,#mooButonConfirmAddress:hover
+    text-decoration: none
+}
+#mooButonLogin:hover,#mooButonAddAddress:hover,#mooButonResetPasswrod:hover,#mooButonLoginAsGuest:hover,#mooButonConfirmAddress:hover
 {
      background: #4691A4;
      box-shadow:none;
@@ -655,4 +657,8 @@ select
 {
     max-width: 800px;
     margin: 0 auto;
+}
+button.mfp-close {
+    padding: 8px;
+    font-size: 40px;
 }

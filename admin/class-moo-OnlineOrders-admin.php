@@ -163,20 +163,24 @@ class moo_OnlineOrders_Admin {
                 $orderDetail = $model->getOneOrder($orderId);
                 $view = $api->getOrderDetails($orderDetail);
 
-               if(isset($view['payments']) && count($view['payments'])>0 )
+                if(isset($view['payments']) && count($view['payments'])>0 )
                 {
                     $orderPayments = $view['payments'];
+                    $status="";
+                    $status_color="";
 
-                    if ($orderPayments[0]->result == "APPROVED")
-                    {
-                        $status = "Paid";
-                        $status_color='green';
+                    foreach ($orderPayments as $p) {
+                        if ($p->result == "APPROVED")
+                        {
+                            $status = "Paid";
+                            $status_color='green';
+                        }
                     }
-                    else
+                    
+                    if($status =="")
                     {
                         $status = "Not Paid";
                         $status_color='red';
-
                     }
                 }
                 else
@@ -252,7 +256,9 @@ class moo_OnlineOrders_Admin {
                                 <th>Name</th><th>Unit price</th><th>Quantity</th><th>Total price</th>
                             </tr>
                             <?php
+                            $subtotal_order = 0;
                             foreach ($order_items as $item) {
+                                $line_price =  $item->price;
                                 ?>
                                 <tr>
                                     <td>
@@ -265,33 +271,55 @@ class moo_OnlineOrders_Admin {
                                             foreach ($data_modifier as $modifier){
                                                 $getModifier = $model->getModifier($modifier);
                                                 echo " - ".$getModifier->name."($".number_format(($getModifier->price/100),2).")</br>";
-                                                $price_item = $price_item + $getModifier->price;
+                                                $line_price += $getModifier->price;
                                             }
                                         }
                                         else
                                             echo $item->name;
                                         ?>
                                     </td>
-                                    <td style="text-align:center"><?php echo "$".number_format((($price_item + $item->price)/100),2); ?></td>
+                                    <td style="text-align:center"><?php echo "$".number_format(($line_price/100),2); ?></td>
                                     <td style="text-align:center"><?php echo $item->quantity; ?></td>
-                                    <td style="text-align:center"><?php echo "$".number_format((($item->quantity*($price_item+$item->price))/100),2); ?></td>
+                                    <td style="text-align:center"><?php echo "$".number_format((($item->quantity*$line_price)/100),2); ?></td>
                                 </tr>
                                 <?php
+                                $subtotal_order += $line_price*$item->quantity;
                             }
                             ?>
                             <tr class="info-total">
-                                <td colspan="3" style="text-align: right"><strong>Subtotal</strong></td><td><?php echo "$".number_format(($view['amount_order']-$view['taxAmount']-$view['deliveryAmount']),2); ?></td>
+                                <td colspan="3" style="text-align: right"><strong>Subtotal</strong></td><td><?php echo "$".number_format($subtotal_order/100,2); ?></td>
                             </tr>
                             <tr class="info-total">
-                                <td colspan="3" style="text-align: right"><strong>Taxes</strong></td><td><?php echo "$".number_format($view['taxAmount'],2); ?></td>
+                                <td colspan="3" style="text-align: right"><strong>Taxes</strong></td>
+                                <td>
+                                    <?php
+                                    if($view['taxAmount'] && !$view['taxRemoved'])
+                                        echo "$".number_format($view['taxAmount'],2);
+                                     else
+                                         echo "$0.00";
+                                    ?>
+                                </td>
                             </tr>
                             <?php
                             if($view['deliveryAmount']>0){
                                 echo '<tr class="info-total">';
-                                echo '<td colspan="3" style="text-align: right"><strong>Delivery Fee</strong></td><td>'.number_format($view['deliveryAmount'],2).'</td>';
+                                echo '<td colspan="3" style="text-align: right"><strong>Delivery Fee</strong></td><td>$'.number_format($view['deliveryAmount'],2).'</td>';
                                 echo '</tr>';
                              }
                              ?>
+                            <?php
+                            if($view["coupon"])
+                            {
+                                echo "<tr class=\"info-total\">";
+                                if($view["coupon"]->type=="amount")
+                                    echo "<td colspan='3' style='text-align: right'><strong>".$view["coupon"]->name."</strong></td><td>-$".number_format($view["coupon"]->value,2)."</td>";
+                                else
+                                    echo "<td colspan='3' style='text-align: right'><strong>".$view["coupon"]->name."</strong></td><td>".number_format(($view["coupon"]->value*$subtotal_order/100),2)."</td>";
+
+
+                                echo "</tr>";
+                            }
+                            ?>
                             <tr class="info-total">
                                 <td colspan="3" style="text-align: right"><strong>Total</strong></td><td><?php echo "$".number_format($view['amount_order'],2); ?></td>
                             </tr>
@@ -310,8 +338,17 @@ class moo_OnlineOrders_Admin {
                                     echo "<tr>";
                                     echo "<td>".$payment->result."</td>";
                                     echo "<td>$".number_format((($payment->paymentAmount+$payment->tipAmount)/100),2)."</td>";
-                                    echo "<td>$".number_format((($payment->paymentAmount-$payment->taxAmount)/100),2)."</td>";
-                                    echo "<td>$".number_format(($payment->taxAmount/100),2)."</td>";
+
+                                    if(!$view['taxRemoved'])
+                                    {
+                                        echo "<td>$".number_format((($payment->paymentAmount-$payment->taxAmount)/100),2)."</td>";
+                                        echo "<td>$".number_format(($payment->taxAmount/100),2)."</td>";
+                                    }
+                                    else
+                                    {
+                                        echo "<td>$".number_format((($payment->paymentAmount)/100),2)."</td>";
+                                        echo "<td>Not taxable</td>";
+                                    }
                                     echo "<td>$".number_format(($payment->tipAmount/100),2)."</td>";
                                     echo "<td> ********".$payment->last4."</td>";
                                     echo "<td>".$payment->createdtime." UTC</td>";
@@ -357,6 +394,257 @@ class moo_OnlineOrders_Admin {
 <?php
         }
     }
+    public function page_coupons()
+    {
+        if(isset($_GET['action']) && ($_GET['action'] == 'add_coupon' || $_GET['action'] == "edit_coupon") )
+         {
+            $action = $_GET['action'];
+            require_once plugin_dir_path( dirname(__FILE__))."/models/moo-OnlineOrders-CallAPI.php";
+            $api = new moo_OnlineOrders_CallAPI();
+            $message="";
+             $header_message = "Add New coupon";
+            if(isset($_POST['submit']))
+            {
+                $theCoupon = array(
+                    "CouponName"=>$_POST['CouponName'],
+                    "CouponCode"=>$_POST['CouponCode'],
+                    "CouponType"=>$_POST['CouponType'],
+                    "CouponValue"=>$_POST['CouponValue'],
+                    "CouponMinAmount"=>$_POST['CouponMinAmount'],
+                    "CouponMaxUses"=>$_POST['CouponMaxUses'],
+                    "CouponExpiryDate"=>$_POST['CouponExpiryDate'],
+                );
+
+
+                if(!isset($_POST['CouponName']) || $_POST['CouponName'] == "")
+                    $message ="Please enter the coupon name";
+                else
+                    if(!isset($_POST['CouponCode']) || $_POST['CouponCode'] == "" || preg_match('/\s/',$_POST['CouponCode']))
+                        $message =" Please enter a valid coupon Code";
+                    else
+                        if(!isset($_POST['CouponType']) || $_POST['CouponType'] == "" || ($_POST['CouponType'] != "amount" && $_POST['CouponType'] != "percentage" ))
+                            $message =" Please select the discount type";
+                        else
+                            if(!isset($_POST['CouponValue']) || $_POST['CouponValue']=="" || $_POST['CouponValue'] <= 0 )
+                                $message =" Please enter a valid value (should be a positive number)";
+                            else
+                                if(!isset($_POST['CouponMinAmount']) || ($_POST['CouponMinAmount'] != "" && $_POST['CouponMinAmount'] < 0) )
+                                    $message =" Please enter a valid minAmount value (should be a positive number)";
+                                else
+                                    if(!isset($_POST['CouponMaxUses']) || $_POST['CouponMaxUses']=="" || $_POST['CouponMaxUses'] < 0 )
+                                        $message =" Please enter a valid max use value (should be a positive number)";
+                                    else
+                                        if(!isset($_POST['CouponExpiryDate']) || $_POST['CouponExpiryDate']== "")
+                                            $message =" The Expiration date is required";
+
+                $class='error';
+                if($message == "")
+                {
+                    if($_POST['submit'] == "Add")
+                    {
+                        $d = new DateTime('today');
+                        $coupon = array(
+                            "name"=>$_POST['CouponName'],
+                            "code"=>$_POST['CouponCode'],
+                            "value"=>$_POST['CouponValue'],
+                            "type"=>$_POST['CouponType'],
+                            "expirationdate"=>$_POST['CouponExpiryDate'],
+                            "minAmount"=>$_POST['CouponMinAmount'],
+                            "maxuses"=>$_POST['CouponMaxUses'],
+                            "startdate"=>$d->format('Y-m-d')
+                        );
+                        $res = json_decode($api->addCoupon($coupon));
+                        if($res->status=="success")
+                        {
+                            $message = 'The coupon was added';
+                            $class="success";
+
+                        }
+                        else
+                            $message = $res->message;
+                    }
+                    else
+                        if($_POST['submit'] == "Save")
+                        {
+                            $d = new DateTime('today');
+                            $coupon = array(
+                                "name"=>$_POST['CouponName'],
+                                "code"=>$_POST['CouponCode'],
+                                "value"=>$_POST['CouponValue'],
+                                "type"=>$_POST['CouponType'],
+                                "expirationdate"=>$_POST['CouponExpiryDate'],
+                                "minAmount"=>$_POST['CouponMinAmount'],
+                                "maxuses"=>$_POST['CouponMaxUses'],
+                                "startdate"=>$d->format('Y-m-d')
+                            );
+                            $res = json_decode($api->updateCoupon($_GET["coupon"],$coupon));
+                            if($res->status=="success")
+                            {
+                                if($_GET['coupon']!=$_POST['CouponCode'])
+                                    $message = 'The coupon was updated. You are updated the coupon code, any other changes on this page will not affect the coupon please go back to coupons page';
+                                else
+                                    $message = 'The coupon was updated';
+
+                                $class="success";
+
+                            }
+                            else
+                                $message = $res->message;
+                        }
+                }
+            }
+            else
+            {
+                if($action=="edit_coupon")
+                {
+                    $coupon_code = $_GET['coupon'];
+                    $coupon = json_decode($api->getCoupon($coupon_code));
+                    if(isset($coupon->status))
+                        if($coupon->status=="success")
+                        {
+                            $c = $coupon->coupon;
+                            $theCoupon = array(
+                                "CouponName"=>$c->name,
+                                "CouponCode"=>$c->code,
+                                "CouponType"=>$c->type,
+                                "CouponValue"=>$c->value,
+                                "CouponMinAmount"=>$c->minAmount,
+                                "CouponMaxUses"=>$c->maxuses,
+                                "CouponExpiryDate"=>$c->expirationdate
+                            );
+                            $header_message = 'Edit a coupon';
+                        }
+                        else
+                            die($coupon->message);
+                    else
+                        die($coupon);
+
+                 }
+            }
+                ?>
+                <div class="wrap">
+                    <h2><?php echo $header_message;?></h2>
+                    <?php if($message!="")
+                        echo '<div class="notice notice-'.$class.' is-dismissibl" style="min-height: 33px;line-height: 33px;">'.$message.'</div>';
+                    ?>
+                    <form method="post" action="#">
+                        <table class="form-table">
+                            <tbody>
+                            <tr>
+                                <th scope="row">
+                                    <label for="couponName">Coupon name</label>
+                                </th>
+                                <td>
+                                    <input name="CouponName" type="text" id="CouponName" class="regular-text" value="<?php echo (isset($theCoupon['CouponName']))?$theCoupon['CouponName']:'';?>" required>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="CouponCode">Coupon Code</label>
+                                </th>
+                                <td>
+                                    <input name="CouponCode" type="text" id="CouponCode" aria-describedby="CouponCode-description" class="regular-text" value="<?php echo (isset($theCoupon['CouponCode']))?$theCoupon['CouponCode']:'';?>" required>
+                                    <p class="description" id="CouponCode-description">This  coupon code will be used by customers during checkout to receive a discount (please do not use spaces and special characters)</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="CouponType">Type of discount</label>
+                                </th>
+                                <td>
+                                    <select name="CouponType" id="CouponType">
+                                        <option <?php echo (isset($theCoupon['CouponType']) && $theCoupon['CouponType']=='amount')?'selected="selected"':'';?> value="amount">Amount</option>
+                                        <option <?php echo (isset($theCoupon['CouponType']) && $theCoupon['CouponType']=='percentage')?'selected="selected"':'';?> value="percentage">Percentage</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="CouponValue">Coupon value</label>
+                                </th>
+                                <td>
+                                    <input name="CouponValue" type="number" min="0" step="0.01" id="CouponValue" value="<?php echo (isset($theCoupon['CouponValue']))?$theCoupon['CouponValue']:'';?>" required>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="CouponMinAmount">Minimum Amount</label>
+                                </th>
+                                <td>
+                                    <input name="CouponMinAmount" type="number" min="0" step="0.01" id="CouponMinAmount" aria-describedby="CouponMinAmount-description" value="<?php echo (isset($_POST['CouponMinAmount']))?$_POST['CouponMinAmount']:'';?>">
+                                    <p class="description" id="CouponMinAmount-description">The coupon will be valid only if the subtotal is greater than the min amount</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="CouponExpiryDate">Expiration date</label>
+                                </th>
+                                <td>
+                                    <input name="CouponExpiryDate" type="text" id="CouponExpiryDate" value="<?php echo (isset($theCoupon['CouponExpiryDate']))?$theCoupon['CouponExpiryDate']:'';?>" >
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="CouponMaxUses">Number of uses</label>
+                                </th>
+                                <td>
+                                    <input name="CouponMaxUses" type="number" id="CouponMaxUses" aria-describedby="CouponMaxUses-description" value="<?php echo (isset($theCoupon['CouponMaxUses']))?$theCoupon['CouponMaxUses']:'0';?>">
+                                    <p class="description" id="CouponMaxUses-description">Enter 0 for unlimited uses</p>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <p class="submit">
+                            <?php
+                            if($action == "add_coupon"){ ?>
+                                <input type="submit" name="submit" id="submit" class="button button-primary" value="Add">
+                            <?php } ?>
+                            <?php if($action == "edit_coupon"){ ?>
+                                <input type="submit" name="submit" id="submit" class="button button-primary" value="Save">
+                            <?php } ?>
+                        </p>
+                    </form>
+                </div>
+                <?php
+            }
+        else
+        {
+            require_once plugin_dir_path( dirname(__FILE__))."admin/includes/class-moo-coupons-list.php";
+            $orders = new Coupons_List_Moo();
+            $orders->prepare_items();
+
+            $message="";
+            if(isset($_GET['enabled']) && $_GET['enabled'] ==="1")
+                $message = '<div class="update-nag" style="display: block;">The coupon have been enabled</div>';
+            else
+                if(isset($_GET['disabled']) && $_GET['disabled'] ==="1")
+                    $message = '<div class="update-nag" style="display: block;">The coupon have been disabled</div>';
+                else
+                    if(isset($_GET['deleted']) && $_GET['deleted'] ==="1")
+                        $message = '<div class="update-nag" style="display: block;">The coupon was removed</div>';
+            ?>
+            <div class="wrap">
+                <?php if($message!="") echo $message; ?>
+                <h1 style="float: left;">List of coupons</h1>
+                <a href="<?php echo add_query_arg(array("action"=>"add_coupon"),remove_query_arg( array('coupon', 'paged'))); ?>" class="page-title-action" style="float: left;top: 11px;margin-left: 18px;">Add Coupon</a>
+                <div id="poststuff">
+                    <div id="post-body" class="metabox-holder">
+                        <div id="post-body-content">
+                            <div class="meta-box-sortables ui-sortable">
+
+                                <form method="post">
+                                    <?php $orders->display(); ?>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <br class="clear">
+                </div>
+            </div>
+
+<?php
+        }
+    }
 
     public function page_products_screen_options()
     {
@@ -373,10 +661,6 @@ class moo_OnlineOrders_Admin {
     {
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'models/moo-OnlineOrders-CallAPI.php';
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'models/moo-OnlineOrders-Model.php';
-
-
-        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-moo-OnlineOrders-activator.php';
-        Moo_OnlineOrders_Activator::activate();
 
         $api   = new  moo_OnlineOrders_CallAPI();
         $model = new  moo_OnlineOrders_Model();
@@ -400,6 +684,8 @@ class moo_OnlineOrders_Admin {
             $MooOptions['thanks_page']='';
         if(!isset($MooOptions['fb_appid']))
             $MooOptions['fb_appid']='';
+        if(!isset($MooOptions['use_coupons']))
+            $MooOptions['use_coupons']='';
         if(!isset($MooOptions['custom_css']))
             $MooOptions['custom_css']='';
         if(!isset($MooOptions['custom_js']))
@@ -466,10 +752,10 @@ class moo_OnlineOrders_Admin {
         }
         else
         {
-            if(get_post_status( $MooOptions['store_page'] )=== false )
+            if(get_post_status( $MooOptions['store_page'] ) === false )
                 echo '<div class="update-nag">Hello, please verify if the store page is published</div>';
 
-            if( $MooOptions['cart_page']=="")
+            if( $MooOptions['cart_page'] == "")
             {
                     echo '<div class="update-nag">Hello, please select the cart page from settings then click save</div>';
             }
@@ -531,6 +817,12 @@ class moo_OnlineOrders_Admin {
         wp_localize_script("moo-map-da", "moo_merchantLng",$MooOptions['lng']);
         /* Fin map Delivery area section*/
         ?>
+        <div id="loader-wrapper">
+            <div id="loader"></div>
+            <div class="loader-section section-left"></div>
+            <div class="loader-section section-right"></div>
+        </div>
+
         <div id="MooPanel">
             <div id="MooPanel_sidebar">
                 <div id="Moopanel_logo">
@@ -700,13 +992,34 @@ class moo_OnlineOrders_Admin {
                     </div>
                     <div class="MooPanelItem">
                         <h3>Add new order type</h3>
-                        <div class="Moo_option-item">
-                            <div class="iwl_holder">
-                                <div class="iwl_label_holder">
-                                    <label for="Moo_AddOT_label">Label</label>
+                            <div class="Moo_option-item">
+                                <div class="iwl_holder">
+                                    <div class="iwl_label_holder">
+                                        <label for="Moo_AddOT_label">Label</label>
+                                    </div>
+                                    <div class="iwl_input_holder">
+                                        <input type="text" value="" id="Moo_AddOT_label"/>
+                                    </div>
                                 </div>
-                                <div class="iwl_input_holder">
-                                    <input type="text" value="" id="Moo_AddOT_label"/>
+
+                                <div class="iwl_holder">
+                                    <div class="iwl_label_holder">
+                                        <label for="Moo_AddOT_label">Minimum amount</label>
+                                    </div>
+                                    <div class="iwl_input_holder">
+                                        <input type="number" step="0.01" id="Moo_AddOT_minAmount"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                             <div>
+                                <div class="iwl_holder">
+                                    <div class="">Delivery Order
+                                        <input style="margin: 10px; margin-right: 2px; margin-left: 40px;" type="radio" name="delivery" value="oui" id="Moo_AddOT_delivery_oui" checked>
+                                        <label for="Moo_AddOT_delivery_oui"> Yes</label>
+                                        <input type="radio" name="delivery" value="non" id="Moo_AddOT_delivery_non" style="margin-left: 10px;" >
+                                        <label for="Moo_AddOT_delivery_non">No</label>
+                                    </div>
                                 </div>
                             </div>
                             <div>
@@ -720,6 +1033,7 @@ class moo_OnlineOrders_Admin {
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -770,10 +1084,10 @@ class moo_OnlineOrders_Admin {
                             { ?>
                                 <div class="Moo_option-item">
                                     <div class="label">All Items (<?php echo $nb_items[0]->nb.' items)'?></div>
-                                    <div class="onoffswitch" onchange="MooChangeCategory_Status('NoCategory')" title="Show/Hide this Category">
-                                        <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_NoCategory" <?php echo ($show_all_items == 'true')?'checked':''?>>
-                                        <label class="onoffswitch-label" for="myonoffswitch_NoCategory"><span class="onoffswitch-inner"></span>
-                                            <span class="onoffswitch-switch"></span>
+                                    <div class="moo-onoffswitch" onchange="MooChangeCategory_Status('NoCategory')" title="Show/Hide this Category">
+                                        <input type="checkbox" name="onoffswitch[]" class="moo-onoffswitch-checkbox" id="myonoffswitch_NoCategory" <?php echo ($show_all_items == 'true')?'checked':''?>>
+                                        <label class="moo-onoffswitch-label" for="myonoffswitch_NoCategory"><span class="moo-onoffswitch-inner"></span>
+                                            <span class="moo-onoffswitch-switch"></span>
                                         </label>
                                     </div>
                                     <span id="item-cat" class="moo-info-msg"
@@ -784,11 +1098,11 @@ class moo_OnlineOrders_Admin {
                                 </div>
                                 <div class="Moo_option-item">
                                     <div class="label">Show images for categories </div>
-                                    <div class="onoffswitch" onchange="MooShowCategoriesImages('myonoffswitch_Visibility')" title="Show category's image">
-                                        <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_Visibility" <?php $DefaultOption = (array)get_option('moo_settings');
+                                    <div class="moo-onoffswitch" onchange="MooShowCategoriesImages('myonoffswitch_Visibility')" title="Show category's image">
+                                        <input type="checkbox" name="onoffswitch[]" class="moo-onoffswitch-checkbox" id="myonoffswitch_Visibility" <?php $DefaultOption = (array)get_option('moo_settings');
                                         echo ($DefaultOption['show_categories_images'] == 'true')?'checked':''?> >
-                                        <label class="onoffswitch-label" for="myonoffswitch_Visibility"><span class="onoffswitch-inner"></span>
-                                            <span class="onoffswitch-switch"></span>
+                                        <label class="moo-onoffswitch-label" for="myonoffswitch_Visibility"><span class="moo-onoffswitch-inner"></span>
+                                            <span class="moo-onoffswitch-switch"></span>
                                         </label>
                                     </div>
                                     <span id="visib-cat001" class="moo-info-msg"
@@ -950,10 +1264,10 @@ class moo_OnlineOrders_Admin {
                                         <a href="#" onclick="annulerChangeNameGG(event,'<?php echo $mg->uuid?>','<?php echo $name?>')"> <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/annuler.png" ?>" style="width: 18px;"></a>
                                     </span>
                                     </div>
-                                    <div class="onoffswitch show_group" onchange="MooChangeModifier_Status('<?php echo $mg->uuid?>')" title="Show/Hide this Modifier Group">
-                                        <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_<?php echo $mg->uuid?>" <?php echo ($mg->show_by_default)?'checked':''?>>
-                                        <label class="onoffswitch-label" for="myonoffswitch_<?php echo $mg->uuid?>"><span class="onoffswitch-inner"></span>
-                                            <span class="onoffswitch-switch"></span>
+                                    <div class="moo-onoffswitch show_group" onchange="MooChangeModifier_Status('<?php echo $mg->uuid?>')" title="Show/Hide this Modifier Group">
+                                        <input type="checkbox" name="onoffswitch[]" class="moo-onoffswitch-checkbox" id="myonoffswitch_<?php echo $mg->uuid?>" <?php echo ($mg->show_by_default)?'checked':''?>>
+                                        <label class="moo-onoffswitch-label" for="myonoffswitch_<?php echo $mg->uuid?>"><span class="moo-onoffswitch-inner"></span>
+                                            <span class="moo-onoffswitch-switch"></span>
                                         </label>
                                     </div>
                                     <div class="saved_new_name">
@@ -979,10 +1293,10 @@ class moo_OnlineOrders_Admin {
                                                     <a href="#" onclick="annulerChangeNameModifier(event,'<?php echo $value->uuid?>')"> <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/annuler.png" ?>" style="width: 18px;"></a>
                                                 </span>
                                             </span>
-                                                <div class="onoffswitch show_group" onchange="MooChangeM_Status('<?php echo $value->uuid?>')" title="Show/Hide this Modifier">
-                                                    <input type="checkbox" name="onoffswitch[]" class="onoffswitch-checkbox" id="myonoffswitch_<?php echo $value->uuid?>" <?php echo ($value->show_by_default)?'checked':''?>>
-                                                    <label class="onoffswitch-label" for="myonoffswitch_<?php echo $value->uuid?>"><span class="onoffswitch-inner"></span>
-                                                        <span class="onoffswitch-switch"></span>
+                                                <div class="moo-onoffswitch show_group" onchange="MooChangeM_Status('<?php echo $value->uuid?>')" title="Show/Hide this Modifier">
+                                                    <input type="checkbox" name="onoffswitch[]" class="moo-onoffswitch-checkbox" id="myonoffswitch_<?php echo $value->uuid?>" <?php echo ($value->show_by_default)?'checked':''?>>
+                                                    <label class="moo-onoffswitch-label" for="myonoffswitch_<?php echo $value->uuid?>"><span class="moo-onoffswitch-inner"></span>
+                                                        <span class="moo-onoffswitch-switch"></span>
                                                     </label>
                                                 </div>
                                                 <div class="edit_modifer_name">
@@ -1031,6 +1345,7 @@ class moo_OnlineOrders_Admin {
                             'order_later_days',
                             'thanks_page',
                             'fb_appid',
+                            'use_coupons',
                             'checkout_login',
                             'custom_css',
                             'custom_js',
@@ -1073,6 +1388,11 @@ class moo_OnlineOrders_Admin {
                         <!-- Track stock section -->
                         <div class="MooPanelItem">
                             <h3>Track stock</h3>
+                            <div class="Moo_option-item">
+                                <div class="normal_text">
+                                    If an item is sold on the website it will deduct the quantity from the Clover Inventory. Once an item reaches 0 count it will say "Out Of Stock"
+                                </div>
+                            </div>
                                 <div class="Moo_option-item">
                                     <div style="float:left; width: 100%;">
                                         <label style="display:block; margin-bottom:8px;">
@@ -1138,11 +1458,11 @@ class moo_OnlineOrders_Admin {
                             <!-- Desktop version -->
                             <div class="Moo_option-item">
                                 <div style="margin-bottom: 14px;" class="label">Pay in Store</div>
-                                <div class="onoffswitch"  title="Pay in Store">
+                                <div class="moo-onoffswitch"  title="Pay in Store">
                                     <input type="hidden" name="moo_settings[payment_cash]" value="off">
-                                    <input type="checkbox" name="moo_settings[payment_cash]" class="onoffswitch-checkbox" id="myonoffswitch_payment_cash" <?php echo (isset($MooOptions['payment_cash']) && $MooOptions['payment_cash'] == 'on')?'checked':''?>>
-                                    <label class="onoffswitch-label" for="myonoffswitch_payment_cash"><span class="onoffswitch-inner"></span>
-                                        <span class="onoffswitch-switch"></span>
+                                    <input type="checkbox" name="moo_settings[payment_cash]" class="moo-onoffswitch-checkbox" id="myonoffswitch_payment_cash" <?php echo (isset($MooOptions['payment_cash']) && $MooOptions['payment_cash'] == 'on')?'checked':''?>>
+                                    <label class="moo-onoffswitch-label" for="myonoffswitch_payment_cash"><span class="moo-onoffswitch-inner"></span>
+                                        <span class="moo-onoffswitch-switch"></span>
                                     </label>
                                 </div>
                                 <span id="moo_info_msg-1" class="moo-info-msg"
@@ -1153,11 +1473,11 @@ class moo_OnlineOrders_Admin {
                             </div>
                             <div class="Moo_option-item">
                                 <div style="margin-bottom: 14px;" class="label">Pay upon delivery</div>
-                                <div class="onoffswitch"  title="Pay upon delivery">
+                                <div class="moo-onoffswitch"  title="Pay upon delivery">
                                     <input type="hidden" name="moo_settings[payment_cash_delivery]" value="off">
-                                    <input type="checkbox" name="moo_settings[payment_cash_delivery]" class="onoffswitch-checkbox" id="myonoffswitch_payment_cash_delivery" <?php echo (isset($MooOptions['payment_cash_delivery']) && $MooOptions['payment_cash_delivery'] == 'on')?'checked':''?>>
-                                    <label class="onoffswitch-label" for="myonoffswitch_payment_cash_delivery"><span class="onoffswitch-inner"></span>
-                                        <span class="onoffswitch-switch"></span>
+                                    <input type="checkbox" name="moo_settings[payment_cash_delivery]" class="moo-onoffswitch-checkbox" id="myonoffswitch_payment_cash_delivery" <?php echo (isset($MooOptions['payment_cash_delivery']) && $MooOptions['payment_cash_delivery'] == 'on')?'checked':''?>>
+                                    <label class="moo-onoffswitch-label" for="myonoffswitch_payment_cash_delivery"><span class="moo-onoffswitch-inner"></span>
+                                        <span class="moo-onoffswitch-switch"></span>
                                     </label>
                                 </div>
                                 <span id="moo_info_msg-1" class="moo-info-msg"
@@ -1168,11 +1488,11 @@ class moo_OnlineOrders_Admin {
                             </div>
                             <div class="Moo_option-item">
                                 <div style="margin-bottom: 14px;" class="label">Secure checkout page</div>
-                                <div class="onoffswitch"  title="Secure checkout page">
+                                <div class="moo-onoffswitch"  title="Secure checkout page">
                                     <input type="hidden" name="moo_settings[scp]" value="off">
-                                    <input type="checkbox" name="moo_settings[scp]" class="onoffswitch-checkbox" id="myonoffswitch_scp" <?php echo (isset($MooOptions['scp']) && $MooOptions['scp'] == 'on')?'checked':''?>>
-                                    <label class="onoffswitch-label" for="myonoffswitch_scp"><span class="onoffswitch-inner"></span>
-                                        <span class="onoffswitch-switch"></span>
+                                    <input type="checkbox" name="moo_settings[scp]" class="moo-onoffswitch-checkbox" id="myonoffswitch_scp" <?php echo (isset($MooOptions['scp']) && $MooOptions['scp'] == 'on')?'checked':''?>>
+                                    <label class="moo-onoffswitch-label" for="myonoffswitch_scp"><span class="moo-onoffswitch-inner"></span>
+                                        <span class="moo-onoffswitch-switch"></span>
                                     </label>
                                 </div>
                                 <span id="moo_info_msg-2" class="moo-info-msg"
@@ -1203,21 +1523,21 @@ class moo_OnlineOrders_Admin {
                                     <div id="moo_bussinessHours_Details" class="<?php echo ($MooOptions["hours"] != "all")?"":"moo_hidden"; ?> ">
                                         <div class="Moo_option-item">
                                             <div style="margin-bottom: 14px;" class="label">Hide the menu when the store is closed</div>
-                                            <div class="onoffswitch"  title="Show/hide the menu">
+                                            <div class="moo-onoffswitch"  title="Show/hide the menu">
                                                 <input type="hidden" name="moo_settings[hide_menu]" value="off">
-                                                <input type="checkbox" name="moo_settings[hide_menu]" class="onoffswitch-checkbox" id="myonoffswitch_hide_menu" <?php echo (isset($MooOptions['hide_menu']) && $MooOptions['hide_menu'] == 'on')?'checked':''?>>
-                                                <label class="onoffswitch-label" for="myonoffswitch_hide_menu"><span class="onoffswitch-inner"></span>
-                                                    <span class="onoffswitch-switch"></span>
+                                                <input type="checkbox" name="moo_settings[hide_menu]" class="moo-onoffswitch-checkbox" id="myonoffswitch_hide_menu" <?php echo (isset($MooOptions['hide_menu']) && $MooOptions['hide_menu'] == 'on')?'checked':''?>>
+                                                <label class="moo-onoffswitch-label" for="myonoffswitch_hide_menu"><span class="moo-onoffswitch-inner"></span>
+                                                    <span class="moo-onoffswitch-switch"></span>
                                                 </label>
                                             </div>
                                         </div>
                                         <div class="Moo_option-item">
                                             <div style="margin-bottom: 14px;" class="label">Allow scheduled orders when the store is closed</div>
-                                            <div class="onoffswitch"  title="Show/hide the menu">
+                                            <div class="moo-onoffswitch"  title="Show/hide the menu">
                                                 <input type="hidden" name="moo_settings[accept_orders_w_closed]" value="off">
-                                                <input type="checkbox" name="moo_settings[accept_orders_w_closed]" class="onoffswitch-checkbox" id="myonoffswitch_accept_orders" <?php echo (isset($MooOptions['accept_orders_w_closed']) && $MooOptions['accept_orders_w_closed'] == 'on')?'checked':''?>>
-                                                <label class="onoffswitch-label" for="myonoffswitch_accept_orders"><span class="onoffswitch-inner"></span>
-                                                    <span class="onoffswitch-switch"></span>
+                                                <input type="checkbox" name="moo_settings[accept_orders_w_closed]" class="moo-onoffswitch-checkbox" id="myonoffswitch_accept_orders" <?php echo (isset($MooOptions['accept_orders_w_closed']) && $MooOptions['accept_orders_w_closed'] == 'on')?'checked':''?>>
+                                                <label class="moo-onoffswitch-label" for="myonoffswitch_accept_orders"><span class="moo-onoffswitch-inner"></span>
+                                                    <span class="moo-onoffswitch-switch"></span>
                                                 </label>
                                             </div>
                                         </div>
@@ -1246,11 +1566,11 @@ class moo_OnlineOrders_Admin {
                             <h3>Allow scheduled orders</h3>
                             <div class="Moo_option-item">
                                 <div style="margin-bottom: 14px;" class="label">Show Order Date</div>
-                                <div class="onoffswitch"  title="Show/hide order date">
+                                <div class="moo-onoffswitch"  title="Show/hide order date">
                                     <input type="hidden" name="moo_settings[order_later]" value="off">
-                                    <input type="checkbox" name="moo_settings[order_later]" class="onoffswitch-checkbox" id="myonoffswitch_order_later" <?php echo (isset($MooOptions['order_later']) && $MooOptions['order_later'] == 'on')?'checked':''?>>
-                                    <label class="onoffswitch-label" for="myonoffswitch_order_later"><span class="onoffswitch-inner"></span>
-                                        <span class="onoffswitch-switch"></span>
+                                    <input type="checkbox" name="moo_settings[order_later]" class="moo-onoffswitch-checkbox" id="myonoffswitch_order_later" <?php echo (isset($MooOptions['order_later']) && $MooOptions['order_later'] == 'on')?'checked':''?>>
+                                    <label class="moo-onoffswitch-label" for="myonoffswitch_order_later"><span class="moo-onoffswitch-inner"></span>
+                                        <span class="moo-onoffswitch-switch"></span>
                                     </label>
                                 </div>
                             </div>
@@ -1308,6 +1628,28 @@ class moo_OnlineOrders_Admin {
                             <div class="Moo_option-item">
                                 <div class="iwl_holder"><div class="iwl_label_holder"><label id="MooFbAppID" >Your APP ID</label></div>
                                     <div class="iwl_input_holder"><input name="moo_settings[fb_appid]" id="MooFbAppID" type="text" value="<?php echo $MooOptions['fb_appid']?>" /></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Coupon section -->
+                        <div class="MooPanelItem">
+                            <h3>Coupons</h3>
+                            <div class="Moo_option-item" >
+                                <div class="normal_text">
+                                    To add coupon codes, select Clover orders then coupons
+                                </div>
+                            </div>
+                            <div class="Moo_option-item">
+                                <div style="float:left; width: 100%;">
+                                    <label style="display:block; margin-bottom:8px;">
+                                        <input name="moo_settings[use_coupons]" id="Moouse_coupons" type="radio" value="enabled" <?php echo ($MooOptions["use_coupons"]=="enabled")?"checked":""; ?> >
+                                        Enabled
+                                    </label>
+                                    <label style="display:block; margin-bottom:8px;">
+                                        <input name="moo_settings[use_coupons]" id="Moouse_coupons" type="radio" value="disabled" <?php echo ($MooOptions["use_coupons"]!="enabled")?"checked":""; ?> >
+                                        Disabled
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -1504,7 +1846,7 @@ class moo_OnlineOrders_Admin {
                                 <div class="iwl_holder">
                                     <div class="iwl_label_holder"><label for="minamount">Min Amount</label></div>
                                     <div class="iwl_input_holder">
-                                        <input placeholder="$" name="moo_settings[free_delivery]" type="text" value="<?php echo (isset($MooOptions['free_delivery']))?$MooOptions['free_delivery']:""; ?>" />
+                                        <input  name="moo_settings[free_delivery]" type="text" value="<?php echo (isset($MooOptions['free_delivery']))?$MooOptions['free_delivery']:""; ?>" />
                                     </div>
                                 </div>
                             </div>
@@ -1515,7 +1857,7 @@ class moo_OnlineOrders_Admin {
                                 <div class="iwl_holder">
                                     <div class="iwl_label_holder"><label for="fixeddeliveryamount">Fixed Delivery amount</label></div>
                                     <div class="iwl_input_holder">
-                                        <input  id="fixeddeliveryamount" placeholder="$" name="moo_settings[fixed_delivery]" type="text" value="<?php echo (isset($MooOptions['fixed_delivery']))?$MooOptions['fixed_delivery']:"";?>" />
+                                        <input  id="fixeddeliveryamount"  name="moo_settings[fixed_delivery]" type="text" value="<?php echo (isset($MooOptions['fixed_delivery']))?$MooOptions['fixed_delivery']:"";?>" />
                                     </div>
                                 </div>
                             </div>
@@ -1526,39 +1868,9 @@ class moo_OnlineOrders_Admin {
                                 <div class="iwl_holder">
                                     <div class="iwl_label_holder"><label for="otherzonesdeliveryfees">Other Zones Delivery fees</label></div>
                                     <div class="iwl_input_holder">
-                                        <input placeholder="$" id="otherzonesdeliveryfees" name="moo_settings[other_zones_delivery]" type="text" value="<?php echo (isset($MooOptions['other_zones_delivery']))?$MooOptions['other_zones_delivery']:"";?>"  /></div>
+                                        <input  id="otherzonesdeliveryfees" name="moo_settings[other_zones_delivery]" type="text" value="<?php echo (isset($MooOptions['other_zones_delivery']))?$MooOptions['other_zones_delivery']:"";?>"  /></div>
                                 </div>
                             </div>
-                            <div class="Moo_option-item" >
-                                <div class="normal_text">
-                                    <strong>Delivery taxes & Delivery amount on receipt</strong> :  To set taxes for delivery or to show the delivery amount on the receipt, select the appropriate item from the drop down menu (with appropriate tax rates) If you don't see the item from the drop down menu ("Delivery Fee" for example) go to your inventory app in Clover and create an item called "Delivery Fee" and make it a variable price, then apply the appropriate tax rate (if you don't want to charge taxes on Delivery fee don't add any taxes rate) afterwards press save. Then press manual sync under import items and select the item you just created from the Drop down menu.
-                                </div>
-                                <div class="iwl_holder">
-                                    <div class="iwl_label_holder"><label for="otherzonesdeliveryfees">The item</label></div>
-                                    <div class="iwl_input_holder">
-                                        <?php
-                                        if(count($itemsWithVariablePrice)>0)
-                                        {
-                                            echo '<select style="width: 100%;" name="moo_settings[item_delivery]">';
-                                            echo '<option value=""></option>';
-                                            foreach ($itemsWithVariablePrice as $item)
-                                            {
-                                                if( $item->uuid == $MooOptions['item_delivery'])
-                                                    echo '<option value="'.$item->uuid.'" selected>'.$item->name.'</option>';
-                                                else
-                                                    echo '<option value="'.$item->uuid.'">'.$item->name.'</option>';
-                                            }
-                                            echo '</select>';
-                                        }
-                                        else
-                                        {
-                                            echo "<strong>you don't have any variable priced items on your Clover. Please create a variable priced item then select manual sync</strong>";
-                                        }
-                                        ?>
-                                    </div>
-                                </div>
-                            </div>
-
                         </div>
                         <div style="text-align: center; margin: 20px;">
                             <textarea id="moo_zones_json" name="moo_settings[zones_json]" hidden><?php echo (isset($MooOptions['zones_json']))?$MooOptions['zones_json']:"";?></textarea>
@@ -1574,7 +1886,8 @@ class moo_OnlineOrders_Admin {
                     <div class="MooPanelItem">
                         <h3>Need Help or Feedback</h3>
                         <div class="normal_text">
-                            Do you need help or would like to give us feedback.<br/>Please e-mail or call us: 925-234-5554 (8am-8pm pacific time)
+                            Do you need help or would like to give us feedback.<br/>Please e-mail or call us: 925-234-5554 (8am-8pm pacific time).<br/>
+                            You can also visit our support site at <a href="http://docs.smartonlineorder.com/docs/online-orders/">http://docs.smartonlineorder.com</a>
                         </div>
                         <div class="Moo_option-item">
                             <div class="iwl_holder">
@@ -1678,6 +1991,7 @@ class moo_OnlineOrders_Admin {
         add_submenu_page('moo_index', 'Settings', 'Settings', 'manage_options', 'moo_index', array($this, 'panel_settings'));
         add_submenu_page('moo_index', 'Items/Images', 'Items / Images', 'manage_options', 'moo_items', array($this, 'page_products'));
         add_submenu_page('moo_index', 'Orders', 'Orders', 'manage_options', 'moo_orders', array($this, 'page_orders'));
+        add_submenu_page('moo_index', 'Coupons', 'Coupons', 'manage_options', 'moo_coupons', array($this, 'page_coupons'));
     }
     public function enq_media_uploader()
     {
@@ -1708,10 +2022,17 @@ class moo_OnlineOrders_Admin {
             'href'  => admin_url().'admin.php?page=moo_items',
             'parent'  => 'Clover_Orders',
         );
+        $args5 = array(
+            'id'    => 'Clover_Orders_coupons',
+            'title' => 'Coupons',
+            'href'  => admin_url().'admin.php?page=moo_coupons',
+            'parent'  => 'Clover_Orders',
+        );
         $wp_admin_bar->add_node( $args  );
         $wp_admin_bar->add_node( $args2 );
         $wp_admin_bar->add_node( $args3 );
         $wp_admin_bar->add_node( $args4 );
+        $wp_admin_bar->add_node( $args5 );
     }
     /**
      * Register the options.
@@ -1751,7 +2072,11 @@ class moo_OnlineOrders_Admin {
         wp_register_style( 'moo-sweetalert-css',plugin_dir_url(dirname(__FILE__))."public/css/sweetalert.css",array(), $this->version);
         wp_enqueue_style( 'moo-sweetalert-css' );
 
+        wp_register_style('jquery-ui', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css');
+        wp_enqueue_style('jquery-ui');
+
         wp_enqueue_style( 'wp-color-picker' );
+        wp_enqueue_style( 'jquery-ui-datepicker' );
     }
 
     /**
@@ -1779,6 +2104,7 @@ class moo_OnlineOrders_Admin {
 
         wp_enqueue_script('jquery');
         wp_enqueue_script( 'wp-color-picker' );
+        wp_enqueue_script( 'jquery-ui-datepicker' );
 
         //wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/moo-OnlineOrders-admin.js', array( 'jquery' ), $this->version, false );
         wp_register_script('moo-google-map', 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc&libraries=drawing&geometry');
@@ -1800,7 +2126,7 @@ class moo_OnlineOrders_Admin {
         wp_enqueue_script('progressbar-js',array('jquery'));
         wp_enqueue_script("moo-tooltip-js",array('jquery'));
 
-        wp_enqueue_script('moo-publicAdmin-js',array('jquery','wp-color-picker'));
+        wp_enqueue_script('moo-publicAdmin-js',array('jquery','wp-color-picker','jquery-ui-datepicker'));
 
 
         wp_localize_script("moo-publicAdmin-js", "moo_params",$params);
@@ -1876,10 +2202,10 @@ class moo_OnlineOrders_Admin {
                 </td>
                 <td class="name-cat" id="name_<?php echo $category->uuid ?>"><?php if ($category->alternate_name == null) {echo $category->name;} else {echo $category->alternate_name;} ?></td>
                 <td class="show-cat">
-                    <div class="onoffswitch" title="Visibility Category">
-                        <input type="checkbox" name="onoffswitch[]" id="myonoffswitch_Visibility_<?php echo $category->uuid ?>" class="onoffswitch-checkbox visib_cat<?php echo $category->uuid ?>" onclick="visibility_cat('<?php echo $category->uuid ?>')" <?php if ($category->show_by_default == 1) {  ?>checked<?php } ?>>
-                        <label class="onoffswitch-label" for="myonoffswitch_Visibility_<?php echo $category->uuid ?>"><span class="onoffswitch-inner"></span>
-                            <span class="onoffswitch-switch"></span>
+                    <div class="moo-onoffswitch" title="Visibility Category">
+                        <input type="checkbox" name="onoffswitch[]" id="myonoffswitch_Visibility_<?php echo $category->uuid ?>" class="moo-onoffswitch-checkbox visib_cat<?php echo $category->uuid ?>" onclick="visibility_cat('<?php echo $category->uuid ?>')" <?php if ($category->show_by_default == 1) {  ?>checked<?php } ?>>
+                        <label class="moo-onoffswitch-label" for="myonoffswitch_Visibility_<?php echo $category->uuid ?>"><span class="moo-onoffswitch-inner"></span>
+                            <span class="moo-onoffswitch-switch"></span>
                         </label>
                     </div>
                 </td>
@@ -1942,6 +2268,7 @@ class moo_OnlineOrders_Admin {
                 </td>
             </tr>
             <div id="detailCat<?php echo $category->uuid; ?>" class="white-popup mfp-hide listItems" style="overflow-y: scroll;max-height:400px;">
+                <h1>Reorder items</h1>
                 <?php
                 $this->moo_getItemsByCategory($category->uuid,$category->items);
                 ?>

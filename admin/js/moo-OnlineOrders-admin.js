@@ -56,6 +56,9 @@ jQuery(document).ready(function($){
     Moo_GetOrderTypes();
 
     $('.moo-color-field').wpColorPicker();
+    $('#CouponExpiryDate').datepicker({
+        dateFormat: 'yy-mm-dd'
+    });
 
     if($('#moo_progressbar_container').length == 1)
          window.bar = new ProgressBar.Line('#moo_progressbar_container', {
@@ -203,6 +206,12 @@ jQuery(document).ready(function($){
     });
    /* --- Modifier Group --- */
 
+   /* Remove loader*/
+    $('body').addClass('loaded')
+    //Force removing loader after 10 seconds
+    setTimeout(function(){ $('body').addClass('loaded') }, 10000);
+
+
 });
 
 /* --- Modifier Group --- */
@@ -233,7 +242,7 @@ jQuery(document).ready(function($){
 
     function show_sub(event,id){
         event.preventDefault();
-        jQuery('#detail_group_'+id).slideToggle('slow', function() {
+        jQuery('#detail_group_'+id).slideToggle('fast', function() {
             if (jQuery(this).is(':visible')) {
                 jQuery("#plus_"+id).attr('src',moo_params.plugin_url+'/public/img/substract.png');
             } else {
@@ -372,10 +381,10 @@ function tr_new(uuid,img){
     var visib_cat = jQuery(".visib_cat"+uuid).is(":checked")? true : false;
     var input_check = "";
     if (visib_cat == true){
-        input_check = '<input type="checkbox" name="onoffswitch[]" id="myonoffswitch_Visibility_'+uuid+'" class="onoffswitch-checkbox visib_cat'+uuid+'" onclick="visibility_cat(\''+uuid+'\')" checked>';
+        input_check = '<input type="checkbox" name="onoffswitch[]" id="myonoffswitch_Visibility_'+uuid+'" class="moo-onoffswitch-checkbox visib_cat'+uuid+'" onclick="visibility_cat(\''+uuid+'\')" checked>';
     }
     else{
-        input_check = '<input type="checkbox" name="onoffswitch[]" id="myonoffswitch_Visibility_'+uuid+'" class="onoffswitch-checkbox visib_cat'+uuid+'" onclick="visibility_cat(\''+uuid+'\')">';
+        input_check = '<input type="checkbox" name="onoffswitch[]" id="myonoffswitch_Visibility_'+uuid+'" class="moo-onoffswitch-checkbox visib_cat'+uuid+'" onclick="visibility_cat(\''+uuid+'\')">';
     }
     var cont_html = "";
     cont_html +="<td style='display:none;'><span id='id_cat'>"+uuid+"</span></td>";
@@ -391,10 +400,10 @@ function tr_new(uuid,img){
     cont_html +=nameCat;
     cont_html +="</td>";
     cont_html +="<td class='show-cat'>";
-    cont_html +='<div class="onoffswitch" title="Visibility Category">';
+    cont_html +='<div class="moo-onoffswitch" title="Visibility Category">';
     cont_html +=input_check;
-    cont_html +='<label class="onoffswitch-label" for="myonoffswitch_Visibility_'+uuid+'"><span class="onoffswitch-inner"></span>';
-    cont_html +='<span class="onoffswitch-switch"></span>';
+    cont_html +='<label class="moo-onoffswitch-label" for="myonoffswitch_Visibility_'+uuid+'"><span class="moo-onoffswitch-inner"></span>';
+    cont_html +='<span class="moo-onoffswitch-switch"></span>';
     cont_html +='</label>';
     cont_html +="</div>";
     cont_html +="</td>";
@@ -559,7 +568,15 @@ function Moo_GetOrderTypes(){
                     html +='<div class="moo_item_order">';
                     html +='<spam style="float: left">';
                     html +="<img src='"+moo_params.plugin_url+"/public/img/menu.png' style='width: 15px;padding-right: 10px;'>";
-                    html += $ot.label;
+                    html += $ot.label ;
+
+                    if ($ot.status==1){
+                        html += '<span style="margin-left: 10px"><img src="'+moo_params.plugin_url+"/public/img/bullet_ball_green.png"+'"/></span>';
+                    }
+                    else{
+                        html += '<span style="margin-left: 10px"><img src="'+moo_params.plugin_url+"/public/img/bullet_ball_glass_grey.png"+'"/></span>';
+                    }
+
                     html +='</spam>';
                     html +='<spam style="float: right;font-size: 12px;" id="top-bt-'+$ot.ot_uuid+'">';
                     html += '<a href="#" onclick="moo_showOrderTypeDetails(event,\''+$ot.ot_uuid+'\')">Edit</a> | <a href="#" title="Delete this order types from the wordpress Database" onclick="Moo_deleteOrderType(event,\''+$ot.ot_uuid+'\')">DELETE</a>';
@@ -571,16 +588,16 @@ function Moo_GetOrderTypes(){
 
                     html +='<div class="champ_order IsEnabled_order"><spam class="label_Torder">Disable / Enabled </spam>';
 
-                    html +='<div class="onoffswitch" title="Enable or disable this order type">';
+                    html +='<div class="moo-onoffswitch" title="Enable or disable this order type">';
 
                     if ($ot.status==1){
-                        html += '<input type="checkbox" name="onoffswitch[]" id="select_En_'+$ot.ot_uuid+'" class="onoffswitch-checkbox" checked>';
+                        html += '<input type="checkbox" name="onoffswitch[]" id="select_En_'+$ot.ot_uuid+'" class="moo-onoffswitch-checkbox" checked>';
                     }
                     else{
-                        html += '<input type="checkbox" name="onoffswitch[]" id="select_En_'+$ot.ot_uuid+'" class="onoffswitch-checkbox" >';
+                        html += '<input type="checkbox" name="onoffswitch[]" id="select_En_'+$ot.ot_uuid+'" class="moo-onoffswitch-checkbox" >';
                     }
-                    html +='<label class="onoffswitch-label" for="select_En_'+$ot.ot_uuid+'"><span class="onoffswitch-inner"></span>';
-                    html +='<span class="onoffswitch-switch"></span>';
+                    html +='<label class="moo-onoffswitch-label" for="select_En_'+$ot.ot_uuid+'"><span class="moo-onoffswitch-inner"></span>';
+                    html +='<span class="moo-onoffswitch-switch"></span>';
                     html +='</label>';
                     html +="</div>";
 
@@ -589,6 +606,10 @@ function Moo_GetOrderTypes(){
                     // html +='<option value="0" '+(($ot.status==0)?"selected":"")+'>No</option>';
                     // html +='</select>';
                     html += '</div>';
+                    //Min amount
+                    html +='<div class="champ_order Taxable_order"><spam class="label_Torder">Minimum Amount </spam>';
+                    html +='<input type="text" id="minAmount_'+$ot.ot_uuid+'" value="'+$ot.minAmount+'" style="width: 160px;">';
+                    html += '</div>';
                     //show Taxable
                     html +='<div class="champ_order Taxable_order"><spam class="label_Torder">Taxable </spam>';
                     html +='<select style="width: 160px;" id="select_Tax_'+$ot.ot_uuid+'">';
@@ -596,6 +617,7 @@ function Moo_GetOrderTypes(){
                     html +='<option value="0" '+(($ot.taxable==0)?"selected":"")+'>No</option>';
                     html +='</select>';
                     html += '</div>';
+                    //Delivery Order
                     html +='<div class="champ_order type_order"><spam class="label_Torder">Delivery Order </spam>';
                     html +='<select style="width: 160px;" id="select_type_'+$ot.ot_uuid+'">';
                     html +='<option value="1" '+(($ot.show_sa==1)?"selected":"")+'>Yes</option>';
@@ -696,6 +718,9 @@ function moo_addordertype(e)
 
     var label   = document.querySelector('#Moo_AddOT_label').value;
     var taxable = document.querySelector('#Moo_AddOT_taxable_oui').checked ;
+    var show_sa = document.querySelector('#Moo_AddOT_delivery_oui').checked ;
+    var minAmount = document.querySelector('#Moo_AddOT_minAmount').value;
+
     if(label == "")
         swal("Error","Please enter a label for your order Type","error");
     else
@@ -703,7 +728,7 @@ function moo_addordertype(e)
         jQuery('#Moo_AddOT_loading').html(window.moo_loading);
         jQuery('#Moo_AddOT_btn').hide();
 
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_add_ot',"label":label,"taxable":taxable}, function (data) {
+        jQuery.post(moo_params.ajaxurl,{'action':'moo_add_ot',"label":label,"taxable":taxable,"minAmount":minAmount,"show_sa":show_sa}, function (data) {
             if(data.status=='success')
             {
                 if(data.message == '401 Unauthorized') jQuery('#Moo_AddOT_loading').html('Verify your API key');
@@ -719,7 +744,6 @@ function moo_addordertype(e)
             {
                 jQuery('#Moo_AddOT_loading').html('Verify your API key');
             }
-
 
             }
         );
@@ -882,7 +906,7 @@ var media_uploader  = null;
 var moo_item_images = [];// {"image_url": "", "image_default": "", "image_enabled": ""}
 var moo_category_images;
 
-function uploader_image_category(enent,id,responsive){
+function uploader_image_category(event,id,responsive){
     event.preventDefault();
     media_uploader = wp.media({
         frame:    "post",
@@ -1022,10 +1046,6 @@ function moo_save_item_images(uuid) {
             "image_enabled": moo_item_images[i].image_enabled
         });
     }
-    if(description.length>250) {
-        swal("Error","Description too long","error");
-        return
-    }
     jQuery.post(moo_params.ajaxurl,{'action':'moo_save_items_with_images',"item_uuid":uuid,"description":description,"images":images}, function (data) {
         if(data.status == 'Success') {
             if(data.data==true) {
@@ -1063,7 +1083,8 @@ function MooPanel_UpdateItems(event) {
     event.preventDefault();
     window.bar.animate(0.01);
     window.bar.setText('1 %');
-    moo_upadateItemsPerPage(0)
+    window.itemReceived = 0;
+    moo_upadateItemsPerPage(0);
 }
 function MooPanel_UpdateCategories(event)
 {
@@ -1115,17 +1136,23 @@ function moo_upadateItemsPerPage(page)
     {
         received = data.received;
         var percent_loaded = data.received*100/window.moo_nb_allItems;
+
         if(percent_loaded == null)
             percent_loaded = 1;
-        window.bar.animate(bar.value()+percent_loaded/100);
+
         if(window.moo_nb_allItems!=0)
-            window.bar.setText(Math.round(percent_loaded+bar.value()*100) + ' %');
-        else
-            window.bar.setText('Please wait...');
+        {
+            window.bar.animate(bar.value()+percent_loaded/100);
+           // window.bar.setText(Math.round(percent_loaded+bar.value()*100) + ' %');
+        }
     }
     ).done(function () {
         if(received>0)
-            moo_upadateItemsPerPage(page+1)
+        {
+            window.itemReceived += received;
+            moo_upadateItemsPerPage(page+1);
+            window.bar.setText(window.itemReceived+' items updated');
+        }
         else
         {
             swal("Items updated");
@@ -1163,13 +1190,7 @@ function moo_editItemDescription(event,item_uuid)
     var new_description = jQuery('#edit-description-content-'+item_uuid).val();
     if(new_description != "")
     {
-        if(new_description.length>250) {
-            swal("Error","Description too long","error");
-            return
-        }
-        else
-            jQuery.magnificPopup.close();
-
+        jQuery.magnificPopup.close();
         jQuery.post(moo_params.ajaxurl,{'action':'moo_save_items_description',"item_uuid":item_uuid,"description":new_description}, function (data) {
                 if(data.status == 'Success') {
                     if(data.data==true) {
@@ -1190,7 +1211,7 @@ function moo_editItemDescription(event,item_uuid)
 function moo_showOrderTypeDetails(e,id) {
     e.preventDefault();
     //jQuery('#detail_'+id).slideToggle( "slow" );
-    jQuery('#detail_'+id).slideToggle('slow', function() {
+    jQuery('#detail_'+id).slideToggle('fast', function() {
         if (jQuery(this).is(':visible')) {
             jQuery("#top-bt-"+id).css('display','none');
         } else {
@@ -1205,8 +1226,8 @@ function moo_saveOrderType(e,uuid) {
     //var isEnabled = jQuery('#select_En_'+ uuid).val();
     var taxable = jQuery('#select_Tax_'+ uuid).val();
     var type = jQuery('#select_type_'+ uuid).val();
-
-    var data = {'action':'moo_update_ordertype',"name":name,"enable":isEnabled,"taxable":taxable,"type":type,"uuid":uuid};
+    var minAmount = jQuery('#minAmount_'+ uuid).val();
+    var data = {'action':'moo_update_ordertype',"name":name,"enable":isEnabled,"taxable":taxable,"type":type,"uuid":uuid,"minAmount":minAmount};
     jQuery.post(moo_params.ajaxurl,data, function (data) {
             if(data.data=="1")
             {
@@ -1236,4 +1257,30 @@ function moo_showCustomerMap(event,lat,lng)
         map: map
     });
 
+}
+function mooDeleteCoupon(e)
+{
+    e.preventDefault();
+    var url = jQuery(e.target).attr("href");
+    swal({
+            title: "Are you sure?",
+            text: "Please confirm that you want delete this coupon",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Confirm",
+            cancelButtonText: "Cancel",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        },
+        function(isConfirm){
+            if (isConfirm == false) {
+                swal("Cancelled","","error");
+            }
+            else
+            {
+                swal.close();
+                window.location.href = url;
+            }
+    });
 }

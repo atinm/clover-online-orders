@@ -2,6 +2,141 @@
  * All of the CSS for your admin-specific functionality should be
  * included in this file.
  */
+/* Loader */
+
+/*  Loader  */
+#loader-wrapper {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    background-color: #ECF0F1;
+}
+#loader {
+    display: block;
+    position: relative;
+    left: 45%;
+    top: 50%;
+    width: 150px;
+    height: 150px;
+    margin: -75px 0 0 -75px;
+
+    border: 3px solid transparent;
+    border-top-color: rgba(227, 0, 0, 0.98);
+    border-radius: 50%;
+    z-index: 1500;
+
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
+}
+#loader:before {
+    content: "";
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    border: 3px solid transparent;
+    border-top-color: #1e5429;
+    border-radius: 50%;
+
+    -webkit-animation: spin 3s linear infinite;
+    animation: spin 3s linear infinite;
+}
+#loader:after {
+    content: "";
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    bottom: 15px;
+    border: 3px solid transparent;
+    border-top-color: #e3e261;
+    border-radius: 50%;
+
+    -webkit-animation: spin 1.5s linear infinite;
+    animation: spin 1.5s linear infinite;
+}
+@-webkit-keyframes spin {
+    0%   {
+        -webkit-transform: rotate(0deg);  /* Chrome, Opera 15+, Safari 3.1+ */
+        -ms-transform: rotate(0deg);  /* IE 9 */
+        transform: rotate(0deg);  /* Firefox 16+, IE 10+, Opera */
+    }
+    100% {
+        -webkit-transform: rotate(360deg);  /* Chrome, Opera 15+, Safari 3.1+ */
+        -ms-transform: rotate(360deg);  /* IE 9 */
+        transform: rotate(360deg);  /* Firefox 16+, IE 10+, Opera */
+    }
+}
+@keyframes spin {
+    0%   {
+        -webkit-transform: rotate(0deg);  /* Chrome, Opera 15+, Safari 3.1+ */
+        -ms-transform: rotate(0deg);  /* IE 9 */
+        transform: rotate(0deg);  /* Firefox 16+, IE 10+, Opera */
+    }
+    100% {
+        -webkit-transform: rotate(360deg);  /* Chrome, Opera 15+, Safari 3.1+ */
+        -ms-transform: rotate(360deg);  /* IE 9 */
+        transform: rotate(360deg);  /* Firefox 16+, IE 10+, Opera */
+    }
+}
+
+#loader-wrapper .loader-section {
+    position: fixed;
+    top: 65px;
+    width: 51%;
+    height: 100%;
+    z-index: 1000;
+    -webkit-transform: translateX(0);  /* Chrome, Opera 15+, Safari 3.1+ */
+    -ms-transform: translateX(0);  /* IE 9 */
+    transform: translateX(0);  /* Firefox 16+, IE 10+, Opera */
+}
+
+#loader-wrapper .loader-section.section-left {
+    left: 0;
+}
+
+#loader-wrapper .loader-section.section-right {
+    right: 0;
+}
+
+/* Loaded */
+.loaded #loader-wrapper .loader-section.section-left {
+    -webkit-transform: translateX(-100%);  /* Chrome, Opera 15+, Safari 3.1+ */
+    -ms-transform: translateX(-100%);  /* IE 9 */
+    transform: translateX(-100%);  /* Firefox 16+, IE 10+, Opera */
+
+    -webkit-transition: all 0.7s 0.3s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+    transition: all 0.7s 0.3s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+}
+
+.loaded #loader-wrapper .loader-section.section-right {
+    -webkit-transform: translateX(100%);  /* Chrome, Opera 15+, Safari 3.1+ */
+    -ms-transform: translateX(100%);  /* IE 9 */
+    transform: translateX(100%);  /* Firefox 16+, IE 10+, Opera */
+
+    -webkit-transition: all 0.7s 0.3s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+    transition: all 0.7s 0.3s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+}
+
+.loaded #loader {
+    opacity: 0;
+    -webkit-transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out;
+}
+.loaded #loader-wrapper {
+    visibility: hidden;
+
+    -webkit-transform: translateY(-100%);  /* Chrome, Opera 15+, Safari 3.1+ */
+    -ms-transform: translateY(-100%);  /* IE 9 */
+    transform: translateY(-100%);  /* Firefox 16+, IE 10+, Opera */
+
+    -webkit-transition: all 0.3s 1s ease-out;
+    transition: all 0.3s 1s ease-out;
+}
+/* Fin loader */
 .moo_option_description
 {
     font-size: 20px;
@@ -32,7 +167,7 @@
 {
     background-color: #faebcc !important;
 }
-#price,#price_type,#unit_name,#sku,#code
+#price,#price_type,#unit_name,#sku
 {
     width: 100px;
 }
@@ -250,39 +385,39 @@
 {
     padding: 15px;
 }
-.onoffswitch {
+.moo-onoffswitch {
     position: relative; width: 60px;
     display: inline-block;
     -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
 }
-.onoffswitch-checkbox {
+.moo-onoffswitch-checkbox {
     display: none !important;
 }
-.onoffswitch-label {
+.moo-onoffswitch-label {
     display: block; overflow: hidden; cursor: pointer;
     border: 2px solid #999999; border-radius: 50px;
 }
-.onoffswitch-inner {
+.moo-onoffswitch-inner {
     display: block; width: 200%; margin-left: -100%;
     transition: margin 0.3s ease-in 0s;
 }
-.onoffswitch-inner:before, .onoffswitch-inner:after {
+.moo-onoffswitch-inner:before, .moo-onoffswitch-inner:after {
     display: block; float: left; width: 50%; height: 10px; padding: 0; line-height: 10px;
     font-size: 14px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
     box-sizing: border-box;
 }
-.onoffswitch-inner:before {
+.moo-onoffswitch-inner:before {
     content: "";
     padding-left: 10px;
     background-color: #EEEEEE; color: #FFFFFF;
 }
-.onoffswitch-inner:after {
+.moo-onoffswitch-inner:after {
     content: "";
     padding-right: 10px;
     background-color: #EEEEEE; color: #999999;
     text-align: right;
 }
-.onoffswitch-switch {
+.moo-onoffswitch-switch {
     display: block; width: 20px; margin: -5px;
     background: #A1A1A1;
     position: absolute; top: 0; bottom: 0;
@@ -290,10 +425,10 @@
     border: 2px solid #999999; border-radius: 50px;
     transition: all 0.3s ease-in 0s;
 }
-.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+.moo-onoffswitch-checkbox:checked + .moo-onoffswitch-label .moo-onoffswitch-inner {
     margin-left: 0;
 }
-.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+.moo-onoffswitch-checkbox:checked + .moo-onoffswitch-label .moo-onoffswitch-switch {
     right: 0px;
     background-color: #27A1CA;
 }
@@ -574,28 +709,28 @@ div#MooPanel div#moo_progressbar_container {
 #MooPanel_main .MooPanelItem .Moo_option-title {
     padding: 0 !important;
 }
-.onoffswitch {
+.moo-onoffswitch {
     padding-top: 0px;
     width: 61px;
 }
-.onoffswitch div:nth-child(2) {
+.moo-onoffswitch div:nth-child(2) {
 
 }
-.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+.moo-onoffswitch-checkbox:checked + .moo-onoffswitch-label .moo-onoffswitch-switch {
     background-color: #5E7F62;
     border-color: green;
     margin-right: 4px;
 }
-.onoffswitch-label {
+.moo-onoffswitch-label {
     border-radius: 0;
     width: 59px;
     /*border: none;*/
 }
 
-.MooPanel_tabContent3 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+.MooPanel_tabContent3 .moo-onoffswitch-checkbox:checked + .moo-onoffswitch-label .moo-onoffswitch-switch {
     margin-right: 6px;
 }
-div.Moo_option-title div.onoffswitch:nth-child(3) {
+div.Moo_option-title div.moo-onoffswitch:nth-child(3) {
     margin-left: 93px !important;
 }
 div.Moo_option-title {
@@ -713,11 +848,11 @@ div#MooOrderTypesContent div.Moo_option-title div.label {
 div#MooOrderTypesContent div.Moo_option-item div.label {
     width: 20%;
 }
-div#MooOrderTypesContent div.Moo_option-title div.onoffswitch {
+div#MooOrderTypesContent div.Moo_option-title div.moo-onoffswitch {
     width: 30% !important;
     margin-left: 0px !important;
 }
-div#MooOrderTypesContent div.Moo_option-item div.onoffswitch {
+div#MooOrderTypesContent div.Moo_option-item div.moo-onoffswitch {
     /*width: 30% !important;*/
     /*margin-left: 0px !important;*/
     margin-right: 23px !important;
@@ -782,7 +917,7 @@ div#MooPanel_tabContent3 div.MooPanelItem div.Moo_option-item {
     /*overflow: visible;
     height: 35px;*/
 }
-.onoffswitch-switch {
+.moo-onoffswitch-switch {
     border-radius: 0px;
     width: 13px !important;
 }
@@ -804,7 +939,7 @@ div#MooPanel_tabContent5 div.MooPanelItem div#bloc_moo_ptions_item div.Moo_optio
     margin-bottom: 15px;
 }
 /*
-.onoffswitch-label {
+.moo-onoffswitch-label {
     border-radius: 5px;
     width: 71px;
 }
@@ -1304,3 +1439,4 @@ table.main_table td{
     font-weight: bold;
     text-transform: uppercase;
 }
+.column-code { width:150px; }

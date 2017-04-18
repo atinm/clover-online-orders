@@ -113,12 +113,32 @@ function ChangeQuantity(item_uuid)
                                }
     }).showModal();
 }
-function moo_check(event,id)
+function moo_check(event,id,item_id,mg_id,limit,checkox)
 {
-    event.preventDefault();
+
+   // event.preventDefault();
     event.stopPropagation();
-    var checked =   jQuery('#moo_checkbox_'+id).prop('checked');
-    jQuery('#moo_checkbox_'+id).prop("checked", !checked);
+
+    if( jQuery('#moo_checkbox_'+id).prop('disabled') == false)
+        if(!checkox)
+        {
+            jQuery('#moo_checkbox_'+id).prop("checked", !jQuery('#moo_checkbox_'+id).prop('checked'));
+        }
+
+    if( limit != "" )
+        if( limit > 1)
+            if( jQuery("#Modifiers_for_"+item_id+" .MooModifierGroup_"+mg_id+" input[type=checkbox]:checked").length >= limit )
+                jQuery("#Modifiers_for_"+item_id+" .MooModifierGroup_"+mg_id+" input[type=checkbox]:not(:checked)").prop("disabled", "disabled");
+            else
+                jQuery("#Modifiers_for_"+item_id+" .MooModifierGroup_"+mg_id+" input[type=checkbox]:not(:checked)").prop("disabled", "");
+        else
+            if( limit == 1)
+                if( jQuery("#Modifiers_for_"+item_id+" .MooModifierGroup_default_"+mg_id+" input[type=checkbox]:checked").length >= limit )
+                    jQuery("#Modifiers_for_"+item_id+" .MooModifierGroup_default_"+mg_id+" input[type=checkbox]:not(:checked)").prop("disabled", "disabled");
+                else
+                    jQuery("#Modifiers_for_"+item_id+" .MooModifierGroup_default_"+mg_id+" input[type=checkbox]:not(:checked)").prop("disabled", "");
+
+
     
 }
 function moo_openFirstModifierG(id)

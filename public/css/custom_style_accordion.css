@@ -53,6 +53,7 @@
     padding: 0;
     list-style: none;
     margin-left: 0px !important;
+    list-style-type: none;
  }
 .moo_accordion_content ul li {
       overflow: hidden;
@@ -194,7 +195,7 @@
     color: #FFFFFF;
     cursor: pointer;
     padding: 5px;
-    z-index: 999999;
+    z-index: 99998;
 }
 .MooGoToCart a
 {

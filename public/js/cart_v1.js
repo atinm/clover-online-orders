@@ -123,6 +123,7 @@ function moo_updateCartTotal()
                 return;
             }
 
+
             html ="<tr  class='moo_cart_total'><td colspan='6'></td></tr>";
             html +="<tr class='moo_cart_total'>";
             html +="<td colspan='3' style='text-align: right;font-weight: bold'>Subtotal:</td>";

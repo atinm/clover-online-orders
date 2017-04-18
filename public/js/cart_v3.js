@@ -86,50 +86,52 @@ function moo_addModifiers(item_name,item_uuid)
             var Modifiers = [];
             var qte = jQuery('#moo_popup_quantity').val();
             var special_instruction = jQuery('#moo_popup_si').val();
-
             jQuery.magnificPopup.close();
-            for(m in selected_modifies)
-            {
-                var modifier = selected_modifies[m];
-                if(modifier.value=='on'){
-                    var name = modifier.name; //the format is : moo_modifiers['item','modifierGroup','Modifier']
-                    var string = name.split(','); // the new format is a table
-                    var item = string[0].substr(15);  // 15 is the length of moo_modifiers['
-                    item = item.substr(0,item.length-1); // remove the last '
-                    var modifierGroup = string[1].substr(1);
-                    modifierGroup = modifierGroup.substr(0,modifierGroup.length-1);
-                    var modif = string[2].substr(1);
-                    modif = modif.substr(0,modif.length-2);
-                    if(item == '' || modifierGroup == '' || modif == '' || item != item_uuid) continue;
-                    if(typeof Mgroups[modifierGroup] === 'undefined') Mgroups[modifierGroup] = 1;
-                    else Mgroups[modifierGroup] +=1;
-                    var modifier = {
-                        "item":item,
-                        "modifier": modif,
-                        "modifierGroup": modifierGroup
-                    };
-                    Modifiers.push(modifier);
-                }
-                else
+
+            if(selected_modifies.length>0)
+                for(m in selected_modifies)
                 {
-                    var name = modifier.name; //the format is : moo_modifiers['item','modifierGroup']
-                    var string = name.split(','); // the new format is a table
-                    var item = string[0].substr(15);  // 15 is the length of moo_modifiers['
-                    item = item.substr(0,item.length-1); // remove the last '
-                    var modifierGroup = string[1].substr(1);
-                    modifierGroup = modifierGroup.substr(0,modifierGroup.length-2);
-                    var modif = modifier.value;
-                    if(item == '' || modifierGroup == '' || modif == '' || item != item_uuid) continue;
-                    if(typeof Mgroups[modifierGroup] === 'undefined') Mgroups[modifierGroup] = 1;
-                    else Mgroups[modifierGroup] +=1;
-                    var modifier = {
-                        "item":item,
-                        "modifier": modif,
-                        "modifierGroup": modifierGroup
-                    };
-                    Modifiers.push(modifier);
+                    var modifier = selected_modifies[m];
+                    if(typeof modifier == "object" )
+                        if(modifier.value=='on'){
+                            var name = modifier.name; //the format is : moo_modifiers['item','modifierGroup','Modifier']
+                            var string = name.split(','); // the new format is a table
+                            var item = string[0].substr(15);  // 15 is the length of moo_modifiers['
+                            item = item.substr(0,item.length-1); // remove the last '
+                            var modifierGroup = string[1].substr(1);
+                            modifierGroup = modifierGroup.substr(0,modifierGroup.length-1);
+                            var modif = string[2].substr(1);
+                            modif = modif.substr(0,modif.length-2);
+                            if(item == '' || modifierGroup == '' || modif == '' || item != item_uuid) continue;
+                            if(typeof Mgroups[modifierGroup] === 'undefined') Mgroups[modifierGroup] = 1;
+                            else Mgroups[modifierGroup] +=1;
+                            var modifier = {
+                                "item":item,
+                                "modifier": modif,
+                                "modifierGroup": modifierGroup
+                            };
+                            Modifiers.push(modifier);
+                        }
+                        else
+                        {
+                            var name = modifier.name; //the format is : moo_modifiers['item','modifierGroup']
+                            var string = name.split(','); // the new format is a table
+                            var item = string[0].substr(15);  // 15 is the length of moo_modifiers['
+                            item = item.substr(0,item.length-1); // remove the last '
+                            var modifierGroup = string[1].substr(1);
+                            modifierGroup = modifierGroup.substr(0,modifierGroup.length-2);
+                            var modif = modifier.value;
+                            if(item == '' || modifierGroup == '' || modif == '' || item != item_uuid) continue;
+                            if(typeof Mgroups[modifierGroup] === 'undefined') Mgroups[modifierGroup] = 1;
+                            else Mgroups[modifierGroup] +=1;
+                            var modifier = {
+                                "item":item,
+                                "modifier": modif,
+                                "modifierGroup": modifierGroup
+                            };
+                            Modifiers.push(modifier);
+                        }
                 }
-            }
 
             var flag = false;
             if(Object.keys(Mgroups).length == 0 && Object.keys(required_modifiers_groups).length <= 1) {
@@ -141,7 +143,7 @@ function moo_addModifiers(item_name,item_uuid)
             /* verify if required modifier Groups are chooses */
             for(mg in required_modifiers_groups){
                 var element = required_modifiers_groups[mg];
-                if(element != "")
+                if(typeof element == "string" && element !="")
                 {
                     if(Object.keys(Mgroups).indexOf(element) == -1)
                     {

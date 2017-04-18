@@ -89,9 +89,9 @@ class Orders_List_Moo extends WP_List_Table_MOO {
         $delete_nonce = wp_create_nonce( 'moo_delete_order' );
         $title = '<strong>' . $order['p_name'] . '</strong>';
         $actions = array(
-            'Delete' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s">Delete Order</a>', esc_attr( $_REQUEST['page'] ), 'delete',$order['uuid'], $delete_nonce ),
+            'Delete' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s">Delete Order</a>', ((isset($_REQUEST['page']))?$_REQUEST['page']:''), 'delete',$order['uuid'], $delete_nonce ),
             'Show' => sprintf( '<a href="https://www.clover.com/r/%s" target="_blank">Show Receipt</a>',$order['uuid']),
-            'Show_detail' => sprintf( '<a href="?page=%s&action=%s&order_uuid=%s">Show Detail</a>', esc_attr( $_REQUEST['page'] ), 'show_order_detail',$order['uuid'] ),
+            'Show_detail' => sprintf( '<a href="?page=%s&action=%s&order_uuid=%s">Show Detail</a>', ((isset($_REQUEST['page']))?$_REQUEST['page']:''), 'show_order_detail',$order['uuid'] ),
         );
         return
             sprintf( '<a target="_blank" href="https://www.clover.com/r/%s">%s</a>',$order['uuid'],$title) . $this->row_actions( $actions );

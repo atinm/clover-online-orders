@@ -332,7 +332,7 @@ class Products_List_Moo extends WP_List_Table_MOO {
             }
             else {
                 self::hide_item($_GET['item']);
-                wp_redirect(admin_url('admin.php?page=moo_items&paged='.$_REQUEST['paged']));
+                wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
                 //wp_redirect(add_query_arg('paged',$_REQUEST['paged']));
                 exit;
             }
@@ -347,7 +347,7 @@ class Products_List_Moo extends WP_List_Table_MOO {
                 }
                 else {
                     self::show_item($_GET['item']);
-                    wp_redirect(admin_url('admin.php?page=moo_items&paged='.$_REQUEST['paged']));
+                    wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
                     exit;
                 }
             }
@@ -361,7 +361,7 @@ class Products_List_Moo extends WP_List_Table_MOO {
                     }
                     else {
                         self::out_of_stock($_GET['item'],true);
-                        wp_redirect(admin_url('admin.php?page=moo_items&paged='.$_REQUEST['paged']));
+                        wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
                         exit;
                     }
                 }
@@ -375,7 +375,7 @@ class Products_List_Moo extends WP_List_Table_MOO {
                         }
                         else {
                             self::out_of_stock($_GET['item'],false);
-                            wp_redirect(admin_url('admin.php?page=moo_items&paged='.$_REQUEST['paged']));
+                            wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
                             exit;
                         }
                     }
@@ -391,7 +391,7 @@ class Products_List_Moo extends WP_List_Table_MOO {
             foreach ( $hide_ids as $id ) {
                self::hide_item( esc_sql($id) );
             }
-            wp_redirect(add_query_arg('paged',$_REQUEST['paged']));
+            wp_redirect(add_query_arg('paged',((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
            exit;
          }
         else
@@ -407,7 +407,7 @@ class Products_List_Moo extends WP_List_Table_MOO {
                     self::show_item( esc_sql($id) );
                 }
 
-                wp_redirect(add_query_arg('paged',$_REQUEST['paged']) );
+                wp_redirect(add_query_arg('paged',((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')) );
                 exit;
             }
             else
@@ -423,7 +423,7 @@ class Products_List_Moo extends WP_List_Table_MOO {
                         self::out_of_stock( esc_sql($id),true);
                     }
 
-                    wp_redirect(add_query_arg('paged',$_REQUEST['paged']) );
+                    wp_redirect(add_query_arg('paged',((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')) );
                     exit;
                 }
                 else
@@ -439,7 +439,7 @@ class Products_List_Moo extends WP_List_Table_MOO {
                             self::out_of_stock( esc_sql($id),false );
                         }
 
-                        wp_redirect(add_query_arg('paged',$_REQUEST['paged']) );
+                        wp_redirect(add_query_arg('paged',((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')) );
                         exit;
                     }
                 }

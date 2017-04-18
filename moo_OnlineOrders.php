@@ -16,7 +16,7 @@
  * Plugin Name:       Merchantech Online Orders for Clover
  * Plugin URI:        http://www.merchantechapps.com
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.2.5
+ * Version:           1.2.6
  * Author:            Merchantech
  * Author URI:        http://www.merchantechapps.com
  * License:           Clover app
@@ -52,6 +52,7 @@ function deactivate_moo_OnlineOrders() {
 register_activation_hook( __FILE__, 'activate_moo_OnlineOrders' );
 register_deactivation_hook( __FILE__, 'deactivate_moo_OnlineOrders' );
 
+
 function moo_OnlineOrders_shortcodes_allitems($atts, $content) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
     return Moo_OnlineOrders_Shortcodes::TheStore($atts, $content);
@@ -72,10 +73,34 @@ function moo_OnlineOrders_shortcodes_thecart($atts, $content) {
     return Moo_OnlineOrders_Shortcodes::theCart($atts, $content);
 }
 
+/*
+* Widgets Contents
+*/
+function moo_OnlineOrders_widget_opening_hours() {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-widgets.php';
+    register_widget( 'Moo_OnlineOrders_Widgets_Opening_hours' );
+}
+function moo_OnlineOrders_widget_best_selling()
+{
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-widgets.php';
+    register_widget( 'Moo_OnlineOrders_Widgets_best_selling' );
+}
+function Moo_OnlineOrders_Widgets_categories()
+{
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-widgets.php';
+    register_widget( 'Moo_OnlineOrders_Widgets_categories' );
+}
+
+/* adding  shortcodes*/
 add_shortcode('moo_all_items', 'moo_OnlineOrders_shortcodes_allitems');
 add_shortcode('moo_checkout', 'moo_OnlineOrders_shortcodes_checkoutPage');
 add_shortcode('moo_buy_button', 'moo_OnlineOrders_shortcodes_buybutton');
 add_shortcode('moo_cart', 'moo_OnlineOrders_shortcodes_thecart');
+
+/* adding  widgets*/
+add_action( 'widgets_init', 'moo_OnlineOrders_widget_opening_hours' );
+add_action( 'widgets_init', 'moo_OnlineOrders_widget_best_selling' );
+add_action( 'widgets_init', 'Moo_OnlineOrders_Widgets_categories' );
 
 
 /*
@@ -101,6 +126,7 @@ function moo_onlineOrders_check_version()
     $version = get_option('moo_onlineOrders_version');
     switch ($version)
     {
+        /*
         case false :
             //Adding show/hide a category
             $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `show_by_default` INT(1) NOT NULL DEFAULT '1' AFTER `sort_order`;");
@@ -139,6 +165,7 @@ function moo_onlineOrders_check_version()
         case '117':
         case '118':
         case '119':
+        */
         case '120':
             //Adding new fields in category table
             $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `image_url` VARCHAR(255) NULL");
@@ -174,11 +201,19 @@ function moo_onlineOrders_check_version()
             if( !isset($defaultOptions["checkout_page"]) || $defaultOptions["checkout_page"] == "") $defaultOptions["checkout_page"] = $chekcout_page;
             if( !isset($defaultOptions["cart_page"]) || $defaultOptions["cart_page"] == "") $defaultOptions["cart_page"] = $cart_page;
             if( !isset($defaultOptions["checkout_login"]) || $defaultOptions["checkout_login"] == "") $defaultOptions["checkout_login"] = "disabled";
+            if( !isset($defaultOptions["use_coupons"]) || $defaultOptions["use_coupons"] == "") $defaultOptions["use_coupons"] = "disabled";
 
             update_option('moo_settings', $defaultOptions );
             update_option('moo_onlineOrders_version','125');
             break;
         case '125':
+            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_item` CHANGE `description` `description` TEXT ");
+            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `minAmount` VARCHAR(100) NULL DEFAULT '0' ");
+            $defaultOptions = get_option( 'moo_settings' );
+            if( !isset($defaultOptions["use_coupons"]) || $defaultOptions["use_coupons"] == "") $defaultOptions["use_coupons"] = "disabled";
+            update_option('moo_settings', $defaultOptions );
+            update_option('moo_onlineOrders_version','126');
+        case '126':
             break;
     }
 }

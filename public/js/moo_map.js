@@ -327,6 +327,7 @@ function moo_update_delivery_amount(result)
 }
 function moo_update_totals()
 {
+   // console.log(moo_Total);
     if(document.getElementById('moo_tips') != null)
         var tips_amount     = parseFloat(document.getElementById('moo_tips').value);
     else
@@ -354,9 +355,43 @@ function moo_update_totals()
     jQuery('.moo-totals-value').fadeOut(300, function() {
         jQuery('#moo-cart-subtotal').html(moo_Total.sub_total);
         if(MooOrderTypeIsTaxable)
-            jQuery('#moo-cart-tax').html(moo_Total.total_of_taxes);
+        {
+            if(moo_Total.coupon == null)
+                jQuery('#moo-cart-tax').html(moo_Total.total_of_taxes_without_discounts);
+            else
+                jQuery('#moo-cart-tax').html(moo_Total.total_of_taxes);
+
+        }
         else
-            jQuery('#moo-cart-tax').html(0);
+            jQuery('#moo-cart-tax').html("0.00");
+
+
+        if(moo_Total.coupon == null)
+        {
+            //Hide the coupon section in total
+            jQuery('#MooCouponInTotalsSection').hide();
+        }
+        else
+        {
+            //Show coupon section in total
+            jQuery('#MooCouponInTotalsSection').show();
+            jQuery('#mooCouponName').html(moo_Total.coupon.name);
+
+            if(moo_Total.coupon.type == 'amount')
+                jQuery('#mooCouponValue').html("-"+moo_Total.coupon.value);
+            else
+                jQuery('#mooCouponValue').html("-"+moo_Total.coupon.value*moo_Total.sub_total/100);
+
+            //update the total when the order is not taxable
+            if(!MooOrderTypeIsTaxable)
+            {
+                if(moo_Total.coupon.type == 'amount')
+                    new_total =  parseFloat(moo_Total.total) + tips_amount + MooDeliveryfees - moo_Total.coupon.value;
+                else
+                    new_total =  parseFloat(moo_Total.sub_total) + tips_amount + MooDeliveryfees - new_total*moo_Total.coupon.value/100;
+
+            }
+        }
 
         jQuery('#moo-cart-tip').html(tips_amount.toFixed(2));
         jQuery('#moo-cart-delivery-fee').html(MooDeliveryfees.toFixed(2));
