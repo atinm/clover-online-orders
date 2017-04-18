@@ -108,7 +108,7 @@ add_filter( 'wp_mail_content_type', function( $content_type ) {
     return 'text/html';
 });
 */
-if(get_option('moo_onlineOrders_version')!='125')
+if(get_option('moo_onlineOrders_version')!='126')
     add_action('plugins_loaded', 'moo_onlineOrders_check_version');
 
 /*
@@ -204,7 +204,6 @@ function moo_onlineOrders_check_version()
             if( !isset($defaultOptions["use_coupons"]) || $defaultOptions["use_coupons"] == "") $defaultOptions["use_coupons"] = "disabled";
 
             update_option('moo_settings', $defaultOptions );
-            update_option('moo_onlineOrders_version','125');
             break;
         case '125':
             $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_item` CHANGE `description` `description` TEXT ");
