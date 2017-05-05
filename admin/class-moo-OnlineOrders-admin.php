@@ -2291,10 +2291,7 @@ class moo_OnlineOrders_Admin {
                 if(!$item) continue;
                 $tab_items[] = $item;
             }
-            usort($tab_items, function($a, $b)
-            {
-                return $a->sort_order>$b->sort_order;
-            });
+            usort($tab_items, "self::sortItems");
             if (!empty($tab_items)){
                 echo "<ul class='moo_listItem' id-cat='$idcat'>";
                 foreach ($tab_items as $value){
@@ -2313,5 +2310,9 @@ class moo_OnlineOrders_Admin {
         else
             echo "<span>No items found</span>";
 
+    }
+    public static function sortItems($a, $b)
+    {
+        return $a->sort_order>$b->sort_order;
     }
 }
