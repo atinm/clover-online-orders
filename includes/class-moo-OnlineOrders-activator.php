@@ -16,9 +16,6 @@ class Moo_OnlineOrders_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate() {
-
-        // Add option to db
-        update_option("use_proxy", "false");
         // Install DB
         global $wpdb;
         $wpdb->hide_errors();
@@ -48,7 +45,7 @@ class Moo_OnlineOrders_Activator {
                       `uuid` VARCHAR(45) NOT NULL ,
                       `name` VARCHAR(100) NULL ,
                       `alternate_name` VARCHAR(100) NULL ,
-                      `description` VARCHAR(255) NULL ,
+                      `description` TEXT NULL ,
                       `price` MEDIUMTEXT NULL ,
                       `code` VARCHAR(100) NULL ,
                       `price_type` VARCHAR(10) NULL ,
@@ -404,37 +401,37 @@ class Moo_OnlineOrders_Activator {
                                 ON UPDATE NO ACTION)
                         ENGINE = InnoDB;");
 
-// Add the page :
+        // Add the page :
         $pages = array(
             'store'=>array(
                 'comment_status' => 'closed',
-                'ping_status' =>  'closed' ,
-                'post_author' => 1,
-                'post_name' => 'Store',
-                'post_status' => 'publish' ,
-                'post_title' => 'Order Online',
-                'post_type' => 'page',
-                'post_content' => '[moo_all_items]'
+                'ping_status'    =>  'closed' ,
+                'post_author'    => 1,
+                'post_name'      => 'Store',
+                'post_status'    => 'publish' ,
+                'post_title'     => 'Order Online',
+                'post_type'      => 'page',
+                'post_content'   => '[moo_all_items]'
             ),
             'checkout'=>array(
                 'comment_status' => 'closed',
-                'ping_status' =>  'closed' ,
-                'post_author' => 1,
-                'post_name' => 'Checkout',
-                'post_status' => 'publish' ,
-                'post_title' => 'Checkout',
-                'post_type' => 'page',
-                'post_content' => '[moo_checkout]'
+                'ping_status'    =>  'closed' ,
+                'post_author'    => 1,
+                'post_name'      => 'Checkout',
+                'post_status'    => 'publish' ,
+                'post_title'     => 'Checkout',
+                'post_type'      => 'page',
+                'post_content'   => '[moo_checkout]'
             ),
             'cart'=>array(
                 'comment_status' => 'closed',
-                'ping_status' =>  'closed' ,
-                'post_author' => 1,
-                'post_name' => 'Cart',
-                'post_status' => 'publish' ,
-                'post_title' => 'Cart',
-                'post_type' => 'page',
-                'post_content' => '[moo_cart]'
+                'ping_status'    =>  'closed' ,
+                'post_author'    => 1,
+                'post_name'      => 'Cart',
+                'post_status'    => 'publish' ,
+                'post_title'     => 'Cart',
+                'post_type'      => 'page',
+                'post_content'   => '[moo_cart]'
             )
         );
         $defaultOptions = (array)get_option( 'moo_settings' );
@@ -456,7 +453,7 @@ class Moo_OnlineOrders_Activator {
         }
 
         // Save the version of the plugin in the Database
-         update_option('moo_onlineOrders_version', '126');
+         update_option('moo_onlineOrders_version', '127');
 
         if( !isset($defaultOptions["default_style"]) || $defaultOptions["default_style"] == "" || $defaultOptions["default_style"] == "style2" ) $defaultOptions["default_style"] = "style1";
         if( !isset($defaultOptions["hours"]) || $defaultOptions["hours"] == "") $defaultOptions["hours"] = "business";
@@ -465,6 +462,15 @@ class Moo_OnlineOrders_Activator {
         if( !isset($defaultOptions["scp"]) || $defaultOptions["scp"] == "") $defaultOptions["scp"] = "on";
         if( !isset($defaultOptions["checkout_login"]) || $defaultOptions["checkout_login"] == "") $defaultOptions["checkout_login"] = "disabled";
         if( !isset($defaultOptions["use_coupons"]) || $defaultOptions["use_coupons"] == "") $defaultOptions["use_coupons"] = "disabled";
+        if( !isset($defaultOptions["use_special_instructions"]) || $defaultOptions["use_special_instructions"] == "") $defaultOptions["use_special_instructions"] = "enabled";
+        if( !isset($defaultOptions["save_cards"]) || $defaultOptions["save_cards"] == "") $defaultOptions["save_cards"] = "disabled";
+        if( !isset($defaultOptions["save_cards_fees"]) || $defaultOptions["save_cards_fees"] == "") $defaultOptions["save_cards_fees"] = "disabled";
+        if( !isset($defaultOptions["service_fees_name"]) || $defaultOptions["service_fees_name"] == "") $defaultOptions["service_fees_name"] = "Service Charge";
+        if( !isset($defaultOptions["service_fees_type"]) || $defaultOptions["service_fees_type"] == "") $defaultOptions["service_fees_type"] = "amount";
+        if( !isset($defaultOptions["delivery_fees_name"]) || $defaultOptions["delivery_fees_name"] == "") $defaultOptions["delivery_fees_name"] = "Delivery Charge";
+        if( !isset($defaultOptions["order_later_minutes_delivery"]) || $defaultOptions["order_later_minutes_delivery"] == "") $defaultOptions["order_later_minutes_delivery"] = "60";
+        if( !isset($defaultOptions["order_later_days_delivery"]) || $defaultOptions["order_later_days_delivery"] == "") $defaultOptions["order_later_days_delivery"] = "4";
+        if( !isset($defaultOptions["copyrights"]) || $defaultOptions["copyrights"] == "") $defaultOptions["copyrights"] = 'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.2.7">Smart Online Order</a>';
 
 
         update_option('moo_settings', $defaultOptions );

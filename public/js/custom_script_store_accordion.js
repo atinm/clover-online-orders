@@ -4,7 +4,8 @@ jQuery(document).ready(function() {
 
     //accordion
     jQuery('.moo_accordion').accordion({defaultOpen: 'MooCat_NoCategory',cookieName:"MooCategories"});
-    
+
+    //Modifiers popup
     jQuery('.popup-text').magnificPopup({
         type: 'inline',
         closeBtnInside: true,
@@ -54,7 +55,8 @@ function addLineToHtmlCart(item_name,item_price,item_uuid)
     html +="</tr>";
     if(Object.keys(MOO_CART).length>0) //jQuery(html).insertBefore(".moo_cart_total:first");
         jQuery(".moo_cart .CartContent>table>tbody").prepend(html);
-    else jQuery(".moo_cart .CartContent>table>tbody").html(html);
+    else
+        jQuery(".moo_cart .CartContent>table>tbody").html(html);
 
 }
 
@@ -148,6 +150,5 @@ function moo_openFirstModifierG(id)
     jQuery('#'+id).next().show();
 }
 
+
 moo_updateCart();
-
-

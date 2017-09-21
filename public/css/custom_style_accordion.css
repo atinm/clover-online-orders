@@ -50,7 +50,7 @@
     background: url(../img/shadow_1.png) no-repeat center top;
     background-size: 100% 19px;
     margin: 5px 0px 0px 0px;
-    padding: 0;
+    padding: 0 !important;
     list-style: none;
     margin-left: 0px !important;
     list-style-type: none;
@@ -60,6 +60,7 @@
       border-bottom: solid 1px #e7e7e7;
       padding: 14px 0 !important;
       position: relative !important;
+    display: inherit;
  }.moo_accordion_content ul li::before {
      display: none !important;
  }
@@ -122,7 +123,7 @@
 }
 .moo_cart table thead th:last-child
 {
-    width: 40%;
+    width: 36%;
 }
 .moo_cart table tbody
 {

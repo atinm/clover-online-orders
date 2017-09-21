@@ -204,7 +204,6 @@
     background: #a0a5aa;
     text-shadow: 1px 1px #54595d;
     color: #ffffff;
-    position: absolute;
     left: 0;
     z-index: 1;
 }
@@ -215,9 +214,9 @@
 }
 #Moopanel_logo p
 {
-    font-size: 20px;
+    font-size: 15px;
     color: #FFFFFF;
-    margin-top: 0;
+    margin: 0;
 }
 #Moopanel_logo img
 {
@@ -227,7 +226,7 @@
 {
     background: #FAFAFA;
     padding: 20px 20px 50px;
-    float: right;
+    float: left;
     width: 593px;
     border: 1px solid #e5e5e5;
     -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.04);
@@ -259,7 +258,8 @@
     background-color: #496F4E;
 }
 #MooPanel_tabContent2,#MooPanel_tabContent3,#MooPanel_tabContent4,#MooPanel_tabContent5, #MooPanel_tabContent6,
-#MooPanel_tabContent7,#MooPanel_tabContent8,#MooPanel_tabContent9,#MooPanel_tabContent10,#MooPanel_tabContent11
+#MooPanel_tabContent7,#MooPanel_tabContent8,#MooPanel_tabContent9,#MooPanel_tabContent10,#MooPanel_tabContent11,
+#MooPanel_tabContent12,#MooPanel_tabContent13,#MooPanel_tabContent14,#MooPanel_tabContent15,#MooPanel_tabContent16
 {
     display: none;
 }
@@ -563,6 +563,17 @@
 #moo_adding-zone {
     display: none;
 }
+.MooAddingZoneBtn
+{
+    display: none;
+    text-align: center;
+}
+#moo_Circleradius
+{
+    margin: 10px;
+    font-size: 15px;
+    font-weight: bold;
+}
 .moo_adding-zone-btn
 {
     float: right;
@@ -602,11 +613,11 @@
     position: relative;
 }
 #MooPanel {
-    width: 80%;
+    width: 95%;
     background: white !important;
 }
 #MooPanel_sidebar {
-    width: 17%;
+    width: 20%;
     background-color: #1e5429;
     min-height: 0 !important;
     border-radius: 10px;
@@ -616,8 +627,8 @@
 #MooPanel_main {
     height: 12px;
     overflow-y: scroll;
-    width: 80.2%;
-    min-height: 537px;
+    width: 75.8%;
+    min-height: 587px;
     padding: 20px 20px 20px;
     border-radius: 10px;
     /*background: white;*/
@@ -811,7 +822,7 @@ div.input_label_center input {
 div#MooPanel input.check_input {
     width: none !important;
 }
-div#MooPanel_tabContent9 textarea {
+div#MooPanel_tabContent10 textarea {
     width: 100% !important;
 
     /*margin-left: 122px !important;

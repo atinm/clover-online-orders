@@ -1,10 +1,11 @@
 ﻿=== Merchantech Online Orders for Clover ===
 Contributors: merchantech
 Donate link: http://www.merchantapps.com/
-Tags: clover,online orders for clover,merchantech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover
-Requires at least: 3.0.1
-Tested up to: 4.7.2
-Stable tag: 1.2.6
+Tags: clover,online orders for clover,merchantech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
+Requires at least: 4.7.1
+Tested up to: 4.8.1
+Requires PHP: 5.0.1
+Stable tag: 1.2.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,7 +49,7 @@ You can add your menu in a new post/page or an existing one using this shortcode
 
 To display items for one category
 
-`[moo_all_items category='cat_id']` : replace the cat_id with the category's id
+`[moo_all_items category="cat_id"]` : replace the cat_id with the category's id
 
 = VIDEO =
 [youtube https://www.youtube.com/watch?v=DHw2oppC6IU]
@@ -90,6 +91,30 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 7. An other example of menu
 
 == Changelog ==
+= 1.2.7 =
+* Added two new store interfaces
+* Store interface 3 has a beautiful interface that allows images to be uploaded for items in a vertical format
+* Store interface 4 is an elegant interface that is great for restaurants or any business that wants a vertical format that may only want to upload images for categories. If the items you are uploading are very similar to the category images, then you can just upload a category image to cover all of the individual items. It also allows you to upload images for items in case the individual items are different from the category image
+* Created a new setting called checkout settings
+* Moved “Login to Checkout” from Store settings to Checkout settings
+* Moved “Payment Options" from Store settings to Checkout settings
+* Moved “Coupons” from Store settings to Checkout settings
+* Moved “Tips” from Store settings to Checkout settings
+* Moved “Thank You Page” forwarding from Store settings to Checkout Settings
+* Ability to charge service fees on all order types; both percentage and a flat fee
+* Ability to charge delivery fees based on percentage of subtotal
+* Ability to change the name of the delivery fee and how it appears on the receipt
+* Fixed issue when order type was saved not to show delivery address, it would show delivery address
+* Ability to choose more than 1 quantity of the same modifier
+* Customer is notified in real time if they exceed the maximum modifier selection
+* Ability to hide special instructions on the checkout page
+* Ability to add additional text in the description fields
+* Changed “Pay in cash” to “Pay at location”
+* Ability to manually enter a radius without having to draw a zone
+* Improved image layout and upload quality
+* Improved the add to cart button (shortcode) for individual items
+* Ability to choose different scheduled order times for delivery and pickup
+
 = 1.2.6 =
 * Added a new feature called coupon codes
 * Fixed issue where duplicate cart pages were being created
@@ -205,3 +230,8 @@ Change the UI for Modifiers
 Update Frequently Asked Questions
 = 1.0.0 =
 First Release
+
+== Upgrade Notice ==
+
+= 1.2.7 =
+Added two new store interfaces.

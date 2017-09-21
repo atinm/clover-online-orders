@@ -16,7 +16,7 @@
  * Plugin Name:       Merchantech Online Orders for Clover
  * Plugin URI:        http://www.merchantechapps.com
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.2.6
+ * Version:           1.2.7
  * Author:            Merchantech
  * Author URI:        http://www.merchantechapps.com
  * License:           Clover app
@@ -72,6 +72,22 @@ function moo_OnlineOrders_shortcodes_thecart($atts, $content) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
     return Moo_OnlineOrders_Shortcodes::theCart($atts, $content);
 }
+function moo_OnlineOrders_shortcodes_categorymsg($atts, $content) {
+    if(isset($atts["cat_id"]) && $atts["message"])
+    {
+        if(isset($_GET["category"]) && $_GET["category"] == $atts["cat_id"])
+        {
+            if(isset($atts["css-class"]) && $atts["css-class"]!="")
+                return "<div class='".$atts["css-class"]."'>".$atts["message"]."</div>";
+            else
+                return $atts["message"];
+        }
+    }
+    else
+        return "Please enter the category id (cat_id) and the message";
+}
+
+
 
 /*
 * Widgets Contents
@@ -91,16 +107,26 @@ function Moo_OnlineOrders_Widgets_categories()
     register_widget( 'Moo_OnlineOrders_Widgets_categories' );
 }
 
+function moo_OnlineOrders_RestAPI() {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-Restapi.php';
+    $rest_api = new Moo_OnlineOrders_Restapi();
+    $rest_api->register_routes();
+}
+
 /* adding  shortcodes*/
 add_shortcode('moo_all_items', 'moo_OnlineOrders_shortcodes_allitems');
 add_shortcode('moo_checkout', 'moo_OnlineOrders_shortcodes_checkoutPage');
 add_shortcode('moo_buy_button', 'moo_OnlineOrders_shortcodes_buybutton');
 add_shortcode('moo_cart', 'moo_OnlineOrders_shortcodes_thecart');
+add_shortcode('moo_category_msg', 'moo_OnlineOrders_shortcodes_categorymsg');
 
 /* adding  widgets*/
 add_action( 'widgets_init', 'moo_OnlineOrders_widget_opening_hours' );
 add_action( 'widgets_init', 'moo_OnlineOrders_widget_best_selling' );
 add_action( 'widgets_init', 'Moo_OnlineOrders_Widgets_categories' );
+
+/* Rest Api adding*/
+add_action( 'rest_api_init', 'moo_OnlineOrders_RestAPI' );
 
 
 /*
@@ -124,48 +150,9 @@ function moo_onlineOrders_check_version()
 {
     global $wpdb;
     $version = get_option('moo_onlineOrders_version');
+    $defaultOptions = get_option( 'moo_settings' );
     switch ($version)
     {
-        /*
-        case false :
-            //Adding show/hide a category
-            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `show_by_default` INT(1) NOT NULL DEFAULT '1' AFTER `sort_order`;");
-        case '112':
-            //Adding description field
-            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_item` ADD `description` VARCHAR(255) NULL  AFTER `alternate_name`;");
-            //Adding images table
-            $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_images` (
-                          `_id` INT NOT NULL AUTO_INCREMENT,
-                          `url` VARCHAR(255) NOT NULL,
-                          `is_enabled` INT NOT NULL,
-                          `is_default` INT NOT NULL,
-                          `item_uuid` VARCHAR(100) NOT NULL,
-                          PRIMARY KEY (`_id`),
-                          CONSTRAINT `fk_item_has_images`
-                                FOREIGN KEY (`item_uuid`)
-                                REFERENCES `{$wpdb->prefix}moo_item` (`uuid`)
-                                ON DELETE NO ACTION
-                                ON UPDATE NO ACTION)
-                        ENGINE = InnoDB;");
-        case '113':
-        case '114':
-        case '115':
-            //Adding new fields in order table
-            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order` ADD `p_state` VARCHAR(100) NULL");
-            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order` ADD `p_country` VARCHAR(100) NULL");
-            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order` ADD `p_lat` VARCHAR(255) NULL");
-            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order` ADD `p_lng` VARCHAR(255) NULL");
-            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order` ADD `shippingfee` VARCHAR(100) NULL");
-            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order` ADD `tipAmount` VARCHAR(100) NULL");
-            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order` ADD `deliveryfee` VARCHAR(100) NULL");
-            //Adding out of stock fields
-            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_item` ADD `outofstock` INT(1) NOT NULL DEFAULT '0'");
-
-        case '116':
-        case '117':
-        case '118':
-        case '119':
-        */
         case '120':
             //Adding new fields in category table
             $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `image_url` VARCHAR(255) NULL");
@@ -193,26 +180,31 @@ function moo_onlineOrders_check_version()
                         ENGINE = InnoDB;");
 
             $store_page     = get_option('moo_store_page');
-            $chekcout_page  = get_option('moo_checkout_page');
+            $checkout_page  = get_option('moo_checkout_page');
             $cart_page      = get_option('moo_cart_page');
-            $defaultOptions = get_option( 'moo_settings' );
-
             if( !isset($defaultOptions["store_page"]) || $defaultOptions["store_page"] == "" ) $defaultOptions["store_page"] = $store_page;
-            if( !isset($defaultOptions["checkout_page"]) || $defaultOptions["checkout_page"] == "") $defaultOptions["checkout_page"] = $chekcout_page;
+            if( !isset($defaultOptions["checkout_page"]) || $defaultOptions["checkout_page"] == "") $defaultOptions["checkout_page"] = $checkout_page;
             if( !isset($defaultOptions["cart_page"]) || $defaultOptions["cart_page"] == "") $defaultOptions["cart_page"] = $cart_page;
             if( !isset($defaultOptions["checkout_login"]) || $defaultOptions["checkout_login"] == "") $defaultOptions["checkout_login"] = "disabled";
             if( !isset($defaultOptions["use_coupons"]) || $defaultOptions["use_coupons"] == "") $defaultOptions["use_coupons"] = "disabled";
-
-            update_option('moo_settings', $defaultOptions );
-            break;
         case '125':
             $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_item` CHANGE `description` `description` TEXT ");
             $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `minAmount` VARCHAR(100) NULL DEFAULT '0' ");
-            $defaultOptions = get_option( 'moo_settings' );
             if( !isset($defaultOptions["use_coupons"]) || $defaultOptions["use_coupons"] == "") $defaultOptions["use_coupons"] = "disabled";
-            update_option('moo_settings', $defaultOptions );
-            update_option('moo_onlineOrders_version','126');
         case '126':
+            if( !isset($defaultOptions["use_special_instructions"]) || $defaultOptions["use_special_instructions"] == "") $defaultOptions["use_special_instructions"] = "enabled";
+            if( !isset($defaultOptions["save_cards"]) || $defaultOptions["save_cards"] == "") $defaultOptions["save_cards"] = "disabled";
+            if( !isset($defaultOptions["save_cards_fees"]) || $defaultOptions["save_cards_fees"] == "") $defaultOptions["save_cards_fees"] = "disabled";
+            if( !isset($defaultOptions["service_fees_name"]) || $defaultOptions["service_fees_name"] == "") $defaultOptions["service_fees_name"] = "Service Charge";
+            if( !isset($defaultOptions["service_fees_type"]) || $defaultOptions["service_fees_type"] == "") $defaultOptions["service_fees_type"] = "amount";
+            if( !isset($defaultOptions["delivery_fees_name"]) || $defaultOptions["delivery_fees_name"] == "") $defaultOptions["delivery_fees_name"] = "Delivery Charge";
+            if( !isset($defaultOptions["order_later_minutes_delivery"]) || $defaultOptions["order_later_minutes_delivery"] == "") $defaultOptions["order_later_minutes_delivery"] = "60";
+            if( !isset($defaultOptions["order_later_days_delivery"]) || $defaultOptions["order_later_days_delivery"] == "") $defaultOptions["order_later_days_delivery"] = "4";
+            if( !isset($defaultOptions["copyrights"]) || $defaultOptions["copyrights"] == "") $defaultOptions["copyrights"] = 'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.2.7">Smart Online Order</a>';
+
+            update_option('moo_settings', $defaultOptions );
+            update_option('moo_onlineOrders_version','127');
+        case '127':
             break;
     }
 }

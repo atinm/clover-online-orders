@@ -364,7 +364,7 @@ function getItemsWithVariablePrice()
     {
         $order    = esc_sql($order);
         foreach ($items as $uuid=>$item) {
-            if($item['item']->uuid=="delivery_fees")
+            if($item['item']->uuid=="delivery_fees" || $item['item']->uuid=="service_fees")
                 continue;
 
             $string = "";
@@ -477,9 +477,9 @@ function getItemsWithVariablePrice()
     function getDefaultItemImage($uuid)
     {
         $uuid = esc_sql($uuid);
-        return $this->db->get_results("SELECT *
+        return $this->db->get_row("SELECT url
                                     FROM {$this->db->prefix}moo_images images
-                                    WHERE images.item_uuid = '{$uuid}' AND images.is_default = '1'
+                                    WHERE images.item_uuid = '{$uuid}' order by images.is_default desc limit 1
                                     ");
     }
     function getOrderDetails($uuid)
@@ -519,8 +519,7 @@ function getItemsWithVariablePrice()
     }
     function saveItemDescription($uuid,$description)
     {
-        if($description != "")
-            $this->db->update("{$this->db->prefix}moo_item", array('description' => $description), array( 'uuid' => $uuid ));
+        $this->db->update("{$this->db->prefix}moo_item", array('description' => $description), array( 'uuid' => $uuid ));
         return true;
     }
 

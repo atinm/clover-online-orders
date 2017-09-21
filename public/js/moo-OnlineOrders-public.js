@@ -29,14 +29,88 @@
 })(jQuery);
 
 
-function moo_btn_addToCart(event,item,name)
+function moo_btn_addToCartFIWM(event,item_uuid,qty_static)
+{
+
+    event.preventDefault();
+    //Change button content to loading
+    var target = event.target;
+    jQuery(target).text('Loading options...');
+    if(qty_static)
+        var qty = 1;
+    else
+        var qty = 1;
+
+    jQuery.get(moo_RestUrl+"moo-clover/v1/items/"+item_uuid, function (data) {
+        //Change button text
+        jQuery(target).text("ADD TO CART");
+
+        if(data != null)
+        {
+                mooBuildModifiersPanel(data.modifier_groups,item_uuid,qty);
+        }
+        else
+        {
+            //Change butn text
+            jQuery(target).text("ADD TO CART");
+            swal({ title: "Error", text: 'We cannot Load the options for this item, please refresh the page or contact us',   type: "error",   confirmButtonText: "ok" });
+        }
+    }).fail(function (data) {
+        //Change butn text
+        jQuery(target).text("ADD TO CART");
+        swal({ title: "Error", text: 'We cannot Load the options for this item, please refresh the page or contact us',   type: "error",   confirmButtonText: "ok" });
+    });
+}
+function moo_btn_addToCart(event,item_uuid,qty_static)
 {
     event.preventDefault();
-    toastr.success(name+ ' added to cart');
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_add_to_cart',"item":item}, function (data) {
-        if(data.status != 'success')
+    if(qty_static)
+        var qty = 1;
+    else
+        var qty = 1;
+
+    //var qty = parseInt(jQuery("#moo-itemQty-for-"+item_id).val());
+
+    var body = {
+        item_uuid:item_uuid,
+        item_qty:qty,
+        item_modifiers:{}
+    };
+    swal({
+        html:
+        '<div class="moo-msgPopup">Adding the item to your cart</div>' +
+        '<img src="'+ moo_params['plugin_img']+'/loading.gif" class="moo-imgPopup"/>',
+        showConfirmButton: false
+    });
+
+    /* Add to cart the item */
+    jQuery.post(moo_RestUrl+"moo-clover/v1/cart", body,function (data) {
+        if(data != null)
         {
-            toastr.error(data.message);
+            swal({
+                title:"Item added",
+                showCancelButton: true,
+                cancelButtonText: 'Close',
+                confirmButtonText: 'Cart page',
+                type:"success"
+            }).then(function () {
+                window.location.replace(moo_CartPage)
+            });
         }
-    })
+        else
+        {
+            swal({
+                title:"Item not added, try again",
+                type:"error"
+            });
+        }
+    }).fail(function ( data ) {
+        swal({
+            title:"Item not added, try again",
+            text:"Check your internet connection or contact us",
+            type:"error"
+        });
+    }).done(function ( data ) {
+        console.log(data);
+    });
 }

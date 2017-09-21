@@ -1,6 +1,7 @@
 /* Set rates + misc */
 var fadeTime = 300;
 
+//this function not used see moo_recalculateCart
 function moo_updateCartTotal()
 {
         jQuery(".moo_cart_total > td:last").html("Calculating...");
@@ -37,6 +38,7 @@ function moo_updateCartTotal()
         });
 
 }
+
 function moo_cart_DeleteItem(item)
 {
     //send delete query to server
@@ -69,7 +71,8 @@ function moo_emptyCart(event)
     //send delete query to server
     jQuery.post(moo_params.ajaxurl,{'action':'moo_emptycart'}, function (data) {
         if(data.status == "success"){
-            jQuery(".moo-shopping-cart").html('<p style="text-align: center; font-size: 20px">Your Cart is empty</p>');
+            var cart = '<div class="moo_emptycart"><p>Your cart is empty</p><span><a class="moo-btn moo-btn-default" href="'+moo_StorePage+'" style="margin-top: 30px;">Back to Main Menu</a></span></div>';
+            jQuery(".moo-shopping-cart").html(cart);
         };
     });
 }
@@ -230,9 +233,21 @@ function moo_recalculateCart()
         if(data.status=="success")
         {
             jQuery('.moo-totals-value').fadeOut(fadeTime, function() {
-                jQuery('#moo-cart-subtotal').html(data.sub_total);
-                jQuery('#moo-cart-tax').html(data.total_of_taxes);
-                jQuery('#moo-cart-total').html(data.total);
+                jQuery('#moo-cart-subtotal').html(formatPrice(data.sub_total));
+                jQuery('#moo-cart-tax').html(formatPrice(data.total_of_taxes));
+                jQuery('#moo-cart-total').html(formatPrice(data.total));
+
+                if(data.coupon != null)
+                {
+                    if(data.coupon.type == 'amount')
+                        jQuery('#mooCouponValue').html("- "+formatPrice(data.coupon.value));
+                    else
+                    {
+                        var t = parseFloat(data.coupon.value)*parseFloat(data.sub_total)/100;
+                        jQuery('#mooCouponValue').html("- "+formatPrice(t.toFixed(2)));
+                    }
+                }
+
                 if(data.total == 0){
                     jQuery('.moo-checkout').fadeOut(fadeTime);
                 }else{
@@ -243,7 +258,8 @@ function moo_recalculateCart()
         }
         else
         {
-            var html = '<div class="moo_emptycart"><p>Your cart is empty</p></div>';
+            var html = '<div class="moo_emptycart"><p>Your cart is empty</p><span><a class="moo-btn moo-btn-default" href="'+moo_StorePage+'" style="margin-top: 30px;">Back to Main Menu</a></span></div>';
+
             jQuery('.moo-shopping-cart').html(html);
         }
     });
@@ -269,7 +285,7 @@ function moo_updateQuantity(quantityInput,item_uuid)
     /* Update line price display and recalc cart totals */
     productRow.children('.moo-product-line-price').each(function () {
         jQuery(this).fadeOut(fadeTime, function() {
-            jQuery(this).text(linePrice.toFixed(2));
+            jQuery(this).text(formatPrice(linePrice.toFixed(2)));
             moo_recalculateCart();
             jQuery(this).fadeIn(fadeTime);
         });
@@ -290,4 +306,8 @@ function moo_removeItem(removeButton,item_uuid)
         productRow.remove();
         moo_recalculateCart();
     });
+}
+
+function formatPrice (p) {
+    return '$'+p.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
 }

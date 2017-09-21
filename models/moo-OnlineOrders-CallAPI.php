@@ -13,8 +13,9 @@ class moo_OnlineOrders_CallAPI {
         $this->Token = $MooSettings['api_key'];
         //Put the API URL here and don't forget the last slash
         $this->url_api = "http://api.smartonlineorders.com/";
-     //   $this->url_api = "http://192.168.1.10/api/";
+        // $this->url_api = "http://192.168.1.8/api/";
         $this->debug = false;
+        //$this->debug = true;
 
     }
     /*
@@ -277,25 +278,26 @@ class moo_OnlineOrders_CallAPI {
 
 
     //manage orders
-    public function createOrder($total,$orderType,$paymentmethod,$taxAmount,$deliveryfee,$tipAmount,$isDelivery,$couponCode)
+    public function createOrder($total,$orderType,$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode)
     {
         if($orderType=='default')
         {
-            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType=default&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode);
+            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType=default&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&deliveryName='.$deliveryfeeName.'&servicefee='.$serviceFee.'&servicefeeName='.$serviceFeeName.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode);
         }
         else
-            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode);
+            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&deliveryName='.$deliveryfeeName.'&servicefee='.$serviceFee.'&servicefeeName='.$serviceFeeName.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode);
 
         return $res;
     }
+
     public function addlineToOrder($oid,$item_uuid,$qte,$special_ins)
     {
         return $this->callApi_Post("create_line_in_order",$this->Token,'oid='.$oid.'&item='.$item_uuid.'&qte='.$qte.'&special_ins='.$special_ins);
     }
 
-    public function addlineWithPriceToOrder($oid,$item_uuid,$qte,$special_ins,$price)
+    public function addlineWithPriceToOrder($oid,$item_uuid,$qte,$name,$price)
     {
-        return $this->callApi_Post("create_line_in_order",$this->Token,'oid='.$oid.'&item='.$item_uuid.'&qte='.$qte.'&special_ins='.$special_ins.'&itemprice='.$price);
+        return $this->callApi_Post("create_line_in_order",$this->Token,'oid='.$oid.'&item='.$item_uuid.'&qte='.$qte.'&special_ins=&itemName='.$name.'&itemprice='.$price);
     }
     public function addModifierToLine($oid,$lineId,$modifer_uuid)
     {
@@ -307,6 +309,11 @@ class moo_OnlineOrders_CallAPI {
     {
         return $this->callApi_Post("pay_order",$this->Token,'orderId='.$oid.'&taxAmount='.$taxAmount.'&amount='.$amount.'&zip='.$zip.'&expMonth='.$expMonth.
             '&cvv='.$cvv.'&last4='.$last4.'&first6='.$first6.'&expYear='.$expYear.'&cardEncrypted='.$cardEncrypted.'&tipAmount='.$tipAmount);
+    }
+    //Pay the order using Spreedly token
+    public function moo_PayOrderUsingSpreedly($token,$oid,$taxAmount,$amount,$tipAmount,$saveCard,$customerToken)
+    {
+        return $this->callApi_Post("pay_order_spreedly",$this->Token,'orderId='.$oid.'&taxAmount='.$taxAmount.'&amount='.$amount.'&token='.$token.'&tipAmount='.$tipAmount.'&saveCard='.$saveCard.'&customerToken='.$customerToken);
     }
     //Send Notification to the merchant when a new order is registered
     public function NotifyMerchant($oid,$instructions,$customer,$pickup_time,$paymentMethode)
@@ -385,6 +392,10 @@ class moo_OnlineOrders_CallAPI {
     public function moo_DeleteAddresses($address_id,$token)
     {
         return $this->callApi_Post('customers/deleteaddress',$this->Token,'token='.$token.'&address_id='.$address_id);
+    }
+    public function moo_DeleteCreditCard($card_token,$Customertoken)
+    {
+        return $this->callApi_Post('remove_card_spreedly',$this->Token,'Customertoken='.$Customertoken.'&token='.$card_token);
 
     }
     public function moo_setDefaultAddresses()
@@ -956,17 +967,40 @@ class moo_OnlineOrders_CallAPI {
             else{
                 $result['taxAmount']=$order->taxAmount;
             }
+
             if (isset($orderFromServer->order->deliveryAmount) && $orderFromServer->order->deliveryAmount != ""){
                 $result['deliveryAmount']=$orderFromServer->order->deliveryAmount/100;
             }
             else {
                 $result['deliveryAmount']=$order->deliveryfee;
             }
+            if (isset($orderFromServer->order->serviceFee) && $orderFromServer->order->serviceFee != ""){
+                $result['serviceFee'] = $orderFromServer->order->serviceFee/100;
+            }
+            else {
+                $result['serviceFee'] = 0;
+            }
+
+            if (isset($orderFromServer->order->deliveryName) && $orderFromServer->order->deliveryName != "" && $orderFromServer->order->deliveryName != "null"&& $orderFromServer->order->deliveryName != null){
+                $result['deliveryName']=$orderFromServer->order->deliveryName;
+            }
+            else {
+                $result['deliveryName']="Delivery Charges";
+            }
+            if (isset($orderFromServer->order->serviceFeeName) && $orderFromServer->order->serviceFeeName != "" && $orderFromServer->order->serviceFeeName != "null"&& $orderFromServer->order->serviceFeeName != null){
+                $result['serviceFeeName']=$orderFromServer->order->serviceFeeName;
+            }
+            else {
+                $result['serviceFeeName']="Service Charges";
+            }
+
             if (isset($orderFromServer->order->tipAmount) && $orderFromServer->order->tipAmount != ""){
                 $result['tipAmount']=$orderFromServer->order->tipAmount/100;
+                $result['amount_order'] += $result['tipAmount'];
             }
             else{
                 $result['tipAmount']=$order->tipAmount;
+                $result['amount_order'] += $result['tipAmount'];
             }
             if (isset($orderFromServer->customer->name) && $orderFromServer->customer->name != ""){
                 $result['name_customer']=$orderFromServer->customer->name;
@@ -1305,13 +1339,12 @@ class moo_OnlineOrders_CallAPI {
 	public function  save_One_orderType($uuid,$label,$taxable,$minAmount,$show_sa)
     {
         global $wpdb;
-
         $res = $wpdb->insert("{$wpdb->prefix}moo_order_types",array(
                                             'ot_uuid' => $uuid,
                                             'label' => esc_sql($label),
-                                            'taxable' => (($taxable)?"1":"0"),
+                                            'taxable' => (($taxable == "true")?"1":"0"),
                                             'status' => 1,
-                                            'show_sa' => (($show_sa)?"1":"0"),
+                                            'show_sa' => (($show_sa == "true")?"1":"0"),
                                             'minAmount' => floatval($minAmount),
             ));
         return $res;

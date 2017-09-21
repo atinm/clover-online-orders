@@ -31,8 +31,8 @@ Side note: I know that this style of nesting in SASS doesn't result in the most 
 }
 
 .moo-product-line-price {
-    float: left;
-    width: 12%;
+    float: right;
+    /* width: 25%; */
     text-align: right;
 }
 
@@ -105,6 +105,8 @@ Side note: I know that this style of nesting in SASS doesn't result in the most 
 }
 .moo-product .moo-product-quantity input {
     width: 60px !important;
+    padding: 2px;
+    background-color: #f5f5f5;
 }
 .moo-product .moo-remove-product {
     border: 0;
@@ -131,18 +133,14 @@ Side note: I know that this style of nesting in SASS doesn't result in the most 
 .moo-totals .moo-totals-item label {
     float: left;
     clear: both;
-    width: 79%;
+    width: 70%;
     text-align: right;
 }
 .moo-totals .moo-totals-item .moo-totals-value {
     float: right;
-    width: 21%;
+    width: 30%;
     text-align: right;
 }
-.moo-totals .moo-totals-item-total {
-    font-family: "HelveticaNeue-Medium", "Helvetica Neue Medium";
-}
-
 .moo-checkout {
     float: right;
     border: 0;
@@ -228,7 +226,7 @@ Side note: I know that this style of nesting in SASS doesn't result in the most 
 
     .moo-product-line-price {
         float: right;
-        width: 70px;
+        width: 100%;
     }
     .moo-continue-shopping {
         float: right;

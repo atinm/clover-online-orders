@@ -2,12 +2,14 @@ var MooCustomer = null;
 var MooCustomerAddress = null;
 var MooCustomerChoosenAddress = null;
 var MooDeliveryfees = null;
+var MooServicefees = null; // Payment using saved creditcard fees
 var MooIsGuest = false;
 var MooIsDisabled;
 var MooPhoneIsVerified = false;
 var MooOrderTypeIsTaxable = true;
 var MooOrderTypeMinAmount = 0;
 var MooIsDeliveryError = true;
+var MooIsDeliveryOrder = false;
 
 if(typeof moo_checkout_login != 'undefined')
 {
@@ -15,6 +17,28 @@ if(typeof moo_checkout_login != 'undefined')
 }
 else
     MooIsDisabled = true;
+
+if(typeof moo_save_cards != 'undefined')
+{
+    MooSaveCards =(moo_save_cards == "enabled")?true:false;
+}
+else
+    MooSaveCards = false;
+
+if(typeof moo_save_cards_fees != 'undefined')
+{
+    MooSaveCardsFees =(moo_save_cards_fees == "enabled")?true:false;
+}
+else
+    MooSaveCardsFees = false;
+
+if(!MooIsDisabled && MooSaveCards && !MooIsGuest)
+{
+    SpreedlyExpress.init("8NzLQzLF0w60ZmZ1upQaMyh3y6A",{
+        "company_name": "Smart Online Order",
+        "sidebar_top_description": "Payment secured via Spreedly"
+    });
+}
 
 if(typeof moo_fb_app_id != 'undefined')
     if(moo_fb_app_id!="")
@@ -46,6 +70,11 @@ try {
     });
     jQuery('.moo-checkout-form-payments-input').iCheck({
         checkboxClass: 'icheckbox_square',
+        radioClass: 'iradio_square-blue',
+        increaseArea: '20%' // optional
+    });
+    jQuery('.moo-checkout-form-savecard-input').iCheck({
+        checkboxClass: 'icheckbox_square-blue',
         radioClass: 'iradio_square-blue',
         increaseArea: '20%' // optional
     });
@@ -81,9 +110,12 @@ function moo_OrderTypeChanged(OrderTypeID)
             if(OrderTypeID == moo_OrderTypes[i].ot_uuid)
             {
                 var selectedOrderType = moo_OrderTypes[i];
-
-                if(selectedOrderType.show_sa == "1")
+                if(selectedOrderType.show_sa == "1") //The order type is delivery type
                 {
+                    MooIsDeliveryOrder = true;
+                    //Change the order date
+                    moo_ChangeOrderDate('delivery');
+
                     jQuery('#MooDeliveryfeesInTotalsSection').show();
                     if(MooCustomerChoosenAddress != null)
                     {
@@ -133,6 +165,10 @@ function moo_OrderTypeChanged(OrderTypeID)
                 }
                 else
                 {
+                    MooIsDeliveryOrder = false;
+                    //Change the order date
+                    moo_ChangeOrderDate('pickup');
+
                     jQuery('#moo-checkout-form-ordertypes>.moo-checkout-bloc-message').hide();
                     jQuery('#MooDeliveryfeesInTotalsSection').hide();
                     MooDeliveryfees = 0;
@@ -226,7 +262,7 @@ function moo_verifyCode(event)
             jQuery('#moo_verifPhone_sending').hide();
             jQuery('#moo_verifPhone_verificatonCode').hide();
             jQuery('#moo_verifPhone_verified').css("display","inline-block");
-            swal({ title: 'Phone verified', text: 'Please have your payment ready when picking up from the store and don\'t forget to finalize your order below',   type: "success",   confirmButtonText: "OK" });
+            swal({ title: 'Phone verified', text: 'Please have your payment ready when picking up from the store and don\'t forget to finalize your order below',   type: "success",timer:5000,   confirmButtonText: "OK" });
             if(MooCustomer != null)
             {
                 MooCustomer[0].phone_verified = '1';
@@ -235,7 +271,7 @@ function moo_verifyCode(event)
             jQuery('#MooContactPhone').prop("readonly",true);
         }
         else
-            swal({ title: "Code invalid", text: 'this code is invalid please try again',   type: "error",   confirmButtonText: "Try again" });
+            swal({ title: "Code invalid", text: 'this code is invalid please try again',   type: "error",timer:5000,   confirmButtonText: "Try again" });
     });
 }
 
@@ -255,6 +291,7 @@ function moo_changePaymentMethod(type)
         //Hide the tips
         jQuery('#moo-checkout-form-tips').hide();
         jQuery('#MooTipsInTotalsSection').hide();
+        jQuery('#moo-checkout-form-savecard').hide();
         if(document.getElementById('moo_tips') != null)
         {
             jQuery('#moo_tips_select').val('cash');
@@ -280,28 +317,92 @@ function moo_changePaymentMethod(type)
         jQuery('#MooTipsInTotalsSection').show();
 
         jQuery('#moo_cashPanel').hide();
-        jQuery('#moo_creditCardPanel').show();
+
+        if(!(!MooIsDisabled && MooSaveCards && !MooIsGuest))
+        {
+            jQuery('#moo_creditCardPanel').show();
+            jQuery('#moo-checkout-form-savecard').hide();
+
+        }
+        else {
+
+            jQuery('#moo-checkout-form-savecard').show();
+        }
+
     }
+    MooServicefees = 0;
     moo_update_totals();
 }
 
 function moo_pickup_day_changed(element)
 {
     var theDay = jQuery(element).val();
-    var times = moo_pickup_time[theDay];
+
+    if(MooIsDeliveryOrder)
+        var times = moo_pickup_time_for_delivery[theDay];
+    else
+        var times = moo_pickup_time[theDay];
+
     var html  = '';
 
     if(!(typeof times === 'undefined'))
     {
-        if(theDay =='Today')
-            html += '<option value="asap">ASAP</option>';
-
         for(i in times)
             html += '<option value="'+times[i]+'">'+times[i]+'</option>'
     }
     else
         html = '';
    jQuery('#moo_pickup_hour').html(html);
+}
+function moo_ChangeOrderDate(type)
+{
+    var dayInput      = jQuery('#moo_pickup_day');
+    var hoursInput    = jQuery('#moo_pickup_hour');
+    var theDay        = '';
+    var html_days = '';
+    var html_hours  = '';
+
+    if(type == 'pickup' )
+    {
+        var first = true;
+        for(var i in moo_pickup_time)
+        {
+            if(first)
+            {
+                theDay = i;
+                first = false;
+            }
+            html_days += '<option value="'+i+'">'+i+'</option>';
+        }
+        var times = moo_pickup_time[theDay];
+
+    }
+    else
+    {
+        var first = true;
+        for(var i in moo_pickup_time_for_delivery)
+        {
+            if(first)
+            {
+                theDay = i;
+                first = false;
+            }
+            html_days += '<option value="'+i+'">'+i+'</option>';
+        }
+        var times = moo_pickup_time_for_delivery[theDay];
+
+    }
+
+    if(!(typeof times === 'undefined'))
+    {
+        for(i in times)
+            html_hours += '<option value="'+times[i]+'">'+times[i]+'</option>'
+    }
+    else
+        html_hours = '';
+
+   hoursInput.html(html_hours);
+   dayInput.html(html_days);
 }
 
 function moo_order_approved(orderId)
@@ -311,9 +412,9 @@ function moo_order_approved(orderId)
     else
     {
         if(orderId == '')
-            html = '<div align="center" class="alert alert-success" role="alert" style="font-size: 20px;">Thank you for your order<br/>Your order is being prepared</div>';
+            html = '<div align="center" class="moo-alert moo-alert-success" role="alert" style="font-size: 20px;">Thank you for your order<br/>Your order is being prepared</div>';
         else
-            html = '<div align="center" class="alert alert-success" role="alert"  style="font-size: 20px;" >Thank you for your order<br/>Your order is being prepared<br> You can see your receipt <a href="https://www.clover.com/r/'+orderId+'" target="_blank">here</a></a> </div>';
+            html = '<div align="center" class="moo-alert moo-alert-success" role="alert"  style="font-size: 20px;" >Thank you for your order<br/>Your order is being prepared<br> You can see your receipt <a href="https://www.clover.com/r/'+orderId+'" target="_blank">here</a></a> </div>';
 
         // console.log(html);
         jQuery("#moo-checkout").html('');
@@ -332,10 +433,10 @@ function moo_order_notApproved(message)
     //Hide Loading Icon and Show the button if there is an error
     jQuery('#moo_checkout_loading').hide();
     jQuery('#moo_btn_submit_order').show();
-    if(message != '')
-        html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>'+message+'</div>';
+    if(message != '' && message != "undefined")
+        html = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>'+message+'</div>';
     else
-        html = '<div class="alert alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>An error has occurred, please try again or contact us</div>';
+        html = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>An error has occurred, please try again or contact us</div>';
     jQuery("#moo-checkout").parent().prepend(html);
     jQuery("html, body").animate({
         scrollTop: 0
@@ -399,6 +500,7 @@ function moo_show_chooseaddressform(e)
         e.preventDefault();
 
     var addresses = null;
+    var cards = null;
     if(MooIsGuest || MooIsDisabled)
     {
         MooCustomerAddress = null;
@@ -422,6 +524,7 @@ function moo_show_chooseaddressform(e)
                 if(data.status == 'success')
                 {
                     addresses =  data.addresses;
+                    cards = data.cards;
                     MooCustomerAddress = addresses;
                     MooCustomer = data.customer;
 
@@ -434,7 +537,7 @@ function moo_show_chooseaddressform(e)
                         if(addresses.length==1)
                         {
                             var OneAddress = addresses[0];
-                            html +='<div class="col-md-4 col-md-offset-4">';
+                            html +='<div class="moo-col-md-4 moo-col-md-offset-4">';
                             html +='<div class="moo-address-block">';
                             html +='<span title="delete this address" onclick="moo_delete_address(event,'+OneAddress.id+')">X</span>';
                             html +=OneAddress.address+'<br />';
@@ -447,7 +550,7 @@ function moo_show_chooseaddressform(e)
                             for(i in addresses)
                             {
                                 var OneAddress = addresses[i];
-                                html +='<div class="col-md-4 ">';
+                                html +='<div class="moo-col-md-4 ">';
                                 html +='<div class="moo-address-block">';
                                 html +='<span title="delete this address" onclick="moo_delete_address(event,'+OneAddress.id+')">X</span>';
                                 html +=OneAddress.address+'<br />';
@@ -461,20 +564,23 @@ function moo_show_chooseaddressform(e)
                     }
                     else
                         moo_show_form_adding_address();
+
+                    if(cards!= null && cards.length > 0)
+                        mooShowSavedCards(cards);
                 }
                 else
                 if(data.status = 'expired')
                 {
                     MooCustomerAddress = null;
                     MooCustomer = null;
-                    swal({ title: "Your session is expired", type: "error",   confirmButtonText: "Login again" });
+                    swal({ title: "Your session is expired", type: "error",timer:5000,   confirmButtonText: "Login again" });
                     moo_show_loginform();
                 }
             })
             .fail(function(data) {
                 MooCustomerAddress = null;
                 MooCustomer        = null;
-                swal({ title: "Your session is expired", type: "error",   confirmButtonText: "Login again" });
+                swal({ title: "Your session is expired", type: "error",timer:5000,   confirmButtonText: "Login again" });
                 moo_show_loginform();
             });
     }
@@ -491,12 +597,12 @@ function moo_login(e)
     var password =  jQuery('#inputPassword').val();
     if(email == '')
     {
-        swal({ title: "Please enter your email",text:"",   type: "error" });
+        swal({ title: "Please enter your email",text:"",  timer:5000, type: "error" });
         return;
     }
     if(password == '')
     {
-        swal({ title: "Please enter your password",text:"",   type: "error"});
+        swal({ title: "Please enter your password",text:"",  timer:5000, type: "error"});
         return;
     }
     jQuery
@@ -507,11 +613,11 @@ function moo_login(e)
                 moo_show_chooseaddressform(e);
             }
             else
-                swal({ title: "Invalid User Name or Password",text:"Please click on forgot password or Please register as new user.",   type: "error",   confirmButtonText: "Try again" });
+                swal({ title: "Invalid User Name or Password",text:"Please click on forgot password or Please register as new user.",   type: "error",timer:5000,   confirmButtonText: "Try again" });
         })
         .fail(function(data) {
             console.log(data.responseText);
-            swal({ title: "Invalid User Name or Password",text:"Please click on forgot password or Please register as new user.",   type: "error",   confirmButtonText: "Try again" });
+            swal({ title: "Invalid User Name or Password",text:"Please click on forgot password or Please register as new user.",   type: "error",timer:5000,   confirmButtonText: "Try again" });
             jQuery(e.target).html('Login In').attr('onclick','moo_login(event)');
 
         });
@@ -971,7 +1077,7 @@ function moo_verify_form(form)
             }
             else
             {
-                swal('Please add the delivery address','You have choosen a delivery method, we need your address','error');
+                swal('Please add the delivery address','You have choose a delivery method, we need your address','error');
                 return false;
             }
         }
@@ -985,36 +1091,9 @@ function moo_verify_form(form)
     }
     else
     {
-        if(form.payments == 'creditcard')
+        if(form.payments == "cash")
         {
-            if(moo_scp != "on")
-            {
-                if(typeof form.cardNumber !== 'undefined')
-                {
-                    form.cardNumber = form.cardNumber.replace(/\s/g, '');
-                    form.cardNumber = form.cardNumber.replace(/-/g, '');
-                }
-                if(form.cardNumber == '' || !regex_exp.credicard.test(form.cardNumber) )
-                {
-                    swal('please enter a valid credit card number',"",'error');
-                    return false;
-                }
-                if(form.cardcvv == '' || !regex_exp.cvv.test(form.cardcvv))
-                {
-                    swal('please enter a valid credit card cvv',"You can found it on tha back of your credit card",'error');
-                    return false;
-                }
-                if(form.zipcode == '')
-                {
-                    swal('The zip code is mandatory to proccess the payment',"please enter a valide zip code",'error');
-                    return false;
-                }
-                form.cardEncrypted=cryptCardNumber(form.cardNumber);
-            }
-        }
-        else
-        {
-            if(MooCustomer != null && MooCustomer[0].phone_verified=='0')
+            if(MooCustomer != null && MooCustomer[0].phone_verified == '0')
             {
                 swal('Please verify your phone',"when you choose the cash payment you must verify your phone",'error');
                 return false;
@@ -1027,60 +1106,143 @@ function moo_verify_form(form)
                     return false;
                 }
             }
+            moo_SendForm(form);
         }
+        else
+        {
+            if(form.payments != "" && form.payments !="creditcard")
+            {
+                form.token = form.payments;
+                form.saveCard = false;
+                moo_SendForm(form);
+            }
+            else
+            {
+                if(MooSaveCards && !MooIsGuest)
+                {
+                    // var displayOptions = {"amount":"$"+moo_Total.total};
+                    SpreedlyExpress.setPaymentMethodParams({"email":form.email,"name":form.name,"phone_number":form.phone});
+                    // SpreedlyExpress.setDisplayOptions(displayOptions);
+                    SpreedlyExpress.openView();
 
+                    SpreedlyExpress.onPaymentMethod(function(token, formData) {
+                        // Send requisite payment method info to backend
+                        form.token = token;
+                        form.saveCard = jQuery('.moo-checkout-form-savecard-input').prop('checked');
+                        moo_SendForm(form);
+                    });
+                }
+                else
+                {
+                    if(moo_scp != "on")
+                    {
+                        if(typeof form.cardNumber !== 'undefined')
+                        {
+                            form.cardNumber = form.cardNumber.replace(/\s/g, '');
+                            form.cardNumber = form.cardNumber.replace(/-/g, '');
+                        }
+                        if(form.cardNumber == '' || !regex_exp.credicard.test(form.cardNumber) )
+                        {
+                            swal('please enter a valid credit card number',"",'error');
+                            return false;
+                        }
+                        if(form.cardcvv == '' || !regex_exp.cvv.test(form.cardcvv))
+                        {
+                            swal('please enter a valid credit card cvv',"You can found it on tha back of your credit card",'error');
+                            return false;
+                        }
+                        if(form.zipcode == '')
+                        {
+                            swal('The zip code is mandatory to proccess the payment',"please enter a valide zip code",'error');
+                            return false;
+                        }
+                        form.cardEncrypted=cryptCardNumber(form.cardNumber);
+                    }
+                    moo_SendForm(form);
+                }
+            }
+        }
     }
+}
 
+function moo_SendForm(form)
+{
     jQuery('#moo_checkout_msg').remove();
     jQuery('#moo_btn_submit_order').hide();
     //Show loading Icon
     jQuery('#moo_checkout_loading').show();
 
-     //Send the form to server
+    //Send the form to server
     jQuery
         .post(moo_params.ajaxurl,{'action':'moo_checkout','form':form}, function (data) {
             if(typeof data == 'object')
+            {
                 if(data.status == 'APPROVED')
-                   moo_order_approved(data.order);
-                else
-                if(data.status == 'REDIRECT')
                 {
-                    window.location.href = data.url;
+                    moo_order_approved(data.order);
                 }
                 else
-                    moo_order_notApproved(data.message);
+                {
+                    if(data.status == 'REDIRECT')
+                    {
+                        /*
+                        var html = '<div align="center" class="moo-alert moo-alert-success" role="alert" style="font-size: 20px;">Thank you for your order<br/>You will be redirected to the payment page</div>';
+                        // console.log(html);
+                        jQuery("#moo-checkout").html('');
+                        jQuery("#moo-checkout").parent().prepend(html);
+                        jQuery("html, body").animate({
+                            scrollTop: 0
+                        }, 600);
+                        window.location.href = data.url;
+                        */
+                        swal({
+                            title: 'Thank you for your order',
+                            text: 'You will be redirected to the payment page in moments',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            showCancelButton: false
+                        }).then(function () {},function (dismiss) {});
+                        window.location.href = data.url;
+                    }
+                    else
+                        moo_order_notApproved(data.message);
+                }
+            }
             else
-            if(data.indexOf('"status":"APPROVED"') != -1 )
-                moo_order_approved('');
-            else
-                moo_order_notApproved('');
+            {
+                if(data.indexOf('"status":"APPROVED"') != -1 )
+                    moo_order_approved('');
+                else
+                    moo_order_notApproved('');
+            }
         })
         .fail(function(data) {
             console.log('FAIL');
             console.log(data.responseText);
+
             if(data.responseText.indexOf('"status":"APPROVED"') != -1 )
                 moo_order_approved('');
             else
                 moo_order_notApproved('')
-        });
 
+        });
 }
 function moo_get_form(callback)
 {
     var form={};
-    form._wpnonce   =  jQuery('#_wpnonce').val();
-    form.name   =  jQuery('#MooContactName').val().trim();
-    form.email  =  jQuery('#MooContactEmail').val().trim();
-    form.phone  =  jQuery('#MooContactPhone').val().trim();
-    form.cardNumber  =  jQuery('#Moo_cardNumber').val();
-    form.expiredDateMonth  =  jQuery('#MooexpiredDateMonth').val();
-    form.expiredDateYear  =  jQuery('#MooexpiredDateYear').val();
-    form.cardcvv  =  jQuery('#moo_cardcvv').val();
-    form.zipcode  =  jQuery('#moo_zipcode').val();
-    form.tips  =  jQuery('#moo_tips').val();
-    form.instructions  =  jQuery('#Mooinstructions').val();
-    form.pickup_day  =  jQuery('#moo_pickup_day').val();
-    form.pickup_hour  =  jQuery('#moo_pickup_hour').val();
+    form._wpnonce               =  jQuery('#_wpnonce').val();
+    form.name                   =  jQuery('#MooContactName').val().trim();
+    form.email                  =  jQuery('#MooContactEmail').val().trim();
+    form.phone                  =  jQuery('#MooContactPhone').val().trim();
+    form.cardNumber             =  jQuery('#Moo_cardNumber').val();
+    form.expiredDateMonth       =  jQuery('#MooexpiredDateMonth').val();
+    form.expiredDateYear        =  jQuery('#MooexpiredDateYear').val();
+    form.cardcvv                =  jQuery('#moo_cardcvv').val();
+    form.zipcode                =  jQuery('#moo_zipcode').val();
+    form.tips                   =  jQuery('#moo_tips').val();
+    form.instructions           =  jQuery('#Mooinstructions').val();
+    form.pickup_day             =  jQuery('#moo_pickup_day').val();
+    form.pickup_hour            =  jQuery('#moo_pickup_hour').val();
 
     if(document.getElementById('moo-checkout-form-ordertypes'))
         form.ordertype  =  jQuery('input[name="ordertype"]:checked').val();
@@ -1088,6 +1250,7 @@ function moo_get_form(callback)
     form.payments  =  jQuery('input[name="payments"]:checked').val();
     form.address = MooCustomerChoosenAddress;
     form.deliveryAmount = MooDeliveryfees;
+    form.serviceCharges = MooServicefees;
     callback(form);
 }
 function moo_finalize_order(e)
@@ -1112,38 +1275,57 @@ function mooCouponApply(e)
 {
     e.preventDefault();
     var coupon_code = jQuery('#moo_coupon').val();
-    jQuery
-        .post(moo_params.ajaxurl,{'action':'moo_coupon_apply','moo_coupon_code':coupon_code}, function (data) {
-            if(data!=null && data.status=="success")
-            {
-                moo_Total = data.total;
-                if(data.type=="amount")
-                    swal({ title: "Coupon applied", text: "You have got $"+data.value+" off",   type: "success",   confirmButtonText: "Ok" });
-                else
-                    swal({ title: "Coupon applied", text: "You have got "+data.value+"% off",   type: "success",   confirmButtonText: "Ok" });
-
-                jQuery("#moo_remove_coupon_code").html(coupon_code);
-                jQuery("#moo_enter_coupon").hide();
-                jQuery("#moo_remove_coupon").show();
-
-                moo_update_totals();
-            }
-            else
-            {
-                jQuery("#moo_remove_coupon").hide();
-                jQuery("#moo_enter_coupon").show();
-                swal({ title: "Error", text: data.message,   type: "error",   confirmButtonText: "Try again" });
-            }
-
-        })
-        .fail(function(data) {
-            console.log('FAIL');
-            console.log(data.responseText);
+    if(coupon_code == "")
+    {
+        swal({
+            title:'Please enter your coupon code',
+            timer:5000
         });
+    }
+    else
+    {
+        swal({
+            title:'Checking your coupon...',
+            showConfirmButton:false
+        });
+        jQuery
+            .post(moo_params.ajaxurl,{'action':'moo_coupon_apply','moo_coupon_code':coupon_code}, function (data) {
+                if(data!=null && data.status=="success")
+                {
+                    moo_Total = data.total;
+                    if(data.type=="amount")
+                        swal({ title: "Coupon applied", text: "Success! You have received a discount of $"+data.value,   type: "success",timer:5000, confirmButtonText: "Ok" });
+                    else
+                        swal({ title: "Coupon applied", text: "Success! You have received a discount of "+data.value+"%",   type: "success",timer:5000, confirmButtonText: "Ok" });
+
+                    jQuery("#moo_remove_coupon_code").html(coupon_code);
+                    jQuery("#moo_enter_coupon").hide();
+                    jQuery("#moo_remove_coupon").show();
+
+                    moo_update_totals();
+                }
+                else
+                {
+                    jQuery("#moo_remove_coupon").hide();
+                    jQuery("#moo_enter_coupon").show();
+                    swal({ title: "Error", text: data.message,   type: "error",timer:5000,   confirmButtonText: "Try again" });
+                }
+
+            })
+            .fail(function(data) {
+                console.log('FAIL');
+                console.log(data.responseText);
+                swal({ title: "Error", text:"verify your connection and try again",   type: "error",timer:5000,   confirmButtonText: "Try again" });
+            });
+    }
 }
 function mooCouponRemove(e)
 {
     e.preventDefault();
+    swal({
+        title:'Removing your coupon....',
+        showConfirmButton:false
+    });
     jQuery
         .post(moo_params.ajaxurl,{'action':'moo_coupon_remove'}, function (data) {
             if(data.status=="success")
@@ -1155,9 +1337,96 @@ function mooCouponRemove(e)
                 jQuery("#moo_remove_coupon").hide();
                 moo_update_totals();
             }
+            swal.close();
         })
         .fail(function(data) {
             console.log('FAIL');
             console.log(data.responseText);
+            swal({ title: "Error", text:"verify your connection and try again",   type: "error",timer:5000,   confirmButtonText: "Try again" });
         });
+}
+function MooRemoveCard(event,token)
+{
+    swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this credit card",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete it!",
+            showLoaderOnConfirm: true,
+            cancelButtonText: "No, cancel!",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        },
+        function(isConfirm){
+            if (isConfirm) {
+                jQuery
+                    .post(moo_params.ajaxurl,{'action':'moo_customer_deleteCreditCard','token':token}, function (data) {
+                        if(data.status == 'failure')
+                        {
+                            swal({ title: "Your session has been expired",text:"Please login again",   type: "error",   confirmButtonText: "Login again" });
+                        }
+                        else
+                        if(data.status == 'success')
+                        {
+                            swal("Deleted!", "Your credit card has been deleted.", "success");
+                            jQuery("#moo-checkout-form-payments-"+token).parent().parent().hide().html("");
+                            MooServicefees = 0;
+                            mooShowSavedCards(data.cards);
+                            moo_update_total();
+                        }
+                        else
+                            swal({ title: "Not deleted",text:"Please try again or contact us",   type: "error",   confirmButtonText: "Try again" });
+                    })
+                    .fail(function(data) {
+                        console.log(data.responseText);
+                        swal({ title: "Connection lost",text:"Not deleted, please try again",   type: "error",   confirmButtonText: "Try again" });
+                    });
+            } else {
+                swal("Cancelled","","error");
+            }
+        });
+}
+function mooShowSavedCards(cards)
+{
+    //Not show saved cards until make this feature for public
+    return false;
+    for(i in cards)
+    {
+        var creditCrad = cards[i];
+
+        html ='<div class="moo-checkout-form-payment-option" style="margin-bottom: 15px;">';
+        html +=' <input class="moo-checkout-form-payment-input" type="radio" name="payments" value="'+creditCrad.token+'" id="moo-checkout-form-payments-'+creditCrad.token+'">';
+        html +='<label for="moo-checkout-form-payments-'+creditCrad.token+'" style="display: inline;margin-left:15px">Pay with : '+creditCrad.number+' ( <a href="#" onclick="MooRemoveCard(event,\''+creditCrad.token+'\')" >X</a> )</label>';
+        html +='</div>';
+        jQuery("#moo-checkout-form-payments>.moo-checkout-bloc-content").prepend(html)
+    }
+
+    jQuery('.moo-checkout-form-payment-input').iCheck({
+        checkboxClass: 'icheckbox_square',
+        radioClass: 'iradio_square-blue',
+        increaseArea: '20%' // optional
+    });
+    jQuery('.moo-checkout-form-payment-input').on('ifClicked', function (event) {
+        var paymentType = jQuery(event.target).val();
+        //moo_changePaymentMethod(paymentType)
+        if(paymentType !="" && paymentType !="cash" && paymentType != "creditcard")
+        {
+            jQuery('#moo-checkout-form-savecard').hide();
+            jQuery('#moo-checkout-form-tips').show();
+            //If we will charge customers to pay using saved credir cards, add the service fees here
+            if(MooSaveCardsFees)
+                MooServicefees = 0.5;
+            else
+                MooServicefees = 0;
+            moo_update_totals();
+        }
+        else
+        {
+            MooServicefees = 0;
+            moo_update_totals();
+        }
+    });
+
 }
