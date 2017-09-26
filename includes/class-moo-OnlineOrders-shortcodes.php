@@ -611,6 +611,7 @@ class Moo_OnlineOrders_Shortcodes {
         else
             $coupon = null;
 
+
         //Include spreedly
 
 
@@ -627,22 +628,58 @@ class Moo_OnlineOrders_Shortcodes {
 
         if($MooOptions["order_later"] == "on")
         {
-            if($MooOptions["order_later_days"] == 0)
-                $nb_days = 1;
+            $inserted_nb_days = intval($MooOptions["order_later_days"]);
+            $inserted_nb_mins = intval($MooOptions["order_later_minutes"]);
+
+            $inserted_nb_days_d = intval($MooOptions["order_later_days_delivery"]);
+            $inserted_nb_mins_d = intval($MooOptions["order_later_minutes_delivery"]);
+
+            if($MooOptions["order_later_days"] === "")
+            {
+                $nb_days = 4;
+            }
             else
-                $nb_days = ($MooOptions["order_later_days"]>0 && $MooOptions["order_later_days"] != '' )?$MooOptions["order_later_days"]:4;
+            {
+                if($inserted_nb_days === 0)
+                    $nb_days = 1;
+                else
+                    $nb_days = ($inserted_nb_days>0)?$inserted_nb_days:4;
+            }
 
-            $nb_minutes = ($MooOptions["order_later_minutes"]>0 && $MooOptions["order_later_minutes"]!='' )?$MooOptions["order_later_minutes"]:20;
+            if($inserted_nb_mins != "")
+            {
+                $nb_minutes = ($inserted_nb_mins>0)?$inserted_nb_mins:20;
+            }
+            else
+                $nb_minutes = 20;
 
-            $nb_days_d = ($MooOptions["order_later_days_delivery"]>0 && $MooOptions["order_later_days"]!='' )?$MooOptions["order_later_days_delivery"]:4;
-            $nb_minutes_d = ($MooOptions["order_later_minutes_delivery"]>0 && $MooOptions["order_later_minutes_delivery"]!='' )?$MooOptions["order_later_minutes_delivery"]:20;
+            if($MooOptions["order_later_days_delivery"] === "")
+            {
+                $nb_days_d = 4;
+            }
+            else
+            {
+                if($inserted_nb_days_d == 0)
+                    $nb_days_d = 1;
+                else
+                    $nb_days_d = ($inserted_nb_days_d>0)?$inserted_nb_days_d:4;
+            }
+
+            if($inserted_nb_mins_d != "")
+            {
+                $nb_minutes_d = ($inserted_nb_mins_d>0)?$inserted_nb_mins_d:60;
+            }
+            else
+                $nb_minutes_d = 60;
+
         }
         else
         {
             $nb_days = 0;
             $nb_minutes = 0;
+            $nb_days_d = 0;
+            $nb_minutes_d = 0;
         }
-
 
 
         $oppening_status = json_decode($api->getOpeningStatus($nb_days,$nb_minutes));
@@ -1791,7 +1828,7 @@ class Moo_OnlineOrders_Shortcodes {
                 <?php }
             }
             echo '</div>';
-            echo '<div class="row moo_items" align="center"><a class="moo-btn moo-btn-default" href="'.$store_page_url.'" style="margin-top: 30px;">Back to Main Menu</a><a style="margin-left:10px" class="btn btn-primary" href="'.$cart_page_url.'">View cart</a></div>';
+            echo '<div class="row moo_items" align="center"><a class="moo-btn moo-btn-default" href="'.$store_page_url.'" >Back to Main Menu</a><a style="margin-left:10px" class="btn btn-primary" href="'.$cart_page_url.'">View cart</a></div>';
         }
         else
             {

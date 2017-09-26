@@ -442,7 +442,8 @@ class Moo_OnlineOrders_Restapi
             {
                 $_SESSION['items'][$cart_line_id]['quantity']+=$qte;
                 $response = array(
-                    'status'	=> 'success'
+                    'status'	=> 'success',
+                    'name'      => $item->name
                 );
             }
             else
@@ -455,7 +456,8 @@ class Moo_OnlineOrders_Restapi
                     'modifiers'=>array()
                 );
                 $response = array(
-                    'status'	=> 'success'
+                    'status'	=> 'success',
+                    'name'      => $item->name
                 );
             }
             //Adding modifiers

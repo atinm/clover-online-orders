@@ -2,8 +2,7 @@
  * Created by Smart MerchantApps on 9/11/2017.
  */
 jQuery(document).ready(function() {
-    var header_height = 0;
-
+    var header_height = (typeof window.header_height != 'undefined' && window.header_height != null)?window.header_height:0;
     MooLoadBaseStructure('#moo_OnlineStoreContainer',mooGetCategories);
     MooSetLoading();
 
@@ -92,6 +91,7 @@ function moo_renderCategories($cats)
     html    += "</ul></nav>";
     jQuery(element).html(html).promise().done(function() {
        window.width = jQuery('#moo_OnlineStoreContainer').width() - jQuery('.moo-menu-category').width();
+       window.width = (jQuery('#moo_OnlineStoreContainer').width()+30) * 0.25;
        var cart_btn =  '<div class="moo-col-md-12" style="text-align: center;">'+
                        '<a href="#" class="moo-btn moo-btn-lg moo-btn-primary" onclick="mooShowCart(event)">View Cart</a>'+
                        '</div>';
@@ -348,7 +348,8 @@ function moo_clickOnOrderBtn(event,item_id,qty)
             else
             {
                 swal({
-                    title:"Item added",
+                    title:data.name,
+                    text:"Added to cart",
                     timer:3000,
                     type:"success"
                 });

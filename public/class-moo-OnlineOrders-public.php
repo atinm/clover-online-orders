@@ -98,18 +98,20 @@ class Moo_OnlineOrders_Public {
 
         //wp_register_style( 'bootstrap-css',plugins_url( '/css/bootstrap.min.css', __FILE__ ),array(), $this->version);
 
-        wp_register_style( 'grid-css',plugins_url( '/css/grid12.css', __FILE__ ),array(), $this->version);
+      //  wp_register_style( 'grid-css',plugins_url( '/css/grid12.css', __FILE__ ),array(), $this->version);
+
+        wp_register_style( 'grid-css',"//api.smartonlineorders.com/assets/css/grid12.min.css",array(), $this->version);
         wp_enqueue_style( 'grid-css' );
 
         wp_register_style( 'font-awesome',plugins_url( '/css/font-awesome.css', __FILE__ ),array(), $this->version);
 
-        wp_register_style( 'magnific-popup', plugins_url( '/css/magnific-popup.css', __FILE__ ),array(), $this->version);
+        wp_register_style( 'magnific-popup', plugins_url( '/css/magnific-popup.min.css', __FILE__ ),array(), $this->version);
         wp_enqueue_style ( 'magnific-popup' );
 
-        wp_register_style( 'toastr-css',plugins_url( '/css/toastr.css', __FILE__ ),array(), $this->version);
-        wp_enqueue_style( 'toastr-css' );
+       // wp_register_style( 'toastr-css',plugins_url( '/css/toastr.css', __FILE__ ),array(), $this->version);
+       // wp_enqueue_style( 'toastr-css' );
 
-        wp_register_style( 'moo-icheck-css',plugins_url( '/css/icheck-skins/square/blue.css', __FILE__ ),array(), $this->version);
+        wp_register_style( 'moo-icheck-css',plugins_url( '/css/icheck-skins/square/blue.min.css', __FILE__ ),array(), $this->version);
         wp_enqueue_style( 'moo-icheck-css' );
 
         if($sweetalert_version == 'v1')
@@ -128,7 +130,7 @@ class Moo_OnlineOrders_Public {
         wp_register_style( 'moo_modifiersPanel',"//api.smartonlineorders.com/assets/css/moo_ModifiersPanel.min.css",array('grid-css','magnific-popup'), $this->version);
         wp_enqueue_style( 'moo_modifiersPanel' );
 
-        wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/moo-OnlineOrders-public.css', array(), $this->version, 'all' );
+        wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/moo-OnlineOrders-public.min.css', array(), $this->version, 'all' );
 
         wp_register_style( 'custom-style-cart3', plugins_url( '/css/custom_style_cart3.css', __FILE__ ),array(), $this->version );
 
@@ -137,26 +139,21 @@ class Moo_OnlineOrders_Public {
             wp_register_style( 'bootstrap-css',plugins_url( '/css/bootstrap.min.css', __FILE__ ),array(), $this->version);
             wp_register_style( 'custom-style-accordion', plugins_url( '/css/custom_style_accordion.css', __FILE__ ),'bootstrap-css',$this->version );
             wp_register_style( 'simple-modal', plugins_url( '/css/simplemodal.css', __FILE__ ),'bootstrap-min', $this->version );
-            wp_register_style( 'magnific-popup', plugins_url( '/css/magnific-popup.css', __FILE__ ),array(), $this->version);
-
         }
         else
         {
             if($this->style == "style2")
             {
 
-                wp_register_style( 'mooStyle-style3', plugins_url( '/css/mooStyle-style3.css', __FILE__ ),array('grid-css','moo_modifiersPanel'), $this->version );
+                wp_register_style( 'mooStyle-style3', plugins_url( '/css/mooStyle-style3.min.css', __FILE__ ),array('grid-css','moo_modifiersPanel'), $this->version );
             }
             else
             {
                 if($this->style == "style3")
                 {
-
                     wp_register_style( 'bootstrap-css',plugins_url( '/css/bootstrap.min.css', __FILE__ ),array(), $this->version);
-
-                    wp_register_style( 'custom-style-accordion', plugins_url( '/css/custom_style_accordion.css', __FILE__ ),'bootstrap-min', $this->version );
+                    wp_register_style( 'custom-style-accordion', plugins_url( '/css/custom_style_accordion.min.css', __FILE__ ),'bootstrap-min', $this->version );
                     wp_register_style( 'custom-style-items', plugins_url( '/css/items-style3.css', __FILE__ ),'bootstrap-min', $this->version );
-                    wp_register_style( 'magnific-popup', plugins_url( '/css/magnific-popup.css', __FILE__ ),array(), $this->version);
                 }
                 else
                 {
@@ -199,14 +196,14 @@ class Moo_OnlineOrders_Public {
             );
 
             // Register the script like this for a plugin:
-            wp_register_script('bootstrap-js', plugins_url( '/js/bootstrap.js', __FILE__ ),array(), $this->version);
+            wp_register_script('bootstrap-js', plugins_url( '/js/bootstrap.min.js', __FILE__ ),array(), $this->version);
             wp_enqueue_script('bootstrap-js',array('jquery'));
 
-            wp_register_script('image-rotation-js', plugins_url( '/js/jquery.images-rotation.js', __FILE__ ),array(), $this->version);
+            wp_register_script('image-rotation-js', plugins_url( '/js/jquery.images-rotation.min.js', __FILE__ ),array(), $this->version);
             wp_enqueue_script('image-rotation-js',array('jquery'));
 
-            wp_register_script('toastr-js', plugins_url( '/js/toastr.min.js', __FILE__ ),array(), $this->version);
-            wp_enqueue_script('toastr-js',array('jquery'));
+            //wp_register_script('toastr-js', plugins_url( '/js/toastr.min.js', __FILE__ ),array(), $this->version);
+           // wp_enqueue_script('toastr-js',array('jquery'));
 
             wp_register_script('moo-icheck-js', plugins_url( '/js/icheck.min.js', __FILE__ ),array(), $this->version);
             wp_enqueue_script('moo-icheck-js',array('jquery'));
@@ -245,7 +242,7 @@ class Moo_OnlineOrders_Public {
             wp_register_script('magnific-modal', plugins_url( '/js/magnific.min.js', __FILE__ ));
             wp_enqueue_script( 'magnific-modal', array( 'jquery' ) );
 
-           // wp_register_script('moo_modifiersPanel_js', plugins_url( '/js/moo_modifiersPanel.js', __FILE__ ),array(), $this->version);
+            //wp_register_script('moo_modifiersPanel_js', plugins_url( '/js/moo_modifiersPanel.js', __FILE__ ),array(), $this->version);
             wp_register_script('moo_modifiersPanel_js', "//api.smartonlineorders.com/assets/js/moo_ModifiersPanel.min.js",array(), $this->version);
             wp_enqueue_script('moo_modifiersPanel_js',array('jquery','magnific-modal'));
 
