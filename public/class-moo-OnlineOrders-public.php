@@ -137,7 +137,7 @@ class Moo_OnlineOrders_Public {
 
         if($this->style == "style1"){
             wp_register_style( 'bootstrap-css',plugins_url( '/css/bootstrap.min.css', __FILE__ ),array(), $this->version);
-            wp_register_style( 'custom-style-accordion', plugins_url( '/css/custom_style_accordion.css', __FILE__ ),'bootstrap-css',$this->version );
+            wp_register_style( 'custom-style-accordion', plugins_url( '/css/custom_style_accordion.min.css', __FILE__ ),'bootstrap-css',$this->version );
             wp_register_style( 'simple-modal', plugins_url( '/css/simplemodal.css', __FILE__ ),'bootstrap-min', $this->version );
         }
         else
