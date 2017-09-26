@@ -491,7 +491,7 @@ class Moo_OnlineOrders_Shortcodes {
                                                     ?>
                                                     <div style='text-align: center;margin-top: 10px;'>
                                                         <?php echo '<div class="btn btn-danger" onclick="moo_addItemWithModifiersToCart(event,\''.$item->uuid.'\',\''.preg_replace('/[^A-Za-z0-9 \-]/', '', $item->name).'\',\''.$item->price.'\')"  >ADD TO YOUR CART</div>'; ?>
-                                                        <div class="btn btn-info" onclick="javascript:jQuery.magnificPopup.close()">Close</div>
+                                                        <div class="moo-btn moo-btn-info" onclick="javascript:jQuery.magnificPopup.close()">Close</div>
                                                     </div>
                                                     <?php
                                                     echo '</form>';
