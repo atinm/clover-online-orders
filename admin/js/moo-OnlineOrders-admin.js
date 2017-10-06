@@ -134,8 +134,8 @@ jQuery(document).ready(function() {
             var tabNew = new Array();
             var i = 0;
 
-            $("#sortable tr").each(function(i, el){
-                tabNew[i] = $(this).attr("data-cat-id");
+            jQuery("#sortable tr").each(function(i, el){
+                tabNew[i] = jQuery(this).attr("data-cat-id");
                 i++;
             });
             jQuery.post(moo_params.ajaxurl,{'action':'moo_new_order_categories','newtable':tabNew},function(data){
@@ -147,8 +147,8 @@ jQuery(document).ready(function() {
         stop: function(event, ui) {
             var tabNew = new Array();
             var i = 0;
-            $("#orderCategory .category-item").each(function (i, el) {
-                tabNew[i] = $(this).attr("cat-id-mobil");
+            jQuery("#orderCategory .category-item").each(function (i, el) {
+                tabNew[i] = jQuery(this).attr("cat-id-mobil");
                 i++;
             });
             jQuery.post(moo_params.ajaxurl,{'action':'moo_new_order_categories','newtable':tabNew},function(data){
@@ -158,11 +158,11 @@ jQuery(document).ready(function() {
     });
     jQuery(".moo_listItem").sortable({
         stop: function(event, ui) {
-            var category = $(this).attr("id-cat");
+            var category = jQuery(this).attr("id-cat");
             var tabNew = new Array();
             var i = 0;
-            $(".moo_listItem li.cat"+category).each(function(i, el){
-                tabNew[i] = $(this).attr("uuid_item");
+            jQuery(".moo_listItem li.cat"+category).each(function(i, el){
+                tabNew[i] = jQuery(this).attr("uuid_item");
                 i++;
             });
             jQuery.post(moo_params.ajaxurl,{'action':'moo_reorder_items','newtable':tabNew},function(data){
@@ -174,27 +174,27 @@ jQuery(document).ready(function() {
         stop: function(event, ui) {
             var tabNew = new Array();
             var i = 0;
-            $("#MooOrderTypesContent li").each(function(i, el){
-                tabNew[i] = $(this).attr("ot_uuid");
+            jQuery("#MooOrderTypesContent li").each(function(i, el){
+                tabNew[i] = jQuery(this).attr("ot_uuid");
                 i++;
             });
             jQuery.post(moo_params.ajaxurl,{'action':'moo_reorder_ordertypes','newtable':tabNew},function(data){
                 if(data===false)
-                    swal('Order Not changed, please contact us to fix that');
+                    swal('Sort Order Not Changed, please contact us to fix that');
             })
         }
     });
     jQuery(".sub-group").sortable({
         stop: function(event, ui) {
-            var group = $(this).attr("GM");
+            var group = jQuery(this).attr("GM");
             var tabNew = new Array();
             var i = 0;
-            $(".moo_ModifierGroup .list-GModifier_"+group).each(function (i, el) {
-                tabNew[i] = $(this).attr("group-id");
+            jQuery(".moo_ModifierGroup .list-GModifier_"+group).each(function (i, el) {
+                tabNew[i] = jQuery(this).attr("group-id");
                 i++;
             });
             //var NB = tabNew.length;
-            $.post(moo_params.ajaxurl,{'action':'moo_new_order_modifier','group_id':group,'newtable':tabNew},function(data){
+            jQuery.post(moo_params.ajaxurl,{'action':'moo_new_order_modifier','group_id':group,'newtable':tabNew},function(data){
                 console.log(data);
             })
         }
@@ -203,11 +203,11 @@ jQuery(document).ready(function() {
         stop: function(event, ui) {
             var tabNew = new Array();
             var i = 0;
-            $(".moo_ModifierGroup .list-group").each(function (i, el) {
-                tabNew[i] = $(this).attr("group-id");
+            jQuery(".moo_ModifierGroup .list-group").each(function (i, el) {
+                tabNew[i] = jQuery(this).attr("group-id");
                 i++;
             });
-            $.post(moo_params.ajaxurl,{'action':'moo_new_order_group_modifier','newtable':tabNew},function(data){
+            jQuery.post(moo_params.ajaxurl,{'action':'moo_new_order_group_modifier','newtable':tabNew},function(data){
                 console.log(data);
             })
         }
