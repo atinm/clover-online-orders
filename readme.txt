@@ -4,8 +4,8 @@ Donate link: http://www.merchantapps.com/
 Tags: clover,online orders for clover,merchantech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
 Requires at least: 4.7.1
 Tested up to: 4.8.1
-Requires PHP: 5.0.1
-Stable tag: 1.2.71
+Requires PHP: 5.2.0
+Stable tag: 1.2.80
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,9 +24,19 @@ This plugin is the ideal solution to get your business on-line in less than 10 m
 After installing the **Merchantech Online Orders for Clover** plugin, add the pages 'Order Online' and 'Checkout' to your Home menu, or you can add the shortcode in a new post/page or an existing one. Then sync your website with your Clover station
 
 
-[Example 1](https://thaihotsushi.com/store)
-[Example 2](http://deafghanan.com/store)
-[Example 3](http://getittoasted.smartonlineorder.com)
+[Example 1](https://chicknchuck.com/)
+[Example 2](http://www.theoriginalturkey.com)
+[Example 3](http://www.islandsmoothiecafe.com)
+[Example 4](http://arrowheadtaphouse.com)
+[Example 5](http://www.josephineskitchenms.com)
+[Example 6](https://twistedfresh.com/)
+[Example 7](http://www.urbanpantrycatering.com/)
+[Example 8](http://www.sandwichcafesfs.com)
+[Example 9](http://villaromarestaurant.net)
+[Example 10](http://www.teabocoffee.com)
+[Example 11](http://misskellyscafe.com)
+[Example 12](http://organicearthproducts.com)
+[Example 13](http://www.himalayanfusiononline.com)
 
 
 == Installation ==
@@ -91,6 +101,21 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 7. An other example of menu
 
 == Changelog ==
+= 1.2.80 =
+* Added the clean inventory feature
+-Improved the store interface 4 to accept direct links to a specif category
+* Added the ability for customer to reply to the emails and got the response in their own inbox
+* Added the quantity window to add to cart shortcode
+* Added the ability to add css class to add to cart shortcode
+* Fixed reordering issue for categories, items and modifiers
+* Added customization options for store interface 4 like changing colors and page width or font familty
+* Improved Cart Icon by adding the number of items and changed it to a small button
+* Added the ability to show or hide the quantity selection window for the 4th store interface
+* Added the ability to disable modifier groups panel and add it on the same page to avoid scroll issues
+* Added the ability to show or hide the qty for all modifiers or for modifiers without price
+* Changed add to cart button on store interface 4 and added the number of items in cart
+* Ability to hide quantity selection from modifiers with prices or modifiers with no prices for store interface 4
+* Ability to show modifiers as a pop-up or directly underneath the item for store interface 4
 = 1.2.7 =
 * Added two new store interfaces
 * Store interface 3 has a beautiful interface that allows images to be uploaded for items in a vertical format
@@ -233,5 +258,5 @@ First Release
 
 == Upgrade Notice ==
 
-= 1.2.71 =
-Added two new store interfaces.
+= 1.2.80 =
+Fixed the reordering issue and added the clean inventory feature with customization for the 4th store interface

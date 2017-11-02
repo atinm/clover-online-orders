@@ -5,6 +5,7 @@ class moo_OnlineOrders_CallAPI {
     public $Token;
     public $url_api;
     public $debug;
+    public $debug_get;
 
 
     function __construct()
@@ -13,9 +14,10 @@ class moo_OnlineOrders_CallAPI {
         $this->Token = $MooSettings['api_key'];
         //Put the API URL here and don't forget the last slash
         $this->url_api = "http://api.smartonlineorders.com/";
-        // $this->url_api = "http://192.168.1.8/api/";
+        //$this->url_api = "http://localhost/api/";
+
         $this->debug = false;
-        //$this->debug = true;
+        $this->debug_get = false;
 
     }
     /*
@@ -113,7 +115,7 @@ class moo_OnlineOrders_CallAPI {
         $res = $this->callApi("options",$this->Token);
         if($res){
             $saved = $this->save_options($res);
-            return "$saved option saved in your DB";
+            return "$saved options imported";
         }
        else{
            return "Please verify your Key in page settings";
@@ -278,21 +280,32 @@ class moo_OnlineOrders_CallAPI {
 
 
     //manage orders
-    public function createOrder($total,$orderType,$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode)
+    public function createOrder($total,$orderType,$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode,$instructions,$pickupTime,$cutomer)
     {
+        /*
         if($orderType=='default')
         {
             $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType=default&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&deliveryName='.$deliveryfeeName.'&servicefee='.$serviceFee.'&servicefeeName='.$serviceFeeName.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode);
         }
         else
             $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&deliveryName='.$deliveryfeeName.'&servicefee='.$serviceFee.'&servicefeeName='.$serviceFeeName.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode);
-
+        */
+        return $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&deliveryName='.$deliveryfeeName.'&servicefee='.$serviceFee.'&servicefeeName='.$serviceFeeName.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode.'&instructions='.$instructions.'&pickupTime='.$pickupTime.'&customer='.json_encode($cutomer));
+       // return $res;
+    }
+    public function createOrderV2($options)
+    {
+        $res =  $this->callApi_Post("v2/create_order",$this->Token,'options='.json_encode($options));
         return $res;
     }
 
     public function addlineToOrder($oid,$item_uuid,$qte,$special_ins)
     {
         return $this->callApi_Post("create_line_in_order",$this->Token,'oid='.$oid.'&item='.$item_uuid.'&qte='.$qte.'&special_ins='.$special_ins);
+    }
+    public function addLinesToOrder($oid,$lines)
+    {
+        return $this->callApi_Post("v2/create_lines",$this->Token,'oid='.$oid.'&lines='.json_encode($lines));
     }
 
     public function addlineWithPriceToOrder($oid,$item_uuid,$qte,$name,$price)
@@ -453,7 +466,7 @@ class moo_OnlineOrders_CallAPI {
      */
     function getItem($uuid)
     {
-        if($uuid=="") return;
+        if($uuid == "") return;
         $res = $this->callApi("items/".$uuid,$this->Token);
         if($res){
             $saved = $this->save_one_item($res);
@@ -463,6 +476,38 @@ class moo_OnlineOrders_CallAPI {
             return false;
         }
     }
+    function getItemWithoutSaving($uuid)
+    {
+        if($uuid == "") return;
+            return $this->callApi("items/".$uuid,$this->Token);
+        return false;
+    }
+    function getCategoryWithoutSaving($uuid)
+    {
+        if($uuid == "") return;
+            return $this->callApi("categories/".$uuid,$this->Token);
+        return false;
+    }
+    function getModifierGroupsWithoutSaving($uuid)
+    {
+        if($uuid == "") return;
+            return $this->callApi("modifier_groups/".$uuid,$this->Token);
+        return false;
+    }
+    function getModifierWithoutSaving($mg_uuid,$uuid)
+    {
+        if($uuid == "" || $mg_uuid == "") return;
+            return $this->callApi("modifier/".$mg_uuid.'/'.$uuid,$this->Token);
+        return false;
+    }
+    function getTaxRateWithoutSaving($uuid)
+    {
+        if( $uuid == "" ) return;
+            return $this->callApi("tax_rates/".$uuid,$this->Token);
+        return false;
+    }
+
+
     public function delete_item($uuid)
     {
         if($uuid=="") return;
@@ -473,8 +518,9 @@ class moo_OnlineOrders_CallAPI {
         $wpdb->delete("{$wpdb->prefix}moo_item_tax_rate",array('item_uuid'=>$uuid));
         $wpdb->delete("{$wpdb->prefix}moo_item_modifier_group",array('item_id'=>$uuid));
         $wpdb->delete("{$wpdb->prefix}moo_item_tag",array('item_uuid'=>$uuid));
+        $wpdb->delete("{$wpdb->prefix}moo_images",array('item_uuid'=>$uuid));
 
-        //TODO : delete all attribute and options if it is the lonly item in the group_item
+        //TODO : delete all attribute and options if it is the only item in the group_item
         $res = $wpdb->delete("{$wpdb->prefix}moo_item",array('uuid'=>$uuid));
         if($res)
         {
@@ -921,6 +967,17 @@ class moo_OnlineOrders_CallAPI {
     public function send_an_email($order_id,$emails,$customer,$instructions,$pickup_time)
     {
         return $this->callApi_Post("sendemails",$this->Token,"order_id=".$order_id."&merchant_emails=".$emails."&customer=".$customer."&instructions=".$instructions."&pickup_time=".$pickup_time);
+    }
+    /*
+     * Function to send Order details via email,
+     * @from : v 1.2.8
+     * @param : the order id
+     * @param : the merchant email
+     * @param : the customer email
+     */
+    public function sendOrderEmails($order_id,$merchant_emails,$customer_email)
+    {
+        return $this->callApi_Post("send_order_emails",$this->Token,"order_id=".$order_id."&merchant_emails=".$merchant_emails."&customer_email=".$customer_email);
     }
     public function checkToken()
     {
@@ -1397,10 +1454,11 @@ class moo_OnlineOrders_CallAPI {
         }
         $info = curl_getinfo($crl);
         curl_close($crl);
-        if($this->debug)
+        if($this->debug_get)
         {
-            echo $url." GET ---- ";
+            echo "GET :: ".$url." <<";
             var_dump($reply);
+            echo ">> ";
         }
         if( $info['http_code']==200 )return $reply;
         return false;
@@ -1431,8 +1489,9 @@ class moo_OnlineOrders_CallAPI {
         curl_close($crl);
         if($this->debug)
         {
-            echo $url." POST ---- ";
-            var_dump($reply);
+            echo "\n POST :: ".$url." <<";
+            echo $reply;
+            echo ">> ";
         }
         if($info['http_code'] == 200)
             return $reply;

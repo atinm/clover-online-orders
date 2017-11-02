@@ -1451,3 +1451,12 @@ table.main_table td{
     text-transform: uppercase;
 }
 .column-code { width:150px; }
+
+.moo-store-interfaceSettings
+{
+    display: none;
+}
+.moo-interfaceSettings-labels
+{
+    text-align: left !important;
+}

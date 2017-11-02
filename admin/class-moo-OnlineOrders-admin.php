@@ -56,8 +56,14 @@ class moo_OnlineOrders_Admin {
 
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action( 'admin_init',  array($this, 'register_mysettings' ));
+
         add_action( 'admin_bar_menu', array($this, 'toolbar_link_to_settings'), 999 );
         add_action("admin_enqueue_scripts", array($this, 'enq_media_uploader'));
+
+        if (filter_input( INPUT_GET, 'page' ) === "moo_import_wizard") {
+            add_action( 'admin_init',  array($this, 'render_import_wizard_page' ));
+        }
+
 
     }
 
@@ -236,10 +242,10 @@ class moo_OnlineOrders_Admin {
                             echo ' <strong>'.$view['name_customer'].'</strong><br />';
                         if($view['address_customer']!="")
                             echo $view['address_customer'].'<br />';
-                        if($view['state_customer']!="")
-                            echo $view['state_customer'].', ';
                         if($view['city_customer']!="")
-                            echo $view['city_customer'];
+                            echo $view['city_customer'].', ';
+                        if($view['state_customer']!="")
+                            echo strtoupper($view['state_customer']);
                         if($view['zipcode']!="")
                             echo ' '.$view['zipcode'].'<br />';
                         if($view['email_customer']!="")
@@ -341,7 +347,7 @@ class moo_OnlineOrders_Admin {
                             <h2>PAYMENTS</h2>
                             <table class="main_table paymentTable">
                                 <tr class="top_table">
-                                    <th>Payment results</th><th>Amount</th><th>Subtotal</th><th>Taxes</th><th>Tips</th><th>Credit Card</th><th>payment date</th>
+                                    <th>Payment results</th><th>Total</th><th>Subtotal</th><th>Taxes</th><th>Tips</th><th>Credit Card</th><th>payment date</th>
                                 </tr>
                                 <?php
                                 foreach ($view['payments'] as $payment) {
@@ -690,7 +696,7 @@ class moo_OnlineOrders_Admin {
                 array("name"=>"use_coupons","value"=>"disabled"),
                 array("name"=>"custom_css","value"=>""),
                 array("name"=>"custom_js","value"=>""),
-                array("name"=>"copyrights","value"=>'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.2.7">Smart Online Order</a>'),
+                array("name"=>"copyrights","value"=>'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.2.8">Smart Online Order</a>'),
                 array("name"=>"default_style","value"=>""),
                 array("name"=>"track_stock","value"=>""),
                 array("name"=>"checkout_login","value"=>""),
@@ -704,6 +710,8 @@ class moo_OnlineOrders_Admin {
                 array("name"=>"order_later_minutes","value"=>"20"),
                 array("name"=>"order_later_days_delivery","value"=>"4"),
                 array("name"=>"order_later_minutes_delivery","value"=>"60"),
+                array("name"=>"order_later_asap_for_p","value"=>"off"),
+                array("name"=>"order_later_asap_for_d","value"=>"off"),
                 array("name"=>"free_delivery","value"=>""),
                 array("name"=>"fixed_delivery","value"=>""),
                 array("name"=>"other_zones_delivery","value"=>""),
@@ -720,8 +728,22 @@ class moo_OnlineOrders_Admin {
                 array("name"=>"store_page","value"=>get_option('moo_store_page')),
                 array("name"=>"checkout_page","value"=>get_option('moo_checkout_page')),
                 array("name"=>"cart_page","value"=>get_option('moo_cart_page')),
-                array("name"=>"use_special_instructions","value"=>"enabled")
+                array("name"=>"use_special_instructions","value"=>"enabled"),
+                array("name"=>"onePage_fontFamily","value"=>"Oswald,sans-serif"),
+                array("name"=>"onePage_categoriesTopMargin","value"=>"0"),
+                array("name"=>"onePage_width","value"=>"1024"),
+                array("name"=>"onePage_categoriesFontColor","value"=>"#ffffff"),
+                array("name"=>"onePage_categoriesBackgroundColor","value"=>"#282b2e"),
+                array("name"=>"onePage_qtyWindow","value"=>"on"),
+                array("name"=>"onePage_qtyWindowForModifiers","value"=>"on"),
+                array("name"=>"onePage_backToTop","value"=>"off"),
+                array("name"=>"style1_width","value"=>"1024"),
+                array("name"=>"style2_width","value"=>"1024"),
+                array("name"=>"mg_settings_displayInline","value"=>"disabled"),
+                array("name"=>"mg_settings_qty_for_all","value"=>"enabled"),
+                array("name"=>"mg_settings_qty_for_zeroPrice","value"=>"enabled"),
         );
+
         $MooOptions = (array)get_option('moo_settings');
         foreach ($default_options as $default_option) {
             if(!isset($MooOptions[$default_option["name"]]))
@@ -862,15 +884,14 @@ class moo_OnlineOrders_Admin {
                     <form method="post" action="options.php">
                         <?php
                         settings_fields('moo_settings');
-                        $fields = array('api_key','zones_json');
+                        $fields = array('api_key');
                         foreach ($MooOptions as $option_name=>$option_value)
                             if(!in_array($option_name,$fields))
-                                if($option_name=="custom_js" || $option_name =="custom_css" || $option_name == "copyrights")
+                                if($option_name=="custom_js" || $option_name =="custom_css" || $option_name == "copyrights"|| $option_name == "zones_json")
                                     echo '<textarea name="moo_settings['.$option_name.']" id="" cols="10" rows="10" style="display:none">'.$option_value.'</textarea>';
                                 else
                                     echo '<input type="text"  name="moo_settings['.$option_name.']" value="'.$option_value.'" hidden/>';
                         ?>
-                        <textarea  name="moo_settings[zones_json]" hidden><?php echo $MooOptions['zones_json']?></textarea>
                         <div id="MooPanel_tabContent1">
                             <h2>Key settings</h2>
                             <hr>
@@ -930,7 +951,7 @@ class moo_OnlineOrders_Admin {
                         <?php } ?>
                 <!-- Import Items -->
                 <div id="MooPanel_tabContent2">
-                    <h2>Import inventory</h2><hr>
+                    <h2>Import inventory (Scroll Down for more options)</h2><hr>
                     <div class="MooPanelItem">
                         <h3>Import your data</h3>
                         <p>You may need to refresh your browser after data is imported. Use manual sync below after you have made additional inventory changes</p>
@@ -970,11 +991,20 @@ class moo_OnlineOrders_Admin {
                         <div class="Moo_option-item">
                             <div class="button_center">
                                 <a href="#" onclick="MooPanel_UpdateItems(event)" class="button button-secondary"
-                                   style="margin-left: 30px;margin-right: 50px" >Update all Items</a>
-                                <a href="#" onclick="MooPanel_UpdateCategories(event)" class="button button-secondary"
-                                   style="margin-right: 50px;" >Update Categories</a>
-                                <a href="#" onclick="MooPanel_UpdateModifiers(event)" class="button button-secondary"
-                                   style="margin-right: 50px;" >Update Modifiers</a>
+                                   style="margin-left: 30px;" >Update all Items</a>
+                                <a href="#" onclick="MooPanel_UpdateCategories(event)" class="button button-secondary">Update Categories</a>
+                                <a href="#" onclick="MooPanel_UpdateModifiers(event)" class="button button-secondary">Update Modifiers</a>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="MooPanelItem">
+                        <h3 style="font-size: 12px">Clean Inventory</h3>
+                        <p>If you have deleted categories, items, modifier groups, modifiers, taxes, and order types from your Clover and they are still appearing on the website; Then use "Clean Inventory"</p>
+                        <div id="moo_progressbar_container"></div>
+                        <div class="Moo_option-item">
+                            <div class="button_center">
+                                <a href="#" onclick="MooPanel_CleanInventory(event)" class="button button-secondary"  style="margin: 0 auto">Clean Inventory</a>
                             </div>
 
                         </div>
@@ -1044,17 +1074,28 @@ class moo_OnlineOrders_Admin {
                     <form method="post" action="options.php">
                         <?php
                         settings_fields('moo_settings');
-                        $fields = array('default_style','zones_json');
+                        $fields = array(
+                                'default_style',
+                                'onePage_fontFamily',
+                                'onePage_categoriesTopMargin',
+                                'onePage_categoriesFontColor',
+                                'onePage_categoriesBackgroundColor',
+                                'onePage_width',
+                                'onePage_qtyWindow',
+                                'onePage_qtyWindowForModifiers',
+                                'onePage_backToTop',
+                                'style1_width',
+                                'style2_width',
+                                'style3_width');
                         foreach ($MooOptions as $option_name=>$option_value)
                             if(!in_array($option_name,$fields))
-                                if($option_name=="custom_js" || $option_name =="custom_css" || $option_name == "copyrights")
+                                if($option_name=="custom_js" || $option_name =="custom_css" || $option_name == "copyrights"|| $option_name == "zones_json")
                                     echo '<textarea name="moo_settings['.$option_name.']" id="" cols="10" rows="10" style="display:none">'.$option_value.'</textarea>';
                                 else
                                     echo '<input type="text"  name="moo_settings['.$option_name.']" value="'.$option_value.'" hidden/>';
                         ?>
-                        <textarea  name="moo_settings[zones_json]" hidden><?php echo $MooOptions['zones_json']?></textarea>
                         <div class="MooPanelItem">
-                            <h3>Choose a Store Interface</h3>
+                            <h3>Choose a Store Interface (Scroll Down for more options)</h3>
                             <div class="Moo_option-item">
                                 <div>
                                     <label>
@@ -1074,6 +1115,152 @@ class moo_OnlineOrders_Admin {
                                         <img style="margin-bottom: 15px;" src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/si4.jpg" ?>" align="middle" />
                                     </label>
                                 </div>
+                            </div>
+                            <div class="moo-store-interfaceSettings" id="mooInterface-style1">
+                                <h2>Store interface 1 customization</h2>
+                                <div class="Moo_option-item">
+                                    <div style="margin-bottom: 14px;" class="moo-interfaceSettings-labels">Page width</div>
+                                    <div style="text-align: left;">
+                                        <input name="moo_settings[style1_width]" id="MooStyle2_width" type="text" value="<?php echo $MooOptions['style1_width']?>" />
+                                        <span id="moo_info_msg-store-settings-1-1" class="moo-info-msg"
+                                              data-ot="Default page width recommendation is 1024px. You can make changes here"
+                                              data-ot-target="#moo_info_msg-store-settings-1-1">
+                                        <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                    </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="moo-store-interfaceSettings" id="mooInterface-style3">
+                                <h2>Store interface 2 customization</h2>
+                                <div class="Moo_option-item">
+                                    <div style="margin-bottom: 14px;" class="moo-interfaceSettings-labels">Page width</div>
+                                    <div style="text-align: left;">
+                                        <input name="moo_settings[style3_width]" id="MooStyle2_width" type="text" value="<?php echo $MooOptions['style3_width']?>" />
+                                        <span id="moo_info_msg-store-settings-3-1" class="moo-info-msg"
+                                              data-ot="Default page width recommendation is 1024px. You can make changes here"
+                                              data-ot-target="#moo_info_msg-store-settings-3-1">
+                                        <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                    </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="moo-store-interfaceSettings" id="mooInterface-style2">
+                                <h2>Store interface 3 customization</h2>
+                                <div class="Moo_option-item">
+                                    <div style="margin-bottom: 14px;" class="moo-interfaceSettings-labels">Page width</div>
+                                    <div style="text-align: left;">
+                                        <input name="moo_settings[style2_width]" id="MooStyle2_width" type="text" value="<?php echo $MooOptions['style2_width']?>" />
+                                        <span id="moo_info_msg-store-settings-2-1" class="moo-info-msg"
+                                              data-ot="Default page width recommendation is 1024px. You can make changes here"
+                                              data-ot-target="#moo_info_msg-store-settings-2-1">
+                                        <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                    </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="moo-store-interfaceSettings" id="mooInterface-onePage">
+                                <h2>Store interface 4 customization</h2>
+                                <div class="Moo_option-item">
+                                    <div style="margin-bottom: 14px;" class="moo-interfaceSettings-labels">Page width</div>
+                                    <div style="text-align: left;">
+                                        <input name="moo_settings[onePage_width]" id="MooOnePage_width" type="text" value="<?php echo $MooOptions['onePage_width']?>" /> px
+                                        <span id="moo_info_msg-store-settings-1" class="moo-info-msg"
+                                              data-ot="Default page width recommendation is 1024px. You can make changes here"
+                                              data-ot-target="#moo_info_msg-store-settings-1">
+                                        <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                    </span>
+                                    </div>
+                                </div>
+                                <div class="Moo_option-item">
+                                    <div style="margin-bottom: 14px;" class="moo-interfaceSettings-labels">Font family</div>
+                                    <div style="text-align: left;">
+                                        <input name="moo_settings[onePage_fontFamily]" type="text" value="<?php echo $MooOptions['onePage_fontFamily']?>" />
+                                        <span id="moo_info_msg-store-settings-2" class="moo-info-msg"
+                                              data-ot="Default font family is Oswald. To use other fonts make sure it is imported by your theme. You can also use custom css to import from Google fonts"
+                                              data-ot-target="#moo_info_msg-store-settings-2">
+                                        <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                    </span>
+                                    </div>
+                                </div>
+                                <div class="Moo_option-item">
+                                    <div style="margin-bottom: 14px;" class="moo-interfaceSettings-labels">Categories top margin</div>
+                                    <div style="text-align: left;">
+                                        <input name="moo_settings[onePage_categoriesTopMargin]" type="text" value="<?php echo $MooOptions['onePage_categoriesTopMargin']?>" /> px
+                                        <span id="moo_info_msg-store-settings-3" class="moo-info-msg"
+                                              data-ot="If you are using a fixed header, please enter the headers height so the categories can remain visible. Default for top margin is 0 px "
+                                              data-ot-target="#moo_info_msg-store-settings-3">
+                                        <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                    </span>
+                                    </div>
+                                </div>
+                                <div class="Moo_option-item">
+                                    <div style="margin-bottom: 14px;" class="moo-interfaceSettings-labels">Categories font color</div>
+                                    <div style="text-align: left;">
+                                        <input class="moo-color-field" name="moo_settings[onePage_categoriesFontColor]" type="text" value="<?php echo $MooOptions['onePage_categoriesFontColor']?>" />
+                                        <span id="moo_info_msg-store-settings-4" class="moo-info-msg"
+                                              data-ot="This will change the font color of categories names"
+                                              data-ot-target="#moo_info_msg-store-settings-4">
+                                        <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                    </span>
+                                    </div>
+                                </div>
+                                <div class="Moo_option-item">
+                                    <div style="margin-bottom: 14px;" class="moo-interfaceSettings-labels">Categories background color</div>
+                                    <div style="text-align: left;">
+                                        <input class="moo-color-field" name="moo_settings[onePage_categoriesBackgroundColor]" type="text" value="<?php echo $MooOptions['onePage_categoriesBackgroundColor']?>" />
+                                        <span id="moo_info_msg-store-settings-5" class="moo-info-msg"
+                                              data-ot="This will change the background color of the categories section and the categories titles when there are no images"
+                                              data-ot-target="#moo_info_msg-store-settings-5">
+                                        <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                    </span>
+                                    </div>
+                                </div>
+                                <div class="Moo_option-item">
+                                    <div style="margin-bottom: 14px;" class="moo-interfaceSettings-labels">Show Quantity Pop Up window after adding any item to cart</div>
+                                    <div class="moo-onoffswitch"  title="Show or hide the quantity window">
+                                        <input type="hidden" name="moo_settings[onePage_qtyWindow]" value="off">
+                                        <input type="checkbox" name="moo_settings[onePage_qtyWindow]" class="moo-onoffswitch-checkbox" id="myonoffswitch_onePage_qtyWindow" <?php echo (isset($MooOptions['onePage_qtyWindow']) && $MooOptions['onePage_qtyWindow'] == 'on')?'checked':''?>>
+                                        <label class="moo-onoffswitch-label" for="myonoffswitch_onePage_qtyWindow"><span class="moo-onoffswitch-inner"></span>
+                                            <span class="moo-onoffswitch-switch"></span>
+                                        </label>
+                                    </div>
+                                    <span id="moo_info_msg-store-settings-6" class="moo-info-msg"
+                                          data-ot="This will show the Quantity selection window when selecting 'add to cart' button. The customer can still change the quantity later in the checkout process"
+                                          data-ot-target="#moo_info_msg-store-settings-6">
+                                    <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                </span>
+                                </div>
+                                <div class="Moo_option-item">
+                                    <div style="margin-bottom: 14px;" class="moo-interfaceSettings-labels">Show Quantity Pop Up window for items with modifiers</div>
+                                    <div class="moo-onoffswitch"  title="Show or hide teh quantity window for items with modifiers">
+                                        <input type="hidden" name="moo_settings[onePage_qtyWindowForModifiers]" value="off">
+                                        <input type="checkbox" name="moo_settings[onePage_qtyWindowForModifiers]" class="moo-onoffswitch-checkbox" id="myonoffswitch_onePage_qtyWindowForModifiers" <?php echo (isset($MooOptions['onePage_qtyWindowForModifiers']) && $MooOptions['onePage_qtyWindowForModifiers'] == 'on')?'checked':''?>>
+                                        <label class="moo-onoffswitch-label" for="myonoffswitch_onePage_qtyWindowForModifiers"><span class="moo-onoffswitch-inner"></span>
+                                            <span class="moo-onoffswitch-switch"></span>
+                                        </label>
+                                    </div>
+                                    <span id="moo_info_msg-store-settings-7" class="moo-info-msg"
+                                          data-ot="This will show the Quantity selection window for items with modifiers when selecting 'Choose Qty & Options' The customer can still change the Quantity later in the checkout processs. Note : this doesn't affect modifier Qty selection"
+                                          data-ot-target="#moo_info_msg-store-settings-7">
+                                    <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                </span>
+                                </div>
+<!--                                <div class="Moo_option-item">-->
+<!--                                    <div style="margin-bottom: 14px;" class="moo-interfaceSettings-labels">Back To Top Button</div>-->
+<!--                                    <div class="moo-onoffswitch"  title="Display Back To Top Button ">-->
+<!--                                        <input type="hidden" name="moo_settings[onePage_backToTop]" value="off">-->
+<!--                                        <input type="checkbox" name="moo_settings[onePage_backToTop]" class="moo-onoffswitch-checkbox" id="myonoffswitch_onePage_backToTop" /> -->
+<!--                                        <label class="moo-onoffswitch-label" for="myonoffswitch_onePage_backToTop"><span class="moo-onoffswitch-inner"></span>-->
+<!--                                            <span class="moo-onoffswitch-switch"></span>-->
+<!--                                        </label>-->
+<!--                                    </div>-->
+<!--                                    <span id="moo_info_msg-store-settings-8" class="moo-info-msg"-->
+<!--                                          data-ot="Enable this option to display Back To Top Button while scrolling"-->
+<!--                                          data-ot-target="#moo_info_msg-store-settings-8">-->
+<!--                                    <img alt="">-->
+<!--                                </span>-->
+<!--                                </div>-->
+
                             </div>
                             <div style="text-align: center; margin: 20px;">
                                 <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
@@ -1244,10 +1431,87 @@ class moo_OnlineOrders_Admin {
                 </div>
                 <!-- Modifiers -->
                 <div id="MooPanel_tabContent6">
-                    <h2>Modifier Groups</h2>
+                    <h2>Modifier Groups (scroll down for more options)</h2>
                     <hr>
                     <div class="MooPanelItem">
-                        <h3>Hide or change modifier group names so they are easy to understand. To view the modifiers press the "+" sign</h3>
+                        <form method="post" action="options.php">
+                            <?php
+                            $MooOptions = (array)get_option('moo_settings');
+                            settings_fields('moo_settings');
+                            $fields = array(
+                                'mg_settings_displayInline',
+                                'mg_settings_qty_for_all',
+                                'mg_settings_qty_for_zeroPrice',
+                                );
+
+                            foreach ($MooOptions as $option_name=>$option_value)
+                                if(!in_array($option_name,$fields))
+                                    if($option_name=="custom_js" || $option_name =="custom_css" || $option_name == "copyrights"|| $option_name == "zones_json")
+                                        echo '<textarea name="moo_settings['.$option_name.']" id="" cols="10" rows="10" style="display:none">'.$option_value.'</textarea>';
+                                    else
+                                        echo '<input type="text"  name="moo_settings['.$option_name.']" value="'.$option_value.'" hidden/>';
+
+                            ?>
+                            <h3>Modifier settings for store interfaces 4</h3>
+                            <div class="Moo_option-item">
+                                <div class="normal_text">
+                                   Display Options for modifier selection
+                                </div>
+                            </div>
+                            <div class="Moo_option-item">
+                                <div style="float:left; width: 100%;padding-left: 60px">
+                                    <label style="display:block; margin-bottom:8px;">
+                                        <input name="moo_settings[mg_settings_displayInline]" id="mg_settings_displayInline" type="radio" value="enabled" <?php echo ($MooOptions["mg_settings_displayInline"]=="enabled")?"checked":""; ?>>
+                                        Pop-Up window
+                                    </label>
+                                    <label style="display:block; margin-bottom:8px;">
+                                        <input name="moo_settings[mg_settings_displayInline]" id="mg_settings_displayInline" type="radio" value="disabled" <?php echo ($MooOptions["mg_settings_displayInline"]=="disabled")?"checked":""; ?> >
+                                        Underneath item name
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="Moo_option-item">
+                                <div class="normal_text">
+                                    Allow customers to choose modifier quantity for all modifiers.
+                                </div>
+                            </div>
+                            <div class="Moo_option-item">
+                                <div style="float:left; width: 100%;padding-left: 60px">
+                                    <label style="display:block; margin-bottom:8px;">
+                                        <input name="moo_settings[mg_settings_qty_for_all]" id="mg_settings_qty_for_all" type="radio" value="disabled" <?php echo ($MooOptions["mg_settings_qty_for_all"]!="enabled")?"checked":""; ?>>
+                                        No
+                                    </label>
+                                    <label style="display:block; margin-bottom:8px;">
+                                        <input name="moo_settings[mg_settings_qty_for_all]" id="mg_settings_qty_for_all" type="radio" value="enabled" <?php echo ($MooOptions["mg_settings_qty_for_all"]=="enabled")?"checked":""; ?>>
+                                        Yes
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="Moo_option-item">
+                                <div class="normal_text">
+                                    Allow customers to choose modifier quantity when modifier is free or $0.00.
+                                </div>
+                            </div>
+                            <div class="Moo_option-item">
+                                <div style="float:left; width: 100%;padding-left: 60px">
+                                    <label style="display:block; margin-bottom:8px;">
+                                        <input name="moo_settings[mg_settings_qty_for_zeroPrice]" id="mg_settings_qty_for_all" type="radio" value="disabled" <?php echo ($MooOptions["mg_settings_qty_for_zeroPrice"]!="enabled")?"checked":""; ?>>
+                                        No
+                                    </label>
+                                    <label style="display:block; margin-bottom:8px;">
+                                        <input name="moo_settings[mg_settings_qty_for_zeroPrice]" id="mg_settings_qty_for_all" type="radio" value="enabled" <?php echo ($MooOptions["mg_settings_qty_for_zeroPrice"]=="enabled")?"checked":""; ?>>
+                                        Yes
+                                    </label>
+                                </div>
+                            </div>
+                        <!-- Save Changes button -->
+                        <div style="text-align: center; margin: 20px;">
+                            <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
+                        </div>
+                        </form>
+                    </div>
+                    <div class="MooPanelItem">
+                        <h3>Hide or change modifier group names so they are easy to understand. To view the modifiers press the "+" sign (for all store interfaces)</h3>
                         <p>You can rearrange Modifier groups and Modifiers by dragging and dropping</p>
                         <?php
                         if(count($modifier_groups)==0) echo "<div class=\"normal_text\">It appears you don't have any Modifier Group, please import your data by clicking on <b>Import Items from sidebar then import inventory</b></div>";
@@ -1355,15 +1619,15 @@ class moo_OnlineOrders_Admin {
                             'service_fees_name',
                             'service_fees_type',
                             'tips');
+
                         foreach ($MooOptions as $option_name=>$option_value)
                             if(!in_array($option_name,$fields))
-                                if($option_name=="custom_js" || $option_name =="custom_css" || $option_name == "copyrights")
+                                if($option_name=="custom_js" || $option_name =="custom_css" || $option_name == "copyrights"|| $option_name == "zones_json")
                                     echo '<textarea name="moo_settings['.$option_name.']" id="" cols="10" rows="10" style="display:none">'.$option_value.'</textarea>';
                                 else
                                     echo '<input type="text"  name="moo_settings['.$option_name.']" value="'.$option_value.'" hidden/>';
 
                         ?>
-                        <textarea  name="moo_settings[zones_json]" hidden><?php echo $MooOptions['zones_json']?></textarea>
                         <!-- Checkout login Section -->
                         <div class="MooPanelItem">
                             <h3>Login to checkout</h3>
@@ -1623,15 +1887,19 @@ class moo_OnlineOrders_Admin {
                             'order_later_days',
                             'order_later_minutes_delivery',
                             'order_later_days_delivery',
+                            'order_later_asap_for_p',
+                            'order_later_asap_for_d',
                             'custom_css',
                             'custom_js',
                             'copyrights',
                             'store_page',
                             'checkout_page',
-                            'cart_page',
-                            'zones_json');
+                            'cart_page');
                         foreach ($MooOptions as $option_name=>$option_value)
                             if(!in_array($option_name,$fields))
+                            if($option_name == "zones_json")
+                                echo '<textarea name="moo_settings['.$option_name.']" id="" cols="10" rows="10" style="display:none">'.$option_value.'</textarea>';
+                            else
                                 echo '<input type="text"  name="moo_settings['.$option_name.']" value="'.$option_value.'" hidden/>';
 
                         ?>
@@ -1775,6 +2043,16 @@ class moo_OnlineOrders_Admin {
                                             <input name="moo_settings[order_later_days]" id="MooOrderLaterDaysP" type="text" value="<?php echo (isset($MooOptions['order_later_days']))?$MooOptions['order_later_days']:"" ?>" />
                                         </div>
                                     </div>
+                                    <div class="iwl_holder">
+                                        <div style="margin-bottom: 14px;" class="label">Allow customers to choose : ASAP</div>
+                                        <div class="moo-onoffswitch"  title="Show/hide asap in pickup time" style="margin-top: 7px;">
+                                            <input type="hidden" name="moo_settings[order_later_asap_for_p]" value="off">
+                                            <input type="checkbox" name="moo_settings[order_later_asap_for_p]" class="moo-onoffswitch-checkbox" id="myonoffswitch_order_later_asap_for_p" <?php echo (isset($MooOptions['order_later_asap_for_p']) && $MooOptions['order_later_asap_for_p'] == 'on')?'checked':''?>>
+                                            <label class="moo-onoffswitch-label" for="myonoffswitch_order_later_asap_for_p"><span class="moo-onoffswitch-inner"></span>
+                                                <span class="moo-onoffswitch-switch"></span>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div style="font-size: 16px;font-weight: 700;">Delivery Orders</div>
                                 <div class="Moo_option-item" >
@@ -1793,6 +2071,16 @@ class moo_OnlineOrders_Admin {
                                         <div class="iwl_label_holder"><label for="MooOrderLaterDaysD">days in future</label></div>
                                         <div class="iwl_input_holder">
                                             <input name="moo_settings[order_later_days_delivery]" id="MooOrderLaterDaysD" type="text" value="<?php echo (isset($MooOptions['order_later_days_delivery']))?$MooOptions['order_later_days_delivery']:"" ?>" />
+                                        </div>
+                                    </div>
+                                    <div class="iwl_holder">
+                                        <div style="margin-bottom: 14px;" class="label">Allow customers to choose : ASAP</div>
+                                        <div class="moo-onoffswitch"  title="Show/hide asap in delivery time" style="margin-top: 7px;">
+                                            <input type="hidden" name="moo_settings[order_later_asap_for_d]" value="off">
+                                            <input type="checkbox" name="moo_settings[order_later_asap_for_d]" class="moo-onoffswitch-checkbox" id="myonoffswitch_order_later_asap_for_d" <?php echo (isset($MooOptions['order_later_asap_for_d']) && $MooOptions['order_later_asap_for_d'] == 'on')?'checked':''?>>
+                                            <label class="moo-onoffswitch-label" for="myonoffswitch_order_later_asap_for_d"><span class="moo-onoffswitch-inner"></span>
+                                                <span class="moo-onoffswitch-switch"></span>
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
@@ -2062,7 +2350,7 @@ class moo_OnlineOrders_Admin {
                         <h3>Need Help or Feedback</h3>
                         <div class="normal_text">
                             Do you need help or would like to give us feedback.<br/>Please e-mail or call us: 925-234-5554 (8am-8pm pacific time).<br/>
-                            You can also visit our support site at <a href="http://docs.smartonlineorder.com/docs/online-orders/">http://docs.smartonlineorder.com</a>
+                            You can also visit our support site at <a href="http://docs.smartonlineorder.com/docs/online-orders/" target="_blank">http://docs.smartonlineorder.com</a>
                         </div>
                         <div class="Moo_option-item">
                             <div class="iwl_holder">
@@ -2167,6 +2455,11 @@ class moo_OnlineOrders_Admin {
         add_submenu_page('moo_index', 'Items/Images', 'Items / Images', 'manage_options', 'moo_items', array($this, 'page_products'));
         add_submenu_page('moo_index', 'Orders', 'Orders', 'manage_options', 'moo_orders', array($this, 'page_orders'));
         add_submenu_page('moo_index', 'Coupons', 'Coupons', 'manage_options', 'moo_coupons', array($this, 'page_coupons'));
+
+        add_submenu_page('', '', '', 'manage_options', 'moo_import_wizard','');
+
+      //  add_dashboard_page( '', '', 'manage_options',"moo_import_wizard", '' );
+
     }
     public function enq_media_uploader()
     {
@@ -2217,6 +2510,44 @@ class moo_OnlineOrders_Admin {
     public function register_mysettings()
     {
         register_setting('moo_settings', 'moo_settings');
+    }
+
+    /**
+     * Render the import inventory wizard
+     *
+     * @since    1.2.8
+     */
+    public function render_import_wizard_page()
+    {
+
+        //Enqueue Scripts and styles
+
+        $dashboard_url = admin_url( '/admin.php?page=moo_index' );
+        ?>
+        <!DOCTYPE html>
+        <!--[if IE 9]>
+        <html class="ie9" <?php language_attributes(); ?> >
+        <![endif]-->
+        <!--[if !(IE 9) ]><!-->
+        <html <?php language_attributes(); ?>>
+        <!--<![endif]-->
+        <head>
+            <meta name="viewport" content="width=device-width"/>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+            <title>Import Inventory Wizard</title>
+        </head>
+        <body class="wp-admin wp-core-ui">
+        <div id="wizard"></div>
+        <div role="contentinfo" class="moo-wizard-return-link-container">
+            <a class="button yoast-wizard-return-link" href="<?php echo $dashboard_url ?>">
+                <span aria-hidden="true" class="dashicons dashicons-no"></span>
+                Close wizard
+            </a>
+        </div>
+        </body>
+        </html>
+        <?php
+
     }
     /**
      * Register the stylesheets for the admin area.
@@ -2295,7 +2626,7 @@ class moo_OnlineOrders_Admin {
 
 
         //wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/moo-OnlineOrders-admin.js', array( 'jquery' ), $this->version, false );
-        wp_register_script('moo-google-map', 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc&libraries=drawing&geometry');
+        wp_register_script('moo-google-map', '//maps.googleapis.com/maps/api/js?key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc&libraries=drawing&geometry');
 
         wp_register_script('moo-publicAdmin-js', plugins_url( 'js/moo-OnlineOrders-admin.js', __FILE__ ),array('moo-google-map'), $this->version);
         wp_register_script('moo-tooltip-js', plugins_url( 'js/tooltip.min.js', __FILE__ ),array(), $this->version);
@@ -2320,6 +2651,7 @@ class moo_OnlineOrders_Admin {
         wp_enqueue_script('moo-publicAdmin-js',array('jquery','wp-color-picker','jquery-ui-datepicker','jquery-ui-sortable'));
 
         wp_localize_script("moo-publicAdmin-js", "moo_params",$params);
+        wp_localize_script("moo-publicAdmin-js", "moo_RestUrl",get_rest_url());
 
     }
 
@@ -2344,13 +2676,11 @@ class moo_OnlineOrders_Admin {
             $fields = array('lat','lng');
             foreach ($MooOptions as $option_name=>$option_value)
                 if(!in_array($option_name,$fields))
-                    if($option_name=="custom_js" || $option_name =="custom_css" || $option_name == "copyrights")
+                    if($option_name=="custom_js" || $option_name =="custom_css" || $option_name == "copyrights"|| $option_name == "zones_json")
                         echo '<textarea name="moo_settings['.$option_name.']" id="" cols="10" rows="10" style="display:none">'.$option_value.'</textarea>';
                     else
                         echo '<input type="text"  name="moo_settings['.$option_name.']" value="'.$option_value.'" hidden/>';
             ?>
-            <textarea name="moo_settings[zones_json]" hidden><?php echo $MooOptions['zones_json']?></textarea>
-
             <input type="hidden" name="_wp_http_referer" value="<?php echo (esc_url((admin_url('admin.php?page=moo_index')))); ?>" />
             <div id="MooPanel_tabContent1">
                 <h2>Set-up your address</h2><hr>
@@ -2484,7 +2814,7 @@ class moo_OnlineOrders_Admin {
                 if(!$item) continue;
                 $tab_items[] = $item;
             }
-            usort($tab_items, "self::sortItems");
+            usort($tab_items, array("moo_OnlineOrders_Admin","sortItems"));
             if (!empty($tab_items)){
                 echo "<ul class='moo_listItem' id-cat='$idcat'>";
                 foreach ($tab_items as $value){

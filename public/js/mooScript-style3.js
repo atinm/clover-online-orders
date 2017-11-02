@@ -202,7 +202,8 @@ function moo_clickOnOrderBtnFIWM(event,item_id)
     var target = event.target;
     jQuery(target).text(jQuery(target).attr("data-loading-text"));
 
-    var qty = 1;
+    var qty = parseInt(jQuery("#moo-itemQty-for-"+item_id).val());
+
 
     jQuery.get(moo_RestUrl+"moo-clover/v1/items/"+item_id, function (data) {
         //Change butn text

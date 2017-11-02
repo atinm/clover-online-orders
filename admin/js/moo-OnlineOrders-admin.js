@@ -54,19 +54,32 @@ jQuery(document).ready(function($){
     $('div#MooPanel_tabContent4 input#MooDefaultStyle').each(function (i,val) {
         var v = $(val).attr('value');
         if($(val).prop('checked'))
+        {
             $('div#MooPanel_tabContent4 input[value='+v+']').next().css('border', '2px solid rgb(34, 255, 79)');
+            $('#mooInterface-'+v).show();
+        }
         else
+        {
             $('div#MooPanel_tabContent4 input[value='+v+']').next().css('border', 'none');
+            $('#mooInterface-'+v).hide();
+        }
     });
+
     $('div#MooPanel_tabContent4 input#MooDefaultStyle').click(function(event) {
         var elm = $(event.target);
         var value = elm.attr('value');
         $('div#MooPanel_tabContent4 input#MooDefaultStyle').each(function (i,val) {
             var v = $(val).attr('value');
             if(v == value)
+            {
                 $('div#MooPanel_tabContent4 input[value='+value+']').next().css('border', '2px solid rgb(34, 255, 79)');
+                $('#mooInterface-'+v).show();
+            }
             else
+            {
                 $('div#MooPanel_tabContent4 input[value='+v+']').next().css('border', 'none');
+                $('#mooInterface-'+v).hide();
+            }
         })
     });
 
@@ -94,14 +107,14 @@ jQuery(document).ready(function($){
         c_html += "</div>";
        // c_html += "<div class='button-name'>";
         c_html += "<div class='bt-valider'>";
-        c_html +='<a href="#" class="vald-change-name" onclick=&quot;vald_change_name(event,'+idCatStr+',"D")&quot;>';
+        c_html +='<a href="#" class="vald-change-name" onclick=\'vald_change_name(event,'+idCatStr+',"D")\'>';
         c_html +='<span id="moo_valide_change1" data-ot="valider_change_name" data-ot-target="#moo_valide_change1">';
         c_html +="<img src='"+moo_params.plugin_url+"/public/img/valider.png' alt='Validate change'>";
         c_html +="</span>";
         c_html +="</a>";
         c_html += "</div>";
         c_html += "<div class='bt-annuler'>";
-        c_html +='<a href="#" class="annuler-change-name" onclick=&quot;annuler_change_name(event,'+idCatStr+',"D",'+name_cat+')&quot;>';
+        c_html +='<a href="#" class="annuler-change-name" onclick=\'annuler_change_name(event,'+idCatStr+',"D",'+name_cat+')\'>';
         c_html += "<img src='"+moo_params.plugin_url+"/public/img/annuler.png' alt='Annuler change'>";
         c_html +="</a>";
         c_html += "</div>";
@@ -1317,4 +1330,146 @@ function moo_saveCardsClicked(status)
     {
         jQuery(".moo_saveCardsClicked").hide();
     }
+}
+
+/*
+ * Clean the inventory, is about removing data that was removed on Clover from local db
+ * @version 1.2.8
+ */
+
+function MooPanel_CleanInventory(e)
+{
+    e.preventDefault();
+    swal.setDefaults({
+        confirmButtonText: 'Next &rarr;',
+        allowOutsideClick: false,
+        showCancelButton: true,
+        animation: false,
+        progressSteps: ['0','1', '2', '3','4', '5', '6']
+    });
+
+    var steps = [
+        {
+            title: 'Clean Inventory',
+            html: 'This may take several minutes depending on the size of your inventory. Only use this feature if you have made significant '+
+                   'changes on Clover and you find it a hassle to manually hide them from the website. <br /> Click "Next" if you wish to proceed'
+        },
+        {
+            title: 'Order Types',
+            html: '<p>Click "Start" to remove old order types that have been deleted from Clover yet still appears on the website.<br/> Click "Next" to move on to Tax Rates </p>'+
+                  '<div id="mooClean_order_types"></div>'+
+                  '<a href="" class="button button-secondary" onclick="mooClean(event,\'order_types\')">Start</a>'
+        },
+        {
+            title: 'Taxes Rates',
+            html: '<p>Click "Start" to remove old tax rates that have been deleted from Clover yet still appears on the website.<br/> Click "Next" to move on to Modifiers Groups</p>'+
+                  '<div id="mooClean_tax_rates"></div>'+
+                  '<a href="" class="button button-secondary" onclick="mooClean(event,\'tax_rates\')">Start</a>'
+        },
+        {
+            title: 'Modifier Groups',
+            html: '<p>Click "Start" to remove old Modifier Groups that have been deleted from Clover yet still appears on the website.<br/> Click "Next" to move on to Modifiers</p>'+
+                  '<div id="mooClean_modifier_groups"></div>'+
+                  '<a href="" class="button button-secondary" onclick="mooClean(event,\'modifier_groups\')">Start</a>'
+        },
+        {
+            title: 'Modifiers',
+            html: '<p>Click "Start" remove old Modifiers that have been deleted from Clover yet still appears on the website. This may take a few minutes.<br/> Click on "Next" to move on to Categories</p>'+
+                  '<div id="mooClean_modifiers"></div>'+
+                  '<a href="" class="button button-secondary" onclick="mooClean(event,\'modifiers\')">Start</a>'
+        },
+        {
+            title: 'Categories',
+            html: '<p>Click "Start" to remove old Categories that have been deleted from Clover yet still appears on the website. <br/> Click on "Next" to move on to Items '+
+                  '<div id="mooClean_categories"></div>'+
+                  '<a href="" class="button button-secondary" onclick="mooClean(event,\'categories\')">Start</a>'
+        },
+        {
+            title: 'Items',
+            html: '<p>Click "Start" to remove old items that have been deleted from Clover yet still appears on the website. '+
+                    'This may take a few minutes. <br/> Click "Next" to finish and exit</p>'+
+                  '<div id="mooClean_items"></div>'+
+                  '<a href="" class="button button-secondary" onclick="mooClean(event,\'items\')">Start</a>'
+        }
+    ];
+
+    swal.queue(steps).then(function () {
+        swal.resetDefaults();
+        swal({
+            title: 'All Done!',
+            html:
+            "The clean up process has been successfully completed. If you have added additional items to your Clover inventory, you will need to do a manual sync. Clean inventory feature only removes old items",
+            confirmButtonText: 'ok'
+        })
+    }, function () {
+        swal.resetDefaults()
+    })
+}
+/*
+ * This function to Clean the inventory, we set teh typOfdate wich may take (order_tyes,tax_rates,categories,items..)
+ * The default number of data per page is 10, then we send an other request using the recursive loop CleanByPage
+ */
+function mooClean(event,typeOfDate)
+{
+    event.preventDefault();
+    jQuery(event.target).hide();
+    var id = "#mooClean_"+typeOfDate;
+    var pbar = new ProgressBar.Line(id, {
+        strokeWidth: 4,
+        easing: 'easeInOut',
+        duration: 1400,
+        color: '#496F4E',
+        trailColor: '#eee',
+        trailWidth: 1,
+        svgStyle: {width: '100%', height: '100%'},
+        text: {
+            style: {
+                // Text color.
+                // Default: same as stroke color (options.color)
+                color: '#999',
+                right: '0',
+                top: '30px',
+                padding: 0,
+                margin: 0,
+                transform: null
+            },
+            autoStyleContainer: false
+        },
+        from: {color: '#FFEA82'},
+        to: {color: '#ED6A5A'}
+    });
+
+    pbar.animate(0.1);
+    jQuery.get(moo_RestUrl+'moo-clover/v1/clean/'+typeOfDate+'/10/0',function (data) {
+        var nb = parseInt(data["nb_"+typeOfDate]);
+        pbar.setText(nb +' '+typeOfDate.replace("_"," ")+' checked');
+        if(! data.last_page)
+            mooCleanByPage(1,pbar,typeOfDate);
+        else
+        {
+            jQuery(id).html(nb +' '+typeOfDate.replace("_"," ")+' Cleaned, You can click on Next')
+        }
+    });
+
+
+}
+function mooCleanByPage(page,pbar,typeOfDate)
+{
+    var id = "#mooClean_"+typeOfDate;
+
+    if(page/10 <1)
+        pbar.animate(page/10);
+    else
+        pbar.animate(1.0);
+
+    jQuery.get(moo_RestUrl+'moo-clover/v1/clean/'+typeOfDate+'/10/'+page,function (data) {
+        var nb = (parseInt(data["nb_"+typeOfDate])+parseInt(page*10));
+        pbar.setText( nb + ' ' + typeOfDate.replace("_"," ")+' checked');
+        if(! data.last_page)
+            mooCleanByPage(page+1,pbar,typeOfDate);
+        else
+        {
+            jQuery(id).html(nb + ' ' + typeOfDate.replace("_"," ") +' Cleaned, You can click on Next')
+        }
+    });
 }

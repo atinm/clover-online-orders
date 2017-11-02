@@ -237,7 +237,6 @@ function moo_draw_zone()
 }
 function moo_validate_selected_zone()
 {
-
     if(typeof selectedShape == 'undefined' || selectedShape == null || selectedShape.map == null)
     {
         alert('Please select the zone');

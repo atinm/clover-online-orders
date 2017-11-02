@@ -16,7 +16,7 @@
  * Plugin Name:       Merchantech Online Orders for Clover
  * Plugin URI:        http://www.merchantechapps.com
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.2.71
+ * Version:           1.2.80
  * Author:            Merchantech
  * Author URI:        http://www.merchantechapps.com
  * License:           Clover app
@@ -72,6 +72,7 @@ function moo_OnlineOrders_shortcodes_thecart($atts, $content) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
     return Moo_OnlineOrders_Shortcodes::theCart($atts, $content);
 }
+
 function moo_OnlineOrders_shortcodes_categorymsg($atts, $content) {
     if(isset($atts["cat_id"]) && $atts["message"])
     {
@@ -134,7 +135,7 @@ add_filter( 'wp_mail_content_type', function( $content_type ) {
     return 'text/html';
 });
 */
-if(get_option('moo_onlineOrders_version')!='126')
+if(get_option('moo_onlineOrders_version')!='128')
     add_action('plugins_loaded', 'moo_onlineOrders_check_version');
 
 /*
@@ -200,11 +201,34 @@ function moo_onlineOrders_check_version()
             if( !isset($defaultOptions["delivery_fees_name"]) || $defaultOptions["delivery_fees_name"] == "") $defaultOptions["delivery_fees_name"] = "Delivery Charge";
             if( !isset($defaultOptions["order_later_minutes_delivery"]) || $defaultOptions["order_later_minutes_delivery"] == "") $defaultOptions["order_later_minutes_delivery"] = "60";
             if( !isset($defaultOptions["order_later_days_delivery"]) || $defaultOptions["order_later_days_delivery"] == "") $defaultOptions["order_later_days_delivery"] = "4";
-            if( !isset($defaultOptions["copyrights"]) || $defaultOptions["copyrights"] == "") $defaultOptions["copyrights"] = 'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.2.7">Smart Online Order</a>';
+            if( !isset($defaultOptions["copyrights"]) || $defaultOptions["copyrights"] == "") $defaultOptions["copyrights"] = 'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.2.8">Smart Online Order</a>';
 
             update_option('moo_settings', $defaultOptions );
-            update_option('moo_onlineOrders_version','127');
+
         case '127':
+            $default_options = array(
+                array("name"=>"onePage_fontFamily","value"=>"Oswald,sans-serif"),
+                array("name"=>"onePage_categoriesTopMargin","value"=>"0"),
+                array("name"=>"onePage_width","value"=>"1024"),
+                array("name"=>"onePage_categoriesFontColor","value"=>"#ffffff"),
+                array("name"=>"onePage_categoriesBackgroundColor","value"=>"#282b2e"),
+                array("name"=>"onePage_qtyWindow","value"=>"on"),
+                array("name"=>"onePage_qtyWindowForModifiers","value"=>"on"),
+                array("name"=>"onePage_backToTop","value"=>"off"),
+                array("name"=>"order_later_asap_for_p","value"=>"off"),
+                array("name"=>"order_later_asap_for_d","value"=>"off"),
+                array("name"=>"mg_settings_displayInline","value"=>"disabled"),
+                array("name"=>"mg_settings_qty_for_all","value"=>"enabled"),
+                array("name"=>"mg_settings_qty_for_zeroPrice","value"=>"enabled"),
+            );
+            $MooOptions = $defaultOptions;
+            foreach ($default_options as $default_option) {
+                if(!isset($MooOptions[$default_option["name"]]))
+                    $MooOptions[$default_option["name"]]=$default_option["value"];
+            }
+            update_option("moo_settings",$MooOptions);
+            update_option('moo_onlineOrders_version','128');
+        case '128':
             break;
     }
 }

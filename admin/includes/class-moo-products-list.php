@@ -206,9 +206,9 @@ class Products_List_Moo extends WP_List_Table_MOO {
             $actions['enable_ot']  = sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Enable out of stock</a>',
                 'moo_items', 'enable_ot',esc_attr($item['uuid']), $enable_ot_nonce,$this->get_pagenum());
 
-        $actions['edit'] = sprintf( '<a href="?page=%s&action=%s&item_uuid=%s">Edit Images</a>',
+        $actions['edit'] = sprintf( '<a href="?page=%s&action=%s&item_uuid=%s">Add / Edit Images</a>',
             'moo_items', 'update_item',esc_attr($item['uuid']));
-        $actions['edit_description'] = sprintf( '<a class="moo-edit-description-button" href="#edit-description-popup-%s">Edit description</a><div id="edit-description-popup-%s" class="white-popup mfp-hide"><textarea id="edit-description-content-%s" style="width: 100&#37;"  rows="5">%s</textarea><button class="button" onclick="moo_editItemDescription(event,\'%s\')">Save</button></div>',
+        $actions['edit_description'] = sprintf( '<a class="moo-edit-description-button" href="#edit-description-popup-%s">Add / Edit description</a><div id="edit-description-popup-%s" class="white-popup mfp-hide"><textarea id="edit-description-content-%s" style="width: 100&#37;"  rows="5">%s</textarea><button class="button" onclick="moo_editItemDescription(event,\'%s\')">Save</button></div>',
             esc_attr($item['uuid']),esc_attr($item['uuid']),esc_attr($item['uuid']),esc_attr($item['description']),esc_attr($item['uuid']));
 
         return $title . $this->row_actions( $actions );

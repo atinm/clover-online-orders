@@ -1,22 +1,51 @@
 /**
- * Created by Smart MerchantApps on 9/11/2017.
+ * Created by Mohammed EL BANYAOUI on 9/11/2017.
  */
-jQuery(document).ready(function() {
-    var header_height = (typeof window.header_height != 'undefined' && window.header_height != null)?window.header_height:0;
-    MooLoadBaseStructure('#moo_OnlineStoreContainer',mooGetCategories);
-    MooSetLoading();
-
+jQuery(document).ready(function()
+{
+    window.moo_theme_setings = [];
+    window.moo_mg_setings = {};
+    window.nb_items_in_cart = 0;
+    window.header_height = (typeof window.header_height != 'undefined' && window.header_height != null)?window.header_height:0;
     var container_top = jQuery('#moo_OnlineStoreContainer').offset().top;
-    var height = (jQuery(window).width()>768)?(container_top>0)?(header_height+0):'':'';
-    window.width  = 267;
-    //jQuery(".moo-nav-menu").css('height', height);
+
+    /* Load the them settings then draw tha layout an get the categories with the first five items */
+    jQuery.get(moo_RestUrl+"moo-clover/v1/theme_settings/onePage", function (data) {
+        if(data != null && data.settings != null)
+        {
+            window.moo_theme_setings = data.settings;
+            window.nb_items_in_cart  = data.nb_items;
+            //Change the categories font-family
+            if(window.moo_theme_setings.onePage_categoriesTopMargin != null)
+            {
+                window.header_height = window.moo_theme_setings.onePage_categoriesTopMargin;
+            }
+            window.height = (jQuery(window).width()>768)?(container_top>0)?(window.header_height):'':'';
+            window.width  = 267;
+        }
+    }).done(function () {
+        MooLoadBaseStructure('#moo_OnlineStoreContainer',mooGetCategories);
+        MooSetLoading();
+    });
+    /* Load the modifiers settings and save them on a window's variable */
+    jQuery.get(moo_RestUrl+"moo-clover/v1/mg_settings", function (data) {
+        if(data != null && data.settings != null)
+        {
+            window.moo_mg_setings = data.settings;
+        }
+    });
+
+    /* a listener when scrolling to fix the tha category section */
     jQuery(window).scroll(function(){
         if (jQuery(window).scrollTop() > (container_top-header_height))
         {
+            jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",window.height+'px');
+            /*
             if(window.width>260)
-                jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",height);
-            else
-                jQuery(".moo-stick-to-content").addClass('moo-fixed').width('100%').css("top",height);
+                jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",window.height+'px');
+             else
+                jQuery(".moo-stick-to-content").addClass('moo-fixed').width('100%').css("top",window.height+'px');
+             */
         }
         else
         {
@@ -25,7 +54,8 @@ jQuery(document).ready(function() {
     });
 
 });
-function MooLoadBaseStructure(elm_id,callback) {
+function MooLoadBaseStructure(elm_id,callback)
+{
     var html = '<div class="moo-row">'+
         '<div id="MooLoadingSection" style="text-align: center;font-size: 20px;display:none">Loading, please wait ...</div>'+
         '</div>'+
@@ -41,8 +71,24 @@ function MooLoadBaseStructure(elm_id,callback) {
         '<div id="moo_cart_icon">'+
         '<span>VIEW CART</span>'+
         '</div></a></div>';
+    var cart_icon = '<div  class="moo-is-sticky  moo-new-icon" onclick="mooShowCart(event)">' +
+                    '<div class="moo-new-icon__count" id="moo-cartNbItems">'+((window.nb_items_in_cart>0)?window.nb_items_in_cart:'')+'</div>' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" class="moo-new-icon__cart-panier" viewBox="0 0 25 25" enable-background="new 0 0 25 25">' +
+                    '<g class="moo-new-icon__group"><path d="M24.6 3.6c-.3-.4-.8-.6-1.3-.6h-18.4l-.1-.5c-.3-1.5-1.7-1.5-2.5-1.5h-1.3c-.6 0-1 .4-1 1s.4 1 1 1h1.8l3 13.6c.2 1.2 1.3 2.4 2.5 2.4h12.7c.6 0 1-.4 1-1s-.4-1-1-1h-12.7c-.2 0-.5-.4-.6-.8l-.2-1.2h12.6c1.3 0 2.3-1.4 2.5-2.4l2.4-7.4v-.2c.1-.5-.1-1-.4-1.4zm-4 8.5v.2c-.1.3-.4.8-.5.8h-13l-1.8-8.1h17.6l-2.3 7.1z"></path><circle  cx="9" cy="22" r="2"></circle><circle cx="19" cy="22" r="2"></circle></g>' +
+                    '</svg></div>';
+
+    /* Adding the structure the the html page */
     jQuery(elm_id).html(html);
-    jQuery('html body').prepend(html_cart);
+    //jQuery('html body').prepend(html_cart);
+    jQuery('html body').prepend(cart_icon);
+
+    //Adding add to back button
+    if(window.moo_theme_setings.onePage_backToTop != null)
+    {
+       var html_backtoTop = "";
+        jQuery('html body').prepend(html_backtoTop);
+    }
+
     callback();
 }
 function MooSetLoading()
@@ -50,7 +96,8 @@ function MooSetLoading()
     jQuery('#MooLoadingSection').show();
 }
 
-function MooCLickOnCategory(event,elm) {
+function MooCLickOnCategory(event,elm)
+{
     event.preventDefault();
     var page = jQuery(elm).attr('href');
     var speed = 750;
@@ -71,6 +118,7 @@ function mooGetCategories()
             jQuery(element).html(html);
         }
     });
+
 }
 //Render all categories to html element and insert it into the page
 function moo_renderCategories($cats)
@@ -84,7 +132,7 @@ function moo_renderCategories($cats)
         var category = $cats[i];
         if(category.five_items.length >0 )
         {
-            html +='<li><a href="#cat-'+category.uuid+'" onclick="MooCLickOnCategory(event,this)">'+category.name+'</a></li>';
+            html +='<li><a href="#cat-'+category.uuid.toLowerCase()+'" onclick="MooCLickOnCategory(event,this)">'+category.name+'</a></li>';
             moo_renderItems(category);
         }
     }
@@ -96,7 +144,51 @@ function moo_renderCategories($cats)
                        '<a href="#" class="moo-btn moo-btn-lg moo-btn-primary" onclick="mooShowCart(event)">View Cart</a>'+
                        '</div>';
        jQuery("#moo-onlineStore-items").append(cart_btn);
-        jQuery('#MooLoadingSection').hide();
+       jQuery('#MooLoadingSection').hide();
+
+       var hash = window.location.hash;
+       if (hash != "") {
+            var top = (jQuery(hash).offset() != null)?jQuery(hash).offset().top:""; //Getting Y of target element
+            window.scrollTo(0, top);
+        }
+        // Custome css or theme customisation applicatio
+        if(window.moo_theme_setings != null && typeof window.moo_theme_setings != "undefined")
+        {
+            //Force page width changing
+            /*
+            if(window.moo_theme_setings.onePage_width != null)
+                jQuery("#moo_OnlineStoreContainer").width(window.moo_theme_setings.onePage_width );
+            */
+            //Change the categories background color
+            if(window.moo_theme_setings.onePage_categoriesBackgroundColor != null)
+            {
+                jQuery(".moo-bg-dark").css("background-color",window.moo_theme_setings.onePage_categoriesBackgroundColor );
+                jQuery(".moo-menu-category .moo-menu-category-title").css("background-color",window.moo_theme_setings.onePage_categoriesBackgroundColor );
+                //Change the cart icon colors
+                jQuery(".moo-new-icon").css("background-color",window.moo_theme_setings.onePage_categoriesBackgroundColor );
+                jQuery(".moo-new-icon").css("border-color",window.moo_theme_setings.onePage_categoriesBackgroundColor );
+            }
+            //Change the categories font color
+            if(window.moo_theme_setings.onePage_categoriesFontColor != null)
+            {
+                jQuery(".moo-nav-menu li a").css("color",window.moo_theme_setings.onePage_categoriesFontColor );
+                jQuery(".moo-menu-category .moo-menu-category-title .moo-title").css("color",window.moo_theme_setings.onePage_categoriesFontColor );
+
+                //Change the cart icon colors
+                jQuery(".moo-new-icon").css("color",window.moo_theme_setings.onePage_categoriesFontColor );
+                jQuery(".moo-new-icon__cart-panier").css("color",window.moo_theme_setings.onePage_categoriesFontColor );
+                jQuery(".moo-new-icon__group").css("fill",window.moo_theme_setings.onePage_categoriesFontColor );
+            }
+            //Change the categories font-family
+            if(window.moo_theme_setings.onePage_fontFamily != null)
+            {
+                jQuery(".moo-nav-menu li a").css("font-family",window.moo_theme_setings.onePage_fontFamily );
+                jQuery(".moo-menu-category .moo-menu-category-title .moo-title").css("font-family",window.moo_theme_setings.onePage_fontFamily );
+            }
+
+
+
+        }
     });
 }
 
@@ -104,12 +196,12 @@ function moo_renderCategories($cats)
 function moo_renderItems(category)
 {
     var element = document.getElementById("moo-onlineStore-items");
-    var html    =   '<div id="cat-'+category.uuid+'" class="moo-menu-category">'+
+    var html    =   '<div id="cat-'+category.uuid.toLowerCase()+'" class="moo-menu-category">'+
                     '<div class="moo-menu-category-title">'+
                     '   <div class="moo-bg-image" style="background-image: url(&quot;'+((category.image_url!=null)?category.image_url:"")+'&quot;);"></div>'+
                     '   <div class="moo-title">'+category.name+'</div>'+
                     '</div>'+
-                    '<div class="moo-menu-category-content" id="moo-items-for-'+category.uuid+'">';
+                    '<div class="moo-menu-category-content" id="moo-items-for-'+category.uuid.toLowerCase()+'">';
 
     for(i in category.five_items){
         var item = category.five_items[i];
@@ -156,14 +248,35 @@ function moo_renderItems(category)
         }
         else
         {
-            if(item.has_modifiers)
-                html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtnFIWM)">Choose Qty & Options</button>';
+            //Checking the Qty window show/hide and add add to cart button
+            if(window.moo_theme_setings.onePage_qtyWindow != null && window.moo_theme_setings.onePage_qtyWindow == "on")
+            {
+                if(item.has_modifiers)
+                {
+                    if(window.moo_theme_setings.onePage_qtyWindowForModifiers != null && window.moo_theme_setings.onePage_qtyWindowForModifiers == "on")
+                        html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtnFIWM)">Choose Qty & Options</button>';
+                    else
+                        html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty</button>';
+                }
+                else
+                    html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)">Add to cart</button>';
+
+            }
             else
-                html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)">Add to cart</button>';
+            {
+                if(item.has_modifiers)
+                    html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty </button>';
+                else
+                    html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtn(event,\''+item.uuid+'\',1)">Add to cart</button>';
+
+            }
+
         }
 
+        html += '</div>';
+        if(item.has_modifiers)
+            html += '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12" id="moo-modifiersContainer-for-'+item.uuid+'"></div>';
         html += '</div>'+
-                '</div>'+
                 '</div>';
     }
     if(category.five_items.length == 5)
@@ -236,18 +349,39 @@ function mooClickOnLoadMoreItems(event,cat_id,cat_name)
                 }
                 else
                 {
-                    if(item.has_modifiers)
-                        html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtnFIWM)">Choose Qty & Options</button>';
+                    //Checking the Qty window show/hide and add add to cart button
+                    if(window.moo_theme_setings.onePage_qtyWindow != null && window.moo_theme_setings.onePage_qtyWindow == "on")
+                    {
+                        if(item.has_modifiers)
+                        {
+                            if(window.moo_theme_setings.onePage_qtyWindowForModifiers != null && window.moo_theme_setings.onePage_qtyWindowForModifiers == "on")
+                                html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtnFIWM)">Choose Qty & Options</button>';
+                            else
+                                html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty</button>';
+                        }
+                        else
+                            html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)">Add to cart</button>';
+
+                    }
                     else
-                        html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)">Add to cart</button>';
+                    {
+                        if(item.has_modifiers)
+                            html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty </button>';
+                        else
+                            html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtn(event,\''+item.uuid+'\',1)">Add to cart</button>';
+
+                    }
+
                 }
 
+                html += '</div>';
+                if(item.has_modifiers)
+                    html += '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12" id="moo-modifiersContainer-for-'+item.uuid+'"></div>';
                 html += '</div>'+
-                    '</div>'+
                     '</div>';
 
                 if(!--count) {
-                    jQuery("#moo-items-for-"+cat_id).html(html).promise().then(function () {
+                    jQuery("#moo-items-for-"+cat_id.toLowerCase()).html(html).promise().then(function () {
                         moo_ZoomOnImages();
                     });
                     swal.close();
@@ -258,7 +392,7 @@ function mooClickOnLoadMoreItems(event,cat_id,cat_name)
         {
             swal.close();
             var html     = 'You don\'t have any item in this category';
-            jQuery("#moo-items-for-"+cat_id).html(html);
+            jQuery("#moo-items-for-"+cat_id.toLowerCase()).html(html);
         }
     });
 }
@@ -370,7 +504,8 @@ function moo_clickOnOrderBtn(event,item_id,qty)
         });
         console.log(data);
     }).done(function ( data ) {
-
+        if(typeof data.nb_items != "undefined")
+            jQuery("#moo-cartNbItems").text(data.nb_items)
     });
 
 }
@@ -380,11 +515,12 @@ function moo_clickOnOrderBtnFIWM(event,item_id,qty)
     event.preventDefault();
     //Change button content to loading
     var target = event.target;
+    var old_text = jQuery(target).text();
     jQuery(target).text("Loading options");
 
     jQuery.get(moo_RestUrl+"moo-clover/v1/items/"+item_id, function (data) {
         //Change butn text
-        jQuery(target).text("Choose Qty & Options");
+        jQuery(target).text(old_text);
 
         if(data != null)
         {
@@ -392,7 +528,14 @@ function moo_clickOnOrderBtnFIWM(event,item_id,qty)
             {
                 if(typeof mooBuildModifiersPanel == "function")
                 {
-                    mooBuildModifiersPanel(data.modifier_groups,item_id,qty);
+                    if(Object.keys(window.moo_mg_setings).length > 0)
+                    {
+                        mooBuildModifiersPanel(data.modifier_groups,item_id,qty,window.moo_mg_setings);
+                    }
+                    else
+                    {
+                        mooBuildModifiersPanel(data.modifier_groups,item_id,qty);
+                    }
                     swal.close();
                 }
                 else
@@ -406,13 +549,13 @@ function moo_clickOnOrderBtnFIWM(event,item_id,qty)
         }
         else
         {
-            //Change butn text
-            jQuery(target).text("Choose Qty & Options");
+            //Change button text
+            jQuery(target).text(old_text);
             swal({ title: "Error", text: 'We cannot Load the options for this item, please refresh the page or contact us',   type: "error",   confirmButtonText: "ok" });
         }
     }).fail(function (data) {
-        //Change butn text
-        jQuery(target).text("Choose Qty & Options");
+        //Change button text
+        jQuery(target).text(old_text);
         swal({ title: "Error", text: 'We cannot Load the options for this item, please refresh the page or contact us',   type: "error",   confirmButtonText: "ok" });
     });
 
@@ -485,7 +628,7 @@ function mooShowCart(event)
                     cart_html+= '<div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-3 moo-col-xs-3  moo-cart-line-itemPrice">$'+formatPrice(line_price.toFixed(2))+'</div>';
                     cart_html+= '<div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-2 moo-col-xs-2  moo-cart-line-itemActions">';
                     cart_html+=  '<i style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fa fa-pencil-square-o" aria-hidden="true" onclick="mooUpdateSpecialInsinCart(\''+line_id+'\',\''+line.special_ins+'\')"></i>'+
-                        '<i style="cursor: pointer" class="fa fa-trash" aria-hidden="true" onclick="mooRemoveLineFromCart(\''+line_id+'\')"></i></div></div>';
+                        '<i style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fa fa-trash" aria-hidden="true" onclick="mooRemoveLineFromCart(\''+line_id+'\')"></i></div></div>';
                 });
                 cart_html += '</div>';
                 //Set teh cart total
@@ -517,6 +660,7 @@ function mooShowCart(event)
                     cancelButtonText : 'Close',
                     confirmButtonText : '<a href="'+moo_CheckoutPage+'" style="color:#ffffff">CHECKOUT</a>'
                 }).then(function () {
+                    console.log("conformed");
                     window.location.href = moo_CheckoutPage;
                 },function () {
 
@@ -569,13 +713,6 @@ function mooShowCart(event)
         });
     });
 }
-
-function mooMouseEnterToCartLine(elem) {
-    jQuery(".moo-cart-line-EditPanel",elem).show();
-}
-function mooMouseLeaveToCartLine(elem) {
-    jQuery(".moo-cart-line-EditPanel",elem).hide();
-}
 function mooRemoveLineFromCart(line_id)
 {
     swal({
@@ -604,6 +741,9 @@ function mooRemoveLineFromCart(line_id)
                     }
                 }).fail(function ( data ) {
                     resolve(false);
+                }).done(function ( data ) {
+                    if(typeof data.nb_items != "undefined")
+                        jQuery("#moo-cartNbItems").text(data.nb_items)
                 });
             })
         },

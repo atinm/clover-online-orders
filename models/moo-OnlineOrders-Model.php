@@ -38,6 +38,74 @@ class moo_OnlineOrders_Model {
                                     WHERE i.uuid = '{$uuid}'
                                     ");
     }
+    function hideItem($uuid)
+    {
+        $uuid = esc_sql($uuid);
+        return $this->db->get_row("UPDATE {$this->db->prefix}moo_item i SET hidden = 1
+                                    WHERE i.uuid = '{$uuid}'
+                                    ");
+    }
+    function hideCategory($uuid)
+    {
+        $uuid = esc_sql($uuid);
+        return $this->db->get_row("UPDATE {$this->db->prefix}moo_category c SET show_by_default = 1
+                                    WHERE c.uuid = '{$uuid}'
+                                    ");
+    }
+    function getItemsByPage($per_page,$page)
+    {
+        $per_page = esc_sql($per_page);
+        $offset = esc_sql($page) * $per_page;
+        return $this->db->get_results("SELECT *
+                                    FROM {$this->db->prefix}moo_item i
+                                    limit {$per_page} offset {$offset}
+                                    ");
+    }
+    function getCategoriesByPage($per_page,$page)
+    {
+        $per_page = esc_sql($per_page);
+        $offset = esc_sql($page) * $per_page;
+        return $this->db->get_results("SELECT *
+                                    FROM {$this->db->prefix}moo_category
+                                    limit {$per_page} offset {$offset}
+                                    ");
+    }
+    function getModifierGroupsByPage($per_page,$page)
+    {
+        $per_page = esc_sql($per_page);
+        $offset = esc_sql($page) * $per_page;
+        return $this->db->get_results("SELECT *
+                                    FROM {$this->db->prefix}moo_modifier_group
+                                    limit {$per_page} offset {$offset}
+                                    ");
+    }
+    function getModifiersByPage($per_page,$page)
+    {
+        $per_page = esc_sql($per_page);
+        $offset = esc_sql($page) * $per_page;
+        return $this->db->get_results("SELECT *
+                                    FROM {$this->db->prefix}moo_modifier
+                                    limit {$per_page} offset {$offset}
+                                    ");
+    }
+    function getTaxRatesByPage($per_page,$page)
+    {
+        $per_page = esc_sql($per_page);
+        $offset = esc_sql($page) * $per_page;
+        return $this->db->get_results("SELECT *
+                                    FROM {$this->db->prefix}moo_tax_rate
+                                    limit {$per_page} offset {$offset}
+                                    ");
+    }
+    function getOrderTypesByPage($per_page,$page)
+    {
+        $per_page = esc_sql($per_page);
+        $offset = esc_sql($page) * $per_page;
+        return $this->db->get_results("SELECT *
+                                    FROM {$this->db->prefix}moo_order_types
+                                    limit {$per_page} offset {$offset}
+                                    ");
+    }
     function getItemsBySearch($motCle)
     {
         $motCle = esc_sql($motCle);
@@ -302,12 +370,62 @@ function getItemsWithVariablePrice()
 
     }
     function moo_DeleteOrderType($uuid)
-{
-    $uuid = esc_sql($uuid);
-    return $this->db->delete("{$this->db->prefix}moo_order_types",
-                            array( 'ot_uuid' => $uuid )
-    );
-}
+    {
+        $uuid = esc_sql($uuid);
+        return $this->db->delete("{$this->db->prefix}moo_order_types",
+                                array( 'ot_uuid' => $uuid )
+        );
+    }
+    function deleteCategory($uuid)
+    {
+        $uuid = esc_sql($uuid);
+        return $this->db->delete("{$this->db->prefix}moo_category",
+                                array( 'uuid' => $uuid )
+        );
+    }
+    function deleteModifierGroup($uuid)
+    {
+        $uuid = esc_sql($uuid);
+        if( $uuid== "" ) return;
+        $this->db->query('START TRANSACTION');
+        $this->db->delete("{$this->db->prefix}moo_modifier",array('group_id'=>$uuid));
+        $this->db->delete("{$this->db->prefix}moo_item_modifier_group",array('group_id'=>$uuid));
+        $res = $this->db->delete("{$this->db->prefix}moo_modifier_group",array('uuid'=>$uuid));
+        if($res)
+        {
+            $this->db->query('COMMIT'); // if the item Inserted in the DB
+        }
+        else {
+            $this->db->query('ROLLBACK'); // // something went wrong, Rollback
+        }
+        return $res;
+
+    }
+    function deleteTaxRate($uuid)
+    {
+        $this->db->show_errors();
+        $uuid = esc_sql($uuid);
+        if( $uuid== "" ) return;
+        $this->db->query('START TRANSACTION');
+        $this->db->delete("{$this->db->prefix}moo_item_tax_rate",array('tax_rate_uuid'=>$uuid));
+        $res = $this->db->delete("{$this->db->prefix}moo_tax_rate",array('uuid'=>$uuid));
+        if($res)
+        {
+            $this->db->query('COMMIT'); // if the item Inserted in the DB
+        }
+        else {
+            $this->db->query('ROLLBACK'); // // something went wrong, Rollback
+        }
+        return $res;
+
+    }
+    function deleteModifier($uuid)
+    {
+        $uuid = esc_sql($uuid);
+        if( $uuid== "" ) return;
+        return $this->db->delete("{$this->db->prefix}moo_modifier",array('uuid'=>$uuid));
+
+    }
 
     function addOrder($uuid,$tax,$total,$name,$address, $city,$zipcode,$phone,$email,$instructions,$state,$country,$deliveryFee,$tipAmount,$shippingFee,$customer_lat,$customer_lng,$ordertype,$datetime)
     {
@@ -428,6 +546,10 @@ function getItemsWithVariablePrice()
     function NbGroupModifier()
     {
         return $this->db->get_results("SELECT count(*) as nb FROM {$this->db->prefix}moo_modifier_group WHERE uuid in (SELECT group_id from {$this->db->prefix}moo_modifier)");
+    }
+    function NbModifierGroups()
+    {
+        return $this->db->get_results("SELECT count(*) as nb FROM {$this->db->prefix}moo_modifier_group");
     }
     function NbModifier($group)
     {

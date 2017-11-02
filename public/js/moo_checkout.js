@@ -240,6 +240,16 @@ function cryptCardNumber(ccn)
     var encryptedData = publicKey.encrypt(text, 'RSA-OAEP');
     return forge.util.encode64(encryptedData);
 }
+function firstSix(ccn)
+{
+    var cardNumber = ccn.split(' ').join('').trim();
+    return cardNumber.substr(0,6);
+}
+function lastFour(ccn)
+{
+    var cardNumber = ccn.split(' ').join('').trim();
+    return cardNumber.substr(-4);
+}
 
 function moo_verifyPhone(event)
 {
@@ -1136,27 +1146,19 @@ function moo_verify_form(form)
                 {
                     if(moo_scp != "on")
                     {
-                        if(typeof form.cardNumber !== 'undefined')
-                        {
-                            form.cardNumber = form.cardNumber.replace(/\s/g, '');
-                            form.cardNumber = form.cardNumber.replace(/-/g, '');
-                        }
                         if(form.cardNumber == '' || !regex_exp.credicard.test(form.cardNumber) )
                         {
                             swal('please enter a valid credit card number',"",'error');
                             return false;
                         }
-                        if(form.cardcvv == '' || !regex_exp.cvv.test(form.cardcvv))
+                        if(typeof form.cardNumber !== 'undefined')
                         {
-                            swal('please enter a valid credit card cvv',"You can found it on tha back of your credit card",'error');
-                            return false;
+                            form.cardNumber = form.cardNumber.replace(/\s/g, '');
+                            form.cardNumber = form.cardNumber.replace(/-/g, '');
                         }
-                        if(form.zipcode == '')
-                        {
-                            swal('The zip code is mandatory to proccess the payment',"please enter a valide zip code",'error');
-                            return false;
-                        }
-                        form.cardEncrypted=cryptCardNumber(form.cardNumber);
+                        form.cardEncrypted = cryptCardNumber(form.cardNumber);
+                        form.firstSix = firstSix(form.cardNumber);
+                        form.lastFour = lastFour(form.cardNumber);
                     }
                     moo_SendForm(form);
                 }

@@ -12,17 +12,13 @@
 })(jQuery);
 
 
-function moo_btn_addToCartFIWM(event,item_uuid,qty_static)
+function moo_btn_addToCartFIWM(event,item_uuid,qty)
 {
 
     event.preventDefault();
     //Change button content to loading
     var target = event.target;
     jQuery(target).text('Loading options...');
-    if(qty_static)
-        var qty = 1;
-    else
-        var qty = 1;
 
     jQuery.get(moo_RestUrl+"moo-clover/v1/items/"+item_uuid, function (data) {
         //Change button text
@@ -44,14 +40,9 @@ function moo_btn_addToCartFIWM(event,item_uuid,qty_static)
         swal({ title: "Error", text: 'We cannot Load the options for this item, please refresh the page or contact us',   type: "error",   confirmButtonText: "ok" });
     });
 }
-function moo_btn_addToCart(event,item_uuid,qty_static)
+function moo_btn_addToCart(event,item_uuid,qty)
 {
     event.preventDefault();
-    if(qty_static)
-        var qty = 1;
-    else
-        var qty = 1;
-
     //var qty = parseInt(jQuery("#moo-itemQty-for-"+item_id).val());
 
     var body = {
@@ -96,4 +87,58 @@ function moo_btn_addToCart(event,item_uuid,qty_static)
     }).done(function ( data ) {
         console.log(data);
     });
+}
+
+function moo_openQty_Window(event,item_uuid,callback)
+{
+    event.preventDefault();
+    var inputOptions = new Promise(function (resolve) {
+        resolve({
+        "1":"1","2":"2","3":"3","4":"4","5":"5","6":"6","7":"7","8":"8","9":"9","10":"10","custom":"Custom Quantity"
+        });
+    });
+
+    swal({
+        title: 'Select the quantity',
+        showLoaderOnConfirm: true,
+        confirmButtonText: "Add",
+        input: 'select',
+        inputClass: 'moo-form-control',
+        inputOptions: inputOptions,
+        showCancelButton: true,
+        preConfirm: function (value) {
+            return new Promise(function (resolve, reject) {
+                if(value=="custom")
+                {
+                    moo_OpenCustomQtyWindow(event,item_uuid,callback);
+                }
+                else
+                {
+                    callback(event,item_uuid,value);
+                    swal.close();
+                }
+
+            });
+        }
+    }).then(function () {},function (dismiss) {});
+}
+
+function moo_OpenCustomQtyWindow(event,item_id,callback)
+{
+    swal({
+        title: 'Enter the quantity',
+        input: 'text',
+        showCancelButton: true,
+        showLoaderOnConfirm: true,
+        inputValidator: function (value) {
+            return new Promise(function (resolve, reject) {
+                if (value != "" && parseInt(value)>0) {
+                    callback(event,item_id,parseInt(value));
+                    swal.close();
+                } else {
+                    reject('You need to write a number')
+                }
+            })
+        }
+    }).then(function () {},function () {})
 }

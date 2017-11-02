@@ -247,12 +247,10 @@ class Moo_OnlineOrders_Shortcodes {
 
         $model = new moo_OnlineOrders_Model();
         $api   = new moo_OnlineOrders_CallAPI();
-
         //wp_enqueue_style ( 'bootstrap-css' );
         wp_enqueue_style ( 'font-awesome' );
         wp_enqueue_style ( 'custom-style-accordion' );
         wp_enqueue_style ( 'simple-modal' );
-
         wp_enqueue_script( 'custom-script-accordion');
         wp_enqueue_script( 'jquery-accordion',array( 'jquery' ));
         wp_enqueue_script( 'simple-modal',array( 'jquery' ));
@@ -355,7 +353,7 @@ class Moo_OnlineOrders_Shortcodes {
                                         $tab_items[$item->uuid] = $item;
                                     }
 
-                                    usort($tab_items, "self::moo_sort_items");
+                                    usort($tab_items, array('Moo_OnlineOrders_Shortcodes','moo_sort_items'));
 
                                     foreach($tab_items as $item)
                                     {
@@ -425,7 +423,7 @@ class Moo_OnlineOrders_Shortcodes {
                                                                 <div class="moo_title"><?php echo ($mg->alternate_name=="")?$mg->name:$mg->alternate_name;?></div>
                                                             </div>
                                                             <div style="padding-right: 50px;padding-left: 50px">
-                                                                <select name="<?php echo 'moo_modifiers[\''.$item->uuid.'\',\''.$mg->uuid.'\']' ?>" class="form-control">
+                                                                <select name="<?php echo 'moo_modifiers[\''.$item->uuid.'\',\''.$mg->uuid.'\']' ?>" class="moo-form-control">
                                                                     <?php  foreach ( $modifiers as $m) {
                                                                         if($m->price>0)
                                                                             echo '<option value="'.$m->uuid.'">'. (($m->alternate_name=="")?$m->name:$m->alternate_name).' ($'.number_format(($m->price/100), 2).')</option>';
@@ -697,6 +695,24 @@ class Moo_OnlineOrders_Shortcodes {
                     $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">Online Ordering Currently Closed'.(($MooOptions['accept_orders_w_closed'] == 'on' )?"<br/>Order in Advance Available":"").'</div>';
             else
                     $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Online Ordering Currently Closed'.(($MooOptions['accept_orders_w_closed'] == 'on' )?"<br/>Order in Advance Available":"").'</div>';
+        }
+        
+        //Adding asap to pickup time
+        if(isset($oppening_status->pickup_time))
+        {
+            if(isset($MooOptions['order_later_asap_for_p']) && $MooOptions['order_later_asap_for_p'] == 'on')
+            {
+                if(isset($oppening_status->pickup_time->Today))
+                    array_unshift($oppening_status->pickup_time->Today,'ASAP');
+            }
+        }
+        if(isset($oppening_status_d->pickup_time))
+        {
+            if(isset($MooOptions['order_later_asap_for_d']) && $MooOptions['order_later_asap_for_d'] == 'on')
+            {
+                if(isset($oppening_status_d->pickup_time->Today))
+                    array_unshift($oppening_status_d->pickup_time->Today,'ASAP');
+            }
         }
 
         if($MooOptions['hours'] != 'all' && $MooOptions['accept_orders_w_closed'] != 'on' && $oppening_msg != "")
@@ -1096,14 +1112,14 @@ class Moo_OnlineOrders_Shortcodes {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="moo-row">
-                                                <div class="col-md-12">
-                                                    <div class="moo-form-group">
-                                                        <label for="moo_zipcode" class="moo-control-label moo-checkoutText-zipCode">ZIP Code</label>
-                                                        <input class="moo-form-control" name="zipcode" id="moo_zipcode" placeholder="zip code">
-                                                    </div>
-                                                </div>
-                                            </div>
+<!--                                            <div class="moo-row">-->
+<!--                                                <div class="col-md-12">-->
+<!--                                                    <div class="moo-form-group">-->
+<!--                                                        <label for="moo_zipcode" class="moo-control-label moo-checkoutText-zipCode">ZIP Code</label>-->
+<!--                                                        <input class="moo-form-control" name="zipcode" id="moo_zipcode" placeholder="zip code">-->
+<!--                                                    </div>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
                                     </div>
                                 <?php } ?>
                                 <?php if($MooOptions['payment_cash'] == 'on' || $MooOptions['payment_cash_delivery'] == 'on'){ ?>
@@ -1498,7 +1514,7 @@ class Moo_OnlineOrders_Shortcodes {
 
                 $items_tab = (array)$items_tab;
                 //ReOrder the items
-                usort($items_tab, "self::moo_sort_items");
+                usort($items_tab, array('Moo_OnlineOrders_Shortcodes','moo_sort_items'));
 
 
                 if(isset($cat))
@@ -1631,7 +1647,7 @@ class Moo_OnlineOrders_Shortcodes {
                                                     <div class="moo_title"><?php echo ($mg->alternate_name=="")?$mg->name:$mg->alternate_name;?></div>
                                                 </div>
                                                 <div style="padding-right: 50px;padding-left: 50px">
-                                                    <select name="<?php echo 'moo_modifiers[\''.$item->uuid.'\',\''.$mg->uuid.'\']' ?>" class="form-control">
+                                                    <select name="<?php echo 'moo_modifiers[\''.$item->uuid.'\',\''.$mg->uuid.'\']' ?>" class="moo-form-control">
                                                         <?php  foreach ( $modifiers as $m) {
                                                             if($m->price>0)
                                                                 echo '<option value="'.$m->uuid.'">'. (($m->alternate_name=="")?$m->name:$m->alternate_name).' ($'.number_format(($m->price/100), 2).')</option>';
@@ -1708,7 +1724,7 @@ class Moo_OnlineOrders_Shortcodes {
                                     </div>
                                     <div class="moo_popup_quantity">
                                         Quantity :
-                                        <select class="form-control" value="1" id='moo_popup_quantity'>
+                                        <select class="moo-form-control" value="1" id='moo_popup_quantity'>
                                             <?php
                                             if($track_stock==true && $itemStock!=false && isset($itemStock->stockCount) && $itemStock->stockCount>0)
                                                 for($i=1; $i<=$itemStock->stockCount && $i<=10; $i++)
@@ -1722,7 +1738,7 @@ class Moo_OnlineOrders_Shortcodes {
                                     </div>
                                     <div class="moo_popup_special_instruction">
                                         Special Instructions :
-                                        <textarea  class="form-control" name="" id="moo_popup_si" cols="30" rows="2"></textarea>
+                                        <textarea  class="moo-form-control" name="" id="moo_popup_si" cols="30" rows="2"></textarea>
                                     </div>
                                     <div class="moo_popup_btns_action">
                                         <?php
@@ -1794,8 +1810,7 @@ class Moo_OnlineOrders_Shortcodes {
                                 </div>
                                 <div class="moo_popup_quantity">
                                     Quantity :
-                                    <!-- <input type="number" class="form-control" value="1" id='moo_popup_quantity'> -->
-                                    <select class="form-control" value="1" id='moo_popup_quantity'>
+                                    <select class="moo-form-control" value="1" id='moo_popup_quantity'>
                                         <?php
                                         if($track_stock==true && $itemStock!=false && isset($itemStock->stockCount) && $itemStock->stockCount>0)
                                             for($i=1; $i<=$itemStock->stockCount && $i<=10; $i++)
@@ -1808,7 +1823,7 @@ class Moo_OnlineOrders_Shortcodes {
                                 </div>
                                 <div class="moo_popup_special_instruction">
                                     Special Instructions :
-                                    <textarea  class="form-control" name="" id="moo_popup_si" cols="30" rows="2"></textarea>
+                                    <textarea  class="moo-form-control" name="" id="moo_popup_si" cols="30" rows="2"></textarea>
                                 </div>
                                 <div class="moo_popup_btns_action">
                                     <?php
@@ -1959,18 +1974,20 @@ class Moo_OnlineOrders_Shortcodes {
         }
 
         $html_code  = '';
-
+        $style = $MooOptions["default_style"];
         $custom_css = $MooOptions["custom_css"];
         $custom_js  = $MooOptions["custom_js"];
-
+        $website_width = intval($MooOptions[$style."_width"]);
         //Include custom css
         if($custom_css != null)
-            $html_code .= '<style type="text/css">'.$custom_css.'</style>';
+            $html_code .= '<style type="text/css">'.$custom_css.'@media only screen and (min-width: 768px) {#moo_OnlineStoreContainer,.moo-shopping-cart-container {min-width: '.$website_width.'px;}}</style>';
+        else
+            $html_code .= '<style type="text/css">@media only screen and (min-width: 768px) {#moo_OnlineStoreContainer,.moo-shopping-cart-container {min-width: '.$website_width.'px;}}</style>';
 
         $html_code .=  $oppening_msg;
         $html_code .=  '<div id="moo_OnlineStoreContainer">';
 
-        $style = $MooOptions["default_style"];
+
 
         if( $style == "style1" )
         {
@@ -2200,11 +2217,16 @@ class Moo_OnlineOrders_Shortcodes {
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-CallAPI.php";
         $model = new moo_OnlineOrders_Model();
         $api = new moo_OnlineOrders_CallAPI();
+        $cssClass= "";
 
         if(isset($atts['name']) && $atts['name']!="")
             $title = $atts['name'];
         else
             $title = 'This item';
+        if(isset($atts['css-class']) && $atts['css-class']!="")
+            $cssClass = $atts['css-class'];
+        else
+            $cssClass = '';
 
         if(isset($atts['id']) && $atts['id']!="")
         {
@@ -2212,16 +2234,20 @@ class Moo_OnlineOrders_Shortcodes {
             $item = $model->getItem($item_uuid);
             if($item)
             {
-                $html = "";
-               // var_dump($item);
+
                 if($model->itemHasModifiers($item_uuid)->total != '0')
                 {
-                    $html .=  "<a style=' background-color: #4CAF50;border: none;color: white;padding: 10px 24px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;' href='#' onclick='moo_btn_addToCartFIWM(event,\"".$item->uuid."\",true)'>ADD TO CART</a>";
-                   //return 'Item has modifiers';
+                    if($cssClass=="")
+                        $html =  "<a style='background-color: #4CAF50;border: none;color: white;padding: 10px 24px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;' href='#' onclick='moo_openQty_Window(event,\"".$item->uuid."\",moo_btn_addToCartFIWM)'>ADD TO CART</a>";
+                    else
+                        $html =  "<a class='".$cssClass."' href='#' onclick='moo_openQty_Window(event,\"".$item->uuid."\",moo_btn_addToCartFIWM)'>ADD TO CART</a>";
                 }
                 else
                 {
-                    $html .=  "<a style=' background-color: #4CAF50;border: none;color: white;padding: 10px 24px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;' href='#' onclick='moo_btn_addToCart(event,\"".$item->uuid."\",true)'>ADD TO CART</a>";
+                    if($cssClass=="")
+                        $html =  "<a style='background-color: #4CAF50;border: none;color: white;padding: 10px 24px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;' href='#' onclick='moo_openQty_Window(event,\"".$item->uuid."\",moo_btn_addToCart)'>ADD TO CART</a>";
+                    else
+                        $html =  "<a class='".$cssClass."' href='#' onclick='moo_openQty_Window(event,\"".$item->uuid."\",moo_btn_addToCart)'>ADD TO CART</a>";
 
                 }
                 return $html;

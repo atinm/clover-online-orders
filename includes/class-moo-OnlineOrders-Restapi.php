@@ -84,6 +84,63 @@ class Moo_OnlineOrders_Restapi
                 'callback'  => array( $this, 'updateQtyforItem' )
             )
         ) );
+
+        /* The Clean Inventory functions */
+        // Clean Items
+        // the url forms is : /clean/items/:per_page/:page
+        register_rest_route( $this->namespace, '/clean/items/(?P<per_page>[0-9]+)/(?P<page>[0-9]+)', array(
+            array(
+                'methods'   => 'GET',
+                'callback'  => array( $this, 'cleanItems' )
+            )
+        ) );
+        register_rest_route( $this->namespace, '/clean/categories/(?P<per_page>[0-9]+)/(?P<page>[0-9]+)', array(
+            array(
+                'methods'   => 'GET',
+                'callback'  => array( $this, 'cleanCategories' )
+            )
+        ) );
+        register_rest_route( $this->namespace, '/clean/modifier_groups/(?P<per_page>[0-9]+)/(?P<page>[0-9]+)', array(
+            array(
+                'methods'   => 'GET',
+                'callback'  => array( $this, 'cleanModifierGroups' )
+            )
+        ) );
+        register_rest_route( $this->namespace, '/clean/modifiers/(?P<per_page>[0-9]+)/(?P<page>[0-9]+)', array(
+            array(
+                'methods'   => 'GET',
+                'callback'  => array( $this, 'cleanModifiers' )
+            )
+        ) );
+        register_rest_route( $this->namespace, '/clean/tax_rates/(?P<per_page>[0-9]+)/(?P<page>[0-9]+)', array(
+            array(
+                'methods'   => 'GET',
+                'callback'  => array( $this, 'cleanTaxRates' )
+            )
+        ) );
+        register_rest_route( $this->namespace, '/clean/order_types/(?P<per_page>[0-9]+)/(?P<page>[0-9]+)', array(
+            array(
+                'methods'   => 'GET',
+                'callback'  => array( $this, 'cleanOrderTypes' )
+            )
+        ) );
+
+        // theme settings
+        // get the store interface settings
+        register_rest_route( $this->namespace, '/theme_settings/(?P<theme_name>[a-zA-Z0-9-]+)', array(
+            array(
+                'methods'   => 'GET',
+                'callback'  => array( $this, 'getThemeSettings' )
+            )
+        ) );
+        // modifiers settings
+        // get the store interface settings
+        register_rest_route( $this->namespace, '/mg_settings', array(
+            array(
+                'methods'   => 'GET',
+                'callback'  => array( $this, 'getModifierGroupsSettings' )
+            )
+        ) );
     }
 
     public function getCategories( $request )
@@ -147,7 +204,7 @@ class Moo_OnlineOrders_Restapi
                                             $final_item['stockCount'] = ($track_stock)?"tracking_stock":"not_tracking_stock";
                                     }
                                     $final_item["uuid"]=$item->uuid;
-                                    $final_item["name"]=($item->alternate_name=="")?$item->name:$item->alternate_name;
+                                    $final_item["name"]=$item->name;
                                     $final_item["description"]  =   stripslashes ($item->description);
                                     $final_item["price"]        =   $item->price;
                                     $final_item["price_type"]   =   $item->price_type;
@@ -159,7 +216,7 @@ class Moo_OnlineOrders_Restapi
 
                                     array_push($c['five_items'],$final_item);
                                 }
-                                usort($c['five_items'], "self::moo_sort_items");
+                                usort($c['five_items'],array('Moo_OnlineOrders_Restapi','moo_sort_items'));
                             }
                         }
                     }
@@ -221,7 +278,7 @@ class Moo_OnlineOrders_Restapi
                         $final_item['stockCount'] = ($track_stock)?"tracking_stock":"not_tracking_stock";
                 }
                 $final_item["uuid"]=$item->uuid;
-                $final_item["name"]=($item->alternate_name=="")?$item->name:$item->alternate_name;
+                $final_item["name"]=$item->name;
                 $final_item["description"]  =   stripslashes ($item->description);
                 $final_item["price"]        =   $item->price;
                 $final_item["price_type"]   =   $item->price_type;
@@ -234,7 +291,7 @@ class Moo_OnlineOrders_Restapi
                 array_push($response['items'],$final_item);
             }
         }
-        usort($response["items"], "self::moo_sort_items");
+        usort($response["items"], array('Moo_OnlineOrders_Restapi','moo_sort_items'));
         // Return all of our post response data.
         return $response;
     }
@@ -280,7 +337,6 @@ class Moo_OnlineOrders_Restapi
         $response["uuid"] = $item->uuid;
         $response["name"] = $item->name;
         $response["uuid"] = $item->uuid;
-        $response["name"] = ($item->alternate_name=="")?$item->name:$item->alternate_name;
         $response["description"]  =   stripslashes ($item->description);
         $response["price"]        =   $item->price;
         $response["price_type"]   =   $item->price_type;
@@ -373,7 +429,6 @@ class Moo_OnlineOrders_Restapi
         // Return all of our post response data.
         return $response;
     }
-
     public function addItemToCart( $request )
     {
         $request_body = $request->get_body_params();
@@ -382,6 +437,7 @@ class Moo_OnlineOrders_Restapi
         $item_modifiers = (isset($request_body['item_modifiers']) && count($request_body['item_modifiers'])>0)?$request_body['item_modifiers']:array();
         $special_ins = "";
         $cart_line_id = $item_uuid;
+        $nb_items_in_cart = 0;
 
         if(count($item_modifiers)>0)
         {
@@ -443,7 +499,8 @@ class Moo_OnlineOrders_Restapi
                 $_SESSION['items'][$cart_line_id]['quantity']+=$qte;
                 $response = array(
                     'status'	=> 'success',
-                    'name'      => $item->name
+                    'name'      => $item->name,
+                    'nb_items'  =>$this->moo_get_nbItems_in_cart()
                 );
             }
             else
@@ -457,14 +514,16 @@ class Moo_OnlineOrders_Restapi
                 );
                 $response = array(
                     'status'	=> 'success',
-                    'name'      => $item->name
+                    'name'      => $item->name,
+                    'nb_items'  =>$this->moo_get_nbItems_in_cart()
                 );
             }
             //Adding modifiers
             foreach ($item_modifiers as $modifier) {
                 $modifier_uuid = $modifier['uuid'];
                 $modifierInfos = (array)$this->model->getModifier($modifier_uuid);
-                $modifierInfos["qty"] = $modifier['qty'];
+                $q = intval($modifier['qty']);
+                $modifierInfos["qty"] = ($q<1)?1:$q;
                 // $_SESSION['items'][$cart_line_id]['modifiers'][$modifier_uuid] = array("modifier"=>(array)$modifierInfos,"qty"=>$modifier['qty']);
                 $_SESSION['items'][$cart_line_id]['modifiers'][$modifier_uuid] = $modifierInfos;
             }
@@ -497,7 +556,8 @@ class Moo_OnlineOrders_Restapi
                 unset($_SESSION['items'][$line_id]);
             }
             $response = array(
-                'status'	=> 'success'
+                'status'	=> 'success',
+                'nb_items'  =>$this->moo_get_nbItems_in_cart()
             );
         }
         else
@@ -510,7 +570,6 @@ class Moo_OnlineOrders_Restapi
         self::moo_refresh_itemQte_cart();
         return $response;
     }
-
     public function updateSpecialInstructionforItem( $request )
     {
         $request_body   = $request->get_body_params();
@@ -616,7 +675,333 @@ class Moo_OnlineOrders_Restapi
     {
         return $a["sort_order"]>$b["sort_order"];
     }
+    /* Clean's functions */
+    public function cleanItems( $request )
+    {
+        $response = array();
+        //var_dump($request["cat_id"]);
+        if ( !isset($request["per_page"]) || !isset( $request["page"] ) ) {
+            return new WP_Error( 'pagination_params_required', 'Pagination params are required, the page number and number of items per page', array( 'status' => 404 ) );
+        }
+        $items = $this->model->getItemsByPage(intval($request["per_page"]),intval($request["page"]));
+        $response["nb_items"] = count($items);
+        $count = 0;
+        $removed = 0;
+        $hidden = 0;
+        foreach ($items as $item) {
+            if($item->uuid != ""){
+                $res = json_decode($this->api->getItemWithoutSaving($item->uuid));
+                if(isset($res->id) && $res->id == $item->uuid)
+                {
+                    $count++;
+                    continue;
+                }
+                else
+                {
+                    $r = $this->api->delete_item($item->uuid);
+                    if($r)
+                    {
+                        $removed++;
+                    }
+                    else
+                    {
+                        $hidden++;
+                        $this->model->hideItem($item->uuid);
+                    }
+                }
+            }
+        }
+        $response["checked"] = $count;
+        $response["removed"] = $removed;
+        $response["hidden"]  = $hidden;
+        $response["last_page"] = ($response["nb_items"] < intval($request["per_page"]))?true:false;
+
+        return $response;
+    }
+    public function cleanCategories( $request )
+    {
+        $response = array();
+        if ( !isset($request["per_page"]) || !isset( $request["page"] ) ) {
+            return new WP_Error( 'pagination_params_required', 'Pagination params are required, the page number and number of items per page', array( 'status' => 404 ) );
+        }
+        $cats = $this->model->getCategoriesByPage(intval($request["per_page"]),intval($request["page"]));
+        $response["nb_categories"] = count($cats);
+        $count = 0;
+        $removed = 0;
+        $hidden = 0;
+        foreach ($cats as $cat) {
+            if($cat->uuid != ""){
+                $res = json_decode($this->api->getCategoryWithoutSaving($cat->uuid));
+                if(isset($res->id) && $res->id == $cat->uuid)
+                {
+                    $count++;
+                    continue;
+                }
+                else
+                {
+                    $r = $this->model->deleteCategory($cat->uuid);
+                    if($r)
+                    {
+                        $removed++;
+                    }
+                    else
+                    {
+                        $hidden++;
+                        $this->model->hideCategory($cat->uuid);
+                    }
+
+                }
+            }
+        }
+        $response["checked"] = $count;
+        $response["removed"] = $removed;
+        $response["hidden"]  = $hidden;
+        $response["last_page"] = ($response["nb_categories"] < intval($request["per_page"]))?true:false;
+
+        return $response;
+    }
+    public function cleanModifierGroups( $request )
+    {
+        $response = array();
+        if ( !isset($request["per_page"]) || !isset( $request["page"] ) ) {
+            return new WP_Error( 'pagination_params_required', 'Pagination params are required, the page number and number of items per page', array( 'status' => 404 ) );
+        }
+        $mGroups = $this->model->getModifierGroupsByPage(intval($request["per_page"]),intval($request["page"]));
+        $response["nb_modifier_groups"] = count($mGroups);
+        $count = 0;
+        $removed = 0;
+        $hidden = 0;
+        foreach ($mGroups as $m) {
+            if($m->uuid != ""){
+                $res = json_decode($this->api->getModifierGroupsWithoutSaving($m->uuid));
+                 if(isset($res->id) && $res->id == $m->uuid)
+                {
+                    $count++;
+                    continue;
+                }
+                else
+                {
+                    $r = $this->model->deleteModifierGroup($m->uuid);
+                    if($r)
+                    {
+                        $removed++;
+                    }
+                    else
+                    {
+                        $hidden++;
+                        $this->model->UpdateModifierGroupStatus($m->uuid,'false');
+                    }
+
+                }
+            }
+        }
+        $response["checked"] = $count;
+        $response["removed"] = $removed;
+        $response["hidden"]  = $hidden;
+        $response["last_page"] = ($response["nb_modifier_groups"] < intval($request["per_page"]))?true:false;
+
+        return $response;
+    }
+    public function cleanModifiers( $request )
+    {
+        $response = array();
+        if ( !isset($request["per_page"]) || !isset( $request["page"] ) ) {
+            return new WP_Error( 'pagination_params_required', 'Pagination params are required, the page number and number of items per page', array( 'status' => 404 ) );
+        }
+        $modifiers = $this->model->getModifiersByPage(intval($request["per_page"]),intval($request["page"]));
+        $response["nb_modifiers"] = count($modifiers);
+        $count = 0;
+        $removed = 0;
+        $hidden = 0;
+        foreach ($modifiers as $m) {
+            if($m->uuid != ""){
+                $res = json_decode($this->api->getModifierWithoutSaving($m->group_id,$m->uuid));
+                 if(isset($res->id) && $res->id == $m->uuid)
+                {
+                    $count++;
+                    continue;
+                }
+                else
+                {
+                    $r = $this->model->deleteModifier($m->uuid);
+                    if($r)
+                    {
+                        $removed++;
+                    }
+                    else
+                    {
+                        $hidden++;
+                        $this->model->UpdateModifierStatus($m->uuid,'false');
+                    }
+
+                }
+            }
+        }
+        $response["checked"] = $count;
+        $response["removed"] = $removed;
+        $response["hidden"]  = $hidden;
+        $response["last_page"] = ($response["nb_modifiers"] < intval($request["per_page"]))?true:false;
+
+        return $response;
+    }
+    public function cleanTaxRates( $request )
+    {
+        $response = array();
+        if ( !isset($request["per_page"]) || !isset( $request["page"] ) ) {
+            return new WP_Error( 'pagination_params_required', 'Pagination params are required, the page number and number of items per page', array( 'status' => 404 ) );
+        }
+        $tax_rates = $this->model->getTaxRatesByPage(intval($request["per_page"]),intval($request["page"]));
+        $response["nb_tax_rates"] = count($tax_rates);
+        $count = 0;
+        $removed = 0;
+        $hidden = 0;
+        foreach ($tax_rates as $t) {
+            if($t->uuid != ""){
+                $res = json_decode($this->api->getTaxRateWithoutSaving($t->uuid));
+                 if(isset($res->id) && $res->id == $t->uuid)
+                {
+                    $count++;
+                    continue;
+                }
+                else
+                {
+                    $r = $this->model->deleteTaxRate($t->uuid);
+                    if($r)
+                    {
+                        $removed++;
+                    }
+                }
+            }
+        }
+        $response["checked"] = $count;
+        $response["removed"] = $removed;
+        $response["hidden"]  = $hidden;
+        $response["last_page"] = ($response["nb_tax_rates"] < intval($request["per_page"]))?true:false;
+
+        return $response;
+    }
+    public function cleanOrderTypes( $request )
+    {
+        $response = array();
+        if ( !isset($request["per_page"]) || !isset( $request["page"] ) ) {
+            return new WP_Error( 'pagination_params_required', 'Pagination params are required, the page number and number of items per page', array( 'status' => 404 ) );
+        }
+        $order_types = $this->model->getOrderTypesByPage(intval($request["per_page"]),intval($request["page"]));
+        $response["nb_order_types"] = count($order_types);
+        $count = 0;
+        $removed = 0;
+        $hidden = 0;
+        foreach ($order_types as $o) {
+            if($o->ot_uuid != ""){
+                $res = json_decode($this->api->GetOneOrdersTypes($o->ot_uuid));
+                if(isset($res->id) && $res->id == $o->ot_uuid)
+                {
+                    $count++;
+                    continue;
+                }
+                else
+                {
+                    $r = $this->model->moo_DeleteOrderType($o->ot_uuid);
+                    if($r)
+                    {
+                        $removed++;
+                    }
+                    else
+                    {
+                        $hidden++;
+                        $this->model->updateOrderTypes($o->ot_uuid,'false');
+                    }
+                }
+
+            }
+        }
+        $response["checked"] = $count;
+        $response["removed"] = $removed;
+        $response["hidden"]  = $hidden;
+        $response["last_page"] = ($response["nb_order_types"] < intval($request["per_page"]))?true:false;
+
+        return $response;
+    }
+    /* Get the theme settings */
+    public function getThemeSettings( $request )
+    {
+        $response = array();
+        if ( !isset($request["theme_name"]) ) {
+            return new WP_Error( 'theme_name_required', 'Please provide ethe theme name', array( 'status' => 404 ) );
+        }
+        $name = $request["theme_name"];
+        $res = array();
+        $settings = (array) get_option("moo_settings");
+        foreach ($settings as $key=>$val) {
+            if(strpos($key,$name."_") === 0 && $val != "")
+            {
+                $res[$key]= $val;
+            }
+        }
+        $response["theme_name"] = $name;
+        $response["nb_items"]   = $this->moo_get_nbItems_in_cart();
+        $response["settings"]   = $res;
+        return $response;
+    }
+    /* Get the  Modifier Groups Settings */
+    public function getModifierGroupsSettings( $request )
+    {
+        $response = array();
+
+        $res = array();
+        $settings = (array) get_option("moo_settings");
+        if(isset($settings["mg_settings_displayInline"]) && $settings["mg_settings_displayInline"] == "enabled")
+        {
+            $res["inlineDisplay"] = true;
+        }
+        else
+        {
+            $res["inlineDisplay"] = false;
+        }
+        if(isset($settings["mg_settings_qty_for_all"]) && $settings["mg_settings_qty_for_all"] == "disabled")
+        {
+            $res["qtyForAll"] = false;
+        }
+        else
+        {
+            $res["qtyForAll"] = true;
+        }
+        if(isset($settings["mg_settings_qty_for_zeroPrice"]) && $settings["mg_settings_qty_for_zeroPrice"] == "disabled")
+        {
+            $res["qtyForZeroPrice"] = false;
+        }
+        else
+        {
+            $res["qtyForZeroPrice"] = true;
+        }
+
+        $response["settings"]   =  $res;
+        return $response;
+    }
+
+    /* Static functions for internal use */
     public static function moo_refresh_itemQte_cart()
+    {
+        unset($_SESSION["itemsQte"]);
+        foreach ($_SESSION['items'] as $item) {
+            $item_uuid = $item["item"]->uuid;
+            if(!isset($_SESSION["itemsQte"][$item_uuid]))
+                $_SESSION["itemsQte"][$item_uuid] = $item["quantity"];
+            else
+                $_SESSION["itemsQte"][$item_uuid] += $item["quantity"];
+
+        }
+    }
+    public static function moo_get_nbItems_in_cart()
+    {
+        $res = 0;
+        if(isset($_SESSION['items']))
+            foreach ($_SESSION['items'] as $item) {
+               $res += $item["quantity"];
+            }
+        return $res ;
+    }
+    public static function moo_CompareTwoObject()
     {
         unset($_SESSION["itemsQte"]);
         foreach ($_SESSION['items'] as $item) {

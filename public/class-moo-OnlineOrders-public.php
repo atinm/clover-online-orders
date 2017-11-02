@@ -96,10 +96,6 @@ class Moo_OnlineOrders_Public {
 
 	    $sweetalert_version = 'v2';
 
-        //wp_register_style( 'bootstrap-css',plugins_url( '/css/bootstrap.min.css', __FILE__ ),array(), $this->version);
-
-      //  wp_register_style( 'grid-css',plugins_url( '/css/grid12.css', __FILE__ ),array(), $this->version);
-
         wp_register_style( 'grid-css',"//api.smartonlineorders.com/assets/css/grid12.min.css",array(), $this->version);
         wp_enqueue_style( 'grid-css' );
 
@@ -126,10 +122,11 @@ class Moo_OnlineOrders_Public {
         }
 
 
-        //wp_register_style( 'moo_modifiersPanel',plugins_url( '/css/moo_modifiersPanel.css', __FILE__ ),array('grid-css','magnific-popup'), $this->version);
+       // wp_register_style( 'moo_modifiersPanel',plugins_url( '/css/moo_modifiersPanel.css', __FILE__ ),array('grid-css','magnific-popup'), $this->version);
         wp_register_style( 'moo_modifiersPanel',"//api.smartonlineorders.com/assets/css/moo_ModifiersPanel.min.css",array('grid-css','magnific-popup'), $this->version);
         wp_enqueue_style( 'moo_modifiersPanel' );
 
+       // wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/moo-OnlineOrders-public.css', array(), $this->version, 'all' );
         wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/moo-OnlineOrders-public.min.css', array(), $this->version, 'all' );
 
         wp_register_style( 'custom-style-cart3', plugins_url( '/css/custom_style_cart3.css', __FILE__ ),array(), $this->version );
@@ -202,8 +199,6 @@ class Moo_OnlineOrders_Public {
             wp_register_script('image-rotation-js', plugins_url( '/js/jquery.images-rotation.min.js', __FILE__ ),array(), $this->version);
             wp_enqueue_script('image-rotation-js',array('jquery'));
 
-            //wp_register_script('toastr-js', plugins_url( '/js/toastr.min.js', __FILE__ ),array(), $this->version);
-           // wp_enqueue_script('toastr-js',array('jquery'));
 
             wp_register_script('moo-icheck-js', plugins_url( '/js/icheck.min.js', __FILE__ ),array(), $this->version);
             wp_enqueue_script('moo-icheck-js',array('jquery'));
@@ -269,7 +264,6 @@ class Moo_OnlineOrders_Public {
                     else
                     {
                         $files = scandir(plugin_dir_path(dirname(__FILE__))."public/themes/".$this->style);
-
                         foreach ($files as $file) {
                             $f = explode(".",$file);
                             if(count($f) == 2)
@@ -1086,7 +1080,7 @@ class Moo_OnlineOrders_Public {
                 if(isset($_POST['form']['address']) && isset($_POST['form']['address']['lng']) )
                     $customer_lng = sanitize_text_field($_POST['form']['address']['lng']);
                 else
-                    $customer_lng=null;
+                    $customer_lng = null;
 
                 if(isset($_POST['form']['tips']) && $_POST['form']['tips'] > 0 )
                     $tipAmount    = $_POST['form']['tips'];
@@ -1107,23 +1101,6 @@ class Moo_OnlineOrders_Public {
                     else
                         $paymentmethod = "creditcard";
                 }
-
-
-                /*
-                if(isset($MooOptions['item_delivery']) && $MooOptions['item_delivery'] != "" && $deliveryFee>0)
-                {
-                    $item = $this->model->getItem($MooOptions['item_delivery']);
-                    $item->price = ($deliveryFee*100);
-                    $_SESSION['items'][$MooOptions['item_delivery']] = array(
-                        'item'=>$item,
-                        'quantity'=>1,
-                        'special_ins'=>'',
-                        'tax_rate'=>$this->model->getItemTax_rate($MooOptions['item_delivery']),
-                        'modifiers'=>array()
-                    );
-                    $deliveryFee = 0;
-                }
-                */
 
                 $deliveryFeeTmp = $deliveryFee;
                 if($deliveryFee>0)
@@ -1154,6 +1131,20 @@ class Moo_OnlineOrders_Public {
                         'modifiers'=>array()
                     );
                 }
+                $customer = array(
+                    "name"    => (isset($_POST['form']['name']))?$_POST['form']['name']:"",
+                    "address" => (isset($_POST['form']['address']) && isset($_POST['form']['address']['address']))?$_POST['form']['address']['address']:"",
+                    "city"    => (isset($_POST['form']['address']['city']))?$_POST['form']['address']['city']:"",
+                    "state"   => (isset($_POST['form']['address']['state']))?$_POST['form']['address']['state']:"",
+                    "country" => (isset($_POST['form']['address']['country']))?$_POST['form']['address']['country']:"",
+                    "zipcode" => (isset($_POST['form']['address']['zipcode']))?$_POST['form']['address']['zipcode']:"",
+                    "phone"   => (isset($_POST['form']['phone']))?$_POST['form']['phone']:"",
+                    "email"   => (isset($_POST['form']['email']))?$_POST['form']['email']:"",
+                    "customer_token"   =>(isset($_SESSION['moo_customer_token']))?$_SESSION['moo_customer_token']:"",
+                    "lat"   =>$customer_lat,
+                    "lng"   =>$customer_lng,
+                );
+
 
                 //Create the Order
                 if(!empty($_POST['form']['ordertype']))
@@ -1161,33 +1152,38 @@ class Moo_OnlineOrders_Public {
                     $OrderType_uuid = sanitize_text_field($_POST['form']['ordertype']);
                     $orderType = $this->api->GetOneOrdersTypes($OrderType_uuid);
                     $orderTypeFromClover = json_decode($orderType);
+                    if(isset($orderTypeFromClover->code) && $orderTypeFromClover->code==998)
+                        return array( 'status'	=> 'Error','message'=> "Sorry, but we are having a brief maintenance.  Check back in a few minutes");
                     $orderTypeFromLocal  = (array)$this->model->getOneOrderTypes($OrderType_uuid);
                     $isDelivery = (isset($orderTypeFromLocal['show_sa']) && $orderTypeFromLocal['show_sa']=="1")?"Delivery":"Pickup";
-                    $orderCreated = $this->moo_CreateOrder($OrderType_uuid,$orderTypeFromClover->taxable,$deliveryFee,$deliveryfeeName,$serviceFee,$serviceFeeName,$paymentmethod,$tipAmount,$isDelivery);
+                    $orderCreated = $this->moo_CreateOrder($OrderType_uuid,$orderTypeFromClover->taxable,$deliveryFee,$deliveryfeeName,$serviceFee,$serviceFeeName,$paymentmethod,$tipAmount,$isDelivery,$_POST['form']['instructions'],$pickup_time,$customer);
+                   // $orderCreated = $this->moo_CreateOrder($OrderType_uuid,$orderTypeFromClover->taxable,$deliveryFee,$deliveryfeeName,$serviceFee,$serviceFeeName,$paymentmethod,$tipAmount,$isDelivery,$_POST['form']['instructions'],$pickup_time,$customer);
                 }
                 else
                 {
-                    $orderCreated = $this->moo_CreateOrder('default',true,$deliveryFee,$deliveryfeeName,$serviceFee,$serviceFeeName,$paymentmethod,$tipAmount,"Pickup");
+                    $orderCreated = $this->moo_CreateOrder('default',true,$deliveryFee,$deliveryfeeName,$serviceFee,$serviceFeeName,$paymentmethod,$tipAmount,"Pickup",$_POST['form']['instructions'],$pickup_time,$customer);
+                   // $orderCreated = $this->moo_CreateOrder('default',true,$deliveryFee,$deliveryfeeName,$serviceFee,$serviceFeeName,$paymentmethod,$tipAmount,"Pickup",$_POST['form']['instructions'],$pickup_time,$customer);
                     $orderTypeFromLocal = array('label'=>'default','show_sa'=>'0');
                 }
-                if($orderCreated != false)
+
+                if($orderCreated)
                 {
                     // Add the delivery charges to Clover order
                     if($deliveryFeeTmp>0)
-                        $this->api->addlineWithPriceToOrder($orderCreated['OrderId'],"",1,$MooOptions["delivery_fees_name"],$deliveryFeeTmp);
-
+                        $this->api->addlineWithPriceToOrder($orderCreated['OrderId'],"",1,$deliveryfeeName,$deliveryFeeTmp);
+                    //Add teh service charges to the CLover order
                     if($serviceFeeTmp>0)
                         $this->api->addlineWithPriceToOrder($orderCreated['OrderId'],"",1,$serviceFeeName,$serviceFeeTmp);
-
+/*
                     $customer = array(
-                        "name"    =>(isset($_POST['form']['name']))?$_POST['form']['name']:"",
-                        "address" =>(isset($_POST['form']['address']) && isset($_POST['form']['address']['address']))?$_POST['form']['address']['address']:"",
-                        "city"    =>(isset($_POST['form']['address']['city']))?$_POST['form']['address']['city']:"",
-                        "state"    =>(isset($_POST['form']['address']['state']))?$_POST['form']['address']['state']:"",
-                        "country"  =>(isset($_POST['form']['address']['country']))?$_POST['form']['address']['country']:"",
-                        "zipcode" =>(isset($_POST['form']['address']['zipcode']))?$_POST['form']['address']['zipcode']:"",
-                        "phone"   =>(isset($_POST['form']['phone']))?$_POST['form']['phone']:"",
-                        "email"   =>(isset($_POST['form']['email']))?$_POST['form']['email']:"",
+                        "name"    => (isset($_POST['form']['name']))?$_POST['form']['name']:"",
+                        "address" => (isset($_POST['form']['address']) && isset($_POST['form']['address']['address']))?$_POST['form']['address']['address']:"",
+                        "city"    => (isset($_POST['form']['address']['city']))?$_POST['form']['address']['city']:"",
+                        "state"   => (isset($_POST['form']['address']['state']))?$_POST['form']['address']['state']:"",
+                        "country" => (isset($_POST['form']['address']['country']))?$_POST['form']['address']['country']:"",
+                        "zipcode" => (isset($_POST['form']['address']['zipcode']))?$_POST['form']['address']['zipcode']:"",
+                        "phone"   => (isset($_POST['form']['phone']))?$_POST['form']['phone']:"",
+                        "email"   => (isset($_POST['form']['email']))?$_POST['form']['email']:"",
                         "customer_token"   =>(isset($_SESSION['moo_customer_token']))?$_SESSION['moo_customer_token']:"",
                         "lat"   =>$customer_lat,
                         "lng"   =>$customer_lng,
@@ -1197,22 +1193,15 @@ class Moo_OnlineOrders_Public {
                         "ServiceFee"=>$serviceFeeTmp*100,
                         "orderAmount"=>$orderCreated['amount'],
                     );
+*/
+                    $customer["taxAmount"] = ($orderCreated['taxamount']*100);
+                    $customer["tipAmount"] = $tipAmount*100;
+                    $customer["ServiceFee"] = $serviceFeeTmp*100;
+                    $customer["orderAmount"] = $orderCreated['amount'];
+                    $customer["deliveryAmount"] = $deliveryFeeTmp*100 ;
 
                     $this->model->addOrder($orderCreated['OrderId'],$orderCreated['taxamount'],$orderCreated['amount'],$customer['name'],$customer['address'], $customer['city'],$customer['zipcode'],$customer['phone'],$customer['email'],$_POST['form']['instructions'],$customer['state'],$customer['country'],$deliveryFeeTmp,$tipAmount,$serviceFee,$customer_lat,$customer_lng,$orderTypeFromLocal['label'],($orderCreated['order']->createdTime/1000));
                     $this->model->addLinesOrder($orderCreated['OrderId'],$_SESSION['items']);
-
-
-
-//                    if(isset($MooOptions['item_delivery']) && $MooOptions['item_delivery'] != "" && $deliveryFeeTmp>0)
-//                    {
-//                        $this->api->addlineWithPriceToOrder($orderCreated['OrderId'],$MooOptions['item_delivery'],1,'',$deliveryFeeTmp);
-//                    }
-//                    else
-//                    {
-//                        if($deliveryFeeTmp>0)
-//                            $this->api->addlineWithPriceToOrder($orderCreated['OrderId'],"",1,'',$deliveryFeeTmp);
-//                    }
-
 
 
                     /*
@@ -1227,9 +1216,14 @@ class Moo_OnlineOrders_Public {
                            // $this->SendSmsToCustomer($orderCreated['OrderId'],$customer['phone']);
                             $this->model->updateOrder($orderCreated['OrderId'],'CASH');
                             $this->api->NotifyMerchant($orderCreated['OrderId'],$_POST['form']['instructions'],$customer,$pickup_time,$paymentmethod);
-
+/*
                             $this->sendEmail2customer($orderCreated['OrderId'],$_POST['form']['email'],$_POST['form']['instructions'],$pickup_time);
                             $this->sendEmail2merchant($orderCreated['OrderId'],$MooOptions['merchant_email'],$customer,$_POST['form']['instructions'],$pickup_time);
+*/
+                            $this->sendEmailsAboutOrder($orderCreated['OrderId'],$MooOptions['merchant_email'],$_POST['form']['email']);
+
+                            /* to debug uncomment this line, to not empty tha cart and you can send the order again */
+                            //wp_send_json(array("status"=>"failed"));
 
                             unset($_SESSION['items']);
                             unset($_SESSION['itemsQte']);
@@ -1267,13 +1261,15 @@ class Moo_OnlineOrders_Public {
                             {
                                 $this->api->NotifyMerchant($orderCreated['OrderId'],$_POST['form']['instructions'],$customer,$pickup_time,$paymentmethod);
 
+                                /* to debug uncomment this line, to not empty tha cart and you can send the order again */
+                                //return false;
+
                                 $this->SendSmsToMerchant($orderCreated['OrderId'],'is paid with CC',$pickup_time);
-
-                                $this->sendEmail2customer($orderCreated['OrderId'],$_POST['form']['email'],$_POST['form']['instructions'],$pickup_time);
-                                $this->sendEmail2merchant($orderCreated['OrderId'],$MooOptions['merchant_email'],$customer,$_POST['form']['instructions'],$pickup_time);
-
+                                $this->sendEmailsAboutOrder($orderCreated['OrderId'],$MooOptions['merchant_email'],$_POST['form']['email']);
                                 //$this->SendSmsToCustomer($orderCreated['OrderId'],$customer['phone']);
                                 $this->model->updateOrder($orderCreated['OrderId'],$paymentResult->paymentId);
+
+
 
                                 unset($_SESSION['items']);
                                 unset($_SESSION['itemsQte']);
@@ -1301,29 +1297,42 @@ class Moo_OnlineOrders_Public {
                         }
                         else
                         {
-                            if( !empty($_POST['form']['cardNumber']) && !empty($_POST['form']['cardcvv']) && !empty($_POST['form']['expiredDateMonth'])
-                                && !empty($_POST['form']['expiredDateYear']) && !empty($_POST['form']['zipcode']))
+                            if( !empty($_POST['form']['cardNumber']) && !empty($_POST['form']['expiredDateMonth']) && !empty($_POST['form']['expiredDateYear']) )
                             {
-                                if($orderCreated['taxable'])
-                                    $paid = $this->moo_PayOrder($_POST['form']['cardEncrypted'],$_POST['form']['cardNumber'],$_POST['form']['cardcvv'],$_POST['form']['expiredDateMonth'],$_POST['form']['expiredDateYear'],
-                                        $orderCreated['OrderId'],$orderCreated['amount'],$orderCreated['taxamount'],$_POST['form']['zipcode'],$tipAmount);
+                                if(isset($_POST['form']['cardcvv'])&& !empty($_POST['form']['cardcvv']))
+                                {
+                                    $cvv = $_POST['form']['cardcvv'];
+                                }
                                 else
-                                    $paid = $this->moo_PayOrder($_POST['form']['cardEncrypted'],$_POST['form']['cardNumber'],$_POST['form']['cardcvv'],$_POST['form']['expiredDateMonth'],$_POST['form']['expiredDateYear'],
-                                        $orderCreated['OrderId'],$orderCreated['sub_total'],'0',$_POST['form']['zipcode'],$tipAmount);
+                                    $cvv = $_POST['form']['cardcvv'];
+
+                                if($_POST['form']['zipcode'] && !empty($_POST['form']['zipcode']))
+                                    $zip = $_POST['form']['zipcode'];
+                                else
+                                    $zip ="";
+
+                                if($orderCreated['taxable'])
+                                    $paid = $this->moo_PayOrder($_POST['form']['cardEncrypted'],$_POST['form']['cardNumber'],$cvv,$_POST['form']['expiredDateMonth'],$_POST['form']['expiredDateYear'],
+                                        $orderCreated['OrderId'],$orderCreated['amount'],$orderCreated['taxamount'],$zip,$tipAmount);
+                                else
+                                    $paid = $this->moo_PayOrder($_POST['form']['cardEncrypted'],$_POST['form']['cardNumber'],$cvv,$_POST['form']['expiredDateMonth'],$_POST['form']['expiredDateYear'],
+                                        $orderCreated['OrderId'],$orderCreated['sub_total'],'0',$zip,$tipAmount);
 
                                 $response = array(
                                     'status'	=> json_decode($paid)->result,
                                     'order'	=> $orderCreated['OrderId']
                                 );
-
                                 if($response['status'] == 'APPROVED')
                                 {
                                     $this->api->NotifyMerchant($orderCreated['OrderId'],$_POST['form']['instructions'],$customer,$pickup_time,$paymentmethod);
 
                                     $this->SendSmsToMerchant($orderCreated['OrderId'],'is paid with CC',$pickup_time);
 
+                                    /*
                                     $this->sendEmail2customer($orderCreated['OrderId'],$_POST['form']['email'],$_POST['form']['instructions'],$pickup_time);
                                     $this->sendEmail2merchant($orderCreated['OrderId'],$MooOptions['merchant_email'],$customer,$_POST['form']['instructions'],$pickup_time);
+                                        */
+                                    $this->sendEmailsAboutOrder($orderCreated['OrderId'],$MooOptions['merchant_email'],$_POST['form']['email']);
 
                                     //$this->SendSmsToCustomer($orderCreated['OrderId'],$customer['phone']);
                                     $this->model->updateOrder($orderCreated['OrderId'],json_decode($paid)->paymentId);
@@ -1337,11 +1346,22 @@ class Moo_OnlineOrders_Public {
                                 else
                                 {
                                     if(json_decode($paid)->failureMessage == null)
-                                        $response = array(
-                                            'status'	=> 'Error',
-                                            'message'	=> "Payment card was declined. Check card info or try another card.",
-                                            'CloverMessage'	=> $paid,
-                                        );
+                                    {
+                                        if(json_decode($paid)->message == null)
+                                        {
+                                            $response = array(
+                                                'status'	=> 'Error',
+                                                'message'	=> "Payment card was declined. Check card info or try another card.",
+                                                'CloverMessage'	=> $paid,
+                                            );
+                                        }
+                                        else
+                                            $response = array(
+                                                'status'	=> 'Error',
+                                                'message'	=> json_decode($paid)->message,
+                                                'CloverMessage'	=> $paid,
+                                            );
+                                    }
                                     else
                                         $response = array(
                                             'status'	=> json_decode($paid)->result,
@@ -1441,7 +1461,7 @@ class Moo_OnlineOrders_Public {
             wp_send_json($response);
         }
     }
-    private function moo_CreateOrder($ordertype,$taxable,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$paymentmethod,$tipAmount,$isDelivery)
+    private function moo_CreateOrder($ordertype,$taxable,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$paymentmethod,$tipAmount,$isDelivery,$instructions,$pickupTime,$customer)
     {
         $total = self::moo_cart_getTotal(true);
         $amount    = floatval(str_replace(',', '', $total['total']));
@@ -1469,10 +1489,18 @@ class Moo_OnlineOrders_Public {
 
 
         if($total['status']=='success'){
-            if($ordertype=='default')
-                    $order = ($taxable==true)?$this->api->createOrder($amount,'default',$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode):$this->api->createOrder($sub_total,'default',$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode);
+            /*
+            if($ordertype == 'default')
+                    $order = ($taxable==true)?$this->api->createOrder($amount,'default',$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode,$customer):$this->api->createOrder($sub_total,'default',$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode,$customer);
             else
-                    $order = ($taxable==true)? $this->api->createOrder($amount,$ordertype,$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode):$this->api->createOrder($sub_total,$ordertype,$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode);
+             $order = ($taxable==true)? $this->api->createOrder($amount,$ordertype,$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode,$customer):$this->api->createOrder($sub_total,$ordertype,$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode,$customer);
+            */
+
+            if($taxable)
+                $order = $this->api->createOrder($amount,$ordertype,$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode,$instructions,$pickupTime,$customer);
+            else
+                $order = $this->api->createOrder($sub_total,$ordertype,$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode,$instructions,$pickupTime,$customer);
+
             $order = json_decode($order);
 
             if(isset($order->href)){
@@ -1515,6 +1543,149 @@ class Moo_OnlineOrders_Public {
 
 
     }
+
+    private function moo_CreateOrderV2($ordertype,$taxable,$deliveryfee,$deliveryFeeName,$serviceFee,$serviceFeeName,$paymentmethod,$tipAmount,$isDelivery,$instructions,$pickupTime,$customer)
+    {
+
+        $total = self::moo_cart_getTotal(true);
+
+        if($total['status'] != 'success')
+            return false;
+
+        $amount    = floatval(str_replace(',', '', $total['total']));
+        $sub_total = floatval(str_replace(',', '', $total['sub_total']));
+        $taxAmount = floatval(str_replace(',', '', $total['total_of_taxes']));
+
+        $couponCode = "";
+        $coupon = $total['coupon'];
+        if($coupon != null)
+        {
+            if(!$taxable)
+            {
+                if($coupon["type"]=='amount')
+                    $sub_total -= $coupon['value'];
+                else
+                    $sub_total -= $coupon['value']*$sub_total/100;
+            }
+            $couponCode = $coupon["code"];
+        }
+
+        $options = array(
+            "orderType"=>$ordertype,
+            "total"=>$amount * 100,
+            "subTotal"=>$sub_total * 100,
+            "deliveryFee"=>$deliveryfee*100,
+            "serviceFee"=>$serviceFee*100,
+            "taxAmount"=>$taxAmount*100,
+            "tipAmount"=>$tipAmount*100,
+            "isDelivery"=>$isDelivery,
+            "serviceFeeName"=>$serviceFeeName,
+            "deliveryGeeName"=>$deliveryFeeName,
+            "paymentMethod"=>$paymentmethod,
+            "orderTitle"=>"",
+            "instructions"=>$instructions,
+            "pickupTime"=>$pickupTime,
+            "address"=>$customer,
+            "customer"=>$customer,
+            "couponCode"=>$couponCode
+
+        );
+        $order = json_decode($this->api->createOrderV2($options));
+        if(isset($order->href)){
+            // Add Items to order
+            foreach($_SESSION['items'] as $item)
+            {
+                // If the item is empty skip to the next iteration of the loop
+                if(!isset($item['item']) || $item['item']->uuid=="delivery_fees") continue;
+                // Create line item
+                if(count($item['modifiers']) > 0) {
+                    for($i=0;$i<$item['quantity'];$i++){
+                        $res = $this->api->addlineToOrder($order->id,$item['item']->uuid,'1',$item['special_ins']);
+                        $lineId = json_decode($res)->id;
+                        foreach ($item['modifiers'] as $modifier) {
+                            if(isset($modifier["qty"]) && intval($modifier["qty"])>1)
+                            {
+                                for($k=0;$k<$modifier["qty"];$k++)
+                                    $this->api->addModifierToLine($order->id,$lineId,$modifier['uuid']);
+                            }
+                            else
+                            {
+                                $this->api->addModifierToLine($order->id,$lineId,$modifier['uuid']);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    $this->api->addlineToOrder($order->id,$item['item']->uuid,$item['quantity'],$item['special_ins']);
+                }
+            }
+            return
+                array("OrderId"=>$order->id,"amount"=>$amount,"taxamount"=>$taxAmount,"taxable"=>$taxable,"sub_total"=>$sub_total,'order'=>$order);
+        }
+        else
+            return false;
+        /*
+        $lineItems = array();
+        foreach($_SESSION['items'] as $item)
+        {
+            // If the item is empty skip to the next iteration of the loop
+            if(!isset($item['item'])) continue;
+            // Create line item
+            if(count($item['modifiers']) > 0) {
+                $line = array(
+                    "item"=>array(
+                        'id'=>$item['item']->uuid
+                    ),
+                    "note"=>$item['special_ins'],
+                    "qty"=>$item['quantity'],
+                    "modifications"=>array()
+                );
+                foreach ($item['modifiers'] as $modifier) {
+                    if(isset($modifier["qty"]) && intval($modifier["qty"])>1)
+                    {
+                        $modification = array(
+                            "modifier"=>array(
+                                "id"=>$modifier['uuid']
+                            ),
+                            "qty"=>$modifier["qty"]
+                        );
+                        array_push($line["modifications"],$modification);
+                    }
+                    else
+                    {
+                        $modification = array(
+                                "modifier"=>array(
+                                    "id"=>$modifier['uuid']
+                                )
+                        );
+                        array_push($line["modifications"],$modification);
+                    }
+                }
+                    array_push($lineItems,$line);
+
+            }
+            else
+            {
+                $line = array(
+                    "item"=>array(
+                        'id'=>$item['item']->uuid
+                    ),
+                    "note"=>$item['special_ins'],
+                    "qty"=>$item['quantity']
+                );
+                array_push($lineItems,$line);
+            }
+        }
+        if(isset($order->href)){
+            $this->api->addLinesToOrder($order->id,$lineItems);
+            return array("OrderId"=>$order->id,"amount"=>$amount,"taxamount"=>$taxAmount,"taxable"=>$taxable,"sub_total"=>$sub_total,'order'=>$order);
+        }
+        return false;
+        */
+
+    }
+
     private function moo_PayOrder($cardEncrypted,$card_number,$cvv,$expMonth,$expYear,$orderId,$amount,$taxAmount,$zip,$tipAmount)
     {
 
@@ -1524,13 +1695,12 @@ class Moo_OnlineOrders_Public {
         $tipAmount = str_replace(',', '', $tipAmount);
 
         $card_number = str_replace(' ','',trim($card_number));
-        $cvv       = intval($cvv);
+        $cvv       = sanitize_text_field($cvv);
         $expMonth  = intval($expMonth);
         $expYear   = intval($expYear);
         $orderId   = sanitize_text_field($orderId);
         $amount    = floatval($amount);
         $taxAmount = floatval($taxAmount);
-        $zip = intval($zip);
 
         $last4  = substr($card_number,-4);
         $first6 = substr($card_number,0,6);
@@ -1755,7 +1925,7 @@ public function moo_AddOrderType()
     public function moo_GetStats()
    {
        $cats     = $this->model->NbCats();
-       $labels   = $this->model->NbGroupModifier();
+       $labels   = $this->model->NbModifierGroups();
        $taxes    = $this->model->NbTaxes();
        $products = $this->model->NbProducts();
 
@@ -2107,6 +2277,10 @@ public function moo_AddOrderType()
     private function sendEmail2customer($order_id,$customer_email,$instructions,$pickup_time)
     {
         @$this->api->send_an_email($order_id,$customer_email,null,$instructions,$pickup_time);
+    }
+    private function sendEmailsAboutOrder($order_id,$merchant_emails,$customer_email)
+    {
+        @$this->api->sendOrderEmails($order_id,$merchant_emails,$customer_email);
     }
     private function sendEmail2merchant($order_id,$merchant_emails,$customer,$instructions,$pickup_time)
     {

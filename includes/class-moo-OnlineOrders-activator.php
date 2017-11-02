@@ -453,7 +453,7 @@ class Moo_OnlineOrders_Activator {
         }
 
         // Save the version of the plugin in the Database
-         update_option('moo_onlineOrders_version', '127');
+         update_option('moo_onlineOrders_version', '128');
 
         if( !isset($defaultOptions["default_style"]) || $defaultOptions["default_style"] == "" || $defaultOptions["default_style"] == "style2" ) $defaultOptions["default_style"] = "style1";
         if( !isset($defaultOptions["hours"]) || $defaultOptions["hours"] == "") $defaultOptions["hours"] = "business";
@@ -470,7 +470,12 @@ class Moo_OnlineOrders_Activator {
         if( !isset($defaultOptions["delivery_fees_name"]) || $defaultOptions["delivery_fees_name"] == "") $defaultOptions["delivery_fees_name"] = "Delivery Charge";
         if( !isset($defaultOptions["order_later_minutes_delivery"]) || $defaultOptions["order_later_minutes_delivery"] == "") $defaultOptions["order_later_minutes_delivery"] = "60";
         if( !isset($defaultOptions["order_later_days_delivery"]) || $defaultOptions["order_later_days_delivery"] == "") $defaultOptions["order_later_days_delivery"] = "4";
-        if( !isset($defaultOptions["copyrights"]) || $defaultOptions["copyrights"] == "") $defaultOptions["copyrights"] = 'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.2.7">Smart Online Order</a>';
+        if( !isset($defaultOptions["order_later_asap_for_p"]) || $defaultOptions["order_later_asap_for_p"] == "") $defaultOptions["order_later_asap_for_p"] = "off";
+        if( !isset($defaultOptions["order_later_asap_for_d"]) || $defaultOptions["order_later_asap_for_d"] == "") $defaultOptions["order_later_asap_for_d"] = "off";
+        if( !isset($defaultOptions["copyrights"]) || $defaultOptions["copyrights"] == "") $defaultOptions["copyrights"] = 'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.2.8">Smart Online Order</a>';
+        if( !isset($defaultOptions["mg_settings_displayInline"]) || $defaultOptions["mg_settings_displayInline"] == "") $defaultOptions["mg_settings_displayInline"] = 'disabled';
+        if( !isset($defaultOptions["mg_settings_qty_for_all"]) || $defaultOptions["mg_settings_qty_for_all"] == "") $defaultOptions["mg_settings_qty_for_all"] = 'enabled';
+        if( !isset($defaultOptions["mg_settings_qty_for_zeroPrice"]) || $defaultOptions["mg_settings_qty_for_zeroPrice"] == "") $defaultOptions["mg_settings_qty_for_zeroPrice"] = 'enabled';
 
 
         update_option('moo_settings', $defaultOptions );

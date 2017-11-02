@@ -140,7 +140,7 @@ function moo_address_changed()
 function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
 {
     var order_total             = parseFloat(moo_Total.sub_total);
-    var delivery_free_after     = parseFloat(moo_delivery_free_amount)  ; //Free delivery after this amount
+    var delivery_free_after     = parseFloat(moo_delivery_fixed_amount)  ; //Free delivery after this amount
     var delivery_fixed_amount   = parseFloat(moo_delivery_fixed_amount) ; //Fixed delivery amount
     var delivery_for_other_zone = parseFloat(moo_delivery_other_zone_fee) ; //Amount of delivery for other zones
     var moo_delivery_areas = null;
@@ -164,8 +164,18 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
             if(!isNaN(delivery_free_after))
             {
                 var amountToAdd = delivery_free_after-order_total;
-                swal({ title: 'Spend $'+delivery_free_after.toFixed(2)+" to get free delivery",text:'Add $'+(amountToAdd.toFixed(2))+' to your order to enjoy free delivery',   type: "warning",   showCancelButton: true,  confirmButtonColor: "#DD6B55",   confirmButtonText: "Continue shopping",cancelButtonText: "Checkout",   closeOnConfirm: false },function(){ window.history.back() });
-            }
+                swal({
+                    title: 'Spend $'+delivery_free_after.toFixed(2)+" to get free delivery",
+                    text:'Add $'+(amountToAdd.toFixed(2))+' to your order to enjoy free delivery',
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Continue shopping",
+                    cancelButtonText: "Checkout",
+                    closeOnConfirm: false
+                },function(){ window.history.back() }
+                );
+             }
             //Customer coordinate
             if(customer_lat != '' && customer_lng != '')
             {
@@ -174,7 +184,7 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
                 {
                     var el = moo_delivery_areas[i];
 
-                    // Verify if the selected address is in any zone
+                    // Verify if the selected address is at any zone
                     if(el.type == 'polygon')
                     {
                        if(google.maps.geometry.poly.containsLocation( new google.maps.LatLng(parseFloat(customer_lat),parseFloat(customer_lng)), new google.maps.Polygon({paths:el.path})))
@@ -189,11 +199,11 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
                             var center = new google.maps.LatLng(parseFloat(el.center.lat),parseFloat(el.center.lng));
                             if(google.maps.geometry.spherical.computeDistanceBetween(point, center) <= el.radius)
                             {
-                                zones_contain_point.push({zone_id:el.id,zone_fee:el.fee});
+                                zones_contain_point.push({zone_id:el.id,zone_fee:el.fee,feeType:el.feeType});
                             }
                          }
                 }
-                // If the selected point on the map exists in at least one merchant's zones
+                // If the selected point on the map exists in at least one merchant's zone
                 // Then we we update the delivery amount by this zone fees
                 // else we verify if the merchant allow other zones
                 if(zones_contain_point.length >= 1 )
