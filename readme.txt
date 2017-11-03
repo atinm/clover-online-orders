@@ -5,7 +5,7 @@ Tags: clover,online orders for clover,merchantech online orders,Clover online or
 Requires at least: 4.7.1
 Tested up to: 4.8.1
 Requires PHP: 5.2.0
-Stable tag: 1.2.80
+Stable tag: 1.2.81
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,7 +43,7 @@ After installing the **Merchantech Online Orders for Clover** plugin, add the pa
 
 Here is what you need to do:
 
-1. Install the app by Merchantech called “ [Smart Online Order + Wordpress](https://www.clover.com/appmarket/apps/6MWGRRXJD5HMW?clientCountry=US ) ” to your Clover Station or Clover Mini
+1. Install the app by Merchantech called “[Smart Online Order + Wordpress](https://www.clover.com/appmarket/apps/6MWGRRXJD5HMW?clientCountry=US )” to your Clover Station or Clover Mini
 1. Install this Plugin
 1. Enter the Api-Key provided by the app in the settings section of this plugin
 1. Wait for your menu to sync
@@ -259,5 +259,5 @@ First Release
 
 == Upgrade Notice ==
 
-= 1.2.80 =
-Fixed the reordering issue and added the clean inventory feature with customization for the 4th store interface
+= 1.2.81 =
+A new update to fix a small issues in the version 1.2.80

@@ -39,7 +39,16 @@ jQuery(document).ready(function()
     jQuery(window).scroll(function(){
         if (jQuery(window).scrollTop() > (container_top-header_height))
         {
-            jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",window.height+'px');
+            //console.log(navigator.userAgent);
+            if( window.innerWidth < 768 ) {
+                jQuery(".moo-stick-to-content").addClass('moo-fixed').width('100%').css("top",window.height+'px')
+            }
+            else
+            {
+                jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",window.height+'px');
+            }
+
+          //  jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",window.height+'px');
             /*
             if(window.width>260)
                 jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",window.height+'px');
