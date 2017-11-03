@@ -43,7 +43,7 @@ After installing the **Merchantech Online Orders for Clover** plugin, add the pa
 
 Here is what you need to do:
 
-1. Install the app by Merchantech called “Online Ordering for Wordpress” to your Clover Station or Clover Mini
+1. Install the app by Merchantech called “ [Smart Online Order + Wordpress](https://www.clover.com/appmarket/apps/6MWGRRXJD5HMW?clientCountry=US ) ” to your Clover Station or Clover Mini
 1. Install this Plugin
 1. Enter the Api-Key provided by the app in the settings section of this plugin
 1. Wait for your menu to sync
@@ -63,6 +63,7 @@ To display items for one category
 
 = VIDEO =
 [youtube https://www.youtube.com/watch?v=DHw2oppC6IU]
+[youtube https://www.youtube.com/watch?v=r74L0glOadE]
 
 == Frequently Asked Questions ==
 
@@ -103,8 +104,8 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 == Changelog ==
 = 1.2.80 =
 * Added the clean inventory feature
--Improved the store interface 4 to accept direct links to a specif category
-* Added the ability for customer to reply to the emails and got the response in their own inbox
+* Improved the store interface 4 to accept direct links to a specif category
+* Added the ability for customer to reply to the emails and get the response in their own inbox
 * Added the quantity window to add to cart shortcode
 * Added the ability to add css class to add to cart shortcode
 * Fixed reordering issue for categories, items and modifiers
