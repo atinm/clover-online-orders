@@ -102,6 +102,8 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 7. An other example of menu
 
 == Changelog ==
+= 1.2.81 =
+* Fixed css issues in Store interface 3
 = 1.2.80 =
 * Added the clean inventory feature
 * Improved the store interface 4 to accept direct links to a specif category
