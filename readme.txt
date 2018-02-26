@@ -89,16 +89,6 @@ No, this plug-in is not by Clover. It is from Merchantech. Both this plug-in and
 
 Please let us know so we can implement additional features.  925-234-5554 / support@merchanteh.us
 
-== Screenshots ==
-
-1. Example of menu 'style1'
-2. Example of checkout page
-3. Dashboard of the plug-in
-4. Example of menu with images
-5. Example of menu with images
-6. Add to cart button
-7. An other example of menu
-
 == Changelog ==
 = 1.3.0 =
 * Added new Store Interface “Store Interface 5”
