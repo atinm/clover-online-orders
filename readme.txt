@@ -266,4 +266,4 @@ First Release
 == Upgrade Notice ==
 
 = 1.3.0 =
-A new update to fix a small issues in the version 1.2.80
+Various fixes and improvements
