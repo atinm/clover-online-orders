@@ -96,6 +96,8 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 * Fixed issue where the store interface wasn’t appearing correctly on Internet Explorer and Microsoft edge browsers
 * Fixed issue where ‘$’ symbol would cut off remaining text on printed receipt
 * Fixed issue where for new installs the address on map would point to New York instead of actual location
+* Added additional FAQ
+* Added the following shortcode to be used with Store Interface 4 so it can load on iPhone Apps [moo_all_items js_loading='false' interface="si4"]
 * Other various fixes and improvements
 = 1.2.80 =
 * Added the clean inventory feature
