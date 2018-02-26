@@ -111,7 +111,7 @@ class moo_OnlineOrders_Model {
         $motCle = esc_sql($motCle);
         return $this->db->get_results("SELECT *
                                     FROM {$this->db->prefix}moo_item i
-                                    WHERE i.name like '%{$motCle}%'
+                                    WHERE i.name like '%{$motCle}%' || i.description like '%{$motCle}%'
                                     ");
     }
 

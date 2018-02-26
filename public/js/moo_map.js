@@ -11,7 +11,7 @@ google.maps.Circle.prototype.contains = function(latLng,circle) {
 
 function moo_getLatLong()
 {
-    if(moo_merchantLat!= "" && moo_merchantLng != "")
+    if(moo_merchantLat != "" && moo_merchantLng != "")
     {
         var Merchantlocation = {};
         Merchantlocation.lng = parseFloat(moo_merchantLng);
@@ -36,7 +36,7 @@ function moo_initMap(myLatLng)
 function moo_InitZones()
 {
     if(!(typeof moo_merchantLat === 'undefined'))
-        if(moo_merchantLat!= "" && moo_merchantLng != "")
+        if(moo_merchantLat != "" && moo_merchantLng != "")
         {
             var Merchantlocation = {};
             Merchantlocation.lng = parseFloat(moo_merchantLng);

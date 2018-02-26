@@ -16,7 +16,7 @@
  * Plugin Name:       Merchantech Online Orders for Clover
  * Plugin URI:        http://www.merchantechapps.com
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.2.81
+ * Version:           1.3.0
  * Author:            Merchantech
  * Author URI:        http://www.merchantechapps.com
  * License:           Clover app
@@ -72,6 +72,10 @@ function moo_OnlineOrders_shortcodes_thecart($atts, $content) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
     return Moo_OnlineOrders_Shortcodes::theCart($atts, $content);
 }
+function moo_OnlineOrders_shortcodes_searchBar($atts, $content) {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
+    return Moo_OnlineOrders_Shortcodes::moo_search_bar($atts, $content);
+}
 
 function moo_OnlineOrders_shortcodes_categorymsg($atts, $content) {
     if(isset($atts["cat_id"]) && $atts["message"])
@@ -120,6 +124,7 @@ add_shortcode('moo_checkout', 'moo_OnlineOrders_shortcodes_checkoutPage');
 add_shortcode('moo_buy_button', 'moo_OnlineOrders_shortcodes_buybutton');
 add_shortcode('moo_cart', 'moo_OnlineOrders_shortcodes_thecart');
 add_shortcode('moo_category_msg', 'moo_OnlineOrders_shortcodes_categorymsg');
+add_shortcode('moo_search', 'moo_OnlineOrders_shortcodes_searchBar');
 
 /* adding  widgets*/
 add_action( 'widgets_init', 'moo_OnlineOrders_widget_opening_hours' );
@@ -135,7 +140,7 @@ add_filter( 'wp_mail_content_type', function( $content_type ) {
     return 'text/html';
 });
 */
-if(get_option('moo_onlineOrders_version') != '128')
+if(get_option('moo_onlineOrders_version') != '130')
     add_action('plugins_loaded', 'moo_onlineOrders_check_version');
 
 /*
@@ -229,6 +234,7 @@ function moo_onlineOrders_check_version()
             update_option("moo_settings",$MooOptions);
             update_option('moo_onlineOrders_version','128');
         case '128':
+        case '130':
             break;
     }
 }

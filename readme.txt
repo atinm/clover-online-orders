@@ -3,9 +3,9 @@ Contributors: merchantech
 Donate link: http://www.merchantapps.com/
 Tags: clover,online orders for clover,merchantech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
 Requires at least: 4.7.1
-Tested up to: 4.8.1
+Tested up to: 4.9.1
 Requires PHP: 5.2.0
-Stable tag: 1.2.81
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -102,8 +102,13 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 7. An other example of menu
 
 == Changelog ==
-= 1.2.81 =
-* Fixed css issues in Store interface 3
+= 1.3.0 =
+* Added new Store Interface “Store Interface 5”
+* Added reports feature
+* Fixed issue where the store interface wasn’t appearing correctly on Internet Explorer and Microsoft edge browsers
+* Fixed issue where ‘$’ symbol would cut off remaining text on printed receipt
+* Fixed issue where for new installs the address on map would point to New York instead of actual location
+* Other various fixes and improvements
 = 1.2.80 =
 * Added the clean inventory feature
 * Improved the store interface 4 to accept direct links to a specif category
@@ -119,6 +124,7 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 * Changed add to cart button on store interface 4 and added the number of items in cart
 * Ability to hide quantity selection from modifiers with prices or modifiers with no prices for store interface 4
 * Ability to show modifiers as a pop-up or directly underneath the item for store interface 4
+
 = 1.2.7 =
 * Added two new store interfaces
 * Store interface 3 has a beautiful interface that allows images to be uploaded for items in a vertical format
@@ -261,5 +267,5 @@ First Release
 
 == Upgrade Notice ==
 
-= 1.2.81 =
+= 1.3.0 =
 A new update to fix a small issues in the version 1.2.80

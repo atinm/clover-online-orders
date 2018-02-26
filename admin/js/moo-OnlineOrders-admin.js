@@ -60,7 +60,7 @@ jQuery(document).ready(function($){
         }
         else
         {
-            $('div#MooPanel_tabContent4 input[value='+v+']').next().css('border', 'none');
+            $('div#MooPanel_tabContent4 input[value='+v+']').next().css('border', '1px solid #999');
             $('#mooInterface-'+v).hide();
         }
     });
@@ -77,7 +77,7 @@ jQuery(document).ready(function($){
             }
             else
             {
-                $('div#MooPanel_tabContent4 input[value='+v+']').next().css('border', 'none');
+                $('div#MooPanel_tabContent4 input[value='+v+']').next().css('border', '1px solid #999');
                 $('#mooInterface-'+v).hide();
             }
         })

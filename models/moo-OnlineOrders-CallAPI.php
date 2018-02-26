@@ -14,7 +14,7 @@ class moo_OnlineOrders_CallAPI {
         $this->Token = $MooSettings['api_key'];
         //Put the API URL here and don't forget the last slash
         $this->url_api = "http://api.smartonlineorders.com/";
-        //$this->url_api = "http://localhost/api/";
+       // $this->url_api = "http://localhost/api/";
 
         $this->debug = false;
         $this->debug_get = false;
@@ -290,7 +290,7 @@ class moo_OnlineOrders_CallAPI {
         else
             $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&deliveryName='.$deliveryfeeName.'&servicefee='.$serviceFee.'&servicefeeName='.$serviceFeeName.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode);
         */
-        return $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&deliveryName='.$deliveryfeeName.'&servicefee='.$serviceFee.'&servicefeeName='.$serviceFeeName.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode.'&instructions='.$instructions.'&pickupTime='.$pickupTime.'&customer='.json_encode($cutomer));
+        return $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&deliveryName='.$deliveryfeeName.'&servicefee='.$serviceFee.'&servicefeeName='.$serviceFeeName.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode.'&instructions='.urlencode($instructions).'&pickupTime='.$pickupTime.'&customer='.json_encode($cutomer));
        // return $res;
     }
     public function createOrderV2($options)
@@ -301,7 +301,7 @@ class moo_OnlineOrders_CallAPI {
 
     public function addlineToOrder($oid,$item_uuid,$qte,$special_ins)
     {
-        return $this->callApi_Post("create_line_in_order",$this->Token,'oid='.$oid.'&item='.$item_uuid.'&qte='.$qte.'&special_ins='.$special_ins);
+        return $this->callApi_Post("create_line_in_order",$this->Token,'oid='.$oid.'&item='.$item_uuid.'&qte='.$qte.'&special_ins='.urlencode($special_ins));
     }
     public function addLinesToOrder($oid,$lines)
     {
@@ -331,7 +331,7 @@ class moo_OnlineOrders_CallAPI {
     //Send Notification to the merchant when a new order is registered
     public function NotifyMerchant($oid,$instructions,$customer,$pickup_time,$paymentMethode)
     {
-        return $this->callApi_Post("notify",$this->Token,'orderId='.$oid.'&instructions='.$instructions.'&pickup_time='.$pickup_time.'&paymentmethod='.$paymentMethode.'&customer='.json_encode($customer));
+        return $this->callApi_Post("notify",$this->Token,'orderId='.$oid.'&instructions='.urlencode($instructions).'&pickup_time='.$pickup_time.'&paymentmethod='.$paymentMethode.'&customer='.json_encode($customer));
     }
     // OrderTypes
     public function GetOneOrdersTypes($uuid)
@@ -966,7 +966,7 @@ class moo_OnlineOrders_CallAPI {
     }
     public function send_an_email($order_id,$emails,$customer,$instructions,$pickup_time)
     {
-        return $this->callApi_Post("sendemails",$this->Token,"order_id=".$order_id."&merchant_emails=".$emails."&customer=".$customer."&instructions=".$instructions."&pickup_time=".$pickup_time);
+        return $this->callApi_Post("sendemails",$this->Token,"order_id=".$order_id."&merchant_emails=".$emails."&customer=".$customer."&instructions=".urlencode($instructions)."&pickup_time=".$pickup_time);
     }
     /*
      * Function to send Order details via email,
@@ -1407,6 +1407,13 @@ class moo_OnlineOrders_CallAPI {
         return $res;
     }
 
+    public function goToReports()
+    {
+        $dashboard_url = admin_url( '/admin.php?page=moo_index' );
+        $newURL = "http://dashboard.smartonlineorder.com/#/login/".$this->Token."?redirectTo=".$dashboard_url;
+        header('Location: '.$newURL);
+        die();
+    }
     private function checkIP($accesstoken)
     {
 

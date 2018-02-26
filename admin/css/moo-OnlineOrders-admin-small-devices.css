@@ -3,6 +3,7 @@
 }
 #MooPanel_main {
 	width: 100%;
+	padding: 0px;
 }
 
 div#MooPanel .button {

@@ -27,16 +27,7 @@ function mooGetCategories()
         }
     });
 }
-//get all the items of one category
-function mooGetItems($cat_id)
-{
 
-}
-//get the details of an item
-function mooGetItem($item_id)
-{
-
-}
 //Render all categories to html element and insert it into the page
 function moo_renderCategories($cats)
 {

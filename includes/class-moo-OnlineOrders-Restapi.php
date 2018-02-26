@@ -141,6 +141,16 @@ class Moo_OnlineOrders_Restapi
                 'callback'  => array( $this, 'getModifierGroupsSettings' )
             )
         ) );
+
+        //Search
+
+        //get item detail
+        register_rest_route( $this->namespace, '/search/(?P<word>(.)+)', array(
+            array(
+                'methods'   => 'GET',
+                'callback'  => array( $this, 'search' )
+            )
+        ) );
     }
 
     public function getCategories( $request )
@@ -291,6 +301,66 @@ class Moo_OnlineOrders_Restapi
                 array_push($response['items'],$final_item);
             }
         }
+        usort($response["items"], array('Moo_OnlineOrders_Restapi','moo_sort_items'));
+        // Return all of our post response data.
+        return $response;
+    }
+    public function search( $request )
+    {
+        $response = array();
+        //var_dump($request["cat_id"]);
+        if ( !isset($request["word"]) || empty( $request["word"] ) ) {
+            return new WP_Error( 'keyword_required', 'Keyword not found', array( 'status' => 404 ) );
+        }
+        $response["keyworld"] = urldecode( $request["word"] );
+
+        $response["items"]= array();
+        $track_stock = $this->api->getTrackingStockStatus();
+        if($track_stock == true)
+            $itemStocks = $this->api->getItemStocks();
+        else
+            $itemStocks = false;
+
+        $items = $this->model->getItemsBySearch($response["keyworld"]);
+
+        foreach ($items as $item) {
+            $final_item = array();
+            //Check if the item if it's disabled
+            if($item->visible == 0 || $item->hidden == 1 || $item->price_type=='VARIABLE') continue;
+
+            //Check the stock
+            if($track_stock)
+                $itemStock = self::getItemStock($itemStocks,$item->uuid);
+            else
+                $itemStock = false;
+
+
+            if($item->outofstock == 1 || ($track_stock == true && $itemStock != false && isset($itemStock->stockCount)  && $itemStock->stockCount < 1))
+            {
+                $final_item['stockCount'] = "out_of_stock";
+            }
+            else
+            {
+                if(isset($itemStock->stockCount))
+                    $final_item['stockCount'] = $itemStock->stockCount;
+                else
+                    $final_item['stockCount'] = ($track_stock)?"tracking_stock":"not_tracking_stock";
+            }
+            $final_item["uuid"]=$item->uuid;
+            $final_item["name"]=$item->name;
+            $final_item["description"]  =   stripslashes ($item->description);
+            $final_item["price"]        =   $item->price;
+            $final_item["price_type"]   =   $item->price_type;
+            $final_item["unit_name"]    =   $item->unit_name;
+            $final_item["unit_name"]    =   $item->unit_name;
+            $final_item["sort_order"]   =   intval($item->sort_order);
+            $final_item["has_modifiers"]=   ($this->model->itemHasModifiers($item->uuid)->total>0)?true:false;
+            $final_item["image"]= $this->model->getDefaultItemImage($item->uuid);
+
+            array_push($response['items'],$final_item);
+        }
+
+
         usort($response["items"], array('Moo_OnlineOrders_Restapi','moo_sort_items'));
         // Return all of our post response data.
         return $response;
@@ -932,8 +1002,13 @@ class Moo_OnlineOrders_Restapi
         $name = $request["theme_name"];
         $res = array();
         $settings = (array) get_option("moo_settings");
+
+        if($name === "default") {
+            $name = $settings["default_style"];
+        }
         foreach ($settings as $key=>$val) {
-            if(strpos($key,$name."_") === 0 && $val != "")
+            $k = (string)$key;
+            if(strpos($k,$name."_") === 0 && $val != "")
             {
                 $res[$key]= $val;
             }

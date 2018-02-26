@@ -4,7 +4,7 @@
 
 function moo_getLatLong() {
     if(moo_merchantLat == "" || moo_merchantLng == "" ||moo_merchantLat == null || moo_merchantLng == null) {
-        jQuery.get('//maps.googleapis.com/maps/api/geocode/json?&address='+moo_merchantAddress+'&key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc',function (data) {
+        jQuery.get('https://maps.googleapis.com/maps/api/geocode/json?&address='+encodeURI(moo_merchantAddress)+'&key=AIzaSyBwB0ahDw6k1CLf9mZxfXd7j5I7rq1bw70',function (data) {
             if(data.results.length>0)
             {
                 var location = data.results[0].geometry.location;

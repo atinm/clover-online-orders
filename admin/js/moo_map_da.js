@@ -17,9 +17,11 @@ document.addEventListener('keydown', function (e){
 
 function moo_getLatLongforMapDa()
 {
-    if(moo_merchantLat == "" || moo_merchantLng == "" ||moo_merchantLat == null || moo_merchantLng == null)
+    if(moo_merchantLat === "" || moo_merchantLng === "" || moo_merchantLat === null || moo_merchantLng === null)
     {
-        if(moo_merchantAddress == '') moo_merchantAddress ='united state';
+        if(moo_merchantAddress === '')
+            moo_merchantAddress ='united state';
+
         jQuery.get('https://maps.googleapis.com/maps/api/geocode/json?&address='+moo_merchantAddress+'&key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc',function (data) {
             if(data.results.length>0)
             {

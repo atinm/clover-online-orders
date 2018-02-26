@@ -1,0 +1,200 @@
+/* Modifier Panel */
+.white-popup {
+    position: relative;
+    background: #f5f5f5;
+    padding: 20px;
+    width: auto;
+    max-width: 800px;
+    margin: 20px auto;
+}
+.mfp-wrap {
+    -webkit-overflow-scrolling: touch;
+    -webkit-transform: translateZ(0);
+}
+
+html.mfp-helper {
+    height: 100%;
+}
+html.mfp-helper  body {
+    overflow: hidden;
+    height: 100%;
+    -webkit-transform: translateZ(0);
+}
+
+
+.mooModifierGroup
+{
+    margin-bottom: 10px;
+}
+.mooModifierGroup .mooModifiers-title
+{
+    font-size: 17px;
+    font-weight: bold;
+    font-family: "Open Sans", Arial, sans-serif;
+    cursor: pointer;
+    color: #751c1c;
+}
+.mooModifierGroup .mooModifiers-title>span:first-child
+{
+    margin-right: 5px;
+    font-size: 22px;
+    cursor: pointer;
+    width: 12px;
+    display: inline-block;
+    float: right;
+}
+.mooModifierGroup .mooModifiers-title-span
+{
+    font-size: 12px !important;
+    font-weight: 400;
+    color: #666;
+}
+
+.mooModifierGroup .moo-row
+{
+    padding-left: 10px;
+    border-top: 1px solid #ccc;
+    cursor: pointer;
+    background: #FFF;
+    line-height: 36px;
+    clear: both;
+}
+.mooModifierGroup .moo-row:first-child
+{
+    border-top: none;
+}
+.mooModifierGroup .mooModifiers-wrapper
+{
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    overflow: hidden;
+    border-radius: 3px;
+}
+.moo-input-group
+{
+    float: left;
+}
+.moo-input-group .moo-form-control
+{
+    position: relative;
+    z-index: 2;
+    float: left;
+    width: 100%;
+    margin-bottom: 0px;
+    margin-top: 6px;
+}
+.moo-input-group .moo-form-control:not(:first-child):not(:last-child)
+{
+    border-radius: 0px;
+}
+
+.moo-input-group-btn
+{
+    position: relative;
+    font-size: 0px;
+    white-space: nowrap;
+}
+.mooOpBtn
+{
+    width: 15px !important;
+    border-radius: 0px !important;
+    height: 23px !important;
+    line-height: 21px !important;
+    color: rgb(0, 0, 0) !important;
+    padding: 0px !important;
+    float: left !important;
+    margin-top: 6px !important;
+    background-color: #fff!important;
+    border-color: #ccc !important;
+    text-decoration: none;
+}
+.mooInputQty
+{
+    width: 41px !important;
+    border-radius: 0px !important;
+    height: 23px !important;
+    line-height: 20px !important;
+    text-align: center !important;
+}
+.mooModifierLine-QtyContainer
+{
+    display: none;
+    height: 35px !important;
+}
+.mooModifierCheckbox
+{
+    max-width: none;
+}
+
+.mooModifier-checked
+{
+    background: #e1eef5 !important;
+}
+.mooModifier-disabled
+{
+    cursor: not-allowed !important;
+    opacity: 0.4 !important;
+    pointer-events: none !important;
+}
+.mooModifier-name
+{
+    line-height: 18px !important;
+    padding-top: 7px !important;
+    padding-bottom: 7px !important;
+    font-family: "Open Sans", Arial, sans-serif !important;
+    font-size: 13px;
+    color : #000000;
+}
+.mooModifier-price
+{
+    font-family: "Open Sans", Arial, sans-serif !important;
+    font-size: 13px;
+    color : #000000;
+}
+.mooModifier-addToCartBtn
+{
+    display: block !important;
+    width: 100% !important;
+    border-color: #25282a !important;
+    background-color: #05ad2f;
+    color: #fff;
+    font-size: 14px !important;
+    cursor: pointer;
+    text-align: center;
+    padding: 10px;
+    margin: 0;
+}
+.mooModifier-addToCartBtn2,.mooModifier-closeBtn
+{
+    display: inline-block;
+    width: 48% !important;
+    color: #fff;
+    font-size: 14px !important;
+    cursor: pointer;
+    text-align: center;
+    padding: 10px;
+    margin-right:5px;
+}
+.mooModifier-addToCartBtn2
+{
+    border-color: #25282a !important;
+    background-color: #05ad2f;
+}
+.mooModifier-closeBtn
+{
+    border-color: #5b5b5b !important;
+    background-color: #5b5b5b;
+}
+.mooModifier-addToCartBtn>a,.mooModifier-addToCartBtn>a:hover,.mooModifier-addToCartBtn2>a,.mooModifier-addToCartBtn2>a:hover,.mooModifier-closeBtn>a,.mooModifier-closeBtn>a:hover
+{
+    text-decoration: none;
+    color: #fff !important;
+}
+.mooModifier-addToCartBtn:hover,.mooModifier-addToCartBtn2:hover,.mooModifier-closeBtn:hover
+{
+    background-color: #ff9200;
+}
+.mooModifier-closeBtn:hover
+{
+    background-color: #333;
+}

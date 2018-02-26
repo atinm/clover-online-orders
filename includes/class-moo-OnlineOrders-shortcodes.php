@@ -258,7 +258,7 @@ class Moo_OnlineOrders_Shortcodes {
         $MooOptions = (array)get_option('moo_settings');
 
         ob_start();
-                ?>
+    ?>
         <a href="#ViewShoppingCart">
             <div class="moo-col-xs-12 moo-col-sm-12 moo-hidden-lg moo-hidden-md MooGoToCart">
                 VIEW SHOPPING CART
@@ -548,11 +548,12 @@ class Moo_OnlineOrders_Shortcodes {
      * @return List of ITEMS (HTML)
      * @since 1.0.0
      */
-    public static function getItemsHtml($category,$filterBy,$orderBy,$search)
-    {
+    public static function getItemsHtml($category,$filterBy,$orderBy,$search) {
         //This function deleted in version 1.2.5 because it was used with the ols interface
     }
-
+    /*
+     * The checkoutPage shortcode implemnation
+     */
     public static function checkoutPage($atts, $content)
     {
         $MooOptions = (array)get_option('moo_settings');
@@ -562,11 +563,11 @@ class Moo_OnlineOrders_Shortcodes {
         wp_enqueue_style( 'custom-style-cart3');
         wp_enqueue_script( 'moo-google-map' );
 
-        if($MooOptions["save_cards"]=="enabled")
+        if($MooOptions["save_cards"] == "enabled")
             wp_enqueue_script( 'moo-spreedly' );
 
-        wp_enqueue_script( 'display-merchant-map',array('moo-google-map') );
-        wp_enqueue_script( 'custom-script-checkout',array('display-merchant-map') );
+        wp_enqueue_script( 'display-merchant-map','moo-google-map' );
+        wp_enqueue_script( 'custom-script-checkout','display-merchant-map' );
         wp_enqueue_script( 'forge' );
 
 
@@ -692,9 +693,9 @@ class Moo_OnlineOrders_Shortcodes {
         if($MooOptions['hours'] != 'all' && $oppening_status->status == 'close')
         {
             if($oppening_status->store_time == '')
-                    $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">Online Ordering Currently Closed'.(($MooOptions['accept_orders_w_closed'] == 'on' )?"<br/>Order in Advance Available":"").'</div>';
+                    $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">Online Ordering Currently Closed'.(($MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: green'>Order in Advance Available</p>":"").'</div>';
             else
-                    $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Online Ordering Currently Closed'.(($MooOptions['accept_orders_w_closed'] == 'on' )?"<br/>Order in Advance Available":"").'</div>';
+                    $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Online Ordering Currently Closed'.(($MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: green'>Order in Advance Available</p>":"").'</div>';
         }
         
         //Adding asap to pickup time
@@ -705,6 +706,9 @@ class Moo_OnlineOrders_Shortcodes {
                 if(isset($oppening_status->pickup_time->Today))
                     array_unshift($oppening_status->pickup_time->Today,'ASAP');
             }
+            if(isset($oppening_status->pickup_time->Today))
+                array_unshift($oppening_status->pickup_time->Today,'Select a time');
+
         }
         if(isset($oppening_status_d->pickup_time))
         {
@@ -713,6 +717,9 @@ class Moo_OnlineOrders_Shortcodes {
                 if(isset($oppening_status_d->pickup_time->Today))
                     array_unshift($oppening_status_d->pickup_time->Today,'ASAP');
             }
+            if(isset($oppening_status_d->pickup_time->Today))
+                array_unshift($oppening_status_d->pickup_time->Today,'Select a time');
+
         }
 
         if($MooOptions['hours'] != 'all' && $MooOptions['accept_orders_w_closed'] != 'on' && $oppening_msg != "")
@@ -953,7 +960,9 @@ class Moo_OnlineOrders_Shortcodes {
                         <div id="moo-checkout-form-customer">
                             <div class="moo-checkout-bloc-title moo-checkoutText-contact">
                                 contact
-                                <span class="moo-checkout-edit-icon" onclick="moo_checkout_edit_contact()"><svg enable-background="new 0 0 40 40" height="15px" id="Layer_1" version="1.1" viewBox="0 0 48 48" width="15px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path clip-rule="evenodd" d="M44.929,14.391c-0.046,0.099-0.102,0.194-0.183,0.276L16.84,42.572  c-0.109,0.188-0.26,0.352-0.475,0.434l-13.852,3.88c-0.029,0.014-0.062,0.016-0.094,0.026l-0.047,0.014  c-0.008,0.003-0.017,0.001-0.024,0.004c-0.094,0.025-0.187,0.046-0.286,0.045c-0.098,0.003-0.189-0.015-0.282-0.041  c-0.021-0.006-0.04-0.002-0.061-0.009c-0.008-0.003-0.013-0.01-0.021-0.013c-0.088-0.033-0.164-0.083-0.24-0.141  c-0.039-0.028-0.08-0.053-0.113-0.086s-0.058-0.074-0.086-0.113c-0.058-0.075-0.107-0.152-0.141-0.24  c-0.004-0.008-0.01-0.013-0.013-0.021c-0.007-0.02-0.003-0.04-0.009-0.061c-0.025-0.092-0.043-0.184-0.041-0.281  c0-0.1,0.02-0.193,0.045-0.287c0.004-0.008,0.001-0.016,0.004-0.023l0.014-0.049c0.011-0.03,0.013-0.063,0.026-0.093l3.88-13.852  c0.082-0.216,0.246-0.364,0.434-0.475l27.479-27.48c0.04-0.045,0.087-0.083,0.128-0.127l0.299-0.299  c0.015-0.015,0.034-0.02,0.05-0.034C34.858,1.87,36.796,1,38.953,1C43.397,1,47,4.603,47,9.047  C47,11.108,46.205,12.969,44.929,14.391z M41.15,15.5l-3.619-3.619L13.891,35.522c0.004,0.008,0.014,0.011,0.018,0.019l2.373,4.827  L41.15,15.5z M3.559,44.473l2.785-0.779l-2.006-2.005L3.559,44.473z M4.943,39.53l3.558,3.559l6.12-1.715  c0,0-2.586-5.372-2.59-5.374l-5.374-2.59L4.943,39.53z M12.49,34.124c0.008,0.004,0.011,0.013,0.019,0.018L36.15,10.5l-3.619-3.619  L7.663,31.749L12.49,34.124z M38.922,3c-1.782,0-3.372,0.776-4.489,1.994l-0.007-0.007L33.912,5.5l8.619,8.619l0.527-0.528  l-0.006-0.006c1.209-1.116,1.979-2.701,1.979-4.476C45.031,5.735,42.296,3,38.922,3z" fill-rule="evenodd"/></svg></span>
+                                <span class="moo-checkout-edit-icon" onclick="moo_checkout_edit_contact()">
+                                    <img src="//api.smartonlineorders.com/assets/images/if_edit_103539.png" alt="edit">
+                                </span>
                             </div>
                             <div class="moo-checkout-bloc-content">
                                 <div id="moo-checkout-contact-content">
@@ -1469,9 +1478,9 @@ class Moo_OnlineOrders_Shortcodes {
         wp_enqueue_style( 'bootstrap-css' );
         wp_enqueue_style( 'font-awesome' );
         wp_enqueue_script( 'custom-script-items' );
-        wp_enqueue_script( 'jquery-accordion',array( 'jquery' ));
+        wp_enqueue_script( 'jquery-accordion','jquery' );
 
-        wp_enqueue_script( 'magnific-modal', array( 'jquery' ) );
+        wp_enqueue_script( 'magnific-modal',  'jquery'  );
         wp_enqueue_style ( 'magnific-popup' );
 
         wp_enqueue_style ( 'custom-style-accordion' );
@@ -1952,7 +1961,9 @@ class Moo_OnlineOrders_Shortcodes {
         </div>
         <?php return ob_get_clean();
     }
-
+    /*
+     * The function that choose teh default store interface
+     */
     public static function TheStore($atts, $content)
     {
         $api   = new moo_OnlineOrders_CallAPI();
@@ -1963,9 +1974,9 @@ class Moo_OnlineOrders_Shortcodes {
         if($MooOptions['hours'] != 'all' && $oppening_status->status == 'close')
         {
             if($oppening_status->store_time == '')
-                $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on' && $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/>Order in Advance Available":"").'</div>';
+                $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on' && $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: green'>Order in Advance Available</p>":"").'</div>';
             else
-                $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on'&& $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/>Order in Advance Available":"").'</div>';
+                $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on'&& $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: green'>Order in Advance Available</p>":"").'</div>';
 
         }
         if($MooOptions['hours'] != 'all' && $MooOptions['hide_menu'] == 'on' && $oppening_status->status == 'close')
@@ -1978,6 +1989,7 @@ class Moo_OnlineOrders_Shortcodes {
         $custom_css = $MooOptions["custom_css"];
         $custom_js  = $MooOptions["custom_js"];
         $website_width = intval($MooOptions[$style."_width"]);
+
         //Include custom css
         if($custom_css != null)
             $html_code .= '<style type="text/css">'.$custom_css.'@media only screen and (min-width: 768px) {#moo_OnlineStoreContainer,.moo-shopping-cart-container {min-width: '.$website_width.'px;}}</style>';
@@ -1987,26 +1999,31 @@ class Moo_OnlineOrders_Shortcodes {
         $html_code .=  $oppening_msg;
         $html_code .=  '<div id="moo_OnlineStoreContainer">';
 
-
-
-        if( $style == "style1" )
-        {
-            $html_code .= self::AllItemsAcordion($atts, $content);
-        }
-        else
-        {
-            if( $style == "style2" )
-            {
-                $html_code .= self::moo_store_style3($atts, $content);
+        if(isset($atts["js_loading"])  && $atts["js_loading"] === "false"){
+            if(isset($atts["interface"]) && $atts["interface"] === "si4") {
+                $html_code .= self::moo_store_style4($atts, $content);
+            } else {
+                $html_code .= "Currently only the interface for can be loaded without js, please add the param interface='si4' to this shortcode" ;
             }
-            else
-                if( $style == "style3" )
-                    $html_code .= self::ItemsWithImages($atts, $content);
-                else
-                    if($style == "style1")
-                        $html_code .= self::AllItems($atts, $content);
-                    else
-                        $html_code .= self::moo_store_use_theme($atts, $content);
+        } else {
+            if( $style == "style1" ) {
+                $html_code .= self::AllItemsAcordion($atts, $content);
+            } else {
+                if( $style == "style2" ) {
+                    $html_code .= self::moo_store_style3($atts, $content);
+                } else {
+                    if( $style == "style3" ) {
+                        $html_code .= self::ItemsWithImages($atts, $content);
+                    } else {
+                        if($style == "style1") {
+                            $html_code .= self::AllItems($atts, $content);
+                        } else {
+                            $html_code .= self::moo_store_use_theme($atts, $content);
+                        }
+                    }
+
+                }
+            }
         }
 
         $html_code .=  '</div><div class="row Moo_Copyright">'.$MooOptions["copyrights"].'</div>';
@@ -2017,6 +2034,9 @@ class Moo_OnlineOrders_Shortcodes {
 
         return $html_code;
     }
+    /*
+     * The cart page
+     */
     public static function theCart($atts, $content)
     {
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-Model.php";
@@ -2206,9 +2226,9 @@ class Moo_OnlineOrders_Shortcodes {
             echo '<script type="text/javascript">'.$custom_js.'</script>';
         return ob_get_clean();
     }
+
     /*
      * This function is the callback of the Shortcode adding buy button,
-     *
      * @since 1.0.6
      */
     public static function moo_BuyButton($atts, $content)
@@ -2262,6 +2282,8 @@ class Moo_OnlineOrders_Shortcodes {
             return 'Missing Item ID';
         }
     }
+
+
     public static function moo_sort_items($a,$b)
     {
         return $a->sort_order>$b->sort_order;
@@ -2298,6 +2320,170 @@ class Moo_OnlineOrders_Shortcodes {
         <div class="moo-col-md-5" id="moo-onlineStore-cart"></div>
        </div>
 
+        <?php
+        return ob_get_clean();
+    }
+    public static function moo_store_style4($atts, $content)
+    {
+        require_once plugin_dir_path( __FILE__ ) . 'class-moo-OnlineOrders-Restapi.php';
+        $rest = new Moo_OnlineOrders_Restapi();
+        $request = new WP_REST_Request();
+        $request->set_query_params(array(
+            'expand' => "five_items"
+        ));
+        $categories = $rest->getCategories( $request);
+        $themeSettings = $rest->getThemeSettings( array("theme_name"=>"onePage"));
+
+        wp_enqueue_style( 'font-awesome' );
+        wp_enqueue_style ( 'mooStyle-style4' );
+        wp_enqueue_script( 'mooScript-style4' );
+
+
+        $MooOptions = (array)get_option( 'moo_settings' );
+
+        $cart_page_id  = $MooOptions['cart_page'];
+        $checkout_page_id = $MooOptions['checkout_page'];
+        $store_page_id = $MooOptions['store_page'];
+
+        $cart_page_url  =  get_page_link($cart_page_id);
+        $checkout_page_url =  get_page_link($checkout_page_id);
+        $store_page_url =  get_page_link($store_page_id);
+
+
+        wp_localize_script("mooScript-style4", "moo_CartPage",$cart_page_url);
+        wp_localize_script("mooScript-style4", "moo_CheckoutPage",$checkout_page_url);
+        wp_localize_script("mooScript-style4", "moo_StorePage",$store_page_url);
+        wp_localize_script("mooScript-style4", "moo_RestUrl",get_rest_url());
+        wp_localize_script("mooScript-style4", "moo_themeSettings",$themeSettings["settings"]);
+
+        ob_start();
+        $nb_items_in_cart = ($themeSettings["nb_items"]>0)?$themeSettings["nb_items"]:'';
+        ?>
+        <div class="moo-row">
+            <div  class="moo-is-sticky moo-new-icon" onclick="mooShowCart(event)">
+                <div class="moo-new-icon__count" id="moo-cartNbItems"><?php echo $nb_items_in_cart; ?></div>
+                <div class="moo-new-icon__cart"></div>
+            </div>
+            <div class="moo-row">
+                <?php if(count($categories)==0) {
+                    echo "<h3>You don't have any category please import your inventory</h3>";
+                } else { ?>
+                <div class="moo-col-md-3" id="moo-onlineStore-categories">
+                   <nav id="moo-menu-navigation" class="moo-stick-to-content">
+                       <div class="moo-choose-category">Choose a Category</div>
+                       <ul class="moo-nav moo-nav-menu moo-bg-dark moo-dark">
+                       <?php
+                       foreach ($categories as $category) {
+                           if(count($category["five_items"])>0) {
+                               echo '<li><a href="#cat-'.strtolower($category['uuid']).'" onclick="MooCLickOnCategory(event,this)">'.$category['name'].'</a></li>';
+                           }
+                       }
+                       ?>
+                       </ul>
+                   </nav>
+                </div>
+                <div class="moo-col-md-9" id="moo-onlineStore-items">
+                    <?php
+                    $html='';
+                    foreach ($categories as $category) {
+                        if(count($category["five_items"])>0) {
+                            $html    .=   '<div id="cat-'.strtolower($category['uuid']).'" class="moo-menu-category">';
+                            $html    .=  '<div class="moo-menu-category-title">';
+                            $html    .= '   <div class="moo-bg-image" style="background-image: url(&quot;'.(($category['image_url']!=null)?$category['image_url']:"").'&quot;);"></div>';
+                            $html    .= '   <div class="moo-title">'.$category['name'].'</div>';
+                            $html    .= '</div>';
+                            $html    .= '<div class="moo-menu-category-content" id="moo-items-for-'.strtolower($category['uuid']).'">';
+                            foreach ($category["five_items"] as $item) {
+                                    $item_price = number_format($item["price"]/100,2);
+                                    
+                                    if($item["price"] > 0 && $item["price_type"] == "PER_UNIT")
+                                       $item_price .= '/' . $item["unit_name"];
+
+                                   $html .= '<div class="moo-menu-item moo-menu-list-item" ><div class="moo-row">';
+
+                                   if($item['image'] != null && $item['image']->url != null && $item['image']->url != "") {
+                                        $html .= '<div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-12 moo-col-xs-12 moo-image-zoom">';
+                                        $html .= '<a href="'.$item['image']->url.'" data-effect="mfp-zoom-in"><img src="'.$item['image']->url.'" class="moo-img-responsive moo-image-zoom"></a></div>';
+                                        $html .= '<div class="moo-col-lg-6 moo-col-md-6 moo-col-sm-12 moo-col-xs-12">';
+                                        $html .= '<div class="moo-item-name">'.$item['name'].'</div>';
+                                        $html .= '<span class="moo-text-muted moo-text-sm">'.$item['description'].'</span></div>';
+                                    } else {
+                                        $html .= '    <div class="moo-col-lg-8 moo-col-md-8 moo-col-sm-12 moo-col-xs-12">';
+                                        $html .= '         <div class="moo-item-name">'.$item['name'].'</div>';
+                                        $html .= '         <span class="moo-text-muted moo-text-sm">'.$item['description'].'</span>';
+                                        $html .= '    </div>';
+                                    }
+
+                                    if($item['price'] == 0) {
+                                        $html .= '    <div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-12 moo-col-xs-12 moo-text-sm-right"><span></span>';
+                                    } else {
+                                        $html .= '    <div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-12 moo-col-xs-12 moo-text-sm-right">';
+                                        $html .='    <span class="moo-price">$'.$item_price.'</span>';
+                                    }
+
+                                    if($item["stockCount"] == "out_of_stock") {
+                                        $html .= '<button class="moo-btn-sm moo-hvr-sweep-to-top">Out Of Stock</button>';
+                                    } else {
+                                        //Checking the Qty window show/hide and add add to cart button
+                                        if($themeSettings['settings']["onePage_qtyWindow"] != null && $themeSettings['settings']["onePage_qtyWindow"]== "on") {
+                                            if($item['has_modifiers']) {
+                                                if($themeSettings['settings']["onePage_qtyWindowForModifiers"] != null && $themeSettings['settings']["onePage_qtyWindowForModifiers"] == "on")
+                                                    $html .= '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''.$item['uuid'].'\',\''.$item['stockCount'].'\',moo_clickOnOrderBtnFIWM)">Choose Qty & Options</button>';
+                                                else
+                                                    $html .= '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''.$item['uuid'].'\',1)">Choose Options & Qty</button>';
+                                            } else {
+                                                $html .= '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''.$item['uuid'].'\',\''.$item['stockCount'].'\',moo_clickOnOrderBtn)">Add to cart</button>';
+                                            }
+
+                                        } else {
+                                            if($item['has_modifiers'])
+                                                $html .= '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''.$item['uuid'].'\',1)">Choose Options & Qty </button>';
+                                            else
+                                                $html .= '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtn(event,\''.$item['uuid'].'\',1)">Add to cart</button>';
+
+                                        }
+
+                                    }
+
+                                    $html .= '</div>';
+                                    if($item['has_modifiers'])
+                                        $html .= '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12" id="moo-modifiersContainer-for-'.$item['uuid'].'"></div>';
+                                    $html .= '</div></div>';
+
+                           }
+
+                           if(count($category["five_items"]) == 5) {
+                                $html .= '<div class="moo-menu-item moo-menu-list-item"><div class="moo-row moo-align-items-center"><a href="#" class="moo-bt-more moo-show-more" onclick="mooClickOnLoadMoreItems(event,\''.$category['uuid'].'\',\''.$category['name'].'\')"> Show More </a><i class="fa fa-chevron-down" aria-hidden="true" style=" display: block; color:red "></i></div></div>';
+                            }
+                            $html    .= "</div></div>";
+                        }
+                    }
+                    echo $html;
+                    ?>
+                </div>
+                <?php } ?>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+    public static function moo_search_bar($atts, $content)
+    {
+
+        wp_enqueue_style( 'font-awesome' );
+
+        wp_enqueue_style ( 'moo-search-bar' );
+        wp_enqueue_script( 'moo-search-bar' );
+
+        ob_start();
+        ?>
+        <div class="" id="moo-search-bar-container">
+            <div class="moo-search-bar moo-row">
+                <input class="moo-col-md-10 moo-search-field" type="text" placeholder="Search" />
+                <button class="moo-col-md-2 osh-btn action" onclick="mooClickonSearchButton()">Search</button>
+            </div>
+            <div class="moo-search-result moo-row"></div>
+        </div>
         <?php
         return ob_get_clean();
     }

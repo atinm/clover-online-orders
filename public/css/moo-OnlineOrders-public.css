@@ -1,0 +1,1340 @@
+/**
+ * All of the CSS for your public-facing functionality should be
+ * included in this file.
+ */
+@import url(//fonts.googleapis.com/css?family=Lato);
+@import url('//fonts.googleapis.com/css?family=Anton|Fjalla+One|Passion+One');
+@font-face {
+    font-family: 'ProximaNovaAltExtraCondensedBold';
+    src: url('../fonts/ProximaNovaAltExtraCondensedBold.eot');
+    src: url('../fonts/ProximaNovaAltExtraCondensedBold.eot') format('embedded-opentype'),
+    url('../fonts/ProximaNovaAltExtraCondensedBold.woff2') format('woff2'),
+    url('../fonts/ProximaNovaAltExtraCondensedBold.woff') format('woff'),
+    url('../fonts/ProximaNovaAltExtraCondensedBold.ttf') format('truetype'),
+    url('../fonts/ProximaNovaAltExtraCondensedBold.svg#ProximaNovaAltExtraCondensedBold') format('svg');
+}
+/* For divi theme : make the popun on the fixed menu*/
+#main-header {
+    z-index: 999 !important;
+}
+
+#moo_OnlineStoreContainer,.moo-shopping-cart-container
+{
+    padding-top: 15px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+@media only screen and (max-width: 767px) {
+    #moo_cart_icon{
+        background-color:red;
+        width:100%;
+        height:40px;
+    }
+    #moo_cart{
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        color: #ffffff;
+        z-index: 999999;
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
+        line-height: 40px;
+        font-family: 'Lato', sans-serif;
+    }
+    #moo_cart a{
+        color: #ffffff;
+        text-decoration: none;
+    }
+    #moo_cart_icon>{
+        width: 100%;
+        height: 40px;
+        line-height: 40px;
+        color: #ffffff;
+        z-index: 999999;
+        cursor: pointer;
+    }
+    #moo_creditCardPanel>*>.form-group
+    {
+        height: 60px;
+    }
+}
+@media only screen and (min-width: 768px) {
+    #moo_cart{
+        position: fixed;
+        right: 2px;
+        top: 30%;
+        color: #ffffff;
+        z-index: 999999;
+        cursor: pointer;
+        padding: 5px;
+        padding-right: 0px;
+    }
+    #moo_cart_icon{
+        background-image: url("../img/moo_cart_icon.png");
+        width:44px;
+        height:152px;
+        float: right;
+    }
+    #moo_cart_icon>span{
+         display: none;
+    }
+    #moo_creditCardPanel>*>.form-group
+    {
+        height: 30px;
+    }
+    #moo_OnlineStoreContainer,.moo-shopping-cart-container {
+       /* min-width: 1024px; */
+        padding-top: 15px;
+        margin: 0 auto;
+    }
+
+}
+
+.moo-imgPopup
+{
+    width: 80px;
+    margin: 15px;
+}
+.moo-msgPopup
+{
+    font-size: 33px;
+    font-family: 'Fjalla One';
+}
+
+#moo_checkout_msg
+{
+    text-align: center;
+    font-size: 20px;
+    padding: 20px;
+    color:red;
+}
+
+.moo_credit_cards
+{
+    margin: 0;
+    border: 0;
+    padding: 0 !important;
+}
+
+.moo_btn_qte{
+    min-width: 42px;
+    border-radius: 4px;
+    cursor: pointer;
+    line-height: 42px;
+    text-align: center;
+    font-size: 20px;
+    color: white;
+    background-color: #989898;
+    float: left;
+}
+.moo_qte{
+    display: inline-block;
+    min-width: 42px;
+    border-radius: 4px;
+    cursor: pointer;
+    line-height: 42px;
+    text-align: center;
+    font-size: 20px;
+    color: #000000;
+    float: left;
+}
+.table > tbody > tr > td {
+    vertical-align: middle;
+}
+#moo_form_address label
+{
+    font-family: serif;
+    color:#000000;
+    font-size: 15px;
+}
+#moo_form_address .error
+{
+    color:red;
+    font-size: 13px;
+}
+#Moo_FileterContainer
+{
+    background-color: #ecf0f1;
+}
+.FixedOnTop
+{
+    position: fixed;
+    top: 0px;
+    z-index: 99999999;
+    padding: 5px !important;
+    box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.7);
+}
+#Moo_FileterContainer input[type=text]
+{
+    position: relative !important;
+    z-index: 2 !important;
+    float: left !important;
+    width: 100% !important;
+    margin-bottom: 0 !important;
+    display: block;
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    -webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+    -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+}
+#Moo_FileterContainer button,.moo_items button
+{
+     margin: 0;
+     margin-left: -2px;
+     color: #333;
+     background-color: #fff;
+     border-color: #ccc;
+     display: inline-block;
+     padding: 6px 12px;
+     margin-bottom: 0;
+     font-size: 14px;
+     font-weight: 400;
+     line-height: 1.42857143;
+     text-align: center;
+     white-space: nowrap;
+     vertical-align: middle;
+     -ms-touch-action: manipulation;
+     touch-action: manipulation;
+     cursor: pointer;
+     -webkit-user-select: none;
+     -moz-user-select: none;
+     -ms-user-select: none;
+     user-select: none;
+     background-image: none;
+}
+#Moo_FileterContainer ul
+{
+      margin-top: -8px;
+      list-style: none;
+}
+#Moo_FileterContainer a
+{
+     text-decoration: none;
+}
+.Moo_Copyright
+{
+    padding: 5px;
+    text-align: center;
+    font-size: 12px;
+    margin-bottom: 20px;
+    clear: both;
+    display: block;
+}
+.Moo_Copyright a
+{
+    color: #000;
+    margin-left: 5px;
+}
+.moo_emptycart p
+{
+    text-align: center;
+    font-size: 20px;
+    color: #000;
+}
+.moo_emptycart span
+{
+    text-align: center;
+    font-size: 16px;
+    display: block;
+    color: #000;
+}
+.moo_emptycart span a,.moo_emptycart span a:visited
+{
+   color: blue;
+}
+.alert-success a
+{
+    color:blue;
+}
+
+#moo_merchantmap
+{
+    width: 100%;
+    height:350px;
+    display: none;
+}
+#moo_dz_map
+{
+    width: 100%;
+    height:350px;
+    margin-top: 20px;
+}
+select
+{
+    padding: 0px !important;
+}
+.moo_loading,#moo_cashPanel,#moo_verifPhone_verificatonCode
+{
+    display: none;
+    text-align: center;
+}
+#moo_cashPanel,#moo_creditCardPanel
+{
+    padding-top: 25px;
+    display: none;
+}
+#moo_paymentOptions
+{
+    font-size: 20px;
+}
+#moo_paymentOptions_cc,#moo_paymentOptions_cash
+{
+    margin-right: 5px;
+    padding: 0px;
+}
+/*CAROUSEL ITEM CSS*/
+.carrousel_images_item {
+    float: none;
+    width: 100%;
+    margin: 0 auto;
+
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+}
+.carrousel_images_item_top {
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+    width: 100%;
+}
+.img_carousel {
+    height: 331px !important;
+    width: 100% !important;
+}
+.sliders_wrapper {
+    height: 331px;
+}
+.popup_slider {
+    padding: 0px !important;
+}
+.nomarginrow {
+    margin-right: 0px !important;
+    margin-left: 0px !important
+}
+.moo_popup_leftSide {
+    padding-right: 20px !important;
+    padding-left: 20px !important;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+.moo_category_page_title
+{
+    font-size:20px;
+    text-transform: uppercase;
+    color: #000;
+}
+
+.btn-primary:hover,.btn-danger:hover {
+    color: #fff !important;
+}
+.btn-primary{
+    color: #fff !important;
+}
+.BtnCheckout,.btn-danger{
+    color: #fff !important;
+    margin: 10px !important;
+}
+.BtnCheckout:visited{
+    color: #fff !important;
+}
+
+.login-or {
+    position: relative;
+    font-size: 18px;
+    color: #aaa;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.span-or {
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: -2px;
+    margin-left: -25px;
+    background-color: #fff;
+    width: 50px;
+    text-align: center;
+}
+.hr-or {
+    background-color: #cdcdcd;
+    height: 1px;
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+}
+.login-separator {
+    position: absolute;
+    float: left;
+    padding: 0 10px;
+    top: 0;
+    bottom: 0;
+    right: 0;
+}
+.login-separator>.separator {
+    position: absolute;
+    height: 100%;
+    left: 50%;
+    border-left: 1px solid #979797;
+}
+.login-separator>.separator>span {
+    display: block;
+    width: 36px;
+    height: 36px;
+    position: absolute;
+    top: 45%;
+    left: -18px;
+    font-size: 18px;
+    color: #666;
+    text-align: center;
+    line-height: 36px;
+    background-color: #fff;
+}
+.login-social-section{
+    height: 220px;
+    font-size: 20px;
+    text-align: center;
+}
+.login-top-section
+{
+    text-align: left;
+    font-size:14px !important;
+    margin-bottom: 30px;
+    margin-top: 18px;
+}
+.login-top-section .login-header
+{
+    text-align: left;
+    font-size:20px;
+}
+#Mooinstructions
+{
+    width: 100%;
+    background-color: #fff;
+}
+.moo-checkout-form-leftside
+{
+    background-color: #fff;
+}
+.moo-checkout-form-leftside .form-control,#moo-forgotpassword-form .form-control,#moo-signing-form .form-control
+{
+    background-color: #fff;
+    height: 34px;
+    border: 1px solid #d2d2d2;
+}
+#moo-signing-form,#moo-forgotpassword-form,#moo-chooseaddress-form,#moo-addaddress-form,#mooButonAddAddress,#moo-checkout-form,.moo-checkout-bloc-message
+{
+    display: none;
+}
+#MooMapAddingAddress
+{
+    width: 100%;
+    height:350px;
+    display: none;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 20px;
+    color: rgba(11, 11, 11, 0.5);
+}
+#inputEmail,#inputPassword
+{
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    border:1px solid #BEBEBE;
+    padding: 7px;
+    margin:0px;
+    -webkit-transition: all 0.30s ease-in-out;
+    -moz-transition: all 0.30s ease-in-out;
+    -ms-transition: all 0.30s ease-in-out;
+    -o-transition: all 0.30s ease-in-out;
+    outline: none;
+    border-radius: 0;
+    background-color: #fff;
+    height: 40px;
+}
+#inputEmail:focus,#inputPassword:focus
+{
+    moz-box-shadow: 0 0 8px #88D5E9;
+    -webkit-box-shadow: 0 0 8px #88D5E9;
+    box-shadow: 0 0 8px #88D5E9;
+    border: 1px solid #88D5E9;
+}
+.MooSimplButon
+{
+    background: #d5d5d5;
+    padding: 8px 15px 8px 15px;
+    border: none;
+    color: #000;
+    border-radius: 0;
+    font-size: 12px;
+
+}
+.MooUseAddressButton
+{
+    position: absolute;
+    left: 20%;
+    bottom: 15px;
+}
+.MooAddressBtnActions
+{
+    float: left;
+    text-align: center;
+    width: 100%;
+    border-top: 1px solid;
+    padding: 10px;
+}
+.MooSimplButon:hover
+{
+     background: #f17e0a;
+     color : #ffffff;
+     box-shadow:none;
+     -moz-box-shadow:none;
+     -webkit-box-shadow:none;
+     text-decoration: none;
+     cursor: pointer;
+}
+#mooButonLogin,#mooButonAddAddress,#mooButonResetPasswrod,#mooButonLoginAsGuest,#mooButonConfirmAddress
+{
+    background: #4B99AD;
+    padding: 8px 15px 8px 15px;
+    border: none;
+    color: #fff;
+    border-radius: 0;
+    text-decoration: none
+}
+#mooButonLogin:hover,#mooButonAddAddress:hover,#mooButonResetPasswrod:hover,#mooButonLoginAsGuest:hover,#mooButonConfirmAddress:hover
+{
+     background: #4691A4;
+     box-shadow:none;
+     -moz-box-shadow:none;
+     -webkit-box-shadow:none;
+     text-decoration: none;
+     cursor: pointer;
+}
+.moo-centred
+{
+ text-align: center;
+}
+.moo-address-block
+{
+    background-color: #fff;
+    padding: 20px 20px 45px 20px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    border: 1px solid #000;
+    font-weight: bold;
+    height: 140px;
+    color: #000;
+}.moo-address-block>span
+{
+     position: absolute;
+     top: 3px;
+     right: 22px;
+     cursor: pointer;
+     font-size: 17px;
+}
+.moo-checkout-form-leftside
+{
+    border: 1px solid #eee;
+}
+.moo-checkout-form-rightside
+{
+    border: 1px solid #0b0b0b;
+}
+#moo-checkout-form-btnActions
+{
+    float: left;
+    text-align: center;
+    width: 100%;
+}
+.MooCartInCheckout
+{
+    border: 1px solid #eee;
+    padding: 0px !important;
+}
+.MooCartInCheckout .moo-column-labels-checkout
+{
+     background-color: #f0f0f0;
+     border: 1px solid #ccc;
+     color: #999;
+     font-size: 14px;
+     font-weight: 700;
+     padding: 15px;
+     height: 50px;
+    margin-bottom: 10px;
+}.MooCartInCheckout .moo-product
+{
+     padding-right: 10px;
+     padding-left: 10px;
+}
+.MooCartInCheckout .moo-product .moo-product-title,.moo-product-quantity,.moo-product-line-price
+{
+     font-size: 14px !important;
+}
+.MooCartInCheckout .moo-product .moo-product-description .moo-product-description>span
+{
+     font-size: 12px !important;
+}
+.moo-checkout-bloc-title
+{
+    text-transform: uppercase;
+    color: #000000;
+    font-weight: 700;
+    height: 30px;
+    padding: 10px 10px 0 10px;
+    font-size: 14px;
+}
+.moo-checkout-bloc-title-2 {
+    text-transform: uppercase;
+    color: #000000;
+    font-weight: 700;
+    height: 41px;
+    padding: 10px 10px 0 10px;
+    font-size: 14px;
+    background-color: #eee;
+    margin-left: -15px;
+    margin-right: -15px;
+}
+.moo-checkout-bloc-content
+{
+    color: #000000;
+    padding: 10px 10px 10px 20px;
+    font-size: 12px;
+}
+.moo-checkout-bloc-message
+{
+    padding: 10px 10px 10px 10px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    background-color: rgba(238, 238, 238, 0.46);
+    border: solid 1px #ccc;
+}
+.moo_chekout_border_bottom
+{
+    border-bottom: 1px solid #eee ;
+    margin-right: -15px;
+    margin-left: -15px;
+}
+.moo-checkout-edit-icon
+{
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #c7cdd6;
+    border-radius: 3px;
+    padding: 11px;
+    fill: #7a8799;
+    right: 10px;
+    cursor: pointer;
+    display: none;
+}
+.moo-checkout-form-ordertypes-option,.moo-checkout-form-payments-option
+{
+    margin-bottom: 10px;
+    font-size: 12px;
+}
+.moo-checkout-form-ordertypes-input,.moo-checkout-form-payments-input
+{
+    margin-right: 15px;
+}
+#moo_verifPhone_verified
+{
+    text-align: center;
+    display:none
+}
+#moo_verifPhone_verified>p
+{
+     margin-top: 10px;
+     font-size: 20px
+}
+#moo_verifPhone_verificatonCode>p
+ {
+    font-size:18px;
+    color:green
+ }
+.moo-finalize-order-btn
+{
+    display: block;
+    width: 50% !important;
+    height: 50px !important;
+    line-height: 38px !important;
+    font-size: 18px;
+    margin: 10px auto !important;
+}
+#MooDeliveryfeesInTotalsSection
+{
+    display: none;
+}
+.MooShowBloc
+{
+    display: block !important;
+}
+#moo-checkout
+{
+    max-width: 800px;
+    margin: 0 auto;
+}
+button.mfp-close {
+    padding: 8px;
+    font-size: 40px;
+}
+#moo-checkout-form-savecard
+{
+    display: none;
+}
+.moo-alert {
+    padding: 8px 35px 8px 14px;
+    margin-bottom: 18px;
+    color: #c09853;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    background-color: #fcf8e3;
+    border: 1px solid #fbeed5;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+.moo-alert-heading {
+    color: inherit;
+}
+
+.moo-alert .close {
+    position: relative;
+    top: -2px;
+    right: -21px;
+    line-height: 18px;
+}
+.moo-alert-success {
+    color: #468847;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+}
+.moo-alert-danger,
+.moo-alert-error {
+    color: #b94a48;
+    background-color: #f2dede;
+    border-color: #eed3d7;
+}
+.moo-alert-info {
+    color: #3a87ad;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}
+
+/* Buttons Css */
+
+.moo-btn {
+    display: inline-block;
+    margin-bottom: 0;
+    font-weight: normal;
+    text-align: center;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    background-image: none;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    border-radius: 4px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    text-decoration: none;
+}
+.moo-btn:focus,
+.moo-btn:active:focus,
+.moo-btn.active:focus,
+.moo-btn.focus,
+.moo-btn:active.focus,
+.moo-btn.active.focus {
+    outline: 5px auto -webkit-focus-ring-color;
+    outline-offset: -2px;
+}
+.moo-btn:hover,
+.moo-btn:focus,
+.moo-btn.focus {
+    color: #333333;
+    text-decoration: none;
+}
+.moo-btn:active,
+.moo-btn.active {
+    outline: 0;
+    background-image: none;
+    -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+.moo-btn.disabled,
+.moo-btn[disabled],
+fieldset[disabled] .moo-btn {
+    cursor: not-allowed;
+    opacity: 0.65;
+    filter: alpha(opacity=65);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+a.moo-btn.disabled,
+fieldset[disabled] a.moo-btn {
+    pointer-events: none;
+}
+.moo-btn-default {
+    color: #333333;
+    background-color: #ffffff;
+    border-color: #cccccc;
+}
+.moo-btn-default:focus,
+.moo-btn-default.focus {
+    color: #333333;
+    background-color: #e6e6e6;
+    border-color: #8c8c8c;
+}
+.moo-btn-default:hover {
+    color: #333333;
+    background-color: #e6e6e6;
+    border-color: #adadad;
+}
+.moo-btn-default:active,
+.moo-btn-default.active,
+.open > .dropdown-toggle.moo-btn-default {
+    color: #333333;
+    background-color: #e6e6e6;
+    border-color: #adadad;
+}
+.moo-btn-default:active:hover,
+.moo-btn-default.active:hover,
+.open > .dropdown-toggle.moo-btn-default:hover,
+.moo-btn-default:active:focus,
+.moo-btn-default.active:focus,
+.open > .dropdown-toggle.moo-btn-default:focus,
+.moo-btn-default:active.focus,
+.moo-btn-default.active.focus,
+.open > .dropdown-toggle.moo-btn-default.focus {
+    color: #333333;
+    background-color: #d4d4d4;
+    border-color: #8c8c8c;
+}
+.moo-btn-default:active,
+.moo-btn-default.active,
+.open > .dropdown-toggle.moo-btn-default {
+    background-image: none;
+}
+.moo-btn-default.disabled:hover,
+.moo-btn-default[disabled]:hover,
+fieldset[disabled] .moo-btn-default:hover,
+.moo-btn-default.disabled:focus,
+.moo-btn-default[disabled]:focus,
+fieldset[disabled] .moo-btn-default:focus,
+.moo-btn-default.disabled.focus,
+.moo-btn-default[disabled].focus,
+fieldset[disabled] .moo-btn-default.focus {
+    background-color: #ffffff;
+    border-color: #cccccc;
+}
+.moo-btn-default .badge {
+    color: #ffffff;
+    background-color: #333333;
+}
+.moo-btn-primary {
+    color: #ffffff;
+    background-color: #337ab7;
+    border-color: #2e6da4;
+}
+.moo-btn-primary:focus,
+.moo-btn-primary.focus {
+    color: #ffffff;
+    background-color: #286090;
+    border-color: #122b40 ;
+}
+.moo-btn-primary:hover {
+    color: #ffffff;
+    background-color: #286090;
+    border-color: #204d74;
+}
+.moo-btn-primary:active,
+.moo-btn-primary.active,
+.open > .dropdown-toggle.moo-btn-primary {
+    color: #ffffff;
+    background-color: #286090;
+    border-color: #204d74;
+}
+.moo-btn-primary:active:hover,
+.moo-btn-primary.active:hover,
+.open > .dropdown-toggle.moo-btn-primary:hover,
+.moo-btn-primary:active:focus,
+.moo-btn-primary.active:focus,
+.open > .dropdown-toggle.moo-btn-primary:focus,
+.moo-btn-primary:active.focus,
+.moo-btn-primary.active.focus,
+.open > .dropdown-toggle.moo-btn-primary.focus {
+    color: #ffffff;
+    background-color: #204d74;
+    border-color: #122b40;
+}
+.moo-btn-primary:active,
+.moo-btn-primary.active,
+.open > .dropdown-toggle.moo-btn-primary {
+    background-image: none;
+}
+.moo-btn-primary.disabled:hover,
+.moo-btn-primary[disabled]:hover,
+fieldset[disabled] .moo-btn-primary:hover,
+.moo-btn-primary.disabled:focus,
+.moo-btn-primary[disabled]:focus,
+fieldset[disabled] .moo-btn-primary:focus,
+.moo-btn-primary.disabled.focus,
+.moo-btn-primary[disabled].focus,
+fieldset[disabled] .moo-btn-primary.focus {
+    background-color: #337ab7;
+    border-color: #2e6da4;
+}
+.moo-btn-primary .badge {
+    color: #337ab7;
+    background-color: #ffffff;
+}
+.moo-btn-success {
+    color: #ffffff;
+    background-color: #5cb85c;
+    border-color: #4cae4c;
+}
+.moo-btn-success:focus,
+.moo-btn-success.focus {
+    color: #ffffff;
+    background-color: #449d44;
+    border-color: #255625;
+}
+.moo-btn-success:hover {
+    color: #ffffff;
+    background-color: #449d44;
+    border-color: #398439;
+}
+.moo-btn-success:active,
+.moo-btn-success.active,
+.open > .dropdown-toggle.moo-btn-success {
+    color: #ffffff;
+    background-color: #449d44;
+    border-color: #398439;
+}
+.moo-btn-success:active:hover,
+.moo-btn-success.active:hover,
+.open > .dropdown-toggle.moo-btn-success:hover,
+.moo-btn-success:active:focus,
+.moo-btn-success.active:focus,
+.open > .dropdown-toggle.moo-btn-success:focus,
+.moo-btn-success:active.focus,
+.moo-btn-success.active.focus,
+.open > .dropdown-toggle.moo-btn-success.focus {
+    color: #ffffff;
+    background-color: #398439;
+    border-color: #255625;
+}
+.moo-btn-success:active,
+.moo-btn-success.active,
+.open > .dropdown-toggle.moo-btn-success {
+    background-image: none;
+}
+.moo-btn-success.disabled:hover,
+.moo-btn-success[disabled]:hover,
+fieldset[disabled] .moo-btn-success:hover,
+.moo-btn-success.disabled:focus,
+.moo-btn-success[disabled]:focus,
+fieldset[disabled] .moo-btn-success:focus,
+.moo-btn-success.disabled.focus,
+.moo-btn-success[disabled].focus,
+fieldset[disabled] .moo-btn-success.focus {
+    background-color: #5cb85c;
+    border-color: #4cae4c;
+}
+.moo-btn-success .badge {
+    color: #5cb85c;
+    background-color: #ffffff;
+}
+.moo-btn-info {
+    color: #ffffff;
+    background-color: #5bc0de;
+    border-color: #46b8da;
+}
+.moo-btn-info:focus,
+.moo-btn-info.focus {
+    color: #ffffff;
+    background-color: #31b0d5;
+    border-color: #1b6d85;
+}
+.moo-btn-info:hover {
+    color: #ffffff;
+    background-color: #31b0d5;
+    border-color: #269abc;
+}
+.moo-btn-info:active,
+.moo-btn-info.active,
+.open > .dropdown-toggle.moo-btn-info {
+    color: #ffffff;
+    background-color: #31b0d5;
+    border-color: #269abc;
+}
+.moo-btn-info:active:hover,
+.moo-btn-info.active:hover,
+.open > .dropdown-toggle.moo-btn-info:hover,
+.moo-btn-info:active:focus,
+.moo-btn-info.active:focus,
+.open > .dropdown-toggle.moo-btn-info:focus,
+.moo-btn-info:active.focus,
+.moo-btn-info.active.focus,
+.open > .dropdown-toggle.moo-btn-info.focus {
+    color: #ffffff;
+    background-color: #269abc;
+    border-color: #1b6d85;
+}
+.moo-btn-info:active,
+.moo-btn-info.active,
+.open > .dropdown-toggle.moo-btn-info {
+    background-image: none;
+}
+.moo-btn-info.disabled:hover,
+.moo-btn-info[disabled]:hover,
+fieldset[disabled] .moo-btn-info:hover,
+.moo-btn-info.disabled:focus,
+.moo-btn-info[disabled]:focus,
+fieldset[disabled] .moo-btn-info:focus,
+.moo-btn-info.disabled.focus,
+.moo-btn-info[disabled].focus,
+fieldset[disabled] .moo-btn-info.focus {
+    background-color: #5bc0de;
+    border-color: #46b8da;
+}
+.moo-btn-info .badge {
+    color: #5bc0de;
+    background-color: #ffffff;
+}
+.moo-btn-warning {
+    color: #ffffff;
+    background-color: #f0ad4e;
+    border-color: #eea236;
+}
+.moo-btn-warning:focus,
+.moo-btn-warning.focus {
+    color: #ffffff;
+    background-color: #ec971f;
+    border-color: #985f0d;
+}
+.moo-btn-warning:hover {
+    color: #ffffff;
+    background-color: #ec971f;
+    border-color: #d58512;
+}
+.moo-btn-warning:active,
+.moo-btn-warning.active,
+.open > .dropdown-toggle.moo-btn-warning {
+    color: #ffffff;
+    background-color: #ec971f;
+    border-color: #d58512;
+}
+.moo-btn-warning:active:hover,
+.moo-btn-warning.active:hover,
+.open > .dropdown-toggle.moo-btn-warning:hover,
+.moo-btn-warning:active:focus,
+.moo-btn-warning.active:focus,
+.open > .dropdown-toggle.moo-btn-warning:focus,
+.moo-btn-warning:active.focus,
+.moo-btn-warning.active.focus,
+.open > .dropdown-toggle.moo-btn-warning.focus {
+    color: #ffffff;
+    background-color: #d58512;
+    border-color: #985f0d;
+}
+.moo-btn-warning:active,
+.moo-btn-warning.active,
+.open > .dropdown-toggle.moo-btn-warning {
+    background-image: none;
+}
+.moo-btn-warning.disabled:hover,
+.moo-btn-warning[disabled]:hover,
+fieldset[disabled] .moo-btn-warning:hover,
+.moo-btn-warning.disabled:focus,
+.moo-btn-warning[disabled]:focus,
+fieldset[disabled] .moo-btn-warning:focus,
+.moo-btn-warning.disabled.focus,
+.moo-btn-warning[disabled].focus,
+fieldset[disabled] .moo-btn-warning.focus {
+    background-color: #f0ad4e;
+    border-color: #eea236;
+}
+.moo-btn-warning .badge {
+    color: #f0ad4e;
+    background-color: #ffffff;
+}
+.moo-btn-danger {
+    color: #ffffff;
+    background-color: #d9534f;
+    border-color: #d43f3a;
+}
+.moo-btn-danger:focus,
+.moo-btn-danger.focus {
+    color: #ffffff;
+    background-color: #c9302c;
+    border-color: #761c19;
+}
+.moo-btn-danger:hover {
+    color: #ffffff;
+    background-color: #c9302c;
+    border-color: #ac2925;
+}
+.moo-btn-danger:active,
+.moo-btn-danger.active,
+.open > .dropdown-toggle.moo-btn-danger {
+    color: #ffffff;
+    background-color: #c9302c;
+    border-color: #ac2925;
+}
+.moo-btn-danger:active:hover,
+.moo-btn-danger.active:hover,
+.open > .dropdown-toggle.moo-btn-danger:hover,
+.moo-btn-danger:active:focus,
+.moo-btn-danger.active:focus,
+.open > .dropdown-toggle.moo-btn-danger:focus,
+.moo-btn-danger:active.focus,
+.moo-btn-danger.active.focus,
+.open > .dropdown-toggle.moo-btn-danger.focus {
+    color: #ffffff;
+    background-color: #ac2925;
+    border-color: #761c19;
+}
+.moo-btn-danger:active,
+.moo-btn-danger.active,
+.open > .dropdown-toggle.moo-btn-danger {
+    background-image: none;
+}
+.moo-btn-danger.disabled:hover,
+.moo-btn-danger[disabled]:hover,
+fieldset[disabled] .moo-btn-danger:hover,
+.moo-btn-danger.disabled:focus,
+.moo-btn-danger[disabled]:focus,
+fieldset[disabled] .moo-btn-danger:focus,
+.moo-btn-danger.disabled.focus,
+.moo-btn-danger[disabled].focus,
+fieldset[disabled] .moo-btn-danger.focus {
+    background-color: #d9534f;
+    border-color: #d43f3a;
+}
+.moo-btn-danger .badge {
+    color: #d9534f;
+    background-color: #ffffff;
+}
+.moo-btn-link {
+    color: #337ab7;
+    font-weight: normal;
+    border-radius: 0;
+}
+.moo-btn-link,
+.moo-btn-link:active,
+.moo-btn-link.active,
+.moo-btn-link[disabled],
+fieldset[disabled] .moo-btn-link {
+    background-color: transparent;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+.moo-btn-link,
+.moo-btn-link:hover,
+.moo-btn-link:focus,
+.moo-btn-link:active {
+    border-color: transparent;
+}
+.moo-btn-link:hover,
+.moo-btn-link:focus {
+    color: #23527c;
+    text-decoration: underline;
+    background-color: transparent;
+}
+.moo-btn-link[disabled]:hover,
+fieldset[disabled] .moo-btn-link:hover,
+.moo-btn-link[disabled]:focus,
+fieldset[disabled] .moo-btn-link:focus {
+    color: #777777;
+    text-decoration: none;
+}
+.moo-btn-lg {
+    padding: 10px 16px;
+    font-size: 18px;
+    line-height: 1.3333333;
+    border-radius: 6px;
+}
+.moo-btn-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
+}
+.moo-btn-xs {
+    padding: 1px 5px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
+}
+.moo-btn-block {
+    display: block;
+    width: 100%;
+}
+.moo-btn-block + .moo-btn-block {
+    margin-top: 5px;
+}
+input[type="submit"].moo-btn-block,
+input[type="reset"].moo-btn-block,
+input[type="button"].moo-btn-block {
+    width: 100%;
+}
+
+/* Forms */
+/*
+.moo-form-control
+{
+    position: relative;
+    z-index: 2;
+    float: left;
+    width: 100%;
+    margin-bottom: 0px;
+    margin-top: 6px;
+}
+*/
+.moo-form-control
+{
+    display: block;
+    width: 100%;
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555555;
+    background-color: #ffffff;
+    background-image: none;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+    -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+}
+.moo-form-control:focus {
+    border-color: #66afe9;
+    outline: 0;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, 0.6);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, 0.6);
+    background-color: #fff !important;
+}
+.moo-form-control::-moz-placeholder {
+    color: #999999;
+    opacity: 1;
+}
+.moo-form-control:-ms-input-placeholder {
+    color: #999999;
+}
+.moo-form-control::-webkit-input-placeholder {
+    color: #999999;
+}
+.moo-form-group
+{
+    margin-bottom: 15px;
+}
+@media (min-width: 768px) {
+    .moo-form-inline .moo-form-group {
+        display: inline-block;
+        margin-bottom: 0;
+        vertical-align: middle;
+    }
+    .moo-form-inline .moo-form-control {
+        display: inline-block;
+        width: auto;
+        vertical-align: middle;
+    }
+    .moo-form-inline .moo-form-control-static {
+        display: inline-block;
+    }
+    .form-inline .input-group {
+        display: inline-table;
+        vertical-align: middle;
+    }
+    .moo-form-inline .moo-input-group .moo-input-group-addon,
+    .moo-form-inline .moo-input-group .moo-input-group-btn,
+    .moo-form-inline .moo-input-group .moo-form-control {
+        width: auto;
+    }
+    .moo-form-inline .moo-input-group > .moo-form-control {
+        width: 100%;
+    }
+    .moo-form-inline .moo-control-label {
+        margin-bottom: 0;
+        vertical-align: middle;
+    }
+    .moo-form-inline .moo-radio,
+    .moo-form-inline .moo-checkbox {
+        display: inline-block;
+        margin-top: 0;
+        margin-bottom: 0;
+        vertical-align: middle;
+    }
+    .moo-form-inline .moo-radio label,
+    .moo-form-inline .moo-checkbox label {
+        padding-left: 0;
+    }
+    .moo-form-inline .moo-radio input[type="radio"],
+    .moo-form-inline .moo-checkbox input[type="checkbox"] {
+        position: relative;
+        margin-left: 0;
+    }
+    .moo-form-inline .moo-has-feedback .moo-form-control-feedback {
+        top: 0;
+    }
+}
+.moo-new-icon
+{
+    border-radius: 3px 0 0 3px;
+    padding: 8px 10px;
+    text-align: center;
+    display: inline-block;
+    min-width: 46px;
+    margin-right: 0;
+    cursor: pointer;
+    -webkit-transition: background 200ms ease;
+    transition: background 200ms ease;
+    background-color: #0c8aac;
+    border-color: #0b83a3;
+    color: #ffffff;
+}
+.moo-new-icon__count
+{
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+.moo-is-sticky {
+    position: fixed;
+    right: 0;
+    top: 57%;
+    transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+    z-index: 2147483645;
+}
+.moo-new-icon__cart-panier
+{
+    color: #ffffff;
+    height: 20px;
+    width: 20px;
+}
+.moo-new-icon__group
+{
+    fill: #ffffff;
+}

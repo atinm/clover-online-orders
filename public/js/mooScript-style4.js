@@ -3,30 +3,14 @@
  */
 jQuery(document).ready(function()
 {
-    window.moo_theme_setings = [];
+    window.moo_theme_setings = moo_themeSettings;
     window.moo_mg_setings = {};
     window.nb_items_in_cart = 0;
-    window.header_height = (typeof window.header_height != 'undefined' && window.header_height != null)?window.header_height:0;
+    window.header_height = window.moo_theme_setings.onePage_categoriesTopMargin;
     var container_top = jQuery('#moo_OnlineStoreContainer').offset().top;
+    window.height = (jQuery(window).width()>768)?(container_top>0)?(window.header_height):'':'';
+    window.width  = 267;
 
-    /* Load the them settings then draw tha layout an get the categories with the first five items */
-    jQuery.get(moo_RestUrl+"moo-clover/v1/theme_settings/onePage", function (data) {
-        if(data != null && data.settings != null)
-        {
-            window.moo_theme_setings = data.settings;
-            window.nb_items_in_cart  = data.nb_items;
-            //Change the categories font-family
-            if(window.moo_theme_setings.onePage_categoriesTopMargin != null)
-            {
-                window.header_height = window.moo_theme_setings.onePage_categoriesTopMargin;
-            }
-            window.height = (jQuery(window).width()>768)?(container_top>0)?(window.header_height):'':'';
-            window.width  = 267;
-        }
-    }).done(function () {
-        MooLoadBaseStructure('#moo_OnlineStoreContainer',mooGetCategories);
-        MooSetLoading();
-    });
     /* Load the modifiers settings and save them on a window's variable */
     jQuery.get(moo_RestUrl+"moo-clover/v1/mg_settings", function (data) {
         if(data != null && data.settings != null)
@@ -49,242 +33,58 @@ jQuery(document).ready(function()
                 jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",window.height+'px');
             }
 
-          //  jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",window.height+'px');
-            /*
-            if(window.width>260)
-                jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",window.height+'px');
-             else
-                jQuery(".moo-stick-to-content").addClass('moo-fixed').width('100%').css("top",window.height+'px');
-             */
+
         }
         else
         {
             jQuery(".moo-stick-to-content").removeClass('moo-fixed');
         }
     });
-
-});
-function MooLoadBaseStructure(elm_id,callback)
-{
-    var html = '<div class="moo-row">'+
-        '<div  class="moo-is-sticky moo-new-icon" onclick="mooShowCart(event)">' +
-        '<div class="moo-new-icon__count" id="moo-cartNbItems">'+((window.nb_items_in_cart>0)?window.nb_items_in_cart:'')+'</div>' +
-        '<div class="moo-new-icon__cart">' +
-        '</div></div>'+
-        '<div id="MooLoadingSection" style="text-align: center;font-size: 20px;display:none">Loading, please wait ...</div>'+
-        '</div>'+
-        '<div class="moo-row">'+
-        '<div class="moo-col-md-3" id="moo-onlineStore-categories">'+
-        '</div>'+
-        '<div class="moo-col-md-9" id="moo-onlineStore-items">'+
-        '</div>'+
-        '</div>';
-    /* Adding the structure the the html page */
-    jQuery(elm_id).html(html);
-
-
-    //Adding add to back button
-    if(window.moo_theme_setings.onePage_backToTop != null)
+    var hash = window.location.hash;
+    if (hash = "") {
+        var top = (jQuery(hash).offset() != null)?jQuery(hash).offset().top:""; //Getting Y of target element
+        window.scrollTo(0, top);
+    }
+    // Custome css or theme customisation applicatio
+    if(window.moo_theme_setings !== null && typeof window.moo_theme_setings !== "undefined")
     {
-       var html_backtoTop = "";
-        jQuery('html body').prepend(html_backtoTop);
+        //Change the categories background color
+        if(window.moo_theme_setings.onePage_categoriesBackgroundColor !== null)
+        {
+            jQuery(".moo-bg-dark").css("background-color",window.moo_theme_setings.onePage_categoriesBackgroundColor );
+            jQuery(".moo-menu-category .moo-menu-category-title").css("background-color",window.moo_theme_setings.onePage_categoriesBackgroundColor );
+            //Change the cart icon colors
+            jQuery(".moo-new-icon").css("background-color",window.moo_theme_setings.onePage_categoriesBackgroundColor );
+            jQuery(".moo-new-icon").css("border-color",window.moo_theme_setings.onePage_categoriesBackgroundColor );
+        }
+        //Change the categories font color
+        if(window.moo_theme_setings.onePage_categoriesFontColor !== null)
+        {
+            jQuery(".moo-nav-menu li a").css("color",window.moo_theme_setings.onePage_categoriesFontColor );
+            jQuery(".moo-menu-category .moo-menu-category-title .moo-title").css("color",window.moo_theme_setings.onePage_categoriesFontColor );
+
+            //Change the cart icon colors
+            jQuery(".moo-new-icon").css("color",window.moo_theme_setings.onePage_categoriesFontColor );
+            jQuery(".moo-new-icon__cart-panier").css("color",window.moo_theme_setings.onePage_categoriesFontColor );
+            jQuery(".moo-new-icon__group").css("fill",window.moo_theme_setings.onePage_categoriesFontColor );
+        }
+        //Change the categories font-family
+        if(window.moo_theme_setings.onePage_fontFamily !== null)
+        {
+            jQuery(".moo-nav-menu li a").css("font-family",window.moo_theme_setings.onePage_fontFamily );
+            jQuery(".moo-menu-category .moo-menu-category-title .moo-title").css("font-family",window.moo_theme_setings.onePage_fontFamily );
+        }
     }
 
-    callback();
-}
-function MooSetLoading()
-{
-    jQuery('#MooLoadingSection').show();
-}
+    moo_ZoomOnImages();
+});
 
-function MooCLickOnCategory(event,elm)
-{
+function MooCLickOnCategory(event,elm) {
     event.preventDefault();
     var page = jQuery(elm).attr('href');
     var speed = 750;
     jQuery('html, body').animate( { scrollTop: jQuery(page).offset().top }, speed ); // Go
     return false;
-}
-
-//get all the categories of the store
-function mooGetCategories()
-{
-    jQuery.get(moo_RestUrl+"moo-clover/v1/categories?expand=five_items", function (data) {
-        if(data!=null && data.length>0)
-            moo_renderCategories(data);
-        else
-        {
-            var element = document.getElementById("moo-onlineStore-categories");
-            var html     = 'You don\'t have any category please import your inventory';
-            jQuery(element).html(html);
-        }
-    });
-
-}
-//Render all categories to html element and insert it into the page
-function moo_renderCategories($cats)
-{
-    var element = document.getElementById("moo-onlineStore-categories");
-    var html     = '<nav id="moo-menu-navigation" class="moo-stick-to-content">';
-        html     += '<div class="moo-choose-category">Choose a Category</div>';
-        html     += '<ul class="moo-nav moo-nav-menu moo-bg-dark moo-dark">';
-
-    for(i in $cats){
-        var category = $cats[i];
-        if(category.five_items.length >0 )
-        {
-            html +='<li><a href="#cat-'+category.uuid.toLowerCase()+'" onclick="MooCLickOnCategory(event,this)">'+category.name+'</a></li>';
-            moo_renderItems(category);
-        }
-    }
-    html    += "</ul></nav>";
-    jQuery(element).html(html).promise().done(function() {
-       window.width = jQuery('#moo_OnlineStoreContainer').width() - jQuery('.moo-menu-category').width();
-       window.width = (jQuery('#moo_OnlineStoreContainer').width()+30) * 0.25;
-       var cart_btn =  '<div class="moo-col-md-12" style="text-align: center;">'+
-                       '<a href="#" class="moo-btn moo-btn-lg moo-btn-primary" onclick="mooShowCart(event)">View Cart</a>'+
-                       '</div>';
-       jQuery("#moo-onlineStore-items").append(cart_btn);
-       jQuery('#MooLoadingSection').hide();
-
-       var hash = window.location.hash;
-       if (hash != "") {
-            var top = (jQuery(hash).offset() != null)?jQuery(hash).offset().top:""; //Getting Y of target element
-            window.scrollTo(0, top);
-        }
-        // Custome css or theme customisation applicatio
-        if(window.moo_theme_setings != null && typeof window.moo_theme_setings != "undefined")
-        {
-            //Force page width changing
-            /*
-            if(window.moo_theme_setings.onePage_width != null)
-                jQuery("#moo_OnlineStoreContainer").width(window.moo_theme_setings.onePage_width );
-            */
-            //Change the categories background color
-            if(window.moo_theme_setings.onePage_categoriesBackgroundColor != null)
-            {
-                jQuery(".moo-bg-dark").css("background-color",window.moo_theme_setings.onePage_categoriesBackgroundColor );
-                jQuery(".moo-menu-category .moo-menu-category-title").css("background-color",window.moo_theme_setings.onePage_categoriesBackgroundColor );
-                //Change the cart icon colors
-                jQuery(".moo-new-icon").css("background-color",window.moo_theme_setings.onePage_categoriesBackgroundColor );
-                jQuery(".moo-new-icon").css("border-color",window.moo_theme_setings.onePage_categoriesBackgroundColor );
-            }
-            //Change the categories font color
-            if(window.moo_theme_setings.onePage_categoriesFontColor != null)
-            {
-                jQuery(".moo-nav-menu li a").css("color",window.moo_theme_setings.onePage_categoriesFontColor );
-                jQuery(".moo-menu-category .moo-menu-category-title .moo-title").css("color",window.moo_theme_setings.onePage_categoriesFontColor );
-
-                //Change the cart icon colors
-                jQuery(".moo-new-icon").css("color",window.moo_theme_setings.onePage_categoriesFontColor );
-                jQuery(".moo-new-icon__cart-panier").css("color",window.moo_theme_setings.onePage_categoriesFontColor );
-                jQuery(".moo-new-icon__group").css("fill",window.moo_theme_setings.onePage_categoriesFontColor );
-            }
-            //Change the categories font-family
-            if(window.moo_theme_setings.onePage_fontFamily != null)
-            {
-                jQuery(".moo-nav-menu li a").css("font-family",window.moo_theme_setings.onePage_fontFamily );
-                jQuery(".moo-menu-category .moo-menu-category-title .moo-title").css("font-family",window.moo_theme_setings.onePage_fontFamily );
-            }
-        }
-    });
-}
-
-//Render items of the selected category to html element and insert it into the page
-function moo_renderItems(category)
-{
-    var element = document.getElementById("moo-onlineStore-items");
-    var html    =   '<div id="cat-'+category.uuid.toLowerCase()+'" class="moo-menu-category">'+
-                    '<div class="moo-menu-category-title">'+
-                    '   <div class="moo-bg-image" style="background-image: url(&quot;'+((category.image_url!=null)?category.image_url:"")+'&quot;);"></div>'+
-                    '   <div class="moo-title">'+category.name+'</div>'+
-                    '</div>'+
-                    '<div class="moo-menu-category-content" id="moo-items-for-'+category.uuid.toLowerCase()+'">';
-
-    for(i in category.five_items){
-        var item = category.five_items[i];
-        var item_price = parseFloat(item.price);
-            item_price = item_price/100;
-            item_price = formatPrice(item_price.toFixed(2));
-
-            if(item.price > 0 && item.price_type == "PER_UNIT")
-                item_price += '/'+item.unit_name;
-
-        html += '<div class="moo-menu-item moo-menu-list-item" >'+
-                ' <div class="moo-row">';
-        if(item.image != null && item.image.url != null && item.image.url != "")
-        {
-            html += '    <div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-12 moo-col-xs-12 moo-image-zoom">'+
-                    '<a href="'+item.image.url+'" data-effect="mfp-zoom-in"><img src="'+item.image.url+'" class="moo-img-responsive moo-image-zoom"></a>'+
-                    '    </div>'+
-                    '    <div class="moo-col-lg-6 moo-col-md-6 moo-col-sm-12 moo-col-xs-12">'+
-                    '         <div class="moo-item-name">'+item.name+'</div>'+
-                    '         <span class="moo-text-muted moo-text-sm">'+item.description+'</span>'+
-                    '    </div>';
-        }
-        else
-        {
-            html += '    <div class="moo-col-lg-8 moo-col-md-8 moo-col-sm-12 moo-col-xs-12">'+
-                    '         <div class="moo-item-name">'+item.name+'</div>'+
-                    '         <span class="moo-text-muted moo-text-sm">'+item.description+'</span>'+
-                    '    </div>';
-        }
-        if(parseFloat(item.price) == 0)
-        {
-            html += '    <div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-12 moo-col-xs-12 moo-text-sm-right">'+
-                '    <span></span>';
-        }
-        else
-        {
-            html += '    <div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-12 moo-col-xs-12 moo-text-sm-right">'+
-                '    <span class="moo-price">$'+item_price+'</span>';
-        }
-
-        if(item.stockCount == "out_of_stock")
-        {
-            html += '<button class="moo-btn-sm moo-hvr-sweep-to-top">Out Of Stock</button>';
-        }
-        else
-        {
-            //Checking the Qty window show/hide and add add to cart button
-            if(window.moo_theme_setings.onePage_qtyWindow != null && window.moo_theme_setings.onePage_qtyWindow == "on")
-            {
-                if(item.has_modifiers)
-                {
-                    if(window.moo_theme_setings.onePage_qtyWindowForModifiers != null && window.moo_theme_setings.onePage_qtyWindowForModifiers == "on")
-                        html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtnFIWM)">Choose Qty & Options</button>';
-                    else
-                        html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty</button>';
-                }
-                else
-                    html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)">Add to cart</button>';
-
-            }
-            else
-            {
-                if(item.has_modifiers)
-                    html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty </button>';
-                else
-                    html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtn(event,\''+item.uuid+'\',1)">Add to cart</button>';
-
-            }
-
-        }
-
-        html += '</div>';
-        if(item.has_modifiers)
-            html += '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12" id="moo-modifiersContainer-for-'+item.uuid+'"></div>';
-        html += '</div>'+
-                '</div>';
-    }
-    category.name.replace("'","");
-    if(category.five_items.length == 5)
-    html += '<div class="moo-menu-item moo-menu-list-item"><div class="moo-row moo-align-items-center"><a href="#" class="moo-bt-more moo-show-more" onclick="mooClickOnLoadMoreItems(event,\''+category.uuid+'\',\''+category.name+'\')"> Show More </a><i class="fa fa-chevron-down" aria-hidden="true" style=" display: block; color:red "></i></div></div>';
-    html    += "</div>";
-
-    jQuery(element).append(html).promise().then(function () {
-        moo_ZoomOnImages();
-    });
 }
 
 function mooClickOnLoadMoreItems(event,cat_id,cat_name)

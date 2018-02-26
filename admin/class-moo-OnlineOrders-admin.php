@@ -663,6 +663,13 @@ class moo_OnlineOrders_Admin {
 <?php
         }
     }
+    public function page_reports()
+    {
+        require_once plugin_dir_path( dirname(__FILE__))."/models/moo-OnlineOrders-CallAPI.php";
+        $api = new moo_OnlineOrders_CallAPI();
+        $api->goToReports();
+
+    }
 
     public function page_products_screen_options()
     {
@@ -696,7 +703,7 @@ class moo_OnlineOrders_Admin {
                 array("name"=>"use_coupons","value"=>"disabled"),
                 array("name"=>"custom_css","value"=>""),
                 array("name"=>"custom_js","value"=>""),
-                array("name"=>"copyrights","value"=>'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.2.8">Smart Online Order</a>'),
+                array("name"=>"copyrights","value"=>'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.3.0">Smart Online Order</a>'),
                 array("name"=>"default_style","value"=>""),
                 array("name"=>"track_stock","value"=>""),
                 array("name"=>"checkout_login","value"=>""),
@@ -737,6 +744,9 @@ class moo_OnlineOrders_Admin {
                 array("name"=>"onePage_qtyWindow","value"=>"on"),
                 array("name"=>"onePage_qtyWindowForModifiers","value"=>"on"),
                 array("name"=>"onePage_backToTop","value"=>"off"),
+                array("name"=>"jTheme_width","value"=>"1024"),
+                array("name"=>"jTheme_qtyWindow","value"=>"on"),
+                array("name"=>"jTheme_qtyWindowForModifiers","value"=>"on"),
                 array("name"=>"style1_width","value"=>"1024"),
                 array("name"=>"style2_width","value"=>"1024"),
                 array("name"=>"mg_settings_displayInline","value"=>"disabled"),
@@ -800,7 +810,7 @@ class moo_OnlineOrders_Admin {
                 {
                     $merchant_website = $MooOptions['store_page'];
                     $api->updateWebsiteHooks(esc_url(admin_url('admin-post.php')));
-                    $api->updateWebsite(esc_url(get_permalink($merchant_website)));
+                  //  $api->updateWebsite(esc_url(get_permalink($merchant_website)));
 
                     $errorToken = "( Token valid )";
                 }
@@ -826,7 +836,7 @@ class moo_OnlineOrders_Admin {
         $merchant_address =  $api->getMerchantAddress();
         wp_enqueue_script('moo-google-map');
         wp_enqueue_script('moo-map-da',array('jquery','moo-google-map'));
-        wp_localize_script("moo-map-da", "moo_merchantAddress",$merchant_address);
+        wp_localize_script("moo-map-da", "moo_merchantAddress",urlencode($merchant_address));
         wp_localize_script("moo-map-da", "moo_merchantLat",$MooOptions['lat']);
         wp_localize_script("moo-map-da", "moo_merchantLng",$MooOptions['lng']);
         /* Fin map Delivery area section*/
@@ -1084,6 +1094,9 @@ class moo_OnlineOrders_Admin {
                                 'onePage_qtyWindow',
                                 'onePage_qtyWindowForModifiers',
                                 'onePage_backToTop',
+                                'jTheme_width',
+                                'jTheme_qtyWindow',
+                                'jTheme_qtyWindowForModifiers',
                                 'style1_width',
                                 'style2_width',
                                 'style3_width');
@@ -1100,19 +1113,23 @@ class moo_OnlineOrders_Admin {
                                 <div>
                                     <label>
                                         <input style="display: none;" name="moo_settings[default_style]" id="MooDefaultStyle" type="radio" value="style1" <?php echo ($MooOptions["default_style"]=="style1")?"checked":""; ?> >
-                                        <img style="margin-bottom: 15px;" src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/si1.jpg" ?>" align="middle" />
+                                        <img style="margin-bottom: 15px;" src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/si1.png" ?>" align="middle" />
                                     </label>
                                     <label>
                                         <input style="display: none;" name="moo_settings[default_style]" id="MooDefaultStyle" type="radio" value="style3" <?php echo ($MooOptions["default_style"]=="style3")?"checked":""; ?> >
-                                        <img style="margin-bottom: 15px;" src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/si2.jpg" ?>" align="middle" />
+                                        <img style="margin-bottom: 15px;" src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/si2.png" ?>" align="middle" />
                                     </label>
                                     <label>
                                         <input style="display: none;" name="moo_settings[default_style]" id="MooDefaultStyle" type="radio" value="style2" <?php echo ($MooOptions["default_style"]=="style2")?"checked":""; ?> >
-                                        <img style="margin-bottom: 15px;" src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/si3.jpg" ?>" align="middle" />
+                                        <img style="margin-bottom: 15px;" src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/si3.png" ?>" align="middle" />
                                     </label>
                                     <label>
                                         <input style="display: none;" name="moo_settings[default_style]" id="MooDefaultStyle" type="radio" value="onePage" <?php echo ($MooOptions["default_style"]=="onePage")?"checked":""; ?> >
-                                        <img style="margin-bottom: 15px;" src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/si4.jpg" ?>" align="middle" />
+                                        <img style="margin-bottom: 15px;" src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/si4.png" ?>" align="middle" />
+                                    </label>
+                                    <label>
+                                        <input style="display: none;" name="moo_settings[default_style]" id="MooDefaultStyle" type="radio" value="jTheme" <?php echo ($MooOptions["default_style"]=="jTheme")?"checked":""; ?> >
+                                        <img style="margin-bottom: 15px;" src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/si5.png" ?>" align="middle" />
                                     </label>
                                 </div>
                             </div>
@@ -1262,6 +1279,51 @@ class moo_OnlineOrders_Admin {
 <!--                                </div>-->
 
                             </div>
+                            <div class="moo-store-interfaceSettings" id="mooInterface-jTheme">
+                                <h2>Store interface 5 customization</h2>
+                                <div class="Moo_option-item">
+                                    <div style="margin-bottom: 14px;" class="moo-interfaceSettings-labels">Page width</div>
+                                    <div style="text-align: left;">
+                                        <input name="moo_settings[jTheme_width]" id="MooOnePage_width" type="text" value="<?php echo $MooOptions['jTheme_width']?>" /> px
+                                        <span id="moo_info_msg-store-settings-1" class="moo-info-msg"
+                                              data-ot="Default page width recommendation is 1024px. You can make changes here"
+                                              data-ot-target="#moo_info_msg-store-settings-1">
+                                        <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                    </span>
+                                    </div>
+                                </div>
+                                <div class="Moo_option-item">
+                                    <div style="margin-bottom: 14px;" class="moo-interfaceSettings-labels">Show Quantity Pop Up window after adding any item to cart</div>
+                                    <div class="moo-onoffswitch"  title="Show or hide the quantity window">
+                                        <input type="hidden" name="moo_settings[jTheme_qtyWindow]" value="off">
+                                        <input type="checkbox" name="moo_settings[jTheme_qtyWindow]" class="moo-onoffswitch-checkbox" id="myonoffswitch_jTheme_qtyWindow" <?php echo (isset($MooOptions['jTheme_qtyWindow']) && $MooOptions['jTheme_qtyWindow'] == 'on')?'checked':''?>>
+                                        <label class="moo-onoffswitch-label" for="myonoffswitch_jTheme_qtyWindow"><span class="moo-onoffswitch-inner"></span>
+                                            <span class="moo-onoffswitch-switch"></span>
+                                        </label>
+                                    </div>
+                                    <span id="moo_info_msg-store-settings-6" class="moo-info-msg"
+                                          data-ot="This will show the Quantity selection window when selecting 'add to cart' button. The customer can still change the quantity later in the checkout process"
+                                          data-ot-target="#moo_info_msg-store-settings-6">
+                                    <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                </span>
+                                </div>
+                                <div class="Moo_option-item">
+                                    <div style="margin-bottom: 14px;" class="moo-interfaceSettings-labels">Show Quantity Pop Up window for items with modifiers</div>
+                                    <div class="moo-onoffswitch"  title="Show or hide teh quantity window for items with modifiers">
+                                        <input type="hidden" name="moo_settings[jTheme_qtyWindowForModifiers]" value="off">
+                                        <input type="checkbox" name="moo_settings[jTheme_qtyWindowForModifiers]" class="moo-onoffswitch-checkbox" id="myonoffswitch_jTheme_qtyWindowForModifiers" <?php echo (isset($MooOptions['jTheme_qtyWindowForModifiers']) && $MooOptions['jTheme_qtyWindowForModifiers'] == 'on')?'checked':''?>>
+                                        <label class="moo-onoffswitch-label" for="myonoffswitch_jTheme_qtyWindowForModifiers"><span class="moo-onoffswitch-inner"></span>
+                                            <span class="moo-onoffswitch-switch"></span>
+                                        </label>
+                                    </div>
+                                    <span id="moo_info_msg-store-settings-7" class="moo-info-msg"
+                                          data-ot="This will show the Quantity selection window for items with modifiers when selecting 'Choose Qty & Options' The customer can still change the Quantity later in the checkout processs. Note : this doesn't affect modifier Qty selection"
+                                          data-ot-target="#moo_info_msg-store-settings-7">
+                                    <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                </span>
+                                </div>
+                            </div>
+
                             <div style="text-align: center; margin: 20px;">
                                 <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
                             </div>
@@ -1363,16 +1425,16 @@ class moo_OnlineOrders_Admin {
                                 <div class="category-item" cat-id-mobil="<?php echo $category->uuid; ?>">
                                     <div class="option-item img-category" id="id_img_M_<?php echo $category->uuid ?>">
                                         <?php if ($category->image_url == null) { ?>
-                                            <label>Pecture</label><img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/no-image.png" ?>" style="width: 50px;">
+                                            <label>Image</label><img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/no-image.png" ?>" style="width: 50px;">
                                         <?php } else { ?>
-                                            <label>Pecture</label><img src="<?php echo $category->image_url ?>" style="width: 50px;">
+                                            <label>Image</label><img src="<?php echo $category->image_url ?>" style="width: 50px;">
                                         <?php } ?>
                                     </div>
                                     <div class="option-item show-category">
                                         <label>Visible ?</label><input type="checkbox" id="visib<?php echo $category->uuid ?>" onclick="visibility_cat_mobile('<?php echo $category->uuid ?>')" <?php if ($category->show_by_default == 1) {  ?>checked<?php } ?>>
                                     </div>
                                     <div class="option-item name-category" id="name_cat_Mobil<?php echo $category->uuid ?>">
-                                        <label>Ctegory's Name</label>
+                                        <label>Category Name</label>
                                         <?php if ($category->alternate_name == null) {$nameCat = $category->name;} else {$nameCat = $category->alternate_name;} ?>
                                         <input type="text" value="<?php echo $nameCat; ?>" id="newName<?php echo $category->uuid ?>" disabled>
                                     </div>
@@ -1433,83 +1495,7 @@ class moo_OnlineOrders_Admin {
                 <div id="MooPanel_tabContent6">
                     <h2>Modifier Groups (scroll down for more options)</h2>
                     <hr>
-                    <div class="MooPanelItem">
-                        <form method="post" action="options.php">
-                            <?php
-                            $MooOptions = (array)get_option('moo_settings');
-                            settings_fields('moo_settings');
-                            $fields = array(
-                                'mg_settings_displayInline',
-                                'mg_settings_qty_for_all',
-                                'mg_settings_qty_for_zeroPrice',
-                                );
 
-                            foreach ($MooOptions as $option_name=>$option_value)
-                                if(!in_array($option_name,$fields))
-                                    if($option_name=="custom_js" || $option_name =="custom_css" || $option_name == "copyrights"|| $option_name == "zones_json")
-                                        echo '<textarea name="moo_settings['.$option_name.']" id="" cols="10" rows="10" style="display:none">'.$option_value.'</textarea>';
-                                    else
-                                        echo '<input type="text"  name="moo_settings['.$option_name.']" value="'.$option_value.'" hidden/>';
-
-                            ?>
-                            <h3>Modifier settings for store interfaces 4</h3>
-                            <div class="Moo_option-item">
-                                <div class="normal_text">
-                                   Display Options for modifier selection
-                                </div>
-                            </div>
-                            <div class="Moo_option-item">
-                                <div style="float:left; width: 100%;padding-left: 60px">
-                                    <label style="display:block; margin-bottom:8px;">
-                                        <input name="moo_settings[mg_settings_displayInline]" id="mg_settings_displayInline" type="radio" value="enabled" <?php echo ($MooOptions["mg_settings_displayInline"]=="enabled")?"checked":""; ?>>
-                                        Pop-Up window
-                                    </label>
-                                    <label style="display:block; margin-bottom:8px;">
-                                        <input name="moo_settings[mg_settings_displayInline]" id="mg_settings_displayInline" type="radio" value="disabled" <?php echo ($MooOptions["mg_settings_displayInline"]=="disabled")?"checked":""; ?> >
-                                        Underneath item name
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="Moo_option-item">
-                                <div class="normal_text">
-                                    Allow customers to choose modifier quantity for all modifiers.
-                                </div>
-                            </div>
-                            <div class="Moo_option-item">
-                                <div style="float:left; width: 100%;padding-left: 60px">
-                                    <label style="display:block; margin-bottom:8px;">
-                                        <input name="moo_settings[mg_settings_qty_for_all]" id="mg_settings_qty_for_all" type="radio" value="disabled" <?php echo ($MooOptions["mg_settings_qty_for_all"]!="enabled")?"checked":""; ?>>
-                                        No
-                                    </label>
-                                    <label style="display:block; margin-bottom:8px;">
-                                        <input name="moo_settings[mg_settings_qty_for_all]" id="mg_settings_qty_for_all" type="radio" value="enabled" <?php echo ($MooOptions["mg_settings_qty_for_all"]=="enabled")?"checked":""; ?>>
-                                        Yes
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="Moo_option-item">
-                                <div class="normal_text">
-                                    Allow customers to choose modifier quantity when modifier is free or $0.00.
-                                </div>
-                            </div>
-                            <div class="Moo_option-item">
-                                <div style="float:left; width: 100%;padding-left: 60px">
-                                    <label style="display:block; margin-bottom:8px;">
-                                        <input name="moo_settings[mg_settings_qty_for_zeroPrice]" id="mg_settings_qty_for_all" type="radio" value="disabled" <?php echo ($MooOptions["mg_settings_qty_for_zeroPrice"]!="enabled")?"checked":""; ?>>
-                                        No
-                                    </label>
-                                    <label style="display:block; margin-bottom:8px;">
-                                        <input name="moo_settings[mg_settings_qty_for_zeroPrice]" id="mg_settings_qty_for_all" type="radio" value="enabled" <?php echo ($MooOptions["mg_settings_qty_for_zeroPrice"]=="enabled")?"checked":""; ?>>
-                                        Yes
-                                    </label>
-                                </div>
-                            </div>
-                        <!-- Save Changes button -->
-                        <div style="text-align: center; margin: 20px;">
-                            <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
-                        </div>
-                        </form>
-                    </div>
                     <div class="MooPanelItem">
                         <h3>Hide or change modifier group names so they are easy to understand. To view the modifiers press the "+" sign (for all store interfaces)</h3>
                         <p>You can rearrange Modifier groups and Modifiers by dragging and dropping</p>
@@ -1595,6 +1581,82 @@ class moo_OnlineOrders_Admin {
                                 <?php $i++; }?>
                         </ul>
 
+                    </div>
+                    <div class="MooPanelItem">
+                        <form method="post" action="options.php">
+                            <?php
+                            $MooOptions = (array)get_option('moo_settings');
+                            settings_fields('moo_settings');
+                            $fields = array(
+                                'mg_settings_displayInline',
+                                'mg_settings_qty_for_all',
+                                'mg_settings_qty_for_zeroPrice',
+                            );
+
+                            foreach ($MooOptions as $option_name=>$option_value)
+                                if(!in_array($option_name,$fields))
+                                    if($option_name=="custom_js" || $option_name =="custom_css" || $option_name == "copyrights"|| $option_name == "zones_json")
+                                        echo '<textarea name="moo_settings['.$option_name.']" id="" cols="10" rows="10" style="display:none">'.$option_value.'</textarea>';
+                                    else
+                                        echo '<input type="text"  name="moo_settings['.$option_name.']" value="'.$option_value.'" hidden/>';
+                            ?>
+                            <h3>Modifier settings for store interfaces 4</h3>
+                            <div class="Moo_option-item">
+                                <div class="normal_text">
+                                    Display Options for modifier selection
+                                </div>
+                            </div>
+                            <div class="Moo_option-item">
+                                <div style="float:left; width: 100%;padding-left: 60px">
+                                    <label style="display:block; margin-bottom:8px;">
+                                        <input name="moo_settings[mg_settings_displayInline]" id="mg_settings_displayInline" type="radio" value="disabled" <?php echo ($MooOptions["mg_settings_displayInline"]=="disabled")?"checked":""; ?>>
+                                        Pop-Up window
+                                    </label>
+                                    <label style="display:block; margin-bottom:8px;">
+                                        <input name="moo_settings[mg_settings_displayInline]" id="mg_settings_displayInline" type="radio" value="enabled" <?php echo ($MooOptions["mg_settings_displayInline"]=="enabled")?"checked":""; ?> >
+                                        Underneath item name
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="Moo_option-item">
+                                <div class="normal_text">
+                                    Allow customers to choose modifier quantity for all modifiers.
+                                </div>
+                            </div>
+                            <div class="Moo_option-item">
+                                <div style="float:left; width: 100%;padding-left: 60px">
+                                    <label style="display:block; margin-bottom:8px;">
+                                        <input name="moo_settings[mg_settings_qty_for_all]" id="mg_settings_qty_for_all" type="radio" value="disabled" <?php echo ($MooOptions["mg_settings_qty_for_all"]!="enabled")?"checked":""; ?>>
+                                        No
+                                    </label>
+                                    <label style="display:block; margin-bottom:8px;">
+                                        <input name="moo_settings[mg_settings_qty_for_all]" id="mg_settings_qty_for_all" type="radio" value="enabled" <?php echo ($MooOptions["mg_settings_qty_for_all"]=="enabled")?"checked":""; ?>>
+                                        Yes
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="Moo_option-item">
+                                <div class="normal_text">
+                                    Allow customers to choose modifier quantity when modifier is free or $0.00.
+                                </div>
+                            </div>
+                            <div class="Moo_option-item">
+                                <div style="float:left; width: 100%;padding-left: 60px">
+                                    <label style="display:block; margin-bottom:8px;">
+                                        <input name="moo_settings[mg_settings_qty_for_zeroPrice]" id="mg_settings_qty_for_all" type="radio" value="disabled" <?php echo ($MooOptions["mg_settings_qty_for_zeroPrice"]!="enabled")?"checked":""; ?>>
+                                        No
+                                    </label>
+                                    <label style="display:block; margin-bottom:8px;">
+                                        <input name="moo_settings[mg_settings_qty_for_zeroPrice]" id="mg_settings_qty_for_all" type="radio" value="enabled" <?php echo ($MooOptions["mg_settings_qty_for_zeroPrice"]=="enabled")?"checked":""; ?>>
+                                        Yes
+                                    </label>
+                                </div>
+                            </div>
+                            <!-- Save Changes button -->
+                            <div style="text-align: center; margin: 20px;">
+                                <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
+                            </div>
+                        </form>
                     </div>
                 </div>
                 <!-- Checkout settings -->
@@ -2409,35 +2471,150 @@ class moo_OnlineOrders_Admin {
                 </div>
                 <!-- FAQ -->
                 <div id="MooPanel_tabContent11">
-                    <h2>FAQ</h2><hr>
+                    <h2>Frequently asked questions </h2><hr>
                     <div class="MooPanelItem">
-                        <h3>FAQ</h3>
                         <div class="Moo_option-item">
                             <div>
                                 <div class="faq_question">
-                                    Q1 - Once an order is placed, does it print to the clover POS?
+                                    Once an order is placed, does it print to the clover POS?
                                 </div>
                                 <div class="faq_response">
-                                    A1 - By default, it prints to the clover POS. If it doesn't print open the Online ordering app for Wordpress on the Clover POS then adjust the settings to select a default printer
+                                    By default, it prints to the clover POS. If it doesn't print open the Online ordering app for Wordpress on the Clover POS then adjust the settings to select a default printer
                                 </div>
                                 <div class="faq_question">
-                                    Q2 - We have several locations, how do I put the menu for each location on the same website?
+                                    We have several locations, how do I put the menu for each location on the same website?
                                 </div>
                                 <div class="faq_response">
-                                    A2 - You will need to create a subdomain on your website. For example, for a website named www.texasfoods.com
+                                    You will need to create a subdomain on your website. For example, for a website named www.texasfoods.com
                                     You would create as many subdomains needed for each location. Then install Wordpress into each subdomain. For example:<br/>
                                     location1.texasfoods.com<br/>
                                     location2.texasfoods.com<br/>
                                     Then place a link on the website for each locations menu
                                 </div>
                                 <div class="faq_question">
-                                    Q3 -  I'm having trouble installing the plugin or have other questions, can you help?
+                                    I'm having trouble installing the plugin or have other questions, can you help?
                                 </div>
                                 <div class="faq_response">
-                                    A3 - Yes, we can, please email or call us:<br/>
+                                    Yes, we can, please email or call us:<br/>
                                     support@merchantech.us<br/>
                                     925-234-5554
                                 </div>
+                                <div class="faq_question">
+                                    When I get an Online Order, it is not printing the receipt?
+                                </div>
+                                <div class="faq_response">
+                                    Please search YouTube, Smart Online Order Printer Setup, or read the following: In the
+                                    Smart Online Order Clover app: Select Printer Settings, Clover Devices, Check the Box, Choose
+                                    this device as the default printer” Then General, make sure Auto Print Order and Payment
+                                    receipts is “ON” Then check the box for “Print Customer Receipt and Print Order Receipt. Under
+                                    Printers, Turn “Off” Use auto print settings, then manually select your Order Receipt Printer and
+                                    Payment Receipt Printer. If you have more than one Clover Device, then on all of the other
+                                    Clover Devices, uncheck the box, “Choose this device as the default printer” It is recommended
+                                    to only check the box “Choose this device as the default printer on only one device. Please
+                                    search Youtube, “Smart Online Order Printer Setup”, for an easy explainer video
+                                </div>
+                                <div class="faq_question">
+                                    Can I have my orders print to a specific kitchen printer?
+                                </div>
+                                <div class="faq_response">
+                                    Yes, your orders can print to both a Clover Device and Kitchen Printer. Turn off “Use Auto
+                                    Print Settings” then manually choose the Order Receipts Printer
+                                </div>
+                                <div class="faq_question">
+                                    I have more than one Clover Device, can I select more than one device for the Payments to
+                                    print?
+                                </div>
+                                <div class="faq_response">
+                                    It is recommended to only select one Clover device as the default printer for the payment or
+                                    customer receipt. Walk over to the Clover where you want the orders to print and check the
+                                    box, “Choose this device as the default printer” On the remaining Clover devices, uncheck that
+                                    same box.
+                                </div>
+                                <div class="faq_question">
+                                    The customer’s name is not showing on the printed receipt?
+                                </div>
+                                <div class="faq_response">
+                                    Go to the Clover Setup App, then select Order Receipt, check the box “Show Customer Info,
+                                    On the left-hand side, select Payment Receipt, check the box, show customer Info
+                                </div>
+
+                                <div class="faq_question">
+                                    The special instructions is not showing up on the printed receipts?
+                                </div>
+                                <div class="faq_response">
+                                    Go to the Clover Setup app, Select Order Receipts, check the box “Order note”
+                                </div>
+                                <div class="faq_question">
+                                    How do I login to my website?
+                                </div>
+                                <div class="faq_response">
+                                    Your Online Ordering page is the Smart Online Order Page or your existing WordPress
+                                    Website. Typically, if you add /wp-admin after .com You can login with your username and
+                                    password.
+                                </div>
+                                <div class="faq_question">
+                                    I would like to allow customers to schedule their orders?
+                                </div>
+                                <div class="faq_response">
+                                    In order for customers to schedule their orders, you will first need to add your business
+                                    hours on Clover.com – Once your business hours are added, then login to the Smart Online
+                                    Order plugin, select Clover orders, settings, store settings, enable schedule orders.
+                                </div>
+                                <div class="faq_question">
+                                    I don’t’ want to accept “pay in store” orders, how do I change that?
+                                </div>
+                                <div class="faq_response">
+                                    Login to your website, then go to clover orders, settings, checkout settings
+                                </div>
+                                <div class="faq_question">
+                                    Are there any tutorial videos?
+                                </div>
+                                <div class="faq_response">
+                                    Yes, there are lots of tutorial videos, please search YouTube for “Smart Online Order” and
+                                    you will get a wide variety of videos.
+                                </div>
+
+                                <div class="faq_question">
+                                    How do I add Delivery Areas and fees?
+                                </div>
+                                <div class="faq_response">
+                                    Please search YouTube “Smart Online Order - Delivery Areas and you will be shown how to
+                                    add and draw your delivery areas.
+                                </div>
+
+                                <div class="faq_question">
+                                    I want to change the Online Business hours or wish to be closed for the day?
+                                </div>
+                                <div class="faq_response">
+                                    Go to Clover.com, then setup, then business information and change the business hours.
+                                    Your Clover Business hours correspond with your Online hours. For this to work, you must have
+                                    enabled “Allow Scheduled Orders” on the website. Search Youtube, if you need a video tutorial.
+                                </div>
+
+                                <div class="faq_question">
+                                    I have additional locations; can I add those as well?
+                                </div>
+                                <div class="faq_response">
+                                    Yes, you can. If you need help, please email or call us and we can help you. You can search
+                                    YouTube “Smart Online Order Multiple locations”
+                                </div>
+
+                                <div class="faq_question">
+                                    I just received an online order and it is showing as Partially Paid?
+                                </div>
+                                <div class="faq_response">
+                                    This happens when you have changed the price of an item on your Clover inventory and the
+                                    price hasn’t been updated on the website. Simply perform a manual sync, so the website price
+                                    is the same as the Clover inventory price. Search YouTube “Smart Online Order Manual Sync”
+                                </div>
+
+                                <div class="faq_question">
+                                    I still have questions?
+                                </div>
+                                <div class="faq_response">
+                                    Please e-mail support@merchantechapps.com or call 925-234- 5554
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -2455,11 +2632,7 @@ class moo_OnlineOrders_Admin {
         add_submenu_page('moo_index', 'Items/Images', 'Items / Images', 'manage_options', 'moo_items', array($this, 'page_products'));
         add_submenu_page('moo_index', 'Orders', 'Orders', 'manage_options', 'moo_orders', array($this, 'page_orders'));
         add_submenu_page('moo_index', 'Coupons', 'Coupons', 'manage_options', 'moo_coupons', array($this, 'page_coupons'));
-
-        add_submenu_page('', '', '', 'manage_options', 'moo_import_wizard','');
-
-      //  add_dashboard_page( '', '', 'manage_options',"moo_import_wizard", '' );
-
+        add_submenu_page('moo_index', 'Reports', 'Reports', 'manage_options', 'moo_reports', array($this, 'page_reports'));
     }
     public function enq_media_uploader()
     {
@@ -2496,11 +2669,18 @@ class moo_OnlineOrders_Admin {
             'href'  => admin_url().'admin.php?page=moo_coupons',
             'parent'  => 'Clover_Orders',
         );
+        $args6 = array(
+            'id'    => 'Clover_Orders_reports',
+            'title' => 'Reports',
+            'href'  => admin_url().'admin.php?page=moo_reports',
+            'parent'  => 'Clover_Orders',
+        );
         $wp_admin_bar->add_node( $args  );
         $wp_admin_bar->add_node( $args2 );
         $wp_admin_bar->add_node( $args3 );
         $wp_admin_bar->add_node( $args4 );
         $wp_admin_bar->add_node( $args5 );
+        $wp_admin_bar->add_node( $args6 );
     }
     /**
      * Register the options.
@@ -2579,14 +2759,27 @@ class moo_OnlineOrders_Admin {
         wp_register_style( 'moo-introjs-css',plugin_dir_url(__FILE__)."css/introjs.min.css",array(), $this->version);
         wp_enqueue_style( 'moo-introjs-css' );
 
-        wp_register_style( 'moo-sweetalert-css',plugin_dir_url(dirname(__FILE__))."public/css/sweetalert2.min.css",array(), $this->version);
-        wp_enqueue_style( 'moo-sweetalert-css' );
+//        wp_register_style( 'moo-sweetalert-css',plugin_dir_url(dirname(__FILE__))."public/css/sweetalert2.min.css",array(), $this->version);
+//        wp_enqueue_style( 'moo-sweetalert-css' );
 
         wp_register_style('jquery-ui', '//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css');
         wp_enqueue_style('jquery-ui');
 
         wp_enqueue_style( 'wp-color-picker' );
         wp_enqueue_style( 'jquery-ui-datepicker' );
+
+        $sweetalert_version = 'v2';
+
+        if($sweetalert_version == 'v1')
+        {
+            wp_register_style( 'moo-sweetalert-css',plugin_dir_url(dirname(__FILE__))."public/css/sweetalert.min.css",array(), $this->version);
+            wp_enqueue_style( 'moo-sweetalert-css' );
+        }
+        else
+        {
+            wp_register_style( 'moo-sweetalert-css',plugin_dir_url(dirname(__FILE__))."public/css/sweetalert2.min.css",array(), $this->version);
+            wp_enqueue_style( 'moo-sweetalert-css' );
+        }
     }
 
     /**
@@ -2626,7 +2819,7 @@ class moo_OnlineOrders_Admin {
 
 
         //wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/moo-OnlineOrders-admin.js', array( 'jquery' ), $this->version, false );
-        wp_register_script('moo-google-map', '//maps.googleapis.com/maps/api/js?key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc&libraries=drawing&geometry');
+        wp_register_script('moo-google-map', 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc&libraries=drawing&geometry');
 
         wp_register_script('moo-publicAdmin-js', plugins_url( 'js/moo-OnlineOrders-admin.js', __FILE__ ),array('moo-google-map'), $this->version);
         wp_register_script('moo-tooltip-js', plugins_url( 'js/tooltip.min.js', __FILE__ ),array(), $this->version);
@@ -2663,7 +2856,7 @@ class moo_OnlineOrders_Admin {
         $merchant_address = $api->getMerchantAddress();
         wp_enqueue_script('moo-google-map');
         wp_enqueue_script('moo-map-js',array('jquery','moo-google-map'));
-        wp_localize_script("moo-map-js", "moo_merchantAddress",$merchant_address);
+        wp_localize_script("moo-map-js", "moo_merchantAddress",urlencode($merchant_address));
         wp_localize_script("moo-map-js", "moo_merchantLat",$MooOptions['lat']);
         wp_localize_script("moo-map-js", "moo_merchantLng",$MooOptions['lng']);
 
@@ -2687,7 +2880,7 @@ class moo_OnlineOrders_Admin {
                 <div class="MooPanelItem">
                     <h3>Please save your address. or change your address</h3>
                     <div class="Moo_option-item" style="padding-top: 0px;margin-top: -15px;">
-                        <div class="normal_text">If the address is incorrect, please go to Clover.com and make chnages</div>
+                        <div class="normal_text">If the address is incorrect, please go to Clover.com and make changes. You can also move the red pointer over to the correct location</div>
                         <div class="normal_text">Your current address is : </div>
                         <p><?php echo $merchant_address?></p>
                         <div class="moo_map" id="moo_map"></div>

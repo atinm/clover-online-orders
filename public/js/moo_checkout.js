@@ -41,6 +41,7 @@ if(!MooIsDisabled && MooSaveCards && !MooIsGuest)
 }
 
 if(typeof moo_fb_app_id != 'undefined')
+{
     if(moo_fb_app_id!="")
     {
         window.fbAsyncInit = function() {
@@ -60,6 +61,7 @@ if(typeof moo_fb_app_id != 'undefined')
             fjs.parentNode.insertBefore(js, fjs);
         }(document, 'script', 'facebook-jssdk'));
     }
+}
 
 try {
 
@@ -99,6 +101,22 @@ catch (e) {
         var paymentType = jQuery(event.target).val();
         moo_changePaymentMethod(paymentType)
     });
+}
+
+var hash = window.location.hash;
+if (hash != "") {
+    console.log(hash);
+    switch (hash) {
+        case "#register":
+            moo_show_sigupform();
+            break;
+        case "#forget-password":
+            moo_show_forgotpasswordform();
+            break;
+        case "#login":
+            moo_show_loginform();
+            break;
+    }
 }
 
 
@@ -457,7 +475,8 @@ function moo_order_notApproved(message)
 
 function moo_show_sigupform(e)
 {
-    e.preventDefault();
+    if(e !== undefined)
+        e.preventDefault();
     jQuery('#moo-login-form').hide();
     jQuery('#moo-signing-form').show();
     jQuery('#moo-forgotpassword-form').hide();
@@ -477,7 +496,9 @@ function moo_show_loginform()
 }
 function moo_show_forgotpasswordform(e)
 {
-    e.preventDefault();
+    if(e !== undefined)
+        e.preventDefault();
+
     jQuery('#moo-login-form').hide();
     jQuery('#moo-signing-form').hide();
     jQuery('#moo-forgotpassword-form').show();
@@ -1069,9 +1090,9 @@ function moo_verify_form(form)
 
         if(selectedOrderType.show_sa =='1')
         {
-            if(MooCustomerChoosenAddress!=null)
+            if(MooCustomerChoosenAddress!==null)
             {
-                if(MooCustomerChoosenAddress.lat =='' || MooCustomerChoosenAddress.lng =='')
+                if(MooCustomerChoosenAddress.lat ==='' || MooCustomerChoosenAddress.lng ==='')
                 {
                     swal('Please verify your address',"We can't found this address on the map, please choose an other address",'error');
                     return false;
@@ -1080,6 +1101,7 @@ function moo_verify_form(form)
                 {
                     if(MooIsDeliveryError===true)
                     {
+                        moo_OrderTypeChanged(selectedOrderType.ot_uuid);
                         swal('Please verify your address',"",'error');
                         return false;
                     }
@@ -1087,10 +1109,18 @@ function moo_verify_form(form)
             }
             else
             {
+                moo_OrderTypeChanged(selectedOrderType.ot_uuid);
                 swal('Please add the delivery address','You have choose a delivery method, we need your address','error');
                 return false;
             }
         }
+    }
+
+    //check Pickup hour
+    if(form.pickup_hour === "Select a time") {
+        swal('Please choose a time','','error');
+
+        return false;
     }
 
     //check the payment info with the phone verification
@@ -1101,16 +1131,16 @@ function moo_verify_form(form)
     }
     else
     {
-        if(form.payments == "cash")
+        if(form.payments === "cash")
         {
-            if(MooCustomer != null && MooCustomer[0].phone_verified == '0')
+            if(MooCustomer !== null && MooCustomer[0].phone_verified === '0')
             {
                 swal('Please verify your phone',"when you choose the cash payment you must verify your phone",'error');
                 return false;
             }
             else
             {
-                if(MooPhoneIsVerified == false)
+                if(MooPhoneIsVerified === false)
                 {
                     swal('Please verify your phone',"when you choose the cash payment you must verify your phone",'error');
                     return false;
@@ -1120,7 +1150,7 @@ function moo_verify_form(form)
         }
         else
         {
-            if(form.payments != "" && form.payments !="creditcard")
+            if(form.payments !== "" && form.payments !=="creditcard")
             {
                 form.token = form.payments;
                 form.saveCard = false;
@@ -1146,7 +1176,7 @@ function moo_verify_form(form)
                 {
                     if(moo_scp != "on")
                     {
-                        if(form.cardNumber == '' || !regex_exp.credicard.test(form.cardNumber) )
+                        if(form.cardNumber === '' || !regex_exp.credicard.test(form.cardNumber) )
                         {
                             swal('please enter a valid credit card number',"",'error');
                             return false;
@@ -1292,10 +1322,10 @@ function mooCouponApply(e)
         });
         jQuery
             .post(moo_params.ajaxurl,{'action':'moo_coupon_apply','moo_coupon_code':coupon_code}, function (data) {
-                if(data!=null && data.status=="success")
+                if(data!==null && data.status==="success")
                 {
                     moo_Total = data.total;
-                    if(data.type=="amount")
+                    if(data.type === "amount")
                         swal({ title: "Coupon applied", text: "Success! You have received a discount of $"+data.value,   type: "success",timer:5000, confirmButtonText: "Ok" });
                     else
                         swal({ title: "Coupon applied", text: "Success! You have received a discount of "+data.value+"%",   type: "success",timer:5000, confirmButtonText: "Ok" });
