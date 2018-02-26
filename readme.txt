@@ -3,7 +3,7 @@ Contributors: merchantech
 Donate link: http://www.merchantapps.com/
 Tags: clover,online orders for clover,merchantech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
 Requires at least: 4.7.1
-Tested up to: 4.9.1
+Tested up to: 4.9.4
 Requires PHP: 5.2.0
 Stable tag: 1.3.0
 License: GPLv2 or later
@@ -57,9 +57,7 @@ You can add your menu in a new post/page or an existing one using this shortcode
 
 `[moo_all_items]`
 
-To display items for one category
-
-`[moo_all_items category="cat_id"]` : replace the cat_id with the category's id
+Or [moo_cart]` or [moo_checkout]` for cart and checkout page
 
 = VIDEO =
 [youtube https://www.youtube.com/watch?v=DHw2oppC6IU]
