@@ -5,7 +5,7 @@ Tags: clover,online orders for clover,merchantech online orders,Clover online or
 Requires at least: 4.7.1
 Tested up to: 4.9.4
 Requires PHP: 5.2.0
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,11 @@ No, this plug-in is not by Clover. It is from Merchantech. Both this plug-in and
 Please let us know so we can implement additional features.  925-234-5554 / support@merchanteh.us
 
 == Changelog ==
+= 1.3.1 =
+* Fixed printing issues
+* Fixed order note not changed
+* Added the receipt link to the text messages
+* Added 'PAID' to order title if the order was paid
 = 1.3.0 =
 * Added new Store Interface “Store Interface 5”
 * Added reports feature
@@ -257,5 +262,5 @@ First Release
 
 == Upgrade Notice ==
 
-= 1.3.0 =
-Various fixes and improvements
+= 1.3.1 =
+Please before updating the plugin make sure you have the last version (3.00IF) of our application on your Clover device

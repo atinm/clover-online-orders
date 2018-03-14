@@ -14,7 +14,6 @@ class moo_OnlineOrders_CallAPI {
         $this->Token = $MooSettings['api_key'];
         //Put the API URL here and don't forget the last slash
         $this->url_api = "http://api.smartonlineorders.com/";
-       // $this->url_api = "http://localhost/api/";
 
         $this->debug = false;
         $this->debug_get = false;
@@ -275,27 +274,23 @@ class moo_OnlineOrders_CallAPI {
     }
     public function updateOrderNote($orderId,$note)
     {
-        return $this->callApi_Post("update_order/".$orderId,$this->Token,'note='.$note);
+        return $this->callApi_Post("update_local_order/".$orderId,$this->Token,'note='.$note);
     }
 
 
     //manage orders
-    public function createOrder($total,$orderType,$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode,$instructions,$pickupTime,$cutomer)
+    public function createOrder($total,$orderType,$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode,$instructions,$pickupTime,$cutomer,$note)
     {
-        /*
-        if($orderType=='default')
-        {
-            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType=default&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&deliveryName='.$deliveryfeeName.'&servicefee='.$serviceFee.'&servicefeeName='.$serviceFeeName.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode);
-        }
-        else
-            $res =  $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&deliveryName='.$deliveryfeeName.'&servicefee='.$serviceFee.'&servicefeeName='.$serviceFeeName.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode);
-        */
-        return $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&deliveryName='.$deliveryfeeName.'&servicefee='.$serviceFee.'&servicefeeName='.$serviceFeeName.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode.'&instructions='.urlencode($instructions).'&pickupTime='.$pickupTime.'&customer='.json_encode($cutomer));
-       // return $res;
+        return $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&deliveryName='.$deliveryfeeName.'&servicefee='.$serviceFee.'&servicefeeName='.$serviceFeeName.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode.'&instructions='.urlencode($instructions).'&pickupTime='.$pickupTime.'&note='.$note.'&customer='.json_encode($cutomer));
     }
     public function createOrderV2($options)
     {
         $res =  $this->callApi_Post("v2/create_order",$this->Token,'options='.json_encode($options));
+        return $res;
+    }
+    public function assignCustomer($customer)
+    {
+        $res =  $this->callApi_Post("assign_customer",$this->Token,'customer='.json_encode($customer));
         return $res;
     }
 
@@ -329,9 +324,9 @@ class moo_OnlineOrders_CallAPI {
         return $this->callApi_Post("pay_order_spreedly",$this->Token,'orderId='.$oid.'&taxAmount='.$taxAmount.'&amount='.$amount.'&token='.$token.'&tipAmount='.$tipAmount.'&saveCard='.$saveCard.'&customerToken='.$customerToken);
     }
     //Send Notification to the merchant when a new order is registered
-    public function NotifyMerchant($oid,$instructions,$customer,$pickup_time,$paymentMethode)
+    public function NotifyMerchant($oid,$instructions,$pickup_time,$paymentMethode)
     {
-        return $this->callApi_Post("notify",$this->Token,'orderId='.$oid.'&instructions='.urlencode($instructions).'&pickup_time='.$pickup_time.'&paymentmethod='.$paymentMethode.'&customer='.json_encode($customer));
+        return $this->callApi_Post("notifyv2",$this->Token,'orderId='.$oid.'&instructions='.urlencode($instructions).'&pickup_time='.$pickup_time.'&paymentmethod='.$paymentMethode);
     }
     // OrderTypes
     public function GetOneOrdersTypes($uuid)

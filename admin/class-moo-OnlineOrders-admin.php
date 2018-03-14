@@ -749,6 +749,7 @@ class moo_OnlineOrders_Admin {
                 array("name"=>"jTheme_qtyWindowForModifiers","value"=>"on"),
                 array("name"=>"style1_width","value"=>"1024"),
                 array("name"=>"style2_width","value"=>"1024"),
+                array("name"=>"style3_width","value"=>"1024"),
                 array("name"=>"mg_settings_displayInline","value"=>"disabled"),
                 array("name"=>"mg_settings_qty_for_all","value"=>"enabled"),
                 array("name"=>"mg_settings_qty_for_zeroPrice","value"=>"enabled"),
