@@ -1,0 +1,38 @@
+{
+    "identifier":"style2",
+    "name":"Store interface 3",
+    "screenshots":"https://api.smartonlineorders.com/assets/images/interface-3.png",
+    "version":"1.0",
+    "description":"This store interface if perfect if you want a simple way of showcasing your menu.",
+    "settings":[
+        {
+            "id":"width",
+            "label":"Page width",
+            "type":"input_text",
+            "info":"Default page width recommendation is 1024px. <br /> You can make changes here",
+            "default":"1024"
+
+        },
+        {
+            "id":"addToCartColor",
+            "label":"The color of the button add to cart and the items prices",
+            "type":"color",
+            "info":"This will allow you to change the default color of the button add to cart and the prices <br /> insert here the color code ",
+            "default":"#D90000",
+            "css":[
+                {
+                    "cssSelector":".moo-cart-btns .BtnCheckout",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":".moo-cart-total-grandtotal>.moo-cart-total-price",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":".moo-items-panel .mooItemPrice",
+                    "cssProperty":"color"
+                }
+            ]
+        }
+      ]
+}

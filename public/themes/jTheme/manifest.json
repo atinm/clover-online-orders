@@ -1,0 +1,30 @@
+{
+    "identifier":"jTheme",
+    "name":"Store interface 5",
+    "screenshots":"https://api.smartonlineorders.com/assets/images/interface-5.png",
+    "version":"1.0",
+    "description":"This store interface is great if you want to use images to showcase your Clover Inventory.",
+    "settings":[
+        {
+            "id":"width",
+            "label":"Page width",
+            "type":"input_text",
+            "info":"Default page width recommendation is 1024px. <br /> You can make changes here",
+            "default":"1024"
+        },
+        {
+            "id":"qtyWindow",
+            "label":"Show Quantity Pop Up window after adding any item to cart",
+            "type":"onoff",
+            "info":"This will show the Quantity selection window when selecting 'add to cart' button. The customer can still change the quantity later in the checkout process",
+            "default":"off"
+        },
+        {
+            "id":"qtyWindowForModifiers",
+            "label":"Show Quantity Pop Up window for items with modifiers",
+            "type":"onoff",
+            "info":"This will show the Quantity selection window for items with modifiers when selecting 'Choose Qty & Options' The customer can still change the Quantity later in the checkout processs. Note : this doesn't affect modifier Qty selection",
+            "default":"off"
+        }
+    ]
+}

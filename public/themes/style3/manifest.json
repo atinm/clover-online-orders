@@ -1,0 +1,7 @@
+{
+    "identifier":"style3",
+    "name":"Store interface 2",
+    "screenshots":"https://api.smartonlineorders.com/assets/images/interface-2.png",
+    "version":"1.0",
+    "description":"This Store Interface is similar to Store Interface 5 but has additional functionality such as the ability to add item descriptions. It also has a different look when adding modifiers."
+}
