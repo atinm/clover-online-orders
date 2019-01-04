@@ -1,4 +1,4 @@
-﻿=== Smart Online Orders for Clover ===
+﻿=== Smart Online Order for Clover ===
 Contributors: zaytech
 Donate link: http://www.zaytechapps.com/
 Tags: clover,online orders for clover,zaytech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
@@ -9,11 +9,11 @@ Stable tag: 1.3.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Smart Online Orders for Clover allows you to receive orders from your Wordpress website and have it sent directly to your Clover Station.
+Smart Online Order for Clover allows you to receive orders from your Wordpress website and have it sent directly to your Clover Station.
 
 == Description ==
 
-With **Smart Online Orders for Clover** plug-in you can easily integrate your inventory to show on your website in real-time. This will allow you to accept online orders from your website.
+With **Smart Online Order for Clover** plug-in you can easily integrate your inventory to show on your website in real-time. This will allow you to accept online orders from your website.
 
 All you need is a Clover pos to easily display your menu in real time on your website. Allow customers to place orders from your website and then be notified of the orders on your clover pos. Easily manage and print the orders as they come in.
 
@@ -21,7 +21,7 @@ This plugin is the ideal solution to get your business on-line in less than 10 m
 
 = How it works =
 
-After installing the **Smart Online Orders for Clover** plugin, add the pages 'Order Online' and 'Checkout' to your Home menu, or you can add the shortcode in a new post/page or an existing one. Then sync your website with your Clover station
+After installing the **Smart Online Order for Clover** plugin, add the pages 'Order Online' and 'Checkout' to your Home menu, or you can add the shortcode in a new post/page or an existing one. Then sync your website with your Clover station
 
 
 Below are just a few websites currently using Smart Online Order with their Clover POS Some websites we built, other websites were build by the merchant themselves while other websites are non Wordpress websites. For Non-Wordpress websites, we create for them the online order page and then it gets linked to their website. Please see actual customers below.
@@ -97,7 +97,7 @@ Yes, Please call 925-234-5554 for any questions you may have. You may also e-mai
 
 = Did Clover make this plug-in =
 
-No, this plug-in is not by Clover. It is from Zaytech. Both this plug-in and Smart Online Orders is by Zaytech.
+No, this plug-in is not by Clover. It is from Zaytech. Both this plug-in and Smart Online Order is by Zaytech.
 
 = I like this plug-in but I need some additional features =
 
