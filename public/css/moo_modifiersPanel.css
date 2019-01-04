@@ -150,6 +150,7 @@ html.mfp-helper  body {
     font-family: "Open Sans", Arial, sans-serif !important;
     font-size: 13px;
     color : #000000;
+    min-width: 80px;
 }
 .mooModifier-addToCartBtn
 {

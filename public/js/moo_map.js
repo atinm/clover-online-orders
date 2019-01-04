@@ -140,7 +140,7 @@ function moo_address_changed()
 function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
 {
     var order_total             = parseFloat(moo_Total.sub_total);
-    var delivery_free_after     = parseFloat(moo_delivery_fixed_amount)  ; //Free delivery after this amount
+    var delivery_free_after     = parseFloat(moo_delivery_free_amount)  ; //Free delivery after this amount
     var delivery_fixed_amount   = parseFloat(moo_delivery_fixed_amount) ; //Fixed delivery amount
     var delivery_for_other_zone = parseFloat(moo_delivery_other_zone_fee) ; //Amount of delivery for other zones
     var moo_delivery_areas = null;

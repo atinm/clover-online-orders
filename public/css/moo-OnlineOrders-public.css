@@ -231,6 +231,7 @@
     margin-bottom: 20px;
     clear: both;
     display: block;
+    text-align: center;
 }
 .Moo_Copyright a
 {
@@ -433,7 +434,7 @@ select
     height: 34px;
     border: 1px solid #d2d2d2;
 }
-#moo-signing-form,#moo-forgotpassword-form,#moo-chooseaddress-form,#moo-addaddress-form,#mooButonAddAddress,#moo-checkout-form,.moo-checkout-bloc-message
+#moo-signing-form,#moo-forgotpassword-form,#moo-chooseaddress-form,#moo-addaddress-form,#mooButonAddAddress,#moo-checkout-form,.moo-checkout-bloc-message,#moo-customerPanel
 {
     display: none;
 }
@@ -479,7 +480,8 @@ select
     color: #000;
     border-radius: 0;
     font-size: 12px;
-
+    display: inline-block;
+    margin-bottom: 2px;
 }
 .MooUseAddressButton
 {
@@ -851,7 +853,7 @@ fieldset[disabled] .moo-btn-default.focus {
 }
 .moo-btn-primary {
     color: #ffffff;
-    background-color: #337ab7;
+    background-color: #3b5998;
     border-color: #2e6da4;
 }
 .moo-btn-primary:focus,
@@ -1199,17 +1201,6 @@ input[type="button"].moo-btn-block {
 }
 
 /* Forms */
-/*
-.moo-form-control
-{
-    position: relative;
-    z-index: 2;
-    float: left;
-    width: 100%;
-    margin-bottom: 0px;
-    margin-top: 6px;
-}
-*/
 .moo-form-control
 {
     display: block;
@@ -1337,4 +1328,26 @@ input[type="button"].moo-btn-block {
 .moo-new-icon__group
 {
     fill: #ffffff;
+}
+.moo-btn-facebook {
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px;
+    background-color: #3b5998;
+    border: 1px solid #3b5998;
+    text-transform: uppercase;
+    color: #fff;
+    cursor: pointer;
+    display: block;
+    font-family: Roboto,Helvetica,Arial,sans-serif;
+    font-style: normal;
+    line-height: 1.42857;
+    position: relative;
+    vertical-align: middle;
+    text-decoration: none;
+    text-align: center;
+}
+.login-social-section{
+    padding-right: 15px;
+    padding-left: 15px;
 }

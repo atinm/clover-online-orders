@@ -1,19 +1,19 @@
-﻿=== Merchantech Online Orders for Clover ===
-Contributors: merchantech
-Donate link: http://www.merchantapps.com/
-Tags: clover,online orders for clover,merchantech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
+﻿=== Smart Online Orders for Clover ===
+Contributors: zaytech
+Donate link: http://www.zaytechapps.com/
+Tags: clover,online orders for clover,zaytech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
 Requires at least: 4.7.1
-Tested up to: 4.9.4
+Tested up to: 5.0.4
 Requires PHP: 5.2.0
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Merchantech Online Orders for Clover allows you to receive orders from your Wordpress website and have it sent directly to your Clover Station.
+Smart Online Orders for Clover allows you to receive orders from your Wordpress website and have it sent directly to your Clover Station.
 
 == Description ==
 
-With **Merchantech Online Orders for Clover** plug-in you can easily integrate your inventory to show on your website in real-time. This will allow you to accept online orders from your website.
+With **Smart Online Orders for Clover** plug-in you can easily integrate your inventory to show on your website in real-time. This will allow you to accept online orders from your website.
 
 All you need is a Clover pos to easily display your menu in real time on your website. Allow customers to place orders from your website and then be notified of the orders on your clover pos. Easily manage and print the orders as they come in.
 
@@ -21,29 +21,39 @@ This plugin is the ideal solution to get your business on-line in less than 10 m
 
 = How it works =
 
-After installing the **Merchantech Online Orders for Clover** plugin, add the pages 'Order Online' and 'Checkout' to your Home menu, or you can add the shortcode in a new post/page or an existing one. Then sync your website with your Clover station
+After installing the **Smart Online Orders for Clover** plugin, add the pages 'Order Online' and 'Checkout' to your Home menu, or you can add the shortcode in a new post/page or an existing one. Then sync your website with your Clover station
 
 
-[Example 1](https://chicknchuck.com/)
-[Example 2](http://www.theoriginalturkey.com)
-[Example 3](http://www.islandsmoothiecafe.com)
-[Example 4](http://arrowheadtaphouse.com)
-[Example 5](http://www.josephineskitchenms.com)
-[Example 6](https://twistedfresh.com/)
-[Example 7](http://www.urbanpantrycatering.com/)
-[Example 8](http://www.sandwichcafesfs.com)
-[Example 9](http://villaromarestaurant.net)
-[Example 10](http://www.teabocoffee.com)
-[Example 11](http://misskellyscafe.com)
-[Example 12](http://organicearthproducts.com)
-[Example 13](http://www.himalayanfusiononline.com)
+Below are just a few websites currently using Smart Online Order with their Clover POS Some websites we built, other websites were build by the merchant themselves while other websites are non Wordpress websites. For Non-Wordpress websites, we create for them the online order page and then it gets linked to their website. Please see actual customers below.
+[Burger Restaurant](https://chicknchuck.com/)
+[Twisted Fresh](https://twistedfresh.com/)
+[Full Service Restaurant](https://www.theoriginalturkey.com)
+[Island Smoothie Cafe](https://www.islandsmoothiecafe.com)
+[Cafe at Airport](https://arrowheadtaphouse.com)
+[Pizza shop Example 1](https://pomodoropizzafl.com)
+[Pizza shop Example 2](http://www.fastpizzaonline.com)
+[Pizza shop Example 3](https://www.zifaros.com)
+[Oasis Grill ](https://oasisgrill.com)
+[Cake Shop](https://nolandscakes.com)
+[Urban Pantry with Store interface 4](https://www.urbanpantrycatering.com/)
+[Sandwich Cafe](https://www.sandwichcafesfs.com)
+[Coffee Shop with Store interface 4](https://coyotecoffeecafe.com)
+[Pizza Shop Example 4](https://villaromarestaurant.net)
+[Pizza Shop Example 5](https://venuspizzeriafl.com)
+[Pizza Shop Example 6](https://www.tonyspizzaandgrinders.com)
+[Coffee Shop Example 2](https://www.teabocoffee.com)
+[Another Cafe Example](https://misskellyscafe.com)
+[Poke Food Example](https://www.bigfinpoke.com)
+[Indian Food Example](https://www.himalayanfusiononline.com)
+[Cookie Store Example](https://rucookiemunchers.com/)
+
 
 
 == Installation ==
 
 Here is what you need to do:
 
-1. Install the app by Merchantech called “[Smart Online Order + Wordpress](https://www.clover.com/appmarket/apps/6MWGRRXJD5HMW?clientCountry=US )” to your Clover Station or Clover Mini
+1. Install the app by Zaytech called “[Smart Online Order + Wordpress](https://www.clover.com/appmarket/apps/6MWGRRXJD5HMW?clientCountry=US )” to your Clover Station or Clover Mini
 1. Install this Plugin
 1. Enter the Api-Key provided by the app in the settings section of this plugin
 1. Wait for your menu to sync
@@ -57,11 +67,15 @@ You can add your menu in a new post/page or an existing one using this shortcode
 
 `[moo_all_items]`
 
-Or [moo_cart]` or [moo_checkout]` for cart and checkout page
+Or [moo_cart]` or [moo_checkout]` for cart and checkout page and `[moo_my_account]` for customers dashboard
 
 = VIDEO =
-[youtube https://www.youtube.com/watch?v=DHw2oppC6IU]
+[youtube https://www.youtube.com/watch?v=Z2GgbhxxnMg&t=327s]
 [youtube https://www.youtube.com/watch?v=r74L0glOadE]
+[youtube https://youtu.be/7kmotlookJQ]
+[youtube https://www.youtube.com/watch?v=paXgzAPRyds]
+[youtube https://www.youtube.com/watch?v=jilF5M7hBIU]
+[youtube https://www.youtube.com/watch?v=tI6EGf6WqnM&t=58s]
 
 == Frequently Asked Questions ==
 
@@ -79,17 +93,32 @@ While this Plug-in is free. Yes, there is a fee associated with the Online Order
 
 = If i have difficulty installing this plug-in or the app, is there support or help =
 
-Yes, Please call 925-234-5554 for any questions you may have. You may also e-mail us at: support@merchantech.us
+Yes, Please call 925-234-5554 for any questions you may have. You may also e-mail us at: support@zaytechapps.com
 
 = Did Clover make this plug-in =
 
-No, this plug-in is not by Clover. It is from Merchantech. Both this plug-in and Smart Online Orders is by Merchantech.
+No, this plug-in is not by Clover. It is from Zaytech. Both this plug-in and Smart Online Orders is by Zaytech.
 
 = I like this plug-in but I need some additional features =
 
 Please let us know so we can implement additional features.  925-234-5554 / support@merchanteh.us
 
 == Changelog ==
+= 1.3.2 =
+* Fixed modifiers manual sync issue when there are more than 1000 modifiers
+* Fixed and Improved Categories and Items sync
+* Added Tax Sync Feature
+* Improved Store Interfaces System and added new features for third party developmers to create Store Interfaces
+* Fixed and improved issues in Store Interfaces 3 and 4
+* Added Start Date for Coupons
+* Updated fontawesome to latest version
+* Added a new Shortcode [moo_my_account] for customers panel (allows customers to see previous orders and re-order) It will start to save orders once the plugin is updated to this version. Deleting and reinstalling the plugin will remove previously saved orders
+* Added more customization options for store interface 4
+* Improved Custom css section (added ability to override original css )
+* Added the possibility to hide 'show more' in store interface 4
+* Added the ability to disable sms verification when orders are not paid with credit card
+* Added the ability to disable online payment and accept only pay at location/pay upon delivery
+* Improved ability to update order types by improving sync functionality with the clover account
 = 1.3.1 =
 * Fixed printing issues
 * Fixed order note not changed
@@ -262,5 +291,5 @@ First Release
 
 == Upgrade Notice ==
 
-= 1.3.1 =
-Please before updating the plugin make sure you have the last version (3.00IF) of our application on your Clover device
+= 1.3.2 =
+Use the new shortcode [moo_my_account] in a empty page to add Re-order feature

@@ -51,7 +51,7 @@ function addLineToHtmlCart(item_name,item_price,item_uuid)
     html +="<td style='cursor: pointer' onclick=\"ChangeQuantity('"+item_uuid+"')\"><strong>"+item_name+"</strong></td>"; //The name of the item
     html +="<td>"+1+"</td>"; // The quantiy
     html +='<td id="moo_itemsubtotal_'+item_uuid+'">$'+price.toFixed(2)+'</td>'; //Sub total  ( price + taxes )
-    html +='<td><i class="fa fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item_uuid+'\')"></i></td>'; //Controlles Btn
+    html +='<td><i class="fas fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item_uuid+'\')"></i></td>'; //Controlles Btn
     html +="</tr>";
     if(Object.keys(MOO_CART).length>0) //jQuery(html).insertBefore(".moo_cart_total:first");
         jQuery(".moo_cart .CartContent>table>tbody").prepend(html);

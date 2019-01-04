@@ -7,8 +7,8 @@
  * public-facing side of the site and the admin area.
  *
  * @since      1.0.0
- * @package    merchantech_OnlineOrders
- * @subpackage merchantech_OnlineOrders/includes
+ * @package    zaytech_OnlineOrders
+ * @subpackage zaytech_OnlineOrders/includes
  * @author     Mohammed EL BANYAOUI <elbanyaoui@hotmail.com>
  */
 class moo_OnlineOrders {
@@ -19,7 +19,7 @@ class moo_OnlineOrders {
 	 *
 	 * @since    1.0.0
 	 * @access   protected
-	 * @var      merchantech_OnlineOrders_Loader    $loader    Maintains and registers all hooks for the plugin.
+	 * @var      zaytech_OnlineOrders_Loader    $loader    Maintains and registers all hooks for the plugin.
 	 */
 	protected $loader;
 
@@ -53,7 +53,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.3.0';
+		$this->version = '1.3.2';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -134,7 +134,7 @@ class moo_OnlineOrders {
 	 */
 	private function define_admin_hooks() {
 
-		$plugin_admin = new Moo_OnlineOrders_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new moo_OnlineOrders_Admin( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
@@ -239,6 +239,7 @@ class moo_OnlineOrders {
 		$this->loader->add_action( 'wp_ajax_moo_update_categories', $plugin_public, 'moo_UpdateCategories');
 		$this->loader->add_action( 'wp_ajax_moo_update_modifiers_groups', $plugin_public, 'moo_UpdateModifiersG');
 		$this->loader->add_action( 'wp_ajax_moo_update_modifiers', $plugin_public, 'moo_UpdateModifiers');
+		$this->loader->add_action( 'wp_ajax_moo_update_taxes', $plugin_public, 'moo_UpdateTaxes');
 
         //Get Statistics
         $this->loader->add_action( 'wp_ajax_moo_get_stats', $plugin_public, 'moo_GetStats');

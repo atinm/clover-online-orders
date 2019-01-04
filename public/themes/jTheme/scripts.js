@@ -163,7 +163,7 @@ function moo_renderItems(data) {
     html +='<h3>'+data.name+'</h3>';
     for(var i in data.items){
         var item = data.items[i];
-        if(item) {
+        if(typeof item =='object') {
             var item_price = parseFloat(item.price);
             item_price = item_price/100;
             item_price = item_price.toFixed(2);
@@ -407,7 +407,10 @@ function moo_clickOnOrderBtnFIWM(event,item_id,qty) {
                     {
                         if(window.moo_mg_setings.inlineDisplay && window.moo_mg_setings.inlineDisplay == true ) {
                             var h = '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12" id="moo-modifiersContainer-for-'+item_id+'"></div>';
-                            jQuery("#moo-onlineStore-items").appendChild(h);
+                            jQuery("#moo-onlineStore-items").append(h);
+                            jQuery("html, body").animate({
+                                scrollTop: jQuery("#moo-modifiersContainer-for-"+item_id).offset().top
+                            }, 600);
                         }
                         mooBuildModifiersPanel(data.modifier_groups,item_id,qty,window.moo_mg_setings);
                     }
@@ -506,8 +509,8 @@ function mooShowCart(event) {
                     cart_html+='<div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-2 moo-col-xs-2  moo-cart-line-itemQty">'+line.qty+'</div>';
                     cart_html+= '<div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-3 moo-col-xs-3  moo-cart-line-itemPrice">$'+formatPrice(line_price.toFixed(2))+'</div>';
                     cart_html+= '<div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-2 moo-col-xs-2  moo-cart-line-itemActions">';
-                    cart_html+=  '<i style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fa fa-pencil-square-o" aria-hidden="true" onclick="mooUpdateSpecialInsinCart(\''+line_id+'\',\''+line.special_ins+'\')"></i>'+
-                        '<i style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fa fa-trash" aria-hidden="true" onclick="mooRemoveLineFromCart(\''+line_id+'\')"></i></div></div>';
+                    cart_html+=  '<i style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fas fa-pen-square" aria-hidden="true" onclick="mooUpdateSpecialInsinCart(\''+line_id+'\',\''+line.special_ins+'\')"></i>'+
+                        '<i style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fas fa-trash" aria-hidden="true" onclick="mooRemoveLineFromCart(\''+line_id+'\')"></i></div></div>';
                 });
                 cart_html += '</div>';
                 //Set teh cart total

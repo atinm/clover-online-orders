@@ -56,6 +56,7 @@ class moo_OnlineOrders_Model {
     {
         $per_page = esc_sql($per_page);
         $offset = esc_sql($page) * $per_page;
+
         return $this->db->get_results("SELECT *
                                     FROM {$this->db->prefix}moo_item i
                                     limit {$per_page} offset {$offset}
@@ -65,6 +66,7 @@ class moo_OnlineOrders_Model {
     {
         $per_page = esc_sql($per_page);
         $offset = esc_sql($page) * $per_page;
+
         return $this->db->get_results("SELECT *
                                     FROM {$this->db->prefix}moo_category
                                     limit {$per_page} offset {$offset}
@@ -74,6 +76,7 @@ class moo_OnlineOrders_Model {
     {
         $per_page = esc_sql($per_page);
         $offset = esc_sql($page) * $per_page;
+
         return $this->db->get_results("SELECT *
                                     FROM {$this->db->prefix}moo_modifier_group
                                     limit {$per_page} offset {$offset}
@@ -83,6 +86,7 @@ class moo_OnlineOrders_Model {
     {
         $per_page = esc_sql($per_page);
         $offset = esc_sql($page) * $per_page;
+
         return $this->db->get_results("SELECT *
                                     FROM {$this->db->prefix}moo_modifier
                                     limit {$per_page} offset {$offset}
@@ -92,6 +96,7 @@ class moo_OnlineOrders_Model {
     {
         $per_page = esc_sql($per_page);
         $offset = esc_sql($page) * $per_page;
+
         return $this->db->get_results("SELECT *
                                     FROM {$this->db->prefix}moo_tax_rate
                                     limit {$per_page} offset {$offset}
@@ -101,6 +106,7 @@ class moo_OnlineOrders_Model {
     {
         $per_page = esc_sql($per_page);
         $offset = esc_sql($page) * $per_page;
+
         return $this->db->get_results("SELECT *
                                     FROM {$this->db->prefix}moo_order_types
                                     limit {$per_page} offset {$offset}
@@ -109,6 +115,7 @@ class moo_OnlineOrders_Model {
     function getItemsBySearch($motCle)
     {
         $motCle = esc_sql($motCle);
+
         return $this->db->get_results("SELECT *
                                     FROM {$this->db->prefix}moo_item i
                                     WHERE i.name like '%{$motCle}%' || i.description like '%{$motCle}%'
@@ -140,6 +147,7 @@ class moo_OnlineOrders_Model {
     function getModifiers($uuid_group)
     {
         $uuid_group = esc_sql($uuid_group);
+
         return $this->db->get_results("SELECT *
                                     FROM `{$this->db->prefix}moo_modifier` m
                                     WHERE m.group_id = '{$uuid_group}' AND m.show_by_default='1'
@@ -148,6 +156,8 @@ class moo_OnlineOrders_Model {
     }
     function getModifiersGroup($item)
     {
+        $item = esc_sql($item);
+
         return $this->db->get_results("SELECT mg.*
                                     FROM `{$this->db->prefix}moo_item_modifier_group` img,  `{$this->db->prefix}moo_modifier_group` mg
                                     WHERE mg.uuid=img.group_id AND mg.show_by_default='1'
@@ -169,6 +179,7 @@ class moo_OnlineOrders_Model {
     function getAllModifiers($uuid_group)
     {
         $uuid_group = esc_sql($uuid_group);
+
         return $this->db->get_results("SELECT *
                                     FROM `{$this->db->prefix}moo_modifier` m
                                     WHERE m.group_id = '{$uuid_group}'
@@ -177,6 +188,8 @@ class moo_OnlineOrders_Model {
     }
     function itemHasModifiers($item)
     {
+        $item = esc_sql($item);
+
         return $this->db->get_row("SELECT count(*) as total
                                     FROM `{$this->db->prefix}moo_item_modifier_group` img, `{$this->db->prefix}moo_modifier_group` mg, `{$this->db->prefix}moo_modifier` m
                                     WHERE img.group_id = mg.uuid AND img.item_id = '{$item}' AND mg.uuid=m.group_id AND mg.show_by_default='1'
@@ -184,6 +197,8 @@ class moo_OnlineOrders_Model {
     }
     function getModifiersGroupLimits($uuid)
     {
+        $uuid = esc_sql($uuid);
+
         return $this->db->get_row("SELECT min_required, max_allowd, name
                                     FROM `{$this->db->prefix}moo_modifier_group` mg
                                     WHERE mg.uuid = '{$uuid}'
@@ -191,6 +206,8 @@ class moo_OnlineOrders_Model {
     }
     function getItemModifiersGroupsRequired($uuid)
     {
+        $uuid = esc_sql($uuid);
+
         return $this->db->get_results("SELECT mg.uuid
                                     FROM `{$this->db->prefix}moo_modifier_group` mg,`{$this->db->prefix}moo_item` item,`{$this->db->prefix}moo_item_modifier_group` item_mg  
                                     WHERE item_mg.item_id =  item.uuid
@@ -201,12 +218,14 @@ class moo_OnlineOrders_Model {
                                     ");
     }
     function getModifier($uuid)
-{
-    return $this->db->get_row("SELECT *
-                                    FROM `{$this->db->prefix}moo_modifier` m
-                                    WHERE m.uuid = '{$uuid}'
-                                    ");
-}
+    {
+        $uuid = esc_sql($uuid);
+
+        return $this->db->get_row("SELECT *
+                                        FROM `{$this->db->prefix}moo_modifier` m
+                                        WHERE m.uuid = '{$uuid}'
+                                        ");
+    }
 function getItemsWithVariablePrice()
 {
     return $this->db->get_results("SELECT *
@@ -225,10 +244,12 @@ function getItemsWithVariablePrice()
     }
     function getOneOrder($orderId)
     {
+        $orderId = esc_sql($orderId);
         return $this->db->get_row("SELECT * FROM {$this->db->prefix}moo_order where uuid='".$orderId."'");
     }
     function getItemsOrder($uuid)
     {
+        $uuid = esc_sql($uuid);
         return $this->db->get_results("SELECT IO.* ,I.* FROM {$this->db->prefix}moo_item_order IO ,{$this->db->prefix}moo_item I WHERE I.uuid = IO.item_uuid and IO.order_uuid = '$uuid' ORDER BY IO.`_id` DESC");
     }
     function getVisibleOrderTypes()
@@ -240,6 +261,7 @@ function getItemsWithVariablePrice()
     {
         $uuid = esc_sql($uuid);
         $st = ($status == "true")? 1:0;
+
         return $this->db->update("{$this->db->prefix}moo_order_types",
                                 array(
                                     'status' => $st
@@ -280,6 +302,7 @@ function getItemsWithVariablePrice()
         $status = esc_sql($enable);
         $type = esc_sql($type);
         $minAmount = esc_sql($minAmount);
+
         return $this->db->update("{$this->db->prefix}moo_order_types",
             array(
                 'label' => $label,
@@ -296,6 +319,7 @@ function getItemsWithVariablePrice()
     {
         $uuid = esc_sql($mg_uuid);
         $name = esc_sql($name);
+
         return $this->db->update("{$this->db->prefix}moo_modifier_group",
                                 array(
                                     'alternate_name' => $name
@@ -486,7 +510,13 @@ function getItemsWithVariablePrice()
                 continue;
 
             $string = "";
-            if(count($item['modifiers'])) foreach ($item['modifiers'] as $key=>$mod) $string .=$key.",";
+            if(count($item['modifiers'])) {
+                foreach ($item['modifiers'] as $key=>$mod) {
+                    for($i=0;$i<$mod['qty'];$i++)
+                        $string .=$key.",";
+                }
+            }
+
             $item_id        = esc_sql($item['item']->uuid);
             $quantity       = esc_sql($item['quantity']);
             $special_ins    = esc_sql($item['special_ins']);
@@ -561,9 +591,17 @@ function getItemsWithVariablePrice()
     }
     function getBestSellingProducts($limit)
     {
+        $limit = esc_sql($limit);
+
         if($limit==0 || $limit<0)
             $limit = 10;
         return $this->db->get_results("SELECT COUNT(*),item_uuid,item.* FROM `{$this->db->prefix}moo_item_order` ligne,{$this->db->prefix}moo_item item where item.uuid=ligne.item_uuid  GROUP by item_uuid ORDER by 1 desc limit ".$limit);
+    }
+    function moo_GetBestItems4Customer($email)
+    {
+        $email = esc_sql($email);
+        $limit = 24;
+        return $this->db->get_results("SELECT COUNT(*) as ordered,item_uuid,item.* FROM `{$this->db->prefix}moo_item_order` ligne,`{$this->db->prefix}moo_item` item,`{$this->db->prefix}moo_order` cmd where cmd.p_email = '".$email."' and cmd.uuid = ligne.order_uuid && item.uuid=ligne.item_uuid  GROUP by item_uuid ORDER by 1,item.sort_order,item.uuid desc limit ".$limit);
     }
 
     /*
@@ -616,7 +654,9 @@ function getItemsWithVariablePrice()
     }
 
     function saveItemWithImage($uuid,$description,$images) {
-        
+        $uuid = esc_sql($uuid);
+        $description = esc_sql($description);
+
         $compteur = 0;
 
         if($description != "")
@@ -641,6 +681,9 @@ function getItemsWithVariablePrice()
     }
     function saveItemDescription($uuid,$description)
     {
+        $uuid = esc_sql($uuid);
+        $description = esc_sql($description);
+
         $this->db->update("{$this->db->prefix}moo_item", array('description' => $description), array( 'uuid' => $uuid ));
         return true;
     }
@@ -659,6 +702,8 @@ function getItemsWithVariablePrice()
     }
 
     function saveImageCategory($uuid,$image){
+        $uuid = esc_sql($uuid);
+        $image = esc_sql($image);
 
         return $this->db->update("{$this->db->prefix}moo_category",
             array(

@@ -163,6 +163,7 @@ class moo_OnlineOrders_Admin {
                 require_once plugin_dir_path( dirname(__FILE__))."/models/moo-OnlineOrders-Model.php";
                 require_once plugin_dir_path( dirname(__FILE__))."/models/moo-OnlineOrders-CallAPI.php";
 
+
                 $model = new moo_OnlineOrders_Model();
                 $api = new moo_OnlineOrders_CallAPI();
                 $MooOptions = (array)get_option("moo_settings");
@@ -170,8 +171,8 @@ class moo_OnlineOrders_Admin {
                 $orderId = sanitize_text_field($_GET['order_uuid']);
                 $order_items = $model->getItemsOrder($orderId);
                 $orderDetail = $model->getOneOrder($orderId);
-
                 $view = $api->getOrderDetails($orderDetail);
+
                 if(isset($view['payments']) && count($view['payments'])>0 )
                 {
                     $orderPayments = $view['payments'];
@@ -191,20 +192,19 @@ class moo_OnlineOrders_Admin {
                         $status = "Not Paid";
                         $status_color='red';
                     }
-                }
-                else
+                } else {
                     if($view['paymentMethode'] == 'cash')
                     {
                         $status ='Will Pay Cash';
                         $status_color='blue';
 
-                    }
-                    else
-                    {
+                    } else {
                         $status = 'Not paid';
                         $status_color='red';
 
                     }
+
+                }
 
                 $price_item = 0;
 
@@ -282,9 +282,9 @@ class moo_OnlineOrders_Admin {
                                                 echo " - ".$getModifier->name."($".number_format(($getModifier->price/100),2).")</br>";
                                                 $line_price += $getModifier->price;
                                             }
-                                        }
-                                        else
+                                        } else {
                                             echo $item->name;
+                                        }
                                         ?>
                                     </td>
                                     <td style="text-align:center"><?php echo "$".number_format(($line_price/100),2); ?></td>
@@ -413,13 +413,14 @@ class moo_OnlineOrders_Admin {
     }
     public function page_coupons()
     {
+        $d = new DateTime('today');
         if(isset($_GET['action']) && ($_GET['action'] == 'add_coupon' || $_GET['action'] == "edit_coupon") )
          {
             $action = $_GET['action'];
             require_once plugin_dir_path( dirname(__FILE__))."/models/moo-OnlineOrders-CallAPI.php";
             $api = new moo_OnlineOrders_CallAPI();
             $message="";
-             $header_message = "Add New coupon";
+            $header_message = "Add New coupon";
             if(isset($_POST['submit']))
             {
                 $theCoupon = array(
@@ -429,6 +430,7 @@ class moo_OnlineOrders_Admin {
                     "CouponValue"=>$_POST['CouponValue'],
                     "CouponMinAmount"=>$_POST['CouponMinAmount'],
                     "CouponMaxUses"=>$_POST['CouponMaxUses'],
+                    "CouponStartDate"=>$_POST['CouponStartDate'],
                     "CouponExpiryDate"=>$_POST['CouponExpiryDate'],
                 );
 
@@ -468,7 +470,7 @@ class moo_OnlineOrders_Admin {
                             "expirationdate"=>$_POST['CouponExpiryDate'],
                             "minAmount"=>$_POST['CouponMinAmount'],
                             "maxuses"=>$_POST['CouponMaxUses'],
-                            "startdate"=>$d->format('Y-m-d')
+                            "startdate"=>$_POST['CouponStartDate']
                         );
                         $res = json_decode($api->addCoupon($coupon));
                         if($res->status=="success")
@@ -479,11 +481,8 @@ class moo_OnlineOrders_Admin {
                         }
                         else
                             $message = $res->message;
-                    }
-                    else
-                        if($_POST['submit'] == "Save")
-                        {
-                            $d = new DateTime('today');
+                    } else {
+                        if($_POST['submit'] == "Save") {
                             $coupon = array(
                                 "name"=>$_POST['CouponName'],
                                 "code"=>$_POST['CouponCode'],
@@ -492,11 +491,10 @@ class moo_OnlineOrders_Admin {
                                 "expirationdate"=>$_POST['CouponExpiryDate'],
                                 "minAmount"=>$_POST['CouponMinAmount'],
                                 "maxuses"=>$_POST['CouponMaxUses'],
-                                "startdate"=>$d->format('Y-m-d')
+                                "startdate"=>$_POST['CouponStartDate']
                             );
                             $res = json_decode($api->updateCoupon($_GET["coupon"],$coupon));
-                            if($res->status=="success")
-                            {
+                            if($res->status=="success") {
                                 if($_GET['coupon']!=$_POST['CouponCode'])
                                     $message = 'The coupon was updated. You are updated the coupon code, any other changes on this page will not affect the coupon please go back to coupons page';
                                 else
@@ -504,10 +502,11 @@ class moo_OnlineOrders_Admin {
 
                                 $class="success";
 
-                            }
-                            else
+                            } else {
                                 $message = $res->message;
+                            }
                         }
+                    }
                 }
             }
             else
@@ -527,7 +526,8 @@ class moo_OnlineOrders_Admin {
                                 "CouponValue"=>$c->value,
                                 "CouponMinAmount"=>$c->minAmount,
                                 "CouponMaxUses"=>$c->maxuses,
-                                "CouponExpiryDate"=>$c->expirationdate
+                                "CouponExpiryDate"=>$c->expirationdate,
+                                "CouponStartDate"=>$c->startdate
                             );
                             $header_message = 'Edit a coupon';
                         }
@@ -594,12 +594,21 @@ class moo_OnlineOrders_Admin {
                             </tr>
                             <tr>
                                 <th scope="row">
+                                    <label for="CouponStartDate">Starting date</label>
+                                </th>
+                                <td>
+                                    <input name="CouponStartDate" type="text" id="CouponStartDate" value="<?php echo (isset($theCoupon['CouponStartDate']))?$theCoupon['CouponStartDate']:$d->format('m-d-Y');?>" >
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
                                     <label for="CouponExpiryDate">Expiration date</label>
                                 </th>
                                 <td>
                                     <input name="CouponExpiryDate" type="text" id="CouponExpiryDate" value="<?php echo (isset($theCoupon['CouponExpiryDate']))?$theCoupon['CouponExpiryDate']:'';?>" >
                                 </td>
                             </tr>
+
                             <tr>
                                 <th scope="row">
                                     <label for="CouponMaxUses">Number of uses</label>
@@ -670,6 +679,194 @@ class moo_OnlineOrders_Admin {
         $api->goToReports();
 
     }
+    public function page_themes()
+    {
+        require_once plugin_dir_path( dirname(__FILE__))."/models/moo-OnlineOrders-CallAPI.php";
+        $api = new moo_OnlineOrders_CallAPI();
+        ?>
+        <div class="wrap">
+            <div class="moo_dashboard_logo">
+                <div class="moo_dashboard_logo_img">
+                    <a href="http://smartonlineorder.com" title="Smart Online Order">
+                        <img src="//api.smartonlineorders.com/assets/images/small-logo.png" alt="Smart online order logo">
+                    </a>
+                </div>
+                <div class="moo_dashboard_logo_links">
+                    <a target="_blank" href="http://docs.smartonlineorder.com" title="Read smart online order Documentation">
+                        Documentation
+                    </a>|
+                    <a target="_blank" href="https://smartonlineorder.com/contact-us/" title="Need Help ?">
+                        Get Support
+                    </a>|
+                    <span class="moo_dashboard_header_version"><strong><?php echo $this->version;?></strong></span>
+                </div>
+            </div>
+            <h2 class="moo_dashboard_title">
+                <i class="moo_dashboard_title_icon fas fa-cubes"></i>
+                Store Interfaces
+            </h2>
+            <div>
+                <div class="moo_dashboard_wrapper">
+                    <?php if(!isset($_GET["theme_identifier"])) { ?>
+                        <!-- Menu -->
+                        <div class="moo_dashboard_nav_tabs pull-left">
+                            <div class="moo_dashboard_nav_tab pull-left noMargin active" id="mooDashbboardTab1" onclick="moo_dashboard_tab_clicked(1)">
+                                <i class="moo_dashboard_tab_icon fas fa-check-circle"></i><br>
+                                <span>Available Store Interfaces</span>
+                            </div>
+                            <div class="moo_dashboard_nav_tab pull-left noMargin" id="mooDashbboardTab2" onclick="moo_dashboard_tab_clicked(2)">
+                                <i class="moo_dashboard_tab_icon fas fa-th-large"></i><br>
+                                <span>Browse New Store Interfaces</span>
+                            </div>
+                        </div>
+                        <!-- Fin Menu -->
+                        <!-- Content -->
+                        <!-- Tab installed themes -->
+                        <div class="moo_dashboard_content_tabs" id="mooDashbboardTabContent1">
+                        </div>
+                        <!-- Tab installed themes -->
+                        <div class="moo_dashboard_content_tabs" id="mooDashbboardTabContent2">
+                        </div>
+                        <!-- Fin Content -->
+                   <?php } else {
+                        $theme_id = $_GET["theme_identifier"];
+                        //get the manifest file
+                        $path = plugin_dir_path(dirname(__FILE__))."public/themes";
+                            if(file_exists($path."/".$theme_id."/manifest.json")){
+                                $theme_manifest = json_decode(file_get_contents($path."/".$theme_id."/manifest.json"),true);
+                                echo '<h1> Customize '.$theme_manifest['name'].'</h1>';
+                                if(!isset($theme_manifest['settings']) || $theme_manifest['settings'] === '' || !is_array($theme_manifest['settings'])){
+                                    echo '<div class="moo_dashboard_text_error">Theme not customisable</div>';
+                                    echo '<div class="moo_dashboard_buttons_actions"><a href="?page=moo_themes" class="moo_dashboard_button moo_dashboard_medium  pull-left moo_dashboard_button_go_back" style="background: black;">Go back to themes</a></div>';
+
+                                } else {
+                                    //get the theme settings
+                                    $themes_current_settings = array();
+                                    $settings = (array) get_option("moo_settings");
+
+                                    foreach ($settings as $key=>$val) {
+                                        $k = (string)$key;
+                                        if(strpos($k,$theme_id."_") === 0 && $val != "")
+                                        {
+                                            $themes_current_settings[$key]= $val;
+                                        }
+                                    }
+                                    echo '<div class="wpvr_options_content"> <form id="moo_theme_customize">';
+                                    foreach ($theme_manifest['settings'] as $item_settings) {
+                                        if(isset($item_settings['type'])) {
+                                            $key = $theme_id."_".$item_settings["id"];
+                                            if(!isset($themes_current_settings[$key]))
+                                                $themes_current_settings[$key] = '';
+                                            switch ($item_settings['type']) {
+                                                case 'input_text':
+                                                    ?>
+                                                    <div class="moo_dashboard_option moo_dashboard_option_input moo_dashboard_input  on">
+                                                        <div class="moo_dashboard_option_button pull-right">
+                                                            <input type="text" class="moo_dashboard_input" name="<?php echo $item_settings['id'];?>" id="<?php echo $item_settings['id'];?>"  value="<?php echo $themes_current_settings[$key];?>">
+                                                        </div>
+                                                        <div class="option_text">
+                                                            <span class="moo_dashboard_option_title"><?php echo $item_settings['label'];?></span>
+                                                            <br>
+                                                            <p class="moo_dashboard_option_desc">
+                                                                <?php echo $item_settings['info'];?>
+                                                            </p>
+                                                        </div>
+                                                        <div class="moo_dashboard_clearfix"></div>
+                                                    </div>
+                                                    <?php
+                                                    break;
+                                                case 'input_number':
+                                                    ?>
+                                                    <div class="moo_dashboard_option moo_dashboard_option_input moo_dashboard_input  on">
+                                                        <div class="moo_dashboard_option_button pull-right">
+                                                            <input type="number" class="small moo_dashboard_input" name="<?php echo $item_settings['id'];?>" id="<?php echo $item_settings['id'];?>"  value="<?php echo $themes_current_settings[$key]; ?>">
+                                                        </div>
+                                                        <div class="option_text">
+                                                            <span class="moo_dashboard_option_title"><?php echo $item_settings['label'];?></span>
+                                                            <br>
+                                                            <p class="moo_dashboard_option_desc">
+                                                                <?php echo $item_settings['info'];?>
+                                                            </p>
+                                                        </div>
+                                                        <div class="moo_dashboard_clearfix"></div>
+                                                    </div>
+                                                    <?php
+                                                    break;
+                                                case 'onoff':
+                                                    if($themes_current_settings[$key] != '') {
+                                                        if($themes_current_settings[$key] == 'on') {
+                                                            $checked = 'checked';
+                                                        } else {
+                                                            $checked = '';
+                                                        }
+                                                    } else {
+                                                        if($item_settings['default'] == 'on') {
+                                                            $checked = 'checked';
+                                                        } else {
+                                                            $checked = '';
+                                                        }
+                                                    }
+                                                    ?>
+                                                    <div class="moo_dashboard_option moo_dashboard_option_input moo_dashboard_input  on">
+                                                        <div class="moo_dashboard_option_button pull-right">
+                                                            <div class="moo-onoffswitch" >
+                                                                <input type="hidden" name="<?php echo $item_settings['id'];?>" value="off">
+                                                                <input type="checkbox" name="<?php echo $item_settings['id'];?>" class="moo-onoffswitch-checkbox" id="myonoffswitch_<?php echo $item_settings['id'];?>" <?php echo $checked; ?> >
+                                                                <label class="moo-onoffswitch-label" for="myonoffswitch_<?php echo $item_settings['id'];?>"><span class="moo-onoffswitch-inner"></span>
+                                                                    <span class="moo-onoffswitch-switch"></span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="option_text">
+                                                            <span class="moo_dashboard_option_title"><?php echo $item_settings['label'];?></span>
+                                                            <br>
+                                                            <p class="moo_dashboard_option_desc">
+                                                                <?php echo $item_settings['info'];?>
+                                                            </p>
+                                                        </div>
+                                                        <div class="moo_dashboard_clearfix"></div>
+                                                    </div>
+                                                    <?php
+                                                    break;
+                                                case 'color':
+                                                    ?>
+                                                    <div class="moo_dashboard_option moo_dashboard_option_input moo_dashboard_input  on">
+                                                        <div class="moo_dashboard_option_button pull-right">
+                                                            <input type="color" class="moo_dashboard_input" name="<?php echo $item_settings['id'];?>" id="<?php echo $item_settings['id'];?>"  value="<?php echo ($themes_current_settings[$key]=='')?$item_settings['default']:$themes_current_settings[$key];?>">
+                                                        </div>
+                                                        <div class="option_text">
+                                                            <span class="moo_dashboard_option_title"><?php echo $item_settings['label'];?></span>
+                                                            <br>
+                                                            <p class="moo_dashboard_option_desc">
+                                                                <?php echo $item_settings['info'];?>
+                                                            </p>
+                                                        </div>
+                                                        <div class="moo_dashboard_clearfix"></div>
+                                                    </div>
+                                                    <?php
+                                                    break;
+                                            }
+                                        }
+                                    }
+                                    echo '</div>';
+                                    echo '<div class="moo_dashboard_buttons_actions"><button onclick="moo_save_theme_customization(event,\''.$theme_id.'\')" class="moo_dashboard_button moo_dashboard_medium moo_dashboard_save_options pull-right "><i class="moo_dashboard_button_icon fas fa-save"></i>Save options</button><a href="?page=moo_themes" class="moo_dashboard_button moo_dashboard_medium  pull-left moo_dashboard_button_go_back" style="background: black;">Go back to themes</a></div>';
+                                    echo '</form>';
+                                }
+
+                            } else {
+                                echo '<div class="moo_dashboard_text_error"> Theme not installed correctly</div>';
+                                echo '<div class="moo_dashboard_buttons_actions"><a href="?page=moo_themes" class="moo_dashboard_button moo_dashboard_medium  pull-left moo_dashboard_button_go_back" style="background: black;">Go back to themes</a></div>';
+                            }
+
+                        ?>
+                   <?php }?>
+
+                </div>
+            </div>
+
+        </div>
+        <?php
+    }
 
     public function page_products_screen_options()
     {
@@ -701,13 +898,15 @@ class moo_OnlineOrders_Admin {
                 array("name"=>"thanks_page","value"=>""),
                 array("name"=>"fb_appid","value"=>""),
                 array("name"=>"use_coupons","value"=>"disabled"),
+                array("name"=>"use_sms_verification","value"=>"enabled"),
                 array("name"=>"custom_css","value"=>""),
                 array("name"=>"custom_js","value"=>""),
-                array("name"=>"copyrights","value"=>'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.3.0">Smart Online Order</a>'),
+                array("name"=>"copyrights","value"=>'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.3.2">Smart Online Order</a>'),
                 array("name"=>"default_style","value"=>""),
                 array("name"=>"track_stock","value"=>""),
                 array("name"=>"checkout_login","value"=>""),
                 array("name"=>"tips","value"=>""),
+                array("name"=>"payment_creditcard","value"=>"on"),
                 array("name"=>"payment_cash","value"=>""),
                 array("name"=>"payment_cash_delivery","value"=>""),
                 array("name"=>"scp","value"=>""),
@@ -760,6 +959,7 @@ class moo_OnlineOrders_Admin {
             if(!isset($MooOptions[$default_option["name"]]))
                 $MooOptions[$default_option["name"]]=$default_option["value"];
         }
+
         //Force options
         $MooOptions["save_cards"] = "disabled";
         update_option("moo_settings",$MooOptions);
@@ -769,40 +969,30 @@ class moo_OnlineOrders_Admin {
         $merchant_proprites = (json_decode($api->getMerchantProprietes())) ;
         $current_hours = $api->getOpeningHours() ;
 
-        if($MooOptions['store_page']=="")
-        {
+        if($MooOptions['store_page'] == "") {
 
                 echo '<div class="update-nag">Hello, please select the store page from settings then click save</div>';
 
-        }
-        else
-        {
+        } else {
             if(get_post_status( $MooOptions['store_page'] ) === false )
                 echo '<div class="update-nag">Hello, please verify if the store page is published</div>';
 
-            if( $MooOptions['cart_page'] == "")
-            {
+            if( $MooOptions['cart_page'] == "") {
                     echo '<div class="update-nag">Hello, please select the cart page from settings then click save</div>';
-            }
-            else
-            {
+            } else {
                 if(get_post_status( $MooOptions['cart_page'] )=== false )
                     echo '<div class="update-nag">Hello, please verify if the cart page is published</div>';
 
-                if( $MooOptions['checkout_page'] == "")
-                {
+                if( $MooOptions['checkout_page'] == "") {
                         echo '<div class="update-nag">Hello, please select the checkout page from settings then click save</div>';
-                }
-                else
-                {
+                } else {
                     if(get_post_status( $MooOptions['checkout_page'] )=== false )
                         echo '<div class="update-nag">Hello, please verify if the checkout page is published</div>';
                 }
             }
         }
 
-        if($token != '')
-        {
+        if($token != '') {
             $result = $api->checkToken();
             if($result == 'Forbidden') $errorToken="( Token invalid )";
             else
@@ -812,23 +1002,19 @@ class moo_OnlineOrders_Admin {
                     $merchant_website = $MooOptions['store_page'];
                     $api->updateWebsiteHooks(esc_url(admin_url('admin-post.php')));
                   //  $api->updateWebsite(esc_url(get_permalink($merchant_website)));
-
                     $errorToken = "( Token valid )";
-                }
-                else
-                {
+                } else {
                     $errorToken="( Token expired )";
                     $checkIp = $api->checkIpBlackListed();
-                    if($checkIp != false)
-                    {
-                        echo '<div class="update-nag">'.$checkIp.'</div>';
+                    if($checkIp != false) {
+                        echo '<div class="update-nag">Please re-install the app smart online order on your Clover account, if you have already did that please open it from the Clover App Market to refresh your key</div>';
                     }
                 }
 
             }
-        }
-        else
+        } else {
             $errorToken="( Required )";
+        }
 
         $modifier_groups = $model->getAllModifiersGroup();
         $all_categories  = $model->getCategories();
@@ -837,6 +1023,18 @@ class moo_OnlineOrders_Admin {
         $merchant_address =  $api->getMerchantAddress();
         wp_enqueue_script('moo-google-map');
         wp_enqueue_script('moo-map-da',array('jquery','moo-google-map'));
+
+        // Not localize empty params
+        $localizeParams = array(
+            "lat","lng"
+        );
+        foreach($MooOptions as $key=>$value) {
+            if (in_array($key,$localizeParams)) {
+                if ($value == "") {
+                    $MooOptions[$key] = null;
+                }
+            }
+        }
         wp_localize_script("moo-map-da", "moo_merchantAddress",urlencode($merchant_address));
         wp_localize_script("moo-map-da", "moo_merchantLat",$MooOptions['lat']);
         wp_localize_script("moo-map-da", "moo_merchantLng",$MooOptions['lng']);
@@ -852,19 +1050,22 @@ class moo_OnlineOrders_Admin {
             <div id="MooPanel_sidebar">
                 <div id="Moopanel_logo">
                     <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/woo_100x100.png";?>" alt=""/>
-                    <p>Merchantech Online orders for Clover</p>
-                    <p style="margin-bottom: 20px">Smart Online Order</p>
+                    <p>Smart Online Order for Clover</p>
+                    <p style="margin-bottom: 20px">by Zaytech</p>
                 </div>
                 <ul>
                     <li class="MooPanel_Selected" id="MooPanel_tab1" onclick="tab_clicked(1)">Key settings</li>
                     <li id="MooPanel_tab2" onclick="tab_clicked(2)">Import inventory</li>
                     <li id="MooPanel_tab3" onclick="tab_clicked(3)">Orders Types</li>
-                    <li id="MooPanel_tab4" onclick="tab_clicked(4)">Store interface</li>
+<!--                    <li id="MooPanel_tab4" onclick="tab_clicked(4)">Store interface</li>-->
                     <li id="MooPanel_tab5" onclick="tab_clicked(5)">Categories & Items</li>
                     <li id="MooPanel_tab6" onclick="tab_clicked(6)">Modifier groups & Modifiers</li>
                     <li id="MooPanel_tab7" onclick="tab_clicked(7)">Checkout settings</li>
                     <li id="MooPanel_tab8" onclick="tab_clicked(8)">Store settings</li>
                     <li id="MooPanel_tab9" onclick="tab_clicked(9)">Delivery areas & fees</li>
+                    <li><a href="<?php echo admin_url()?>admin.php?page=moo_themes">Store Interfaces <i class="fas fa-external-link-square-alt"></i></a></li>
+                    <li><a href="<?php echo admin_url()?>admin.php?page=moo_items">Items / Images / Description <i class="fas fa-external-link-square-alt"></i></a></li>
+                    <li><a href="<?php echo admin_url()?>admin.php?page=moo_coupons">Coupons <i class="fas fa-external-link-square-alt"></i></a></li>
                     <li id="MooPanel_tab10" onclick="tab_clicked(10)">Feedback / Help</li>
                     <li id="MooPanel_tab11" onclick="tab_clicked(11)">FAQ</li>
                 </ul>
@@ -881,17 +1082,21 @@ class moo_OnlineOrders_Admin {
                         <li class="MooPanel_Selected" id="MooPanel_tab_1" onclick="tab_clicked(1)">Key settings</li>
                         <li id="MooPanel_tab_2" onclick="tab_clicked(2)">Import inventory</li>
                         <li id="MooPanel_tab_3" onclick="tab_clicked(3)">Orders Types</li>
-                        <li id="MooPanel_tab_4" onclick="tab_clicked(4)">Store interface</li>
+<!--                        <li id="MooPanel_tab_4" onclick="tab_clicked(4)">Store interface</li>-->
                         <li id="MooPanel_tab_5" onclick="tab_clicked(5)">Categories & Items</li>
                         <li id="MooPanel_tab_6" onclick="tab_clicked(6)">Modifier groups & Modifiers</li>
                         <li id="MooPanel_tab_7" onclick="tab_clicked(7)">Checkout settings</li>
                         <li id="MooPanel_tab_8" onclick="tab_clicked(8)">Store settings</li>
                         <li id="MooPanel_tab_9" onclick="tab_clicked(9)">Delivery areas & fees</li>
+                        <li><a href="<?php echo admin_url()?>admin.php?page=moo_themes">Store Interfaces <i class="fas fa-external-link-square-alt"></i></a></li>
+                        <li><a href="<?php echo admin_url()?>admin.php?page=moo_items">Items / Images / Description <i class="fas fa-external-link-square-alt"></i></a></li>
+                        <li><a href="<?php echo admin_url()?>admin.php?page=moo_coupons">Coupons <i class="fas fa-external-link-square-alt"></i></a></li>
                         <li id="MooPanel_tab_10" onclick="tab_clicked(10)">Feedback/Help</li>
                         <li id="MooPanel_tab_11" onclick="tab_clicked(11)">FAQ</li>
                     </ul>
                 </div>
-                <?php if( $errorToken != "( Token valid )" ) { ?>
+                <?php
+                if( $errorToken != "( Token valid )" ) { ?>
                     <form method="post" action="options.php">
                         <?php
                         settings_fields('moo_settings');
@@ -926,16 +1131,18 @@ class moo_OnlineOrders_Admin {
                     </form>
                     <?php
 
-                } else
-                    if( $MooOptions['lng'] == "" || $MooOptions['lat'] == "")
-                    {
+                }
+                else
+                    if( $MooOptions['lng'] == "" || $MooOptions['lat'] == ""){
                         $this->moo_update_address();
-                    }
-                    else
-                        if(isset($_GET['moo_section']) && $_GET['moo_section']=='update_address')
+                    } else {
+
+                        if(isset($_GET['moo_section']) && $_GET['moo_section']=='update_address') {
                             $this->moo_update_address();
-                        else
-                        {
+                        } else {
+                            if(isset($_GET['moo_section']) && $_GET['moo_section']=='update_token') {
+                                $this->moo_update_token();
+                            } else {
                             ?>
                             <!-- My store -->
                             <div id="MooPanel_tabContent1">
@@ -958,8 +1165,20 @@ class moo_OnlineOrders_Admin {
                                         </p>
                                     </div>
                                 </div>
+                                <div class="MooRow">
+                                    <div class="MooRowSection" style="text-align: center">
+                                        <h3>Need help on what to do next ?</h3>
+                                        <p>
+                                            We have video tutorials. Simply go to youtube.com and search for Smart Online Order
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                        <?php } ?>
+                        <?php
+                            }
+                        }
+                    }
+                        ?>
                 <!-- Import Items -->
                 <div id="MooPanel_tabContent2">
                     <h2>Import inventory (Scroll Down for more options)</h2><hr>
@@ -1005,6 +1224,7 @@ class moo_OnlineOrders_Admin {
                                    style="margin-left: 30px;" >Update all Items</a>
                                 <a href="#" onclick="MooPanel_UpdateCategories(event)" class="button button-secondary">Update Categories</a>
                                 <a href="#" onclick="MooPanel_UpdateModifiers(event)" class="button button-secondary">Update Modifiers</a>
+                                <a href="#" onclick="MooPanel_UpdateTaxes(event)" class="button button-secondary">Update Taxes</a>
                             </div>
 
                         </div>
@@ -1668,12 +1888,14 @@ class moo_OnlineOrders_Admin {
                         $MooOptions = (array)get_option('moo_settings');
                         settings_fields('moo_settings');
                         $fields = array(
+                            'payment_creditcard',
                             'payment_cash',
                             'payment_cash_delivery',
                             'scp',
                             'thanks_page',
                             'fb_appid',
                             'use_coupons',
+                            'use_sms_verification',
                             'use_special_instructions',
                             'checkout_login',
                             'save_cards',
@@ -1684,11 +1906,14 @@ class moo_OnlineOrders_Admin {
                             'tips');
 
                         foreach ($MooOptions as $option_name=>$option_value)
-                            if(!in_array($option_name,$fields))
-                                if($option_name=="custom_js" || $option_name =="custom_css" || $option_name == "copyrights"|| $option_name == "zones_json")
+                            if(!in_array($option_name,$fields)){
+                                if($option_name=="custom_js" || $option_name =="custom_css" || $option_name == "copyrights"|| $option_name == "zones_json") {
                                     echo '<textarea name="moo_settings['.$option_name.']" id="" cols="10" rows="10" style="display:none">'.$option_value.'</textarea>';
-                                else
+                                } else {
                                     echo '<input type="text"  name="moo_settings['.$option_name.']" value="'.$option_value.'" hidden/>';
+                                }
+                            }
+
 
                         ?>
                         <!-- Checkout login Section -->
@@ -1768,10 +1993,29 @@ class moo_OnlineOrders_Admin {
                         <!-- Additional payment options section -->
                         <div class="MooPanelItem">
                             <h3>Payment options</h3>
-                            <!-- Desktop version -->
                             <div class="Moo_option-item">
-                                <div style="margin-bottom: 14px;" class="label">Pay in Store</div>
-                                <div class="moo-onoffswitch"  title="Pay in Store">
+                                <div class="normal_text">
+                                    You must enable at least one payment option. You can choose  Pay Online, Pay at location, Pay Upon Delivery, or all three. Hint : Don't forget to press "save changes"
+                                </div>
+                            </div>
+                            <div class="Moo_option-item">
+                                <div style="margin-bottom: 14px;" class="label">Pay Online</div>
+                                <div class="moo-onoffswitch"  title="Pay Online">
+                                    <input type="hidden" name="moo_settings[payment_creditcard]" value="off">
+                                    <input type="checkbox" name="moo_settings[payment_creditcard]" class="moo-onoffswitch-checkbox" id="myonoffswitch_payment_creditcard" <?php echo (isset($MooOptions['payment_creditcard']) && $MooOptions['payment_creditcard'] == 'on')?'checked':''?>>
+                                    <label class="moo-onoffswitch-label" for="myonoffswitch_payment_creditcard"><span class="moo-onoffswitch-inner"></span>
+                                        <span class="moo-onoffswitch-switch"></span>
+                                    </label>
+                                </div>
+                                <span id="moo_info_msg-0" class="moo-info-msg"
+                                      data-ot="Allow customer to pay online"
+                                      data-ot-target="#moo_info_msg-0">
+                                    <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                </span>
+                            </div>
+                            <div class="Moo_option-item">
+                                <div style="margin-bottom: 14px;" class="label">Pay at location</div>
+                                <div class="moo-onoffswitch"  title="Pay at location">
                                     <input type="hidden" name="moo_settings[payment_cash]" value="off">
                                     <input type="checkbox" name="moo_settings[payment_cash]" class="moo-onoffswitch-checkbox" id="myonoffswitch_payment_cash" <?php echo (isset($MooOptions['payment_cash']) && $MooOptions['payment_cash'] == 'on')?'checked':''?>>
                                     <label class="moo-onoffswitch-label" for="myonoffswitch_payment_cash"><span class="moo-onoffswitch-inner"></span>
@@ -1794,13 +2038,13 @@ class moo_OnlineOrders_Admin {
                                     </label>
                                 </div>
                                 <span id="moo_info_msg-1" class="moo-info-msg"
-                                      data-ot="Allow customer to order online and then pay upon delivery"
+                                      data-ot="Allow customer to order online and then pay upon delivery, If you are not offering delivery Orders then this setting won't affect you"
                                       data-ot-target="#moo_info_msg-1">
                                     <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
                                 </span>
                             </div>
                             <div class="Moo_option-item">
-                                <div style="margin-bottom: 14px;" class="label">Secure checkout page</div>
+                                <div style="margin-bottom: 14px;" class="label">Use Smart Online Order Checkout page</div>
                                 <div class="moo-onoffswitch"  title="Secure checkout page">
                                     <input type="hidden" name="moo_settings[scp]" value="off">
                                     <input type="checkbox" name="moo_settings[scp]" class="moo-onoffswitch-checkbox" id="myonoffswitch_scp" <?php echo (isset($MooOptions['scp']) && $MooOptions['scp'] == 'on')?'checked':''?>>
@@ -1886,6 +2130,32 @@ class moo_OnlineOrders_Admin {
                                     </div>
                                 </div>
                             <?php } ?>
+                        </div>
+                        <!-- SMS verification section -->
+                        <div class="MooPanelItem">
+                            <h3>Verify with SMS</h3>
+                                <div class="Moo_option-item" >
+                                    <div class="normal_text">
+                                        Require customers to verify their phone number with text message when not paying with credit card in advance
+                                    </div>
+                                </div>
+                                <div class="Moo_option-item">
+                                    <div style="float:left; width: 100%;padding-left: 60px;">
+                                        <label style="display:block; margin-bottom:8px;">
+                                            <input name="moo_settings[use_sms_verification]" id="MooSMSVerification" type="radio" value="enabled" <?php echo ($MooOptions["use_sms_verification"]=="enabled")?"checked":""; ?> >
+                                            Enabled
+                                        </label>
+                                        <label style="display:block; margin-bottom:8px;">
+                                            <input name="moo_settings[use_sms_verification]" id="MooSMSVerification" type="radio" value="disabled" <?php echo ($MooOptions["use_sms_verification"]!="enabled")?"checked":""; ?> >
+                                            Disabled
+                                            <span id="moo_info_msg_MooSMSVerification" class="moo-info-msg"
+                                                  data-ot="Not recommended as you may get orders where customers may not show up - By disabling you are increasing the risk of no-shows"
+                                                  data-ot-target="#moo_info_msg_MooSMSVerification">
+                                                <img src="<?php echo plugin_dir_url(dirname(__FILE__))."public/img/info-icon.png" ?>" alt="">
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
                         </div>
                         <!-- Special Instruction -->
                         <div class="MooPanelItem">
@@ -2221,6 +2491,11 @@ class moo_OnlineOrders_Admin {
                         <div class="MooPanelItem">
                             <h3>Custom CSS</h3>
                             <div class="Moo_option-item">
+                                <div class="normal_text">
+                                    Visit <a href="http://docs.smartonlineorder.com">docs.smartonlineorder.com</a> for some sample code
+                                </div>
+                            </div>
+                            <div class="Moo_option-item">
                                 <textarea name="moo_settings[custom_css]" id="" cols="10" rows="10" style="width: 100%"><?php echo (isset($MooOptions['custom_css']))?$MooOptions['custom_css']:"";?></textarea>
                             </div>
                         </div>
@@ -2412,7 +2687,7 @@ class moo_OnlineOrders_Admin {
                     <div class="MooPanelItem">
                         <h3>Need Help or Feedback</h3>
                         <div class="normal_text">
-                            Do you need help or would like to give us feedback.<br/>Please e-mail or call us: 925-234-5554 (8am-8pm pacific time).<br/>
+                            Do you need help or would like to give us feedback.<br/>Please e-mail or call us: 925-234-5554 (8am-6pm pacific time).<br/>
                             You can also visit our support site at <a href="http://docs.smartonlineorder.com/docs/online-orders/" target="_blank">http://docs.smartonlineorder.com</a>
                         </div>
                         <div class="Moo_option-item">
@@ -2497,7 +2772,7 @@ class moo_OnlineOrders_Admin {
                                 </div>
                                 <div class="faq_response">
                                     Yes, we can, please email or call us:<br/>
-                                    support@merchantech.us<br/>
+                                    support@zaytechapps.com<br/>
                                     925-234-5554
                                 </div>
                                 <div class="faq_question">
@@ -2562,7 +2837,7 @@ class moo_OnlineOrders_Admin {
                                     Order plugin, select Clover orders, settings, store settings, enable schedule orders.
                                 </div>
                                 <div class="faq_question">
-                                    I don’t’ want to accept “pay in store” orders, how do I change that?
+                                    I don’t’ want to accept “pay at location” orders, how do I change that?
                                 </div>
                                 <div class="faq_response">
                                     Login to your website, then go to clover orders, settings, checkout settings
@@ -2613,7 +2888,7 @@ class moo_OnlineOrders_Admin {
                                     I still have questions?
                                 </div>
                                 <div class="faq_response">
-                                    Please e-mail support@merchantechapps.com or call 925-234- 5554
+                                    Please e-mail support@zaytechapps.com or call 925-234- 5554
                                 </div>
 
                             </div>
@@ -2630,7 +2905,8 @@ class moo_OnlineOrders_Admin {
         $icon_url =  plugin_dir_url(dirname(__FILE__))."public/img/ic_launcher2.png";
         add_menu_page('Settings page', 'Clover Orders', 'manage_options', 'moo_index', array($this, 'panel_settings'),$icon_url);
         add_submenu_page('moo_index', 'Settings', 'Settings', 'manage_options', 'moo_index', array($this, 'panel_settings'));
-        add_submenu_page('moo_index', 'Items/Images', 'Items / Images', 'manage_options', 'moo_items', array($this, 'page_products'));
+        add_submenu_page('moo_index', 'Themes', 'Store Interfaces', 'manage_options', 'moo_themes', array($this, 'page_themes'));
+        add_submenu_page('moo_index', 'Items/Images', 'Items / Images / Description', 'manage_options', 'moo_items', array($this, 'page_products'));
         add_submenu_page('moo_index', 'Orders', 'Orders', 'manage_options', 'moo_orders', array($this, 'page_orders'));
         add_submenu_page('moo_index', 'Coupons', 'Coupons', 'manage_options', 'moo_coupons', array($this, 'page_coupons'));
         add_submenu_page('moo_index', 'Reports', 'Reports', 'manage_options', 'moo_reports', array($this, 'page_reports'));
@@ -2653,24 +2929,30 @@ class moo_OnlineOrders_Admin {
             'parent'  => 'Clover_Orders',
         );
         $args3 = array(
+            'id'    => 'Clover_Orders_themes',
+            'title' => 'Store Interfaces',
+            'href'  => admin_url().'admin.php?page=moo_themes',
+            'parent'  => 'Clover_Orders',
+        );
+        $args4 = array(
             'id'    => 'Clover_Orders_orders',
             'title' => 'Orders',
             'href'  => admin_url().'admin.php?page=moo_orders',
             'parent'  => 'Clover_Orders',
         );
-        $args4 = array(
+        $args5 = array(
             'id'    => 'Clover_Orders_items',
-            'title' => 'Items / Images',
+            'title' => 'Items / Images / Description',
             'href'  => admin_url().'admin.php?page=moo_items',
             'parent'  => 'Clover_Orders',
         );
-        $args5 = array(
+        $args6 = array(
             'id'    => 'Clover_Orders_coupons',
             'title' => 'Coupons',
             'href'  => admin_url().'admin.php?page=moo_coupons',
             'parent'  => 'Clover_Orders',
         );
-        $args6 = array(
+        $args7 = array(
             'id'    => 'Clover_Orders_reports',
             'title' => 'Reports',
             'href'  => admin_url().'admin.php?page=moo_reports',
@@ -2682,6 +2964,7 @@ class moo_OnlineOrders_Admin {
         $wp_admin_bar->add_node( $args4 );
         $wp_admin_bar->add_node( $args5 );
         $wp_admin_bar->add_node( $args6 );
+        $wp_admin_bar->add_node( $args7 );
     }
     /**
      * Register the options.
@@ -2752,10 +3035,15 @@ class moo_OnlineOrders_Admin {
         wp_enqueue_style( 'moo-OnlineOrders-admin-css', plugin_dir_url( __FILE__ ).'css/moo-OnlineOrders-admin.css', array(), $this->version, 'all');
         wp_enqueue_style( 'moo-OnlineOrders-admin-small-devices-css', plugin_dir_url( __FILE__ ).'css/moo-OnlineOrders-admin-small-devices.css', array(), $this->version, 'only screen and (max-device-width: 1200px)');
 
+        wp_enqueue_style( 'moo-OnlineOrders-dashboard-css', plugin_dir_url( __FILE__ ).'css/moo-dashboard.css', array(), $this->version,'all');
+
         wp_enqueue_style('moo-tooltip-css',   plugin_dir_url( __FILE__ )."css/tooltip.css", array(), $this->version, 'all');
 
         wp_register_style( 'magnific-popup', plugin_dir_url(dirname(__FILE__))."public/css/magnific-popup.min.css" );
         wp_enqueue_style( 'magnific-popup');
+
+        wp_register_style( 'font-awesome-dash', plugin_dir_url(dirname(__FILE__))."public/css/font-awesome.css" );
+        wp_enqueue_style( 'font-awesome-dash' );
 
         wp_register_style( 'moo-introjs-css',plugin_dir_url(__FILE__)."css/introjs.min.css",array(), $this->version);
         wp_enqueue_style( 'moo-introjs-css' );
@@ -2803,7 +3091,9 @@ class moo_OnlineOrders_Admin {
          */
         $params = array(
             'ajaxurl' => admin_url( 'admin-ajax.php', isset( $_SERVER['HTTPS'] ) ? 'https://' : 'http://' ),
-            'plugin_url'=>plugin_dir_url(dirname(__FILE__))
+            'plugin_url'=>plugin_dir_url(dirname(__FILE__)),
+            'plugin_img'=>plugins_url( '/img', __FILE__ ),
+            'nonce' => wp_create_nonce( 'wp_rest' )
         );
 
         wp_enqueue_script('jquery');
@@ -2823,6 +3113,7 @@ class moo_OnlineOrders_Admin {
         wp_register_script('moo-google-map', 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc&libraries=drawing&geometry');
 
         wp_register_script('moo-publicAdmin-js', plugins_url( 'js/moo-OnlineOrders-admin.js', __FILE__ ),array('moo-google-map'), $this->version);
+        wp_register_script('moo-AdminDashboard-js', plugins_url( 'js/moo-dashboard.js', __FILE__ ),array('jquery'), $this->version);
         wp_register_script('moo-tooltip-js', plugins_url( 'js/tooltip.min.js', __FILE__ ),array(), $this->version);
         wp_register_script('progressbar-js', plugins_url( 'js/progressbar.min.js', __FILE__ ));
 
@@ -2843,8 +3134,10 @@ class moo_OnlineOrders_Admin {
         wp_enqueue_script("moo-tooltip-js",array('jquery'));
 
         wp_enqueue_script('moo-publicAdmin-js',array('jquery','wp-color-picker','jquery-ui-datepicker','jquery-ui-sortable'));
+        wp_enqueue_script('moo-AdminDashboard-js');
 
         wp_localize_script("moo-publicAdmin-js", "moo_params",$params);
+        wp_localize_script("moo-AdminDashboard-js", "moo_params",$params);
         wp_localize_script("moo-publicAdmin-js", "moo_RestUrl",get_rest_url());
 
     }
@@ -2857,6 +3150,20 @@ class moo_OnlineOrders_Admin {
         $merchant_address = $api->getMerchantAddress();
         wp_enqueue_script('moo-google-map');
         wp_enqueue_script('moo-map-js',array('jquery','moo-google-map'));
+
+        // Not localize empty params
+        $localizeParams = array(
+            "lat","lng"
+        );
+        foreach($MooOptions as $key=>$value) {
+            if (in_array($key,$localizeParams)) {
+                if ($value == "") {
+                    $MooOptions[$key] = null;
+                }
+            }
+        }
+        if($merchant_address=='')
+            $merchant_address = ' ';
         wp_localize_script("moo-map-js", "moo_merchantAddress",urlencode($merchant_address));
         wp_localize_script("moo-map-js", "moo_merchantLat",$MooOptions['lat']);
         wp_localize_script("moo-map-js", "moo_merchantLng",$MooOptions['lng']);
@@ -2877,9 +3184,9 @@ class moo_OnlineOrders_Admin {
             ?>
             <input type="hidden" name="_wp_http_referer" value="<?php echo (esc_url((admin_url('admin.php?page=moo_index')))); ?>" />
             <div id="MooPanel_tabContent1">
-                <h2>Set-up your address</h2><hr>
+                <h2>Setup your address</h2><hr>
                 <div class="MooPanelItem">
-                    <h3>Please save your address. or change your address</h3>
+                    <h3>Please verify your address</h3>
                     <div class="Moo_option-item" style="padding-top: 0px;margin-top: -15px;">
                         <div class="normal_text">If the address is incorrect, please go to Clover.com and make changes. You can also move the red pointer over to the correct location</div>
                         <div class="normal_text">Your current address is : </div>
@@ -2898,6 +3205,25 @@ class moo_OnlineOrders_Admin {
             </div>
 
         </form>
+        <?php
+    }
+    public function moo_update_token()
+    {
+        $MooOptions = (array)get_option('moo_settings');
+        $api   = new  moo_OnlineOrders_CallAPI();
+
+    ?>
+            <div id="MooPanel_tabContent1">
+                <h2>Change your api key</h2><hr>
+                <div class="MooPanelItem">
+                    <div class="Moo_option-item" style="padding-top: 0px;margin-top: -15px;">
+                        <div class="normal_text">By Changing your api key, you will remove all your data (items,orders, categories..), use this feature only if you have a new Clover station</div>
+                    </div>
+                    <div class="Moo_option-item">
+                        <h1>Soon</h1>
+                    </div>
+                </div>
+            </div>
         <?php
     }
     public function detail_category()
@@ -2989,6 +3315,8 @@ class moo_OnlineOrders_Admin {
                 <?php
                 $this->moo_getItemsByCategory($category->uuid,$category->items);
                 ?>
+                <p>You didn't find all items, please click <a href="#" onclick="mooImportOneCategory('<?php echo $category->uuid; ?>')">here</a> to sync this category with your Clover account</p>
+
             </div>
             <?php $i++; } ?>
         <?php

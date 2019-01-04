@@ -240,7 +240,7 @@ class Moo_OnlineOrders_Shortcodes {
      * This ShortCode display the store using the first style
      * @since    1.0.0
      */
-    public static function AllItemsAcordion($atts, $content)
+    public static function AllItemsAcordion($atts, $content,$custom_css)
     {
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-Model.php";
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-CallAPI.php";
@@ -254,6 +254,7 @@ class Moo_OnlineOrders_Shortcodes {
         wp_enqueue_script( 'custom-script-accordion');
         wp_enqueue_script( 'jquery-accordion',array( 'jquery' ));
         wp_enqueue_script( 'simple-modal',array( 'jquery' ));
+        wp_add_inline_style( "custom-style-accordion", $custom_css );
 
         $MooOptions = (array)get_option('moo_settings');
 
@@ -300,15 +301,15 @@ class Moo_OnlineOrders_Shortcodes {
                         array_push($categories,(object)array("name"=>'All Items',"uuid"=>'NoCategory'));
                     }
                     foreach ($categories as $category ){
-                        if(isset($atts['category']) && $atts['category']!="")
-                        {
-                            if($category->uuid != $atts['category'] ) continue;
-                        }
-                        else
+                        if(isset($atts['category']) && $atts['category']!="") {
+                            if(strtoupper($category->uuid) != strtoupper($atts['category']) ) continue;
+                        } else{
                             if(isset($_GET['category']) && $_GET['category']!="")
                             {
-                                if($category->uuid != $_GET['category'] ) continue;
+                                if(strtoupper($category->uuid) != strtoupper($_GET['category']) ) continue;
                             }
+                        }
+
 
                         if($category->uuid == 'NoCategory')
                         {
@@ -552,7 +553,7 @@ class Moo_OnlineOrders_Shortcodes {
         //This function deleted in version 1.2.5 because it was used with the ols interface
     }
     /*
-     * The checkoutPage shortcode implemnation
+     * The checkoutPage shortcode implemenation
      */
     public static function checkoutPage($atts, $content)
     {
@@ -580,13 +581,13 @@ class Moo_OnlineOrders_Shortcodes {
 
         if($MooOptions['scp'] == "on")
         {
-            $key = array();
+            $cloverKey = array();
         }
         else
         {
-            $key = $api->getPayKey();
-            $key = json_decode($key);
-            if($key == NULL)
+            $cloverKey = $api->getPayKey();
+            $cloverKey = json_decode($cloverKey);
+            if($cloverKey == NULL)
             {
                 echo '<div id="moo_checkout_msg">This store cannot accept orders, if you are the owner please verify your API Key</div>';
                 return ob_get_clean();
@@ -606,18 +607,16 @@ class Moo_OnlineOrders_Shortcodes {
             $coupon = $_SESSION['coupon'];
             if($coupon['minAmount']>$total['sub_total'])
                 $coupon = null;
-        }
-        else
+        } else {
             $coupon = null;
-
-
-        //Include spreedly
+        }
 
 
 
         //Include custom css
         if($custom_css != null)
-           echo '<style type="text/css">'.$custom_css.'</style>';
+            wp_add_inline_style( "custom-style-cart3", $custom_css );
+
 
         if($total === false || !isset($total['nb_items']) || $total['nb_items'] < 1){
 
@@ -710,6 +709,7 @@ class Moo_OnlineOrders_Shortcodes {
                 array_unshift($oppening_status->pickup_time->Today,'Select a time');
 
         }
+
         if(isset($oppening_status_d->pickup_time))
         {
             if(isset($MooOptions['order_later_asap_for_d']) && $MooOptions['order_later_asap_for_d'] == 'on')
@@ -736,13 +736,27 @@ class Moo_OnlineOrders_Shortcodes {
         $cart_page_url    =  get_page_link($cart_page_id);
         $checkout_page_url    =  get_page_link($checkout_page_id);
 
-
+        // Not localize empty params
+        // localize params
+        $localizeParams = array(
+                "thanks_page","payment_cash_delivery","payment_cash","payment_creditcard","lat","lng","zones_json",
+                "other_zones_delivery","free_delivery","fixed_delivery","fb_appid","scp","checkout_login",
+                "save_cards","save_cards_fees",'use_sms_verification'
+        );
+        foreach($MooOptions as $key=>$value) {
+            if (in_array($key,$localizeParams)) {
+                if ($value == "") {
+                    $MooOptions[$key] = null;
+                }
+            }
+        }
         wp_localize_script("custom-script-checkout", "moo_OrderTypes",$orderTypes);
         wp_localize_script("custom-script-checkout", "moo_Total",$total);
-        wp_localize_script("custom-script-checkout", "moo_Key",(array)$key);
+        wp_localize_script("custom-script-checkout", "moo_Key",(array)$cloverKey);
         wp_localize_script("custom-script-checkout", "moo_thanks_page",$MooOptions['thanks_page']);
         wp_localize_script("custom-script-checkout", "moo_cash_upon_delivery",$MooOptions['payment_cash_delivery']);
         wp_localize_script("custom-script-checkout", "moo_cash_in_store",$MooOptions['payment_cash']);
+        wp_localize_script("custom-script-checkout", "moo_pay_online",$MooOptions['payment_creditcard']);
         wp_localize_script("custom-script-checkout", "moo_pickup_time",$oppening_status->pickup_time);
         wp_localize_script("custom-script-checkout", "moo_pickup_time_for_delivery",$oppening_status_d->pickup_time);
         wp_localize_script("display-merchant-map", "moo_merchantLat",$MooOptions['lat']);
@@ -754,6 +768,7 @@ class Moo_OnlineOrders_Shortcodes {
         wp_localize_script("display-merchant-map", "moo_delivery_fixed_amount",$MooOptions['fixed_delivery']);
         wp_localize_script("display-merchant-map", "moo_fb_app_id",$MooOptions['fb_appid']);
         wp_localize_script("display-merchant-map", "moo_scp",$MooOptions['scp']);
+        wp_localize_script("display-merchant-map", "moo_use_sms_verification",$MooOptions['use_sms_verification']);
         wp_localize_script("display-merchant-map", "moo_checkout_login",$MooOptions['checkout_login']);
         wp_localize_script("display-merchant-map", "moo_save_cards",$MooOptions['save_cards']);
         wp_localize_script("display-merchant-map", "moo_save_cards_fees",$MooOptions['save_cards_fees']);
@@ -788,7 +803,7 @@ class Moo_OnlineOrders_Shortcodes {
                         </div>
                         <div class="moo-col-md-6">
                             <ul>
-                                <li>View your past orders (coming soon)</li>
+                                <li>View your past orders</li>
                                 <li>Get exclusive deals and coupons</li>
                             </ul>
                         </div>
@@ -882,7 +897,7 @@ class Moo_OnlineOrders_Shortcodes {
                                 <input type="password" class="moo-form-control" id="inputMooPassword">
                             </div>
                             <p>
-                                By clicking the button below you agree to our <a href="http://www.merchantechapps.com/pages/merchantech-eula" target="_blank">Terms Of Service</a>
+                                By clicking the button below you agree to our <a href="https://www.zaytechapps.com/zaytech-eula/" target="_blank">Terms Of Service</a>
                             </p>
                             <a class="moo-btn moo-btn-primary" onclick="moo_signin(event)">
                                Submit
@@ -923,6 +938,10 @@ class Moo_OnlineOrders_Shortcodes {
                         <div class="moo-form-group">
                             <label for="inputMooAddress">Address</label>
                             <input type="text" class="moo-form-control" id="inputMooAddress">
+                        </div>
+                        <div class="moo-form-group">
+                            <label for="inputMooAddress">Suite / Apt #</label>
+                            <input type="text" class="moo-form-control" id="inputMooAddress2">
                         </div>
                         <div class="moo-form-group">
                             <label for="inputMooCity">City</label>
@@ -970,19 +989,19 @@ class Moo_OnlineOrders_Shortcodes {
                                 <div id="moo-checkout-contact-form">
                                     <div class="moo-row">
                                         <div class="moo-form-group">
-                                            <label for="name" class="moo-checkoutText-fullName">Full Name:</label>
+                                            <label for="name" class="moo-checkoutText-fullName">Full Name:*</label>
                                             <input class="moo-form-control" name="name" id="MooContactName">
                                         </div>
                                     </div>
                                     <div class="moo-row">
                                         <div class="moo-form-group">
-                                            <label for="MooContactEmail" class="moo-checkoutText-email">Email</label>
+                                            <label for="MooContactEmail" class="moo-checkoutText-email">Email:*</label>
                                             <input class="moo-form-control" id="MooContactEmail">
                                         </div>
                                     </div>
                                     <div class="moo-row">
                                         <div class="moo-form-group">
-                                            <label for="MooContactPhone" class="moo-checkoutText-phoneNumber">Phone number:</label>
+                                            <label for="MooContactPhone" class="moo-checkoutText-phoneNumber">Phone number:*</label>
                                             <input class="moo-form-control" name="phone" id="MooContactPhone" onchange="moo_phone_changed()">
                                         </div>
                                     </div>
@@ -994,7 +1013,7 @@ class Moo_OnlineOrders_Shortcodes {
                         <?php if(count($orderTypes)>0){?>
                         <div id="moo-checkout-form-ordertypes">
                             <div class="moo-checkout-bloc-title moo-checkoutText-orderingMethod">
-                                ORDERING METHOD
+                                ORDERING METHOD*
                             </div>
                             <div class="moo-checkout-bloc-content">
                                 <?php
@@ -1011,7 +1030,7 @@ class Moo_OnlineOrders_Shortcodes {
                         <div class="moo_chekout_border_bottom"></div>
                         <?php  } ?>
                         <?php
-                        if(isset($MooOptions['order_later']) && $MooOptions['order_later'] == 'on' && count($oppening_status->pickup_time)>0){ ?>
+                        if(isset($MooOptions['order_later']) && $MooOptions['order_later'] == 'on' && @count($oppening_status->pickup_time)>0){ ?>
                         <div id="moo-checkout-form-orderdate">
                             <div class="moo-checkout-bloc-title moo-checkoutText-ChooseATime">
                                 CHOOSE A TIME
@@ -1056,20 +1075,22 @@ class Moo_OnlineOrders_Shortcodes {
         <?php } ?>
                         <div id="moo-checkout-form-payments">
                             <div class="moo-checkout-bloc-title moo-checkoutText-payment" >
-                                PAYMENT  <?php if($MooOptions['payment_cash'] == 'on' || $MooOptions['payment_cash_delivery'] == 'on'){ echo 'METHOD';}?>
+                                PAYMENT  <?php if($MooOptions['payment_cash'] == 'on' || $MooOptions['payment_cash_delivery'] == 'on'){ echo 'METHOD';}?>*
                             </div>
                             <div class="moo-checkout-bloc-content">
+
+                                <?php if($MooOptions['payment_creditcard'] == 'on'){ ?>
                                 <div class="moo-checkout-form-payments-option">
                                     <input class="moo-checkout-form-payments-input" type="radio" name="payments" value="creditcard" id="moo-checkout-form-payments-creditcard">
                                     <label for="moo-checkout-form-payments-creditcard" style="display: inline;margin-left:15px">Pay now with Credit Card</label>
                                 </div>
+                                <?php } ?>
                                 <?php if($MooOptions['payment_cash'] == 'on' || $MooOptions['payment_cash_delivery'] == 'on'){ ?>
                                 <div class="moo-checkout-form-payments-option">
                                    <input class="moo-checkout-form-payments-input" type="radio" name="payments" value="cash" id="moo-checkout-form-payments-cash">
                                    <label for="moo-checkout-form-payments-cash" style="display: inline;margin-left:15px" id="moo-checkout-form-payincash-label">Pay at Location</label>
                                </div>
-                                <?php }
-                                ?>
+                                <?php } ?>
                                 <?php if((!isset($MooOptions['scp']) || $MooOptions['scp'] != 'on')){ ?>
                                     <div id="moo_creditCardPanel">
                                             <div class="moo-row">
@@ -1121,21 +1142,21 @@ class Moo_OnlineOrders_Shortcodes {
                                                     </div>
                                                 </div>
                                             </div>
-<!--                                            <div class="moo-row">-->
-<!--                                                <div class="col-md-12">-->
-<!--                                                    <div class="moo-form-group">-->
-<!--                                                        <label for="moo_zipcode" class="moo-control-label moo-checkoutText-zipCode">ZIP Code</label>-->
-<!--                                                        <input class="moo-form-control" name="zipcode" id="moo_zipcode" placeholder="zip code">-->
-<!--                                                    </div>-->
-<!--                                                </div>-->
-<!--                                            </div>-->
+                                            <div class="moo-row">
+                                                <div class="moo-col-md-12">
+                                                    <div class="moo-form-group">
+                                                        <label for="moo_zipcode" class="moo-control-label moo-checkoutText-zipCode">Zip Code</label>
+                                                        <input class="moo-form-control" name="zipcode" id="moo_zipcode" placeholder="Zip code">
+                                                    </div>
+                                                </div>
+                                            </div>
                                     </div>
                                 <?php } ?>
                                 <?php if($MooOptions['payment_cash'] == 'on' || $MooOptions['payment_cash_delivery'] == 'on'){ ?>
                                     <div id="moo_cashPanel">
                                         <div class="moo-row"  id="moo_verifPhone_verified">
                                             <img src="<?php echo  plugin_dir_url(dirname(__FILE__))."public/img/check.png"?>" width="60px">
-                                            <p>Your phone number has been verified <br />Please have your payment ready when picking up from the store <br/>Please finalize your order below</p>
+                                            <p>Your phone number has been verified <br/>Please finalize your order below</p>
                                         </div>
                                         <div class="moo-row" id="moo_verifPhone_sending">
                                             <div class="moo-form-group moo-form-inline">
@@ -1466,9 +1487,284 @@ class Moo_OnlineOrders_Shortcodes {
     }
 
     /*
+     * The MyAccount shortcode implemenation
+     */
+    public static function moo_customer_account($atts, $content)
+    {
+        $MooOptions = (array)get_option('moo_settings');
+
+        //wp_enqueue_style( 'bootstrap-css' );
+        wp_enqueue_style( 'font-awesome' );
+        wp_enqueue_style( 'moo-myaccount' );
+        wp_enqueue_script( 'moo-google-map' );
+        wp_enqueue_script( 'custom-script-my-account');
+
+        ob_start();
+        $model = new moo_OnlineOrders_Model();
+        $api   = new moo_OnlineOrders_CallAPI();
+
+        $custom_css = $MooOptions["custom_css"];
+        $custom_js  = $MooOptions["custom_js"];
+
+
+        //Include custom css
+        wp_add_inline_style( "moo-myaccount", $custom_css );
+
+
+
+        $merchant_address =  $api->getMerchantAddress();
+        $store_page_id     = $MooOptions['store_page'];
+        $cart_page_id     = $MooOptions['cart_page'];
+        $checkout_page_id     = $MooOptions['checkout_page'];
+        $myAccount_page_id     = $MooOptions['my_account_page'];
+        $store_page_url    =  get_page_link($store_page_id);
+        $cart_page_url    =  get_page_link($cart_page_id);
+        $myAccount_page_url    =  get_page_link($myAccount_page_id);
+
+        // Not localize empty params
+        // localize params
+        $localizeParams = array(
+                "fb_appid","checkout_login"
+        );
+        foreach($MooOptions as $key=>$value) {
+            if (in_array($key,$localizeParams)) {
+
+                if ($value == "") {
+                    $MooOptions[$key] = null;
+                }
+            }
+        }
+        if(isset($_SESSION['moo_customer_token']) && $_SESSION['moo_customer_token']!="") {
+            wp_localize_script("custom-script-my-account", "moo_customer_logged","yes");
+        } else {
+            wp_localize_script("custom-script-my-account", "moo_customer_logged","no");
+        }
+        wp_localize_script("custom-script-my-account", "moo_fb_app_id",($MooOptions['fb_appid']));
+
+
+        if((isset($_GET['logout']) && $_GET['logout']==true))
+        {
+            unset($_SESSION['moo_customer_token']);
+            if(isset($myAccount_page_url))
+                wp_redirect ( $myAccount_page_url );
+        }
+
+        ?>
+
+        <div id="moo_OnlineStoreContainer">
+        <div class="moo-row" id="moo-my-account">
+                <!--            login               -->
+                <div id="moo-login-form" <?php if(isset($_SESSION['moo_customer_token']) && $_SESSION['moo_customer_token']!="") echo 'style="display:none;"'?> class="moo-col-md-12 ">
+                    <div class="moo-row login-top-section" style="display: none">
+                        <div class="login-header">
+                            Why create a  <a href="http://www.smartonlineorder.com" target="_blank" alt="Online ordering for Clover POS">Smart Online Order</a> account?
+                        </div>
+                        <div class="moo-col-md-6">
+                            <ul>
+                                <li>Save your address</li>
+                                <li>Faster Checkout!</li>
+                            </ul>
+                        </div>
+                        <div class="moo-col-md-6">
+                            <ul>
+                                <li>View your past orders</li>
+                                <li>Get exclusive deals and coupons</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="moo-col-md-6 moo-col-md-offset-3">
+                        <div class="moo-row login-section">
+                            <form action="post" onsubmit="moo_login(event)">
+                                <div class="form-group">
+                                    <label for="inputEmail">Email</label>
+                                    <input type="text" id="inputEmail" class="moo-form-control" autocomplete="username">
+                                </div>
+                                <div class="moo-form-group">
+
+                                    <label for="inputPassword">Password</label>
+                                    <input type="password"  id="inputPassword" class="moo-form-control" autocomplete="current-password">
+                                    <a class="pull-right" href="#" onclick="moo_show_forgotpasswordform(event)">Forgot password?</a>
+                                </div>
+                                <button id="mooButonLogin" class="moo-btn" onclick="moo_login(event)">
+                                    Log In
+                                </button>
+                                <p style="padding: 10px;"> Don't have an account<a  href="#" onclick="moo_show_sigupform(event)"> Sign-up</a> </p>
+                            </form>
+
+                        </div>
+                        <?php if(isset($MooOptions['fb_appid']) && $MooOptions['fb_appid']!=""){ ?>
+                        <div class="moo-row">
+                            <div class="moo-row login-social-section" >
+
+                                    <div class="moo-row">
+                                        <div class="moo-col-md-12">
+                                            <a href="#" class="moo-btn-facebook" onclick="moo_loginViaFacebook(event)" style="margin-top: 12px;">LOGIN WITH FACEBOOK</a>
+                                        </div>
+                                    </div>
+                            </div>
+                            <?php }?>
+                        </div>
+
+                    </div>
+                </div>
+                <!--            Register            -->
+                <div id="moo-signing-form" class="moo-col-md-12">
+                    <div class="moo-col-md-8 moo-col-md-offset-2">
+                        <form action="post" onsubmit="moo_signin(event)">
+                            <div class="moo-form-group">
+                                <label for="inputMooFullName">Full Name</label>
+                                <input type="text" class="moo-form-control" id="inputMooFullName" autocomplete="full-name">
+                            </div>
+
+                            <div class="moo-form-group">
+                                <label for="inputMooEmail">Email</label>
+                                <input type="text" class="moo-form-control" id="inputMooEmail" autocomplete="username">
+                            </div>
+                            <div class="moo-form-group">
+                                <label for="inputMooPhone">Phone</label>
+                                <input type="text" class="moo-form-control" id="inputMooPhone" autocomplete="phone">
+                            </div>
+                            <div class="moo-form-group">
+                                <label for="inputMooPassword">Password</label>
+                                <input type="password" class="moo-form-control" id="inputMooPassword" autocomplete="current-password">
+                            </div>
+                            <p>
+                                By clicking the button below you agree to our <a href="https://www.zaytechapps.com/zaytech-eula/" target="_blank">Terms Of Service</a>
+                            </p>
+                            <button class="moo-btn moo-btn-primary" onclick="moo_signin(event)">
+                                Submit
+                            </button>
+                            <p style="padding: 10px;"> Have an account already?<a  href="#" onclick="moo_show_loginform()"> Click here</a> </p>
+                        </form>
+
+                    </div>
+
+                </div>
+                <!--            Reset Password      -->
+                <div   id="moo-forgotpassword-form" class="moo-col-md-12">
+                    <div class="moo-col-md-8 moo-col-md-offset-2">
+                        <form action="post" onsubmit="moo_resetpassword(event)">
+                            <div class="moo-form-group">
+                                <label for="inputEmail4Reset">Email</label>
+                                <input type="text" class="moo-form-control" id="inputEmail4Reset" autocomplete="username">
+                            </div>
+                            <button class="moo-btn moo-btn-primary" onclick="moo_resetpassword(event)">
+                                Reset
+                            </button>
+                            <button class="moo-btn moo-btn-default" onclick="moo_show_loginform()">
+                                Cancel
+                            </button>
+                        </form>
+
+                    </div>
+                 </div>
+                <!--            customerPanel      -->
+                <div id="moo-customerPanel" <?php if(isset($_SESSION['moo_customer_token']) && $_SESSION['moo_customer_token']!="") echo 'style="display:block;"'?> class="moo-col-md-12">
+                    <div id="moo-customerPanelContent" class="moo-row">
+                           <div class="moo_cp_wrap moo-row">
+                               <div></div>
+                               <nav class="moo_cp_nav moo-col-md-2" id="moo_cp_nav">
+                                   <ul>
+                                       <li id="moo_nav_favorits" class="moo-col-xs-4 moo-col-md-12 moo_right_border_forNav moo_nav_cpanel" onclick="moo_my_account_myfavorits(event)">
+                                           <a href="#" >
+                                               <i class="far fa-heart"></i>
+                                               <span>Most Purchased</span>
+                                           </a>
+                                       </li>
+                                       <li id="moo_nav_orders" class="moo-col-xs-4 moo-col-md-12 moo_right_border_forNav moo_nav_cpanel" onclick="moo_my_account_myorders(event)">
+                                           <a href="#">
+                                               <i class="fab fa-buromobelexperte"></i>
+                                               <span>Previous Orders</span>
+                                           </a>
+                                       </li>
+                                       <li id="moo_nav_profil" class="moo-col-xs-4 moo-col-md-12 moo_right_border_forNav moo_nav_cpanel" onclick="moo_my_account_profil(event)">
+                                           <a href="#">
+                                               <i class="far fa-user"></i>
+                                               <span>My profile</span>
+                                           </a>
+                                       </li>
+                                       <li id="moo_nav_addresses" class="moo-col-xs-4 moo-col-md-12 moo_right_border_forNav moo_nav_cpanel" onclick="moo_my_account_addresses(event)">
+                                           <a href="#">
+                                               <i class="far fa-address-card"></i>
+                                               <span>My address</span>
+                                           </a>
+                                       </li>
+<!--                                       <li id="moo_nav_coupons" class="moo-col-xs-4 moo-col-md-12 moo_right_border_forNav moo_nav_cpanel" >-->
+<!--                                           <a href="#">-->
+<!--                                               <i class="far fa-money-bill-alt"></i>-->
+<!--                                               <span>My coupons</span>-->
+<!--                                           </a>-->
+<!--                                       </li>-->
+                                       <li class="moo-col-xs-4 moo-col-md-12 moo_right_border_forNav">
+                                           <a href="?logout=true">
+                                               <i class="far fa-window-close"></i>
+                                               <span>Logout</span>
+                                           </a>
+                                       </li>
+                                   </ul>
+                               </nav>
+                               <section class="moo_cp_content moo-col-md-10" id="moo_cp_content">
+                               </section>
+                           </div>
+                    </div>
+                </div>
+                <!--            Add new address      -->
+                <div id="moo-addaddress-form" class="moo-col-md-12">
+                    <h1>Add new Address to your account</h1>
+                    <div class="moo-col-md-8 moo-col-md-offset-2">
+                        <div class="moo-form-group">
+                            <label for="inputMooAddress">Address</label>
+                            <input type="text" class="moo-form-control" id="inputMooAddress">
+                        </div>
+                        <div class="moo-form-group">
+                            <label for="inputMooAddress">Suite / Apt #</label>
+                            <input type="text" class="moo-form-control" id="inputMooAddress2">
+                        </div>
+                        <div class="moo-form-group">
+                            <label for="inputMooCity">City</label>
+                            <input type="text" class="moo-form-control" id="inputMooCity">
+                        </div>
+                        <div class="moo-form-group">
+                            <label for="inputMooState">State</label>
+                            <input type="text" class="moo-form-control" id="inputMooState">
+                        </div>
+                        <div class="moo-form-group">
+                            <label for="inputMooZipcode">Zip code</label>
+                            <input type="text" class="moo-form-control" id="inputMooZipcode">
+                        </div>
+                        <p class="moo-centred">
+                            <a href="#" class="moo-btn moo-btn-warning" onclick="moo_ConfirmAddressOnMap(event)">Next</a>
+                        </p>
+                        <div id="MooMapAddingAddress">
+                            <p style="margin-top: 150px;">Loading the MAP...</p>
+                        </div>
+                        <input type="hidden" class="moo-form-control" id="inputMooLat">
+                        <input type="hidden" class="moo-form-control" id="inputMooLng">
+                        <div class="form-group">
+                             <a id="mooButonAddAddress" onclick="moo_addAddress(event)">
+                            Confirm and add address
+                        </a>
+                        </div>
+
+                        <p style="padding: 10px;">If you want to skip this step and add your address later <a  href="#" onclick="moo_pickup_the_order(event)" style="color:blue"> Click here</a> </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+        if($custom_js != null) {
+            echo '<script type="text/javascript">'.$custom_js.'</script>';
+        }
+        if(isset($_SESSION['moo_customer_token']) && $_SESSION['moo_customer_token']!="")
+            echo '<script type="text/javascript"> jQuery( document ).ready(function($) { moo_showCustomerPanel() });</script>';
+
+        return ob_get_clean();
+    }
+
+    /*
      * The store interface 2
      */
-    public static function ItemsWithImages($atts,$content) {
+    public static function ItemsWithImages($atts,$content,$custom_css) {
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-Model.php";
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-CallAPI.php";
 
@@ -1485,6 +1781,8 @@ class Moo_OnlineOrders_Shortcodes {
 
         wp_enqueue_style ( 'custom-style-accordion' );
         wp_enqueue_style ( 'custom-style-items' );
+        wp_add_inline_style( "custom-style-items", $custom_css );
+
 
         $MooOptions = (array)get_option( 'moo_settings' );
         $cart_page_id  = $MooOptions['cart_page'];
@@ -1513,7 +1811,7 @@ class Moo_OnlineOrders_Shortcodes {
                 }
             }
 
-            if(count($items_tab)<=0)  echo '<div class="col-md-12">"No items available.</div>';
+            if(@count($items_tab)<=0)  echo '<div class="col-md-12">"No items available.</div>';
             else
             {
                 $track_stock = $api->getTrackingStockStatus();
@@ -1985,16 +2283,15 @@ class Moo_OnlineOrders_Shortcodes {
         }
 
         $html_code  = '';
-        $style = $MooOptions["default_style"];
+        $theme_id = $MooOptions["default_style"];
         $custom_css = $MooOptions["custom_css"];
         $custom_js  = $MooOptions["custom_js"];
-        $website_width = intval($MooOptions[$style."_width"]);
+        $website_width = intval($MooOptions[$theme_id."_width"]);
+        if($website_width === 0)
+            $website_width = 1024;
 
-        //Include custom css
-        if($custom_css != null)
-            $html_code .= '<style type="text/css">'.$custom_css.'@media only screen and (min-width: 768px) {#moo_OnlineStoreContainer,.moo-shopping-cart-container {min-width: '.$website_width.'px;}}</style>';
-        else
-            $html_code .= '<style type="text/css">@media only screen and (min-width: 768px) {#moo_OnlineStoreContainer,.moo-shopping-cart-container {min-width: '.$website_width.'px;}}</style>';
+        $custom_css .= '@media only screen and (min-width: 768px) {#moo_OnlineStoreContainer,.moo-shopping-cart-container,.Moo_Copyright {min-width: '.$website_width.'px;}}';
+        $custom_css .= self::moo_render_customised_css_for_themes($theme_id);
 
         $html_code .=  $oppening_msg;
         $html_code .=  '<div id="moo_OnlineStoreContainer">';
@@ -2003,25 +2300,20 @@ class Moo_OnlineOrders_Shortcodes {
             if(isset($atts["interface"]) && $atts["interface"] === "si4") {
                 $html_code .= self::moo_store_style4($atts, $content);
             } else {
-                $html_code .= "Currently only the interface for can be loaded without js, please add the param interface='si4' to this shortcode" ;
+                $html_code .= "Currently only the store interface 4 can be loaded without js, please add the param interface='si4' to this shortcode" ;
             }
         } else {
-            if( $style == "style1" ) {
-                $html_code .= self::AllItemsAcordion($atts, $content);
+            if( $theme_id == "style1" ) {
+                $html_code .= self::AllItemsAcordion($atts, $content,$custom_css);
             } else {
-                if( $style == "style2" ) {
-                    $html_code .= self::moo_store_style3($atts, $content);
+                if( $theme_id == "style2" ) {
+                    $html_code .= self::moo_store_style3($atts, $content,$custom_css);
                 } else {
-                    if( $style == "style3" ) {
-                        $html_code .= self::ItemsWithImages($atts, $content);
+                    if( $theme_id == "style3" ) {
+                        $html_code .= self::ItemsWithImages($atts, $content,$custom_css);
                     } else {
-                        if($style == "style1") {
-                            $html_code .= self::AllItems($atts, $content);
-                        } else {
-                            $html_code .= self::moo_store_use_theme($atts, $content);
-                        }
+                            $html_code .= self::moo_store_use_theme($atts, $content,$custom_css);
                     }
-
                 }
             }
         }
@@ -2063,8 +2355,7 @@ class Moo_OnlineOrders_Shortcodes {
         $custom_css = $MooOptions["custom_css"];
         $custom_js  = $MooOptions["custom_js"];
         //Include custom css
-        if($custom_css != null)
-           echo '<style type="text/css">'.$custom_css.'</style>';
+        wp_add_inline_style( "custom-style-cart3", $custom_css );
 
         $total =   Moo_OnlineOrders_Public::moo_cart_getTotal(true);
 
@@ -2288,14 +2579,13 @@ class Moo_OnlineOrders_Shortcodes {
     {
         return $a->sort_order>$b->sort_order;
     }
-    public static function moo_store_style3($atts, $content)
+    public static function moo_store_style3($atts, $content,$custom_css)
     {
 
         wp_enqueue_style( 'font-awesome' );
-
-        //wp_enqueue_style( 'bootstrap-css' );
         wp_enqueue_style ( 'mooStyle-style3' );
         wp_enqueue_script( 'mooScript-style3' );
+        wp_add_inline_style( "mooStyle-style3", $custom_css );
 
 
         $MooOptions = (array)get_option( 'moo_settings' );
@@ -2337,7 +2627,6 @@ class Moo_OnlineOrders_Shortcodes {
         wp_enqueue_style( 'font-awesome' );
         wp_enqueue_style ( 'mooStyle-style4' );
         wp_enqueue_script( 'mooScript-style4' );
-
 
         $MooOptions = (array)get_option( 'moo_settings' );
 
@@ -2453,7 +2742,7 @@ class Moo_OnlineOrders_Shortcodes {
                            }
 
                            if(count($category["five_items"]) == 5) {
-                                $html .= '<div class="moo-menu-item moo-menu-list-item"><div class="moo-row moo-align-items-center"><a href="#" class="moo-bt-more moo-show-more" onclick="mooClickOnLoadMoreItems(event,\''.$category['uuid'].'\',\''.$category['name'].'\')"> Show More </a><i class="fa fa-chevron-down" aria-hidden="true" style=" display: block; color:red "></i></div></div>';
+                                $html .= '<div class="moo-menu-item moo-menu-list-item"><div class="moo-row moo-align-items-center"><a href="#" class="moo-bt-more moo-show-more" onclick="mooClickOnLoadMoreItems(event,\''.$category['uuid'].'\',\''.$category['name'].'\')"> Show More </a><i class="fas fa-chevron-down" aria-hidden="true" style=" display: block; color:red "></i></div></div>';
                             }
                             $html    .= "</div></div>";
                         }
@@ -2487,35 +2776,69 @@ class Moo_OnlineOrders_Shortcodes {
         <?php
         return ob_get_clean();
     }
-    public static function moo_store_use_theme($atts, $content)
+    public static function moo_store_use_theme($atts, $content,$custom_css)
     {
-      //  $MooOptions = (array)get_option('moo_settings');
-
         $MooOptions = (array)get_option( 'moo_settings' );
-        $files = scandir(plugin_dir_path(dirname(__FILE__))."public/themes/".$MooOptions["default_style"]);
+        $theme_id = $MooOptions["default_style"];
+        $files = scandir(plugin_dir_path(dirname(__FILE__))."public/themes/".$theme_id);
         foreach ($files as $file) {
             $f = explode(".",$file);
             if(count($f) == 2)
             {
                 $file_name = $f[0];
                 $file_extension = $f[1];
-                if(strtoupper($file_extension) =="CSS")
-                {
-                   // wp_register_style( 'moo-'.$file_name.'-css' ,plugins_url( 'themes/'.$this->style.'/'.$file_name.'.'.$file_extension, __FILE__ ),array(), $this->version);
-                    wp_enqueue_style(  'moo-'.$file_name.'-css' );
-                }
-                else{
-                    if(strtoupper($file_extension) =="JS")
+                if(strtoupper($file_extension) == "CSS") {
+                    wp_enqueue_style(  'moo-'.$file_name.'-style' );
+                    wp_add_inline_style( 'moo-'.$file_name.'-style', $custom_css );
+
+                } else {
+                    if(strtoupper($file_extension) == "JS")
                     {
-                        // wp_register_style( 'moo-'.$file_name.'-css' ,plugins_url( 'themes/'.$this->style.'/'.$file_name.'.'.$file_extension, __FILE__ ),array(), $this->version);
                         wp_enqueue_script(  'moo-'.$file_name.'-js' );
                     }
                 }
             }
         }
-
         ob_start();
         return ob_get_clean();
+    }
+    public static function moo_render_customised_css_for_themes($theme_id)
+    {
+        $MooOptions = (array)get_option( 'moo_settings' );
+        $theme_id = $MooOptions["default_style"];
+        $path = plugin_dir_path(dirname(__FILE__))."public/themes/";
+
+        if(file_exists($path."/".$theme_id."/manifest.json")){
+            $theme_settings = json_decode(file_get_contents($path."/".$theme_id."/manifest.json"));
+            if(!isset($theme_settings->name) || $theme_settings->name === ''){
+                return;
+            }
+            if(isset($theme_settings->settings)) {
+                foreach ($theme_settings->settings as $setting) {
+                    if(isset($setting->css)){
+                        if(is_array($setting->css)) {
+                            foreach ($setting->css as $oneCssConfig) {
+                                if(isset($oneCssConfig->cssSelector) && isset($oneCssConfig->cssProperty) && isset($MooOptions[$theme_id."_".$setting->id])) {
+                                    $css .= $oneCssConfig->cssSelector;
+                                    $css .= '{';
+                                    $css .= $oneCssConfig->cssProperty.':'.$MooOptions[$theme_id."_".$setting->id].';';
+                                    $css .= '}';
+                                }
+                            }
+                        } else {
+                            if(isset($setting->css->cssSelector) && isset($setting->css->cssProperty) && isset($MooOptions[$theme_id."_".$setting->id])) {
+                                $css .= $setting->css->cssSelector;
+                                $css .= '{';
+                                $css .= $setting->css->cssProperty.':'.$MooOptions[$theme_id."_".$setting->id].';';
+                                $css .= '}';
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+        return $css;
     }
     public static function getItemStock($items,$item_uuid)
     {

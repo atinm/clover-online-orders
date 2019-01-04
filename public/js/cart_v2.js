@@ -46,7 +46,7 @@ function moo_updateCart()
 
                     html +='<td>'+product.quantity+'</td>'; //qty
                     html +='<td>$'+subtotal.toFixed(2)+'</td>'; //Sub total  ( price + taxes )
-                    html +='<td><i class="fa fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item+'\')"></i></td>'; //Controlles Btn
+                    html +='<td><i class="fas fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item+'\')"></i></td>'; //Controlles Btn
                     html +='</tr>';
                 }
                 else
@@ -58,7 +58,7 @@ function moo_updateCart()
                     html +="<td onclick=\"ChangeQuantity('"+item+"')\" style='cursor:pointer;'><strong>"+product.item.name+"</strong></td>"; //The name of the item
                     html +="<td>"+product.quantity+"</td>"; // The quantiy
                     html +='<td id="moo_itemsubtotal_'+item+'">$'+subtotal.toFixed(2)+'</td>';
-                    html +='<td><i class="fa fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item+'\')"></i></td>'; //Controlles Btn
+                    html +='<td><i class="fas fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item+'\')"></i></td>'; //Controlles Btn
                     html +="</tr>";
                 }
                 //Add the item to Our JS Cart

@@ -165,7 +165,7 @@
     font-size: 15px;
     display: block;
     color:#fff;
-    text-decoration: none;
+    text-decoration: none !important;
     box-shadow: none;
 }
 
@@ -222,7 +222,7 @@
 /* ------ Button ------ */
 button.moo-btn-sm {
     border-radius: 0;
-    border: 2px solid #000;
+    border: 2px solid ;
     padding: 8px;
     font-family: "Oswald",sans-serif;
     font-weight: 400;
@@ -233,6 +233,7 @@ button.moo-btn-sm {
     cursor: pointer;
     margin-left: 10px;
     color: #000;
+    border-color: #000;
 }
 
 .moo-hvr-sweep-to-top {
@@ -500,4 +501,42 @@ button.moo-btn-sm {
 {
     background: url('./img/cart.png') no-repeat;
     height: 26px;
+}
+.moo-new-icon
+{
+    border-radius: 3px 0 0 3px;
+    padding: 8px 10px;
+    text-align: center;
+    display: inline-block;
+    min-width: 46px;
+    margin-right: 0;
+    cursor: pointer;
+    -webkit-transition: background 200ms ease;
+    transition: background 200ms ease;
+    background-color: #0c8aac;
+    border-color: #0b83a3;
+    color: #ffffff;
+}
+.moo-new-icon__count
+{
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+.moo-is-sticky {
+    position: fixed;
+    right: 0;
+    top: 57%;
+    transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+    z-index: 2147483645;
+}
+.moo-new-icon__cart-panier
+{
+    color: #ffffff;
+    height: 20px;
+    width: 20px;
+}
+.moo-new-icon__group
+{
+    fill: #ffffff;
 }

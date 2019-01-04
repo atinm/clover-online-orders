@@ -11,11 +11,17 @@ class moo_OnlineOrders_CallAPI {
     function __construct()
     {
         $MooSettings = (array) get_option("moo_settings");
-        $this->Token = $MooSettings['api_key'];
+        if(isset( $MooSettings['api_key'])) {
+            $this->Token = $MooSettings['api_key'];
+        } else {
+            $this->Token ='';
+        }
+
         //Put the API URL here and don't forget the last slash
         $this->url_api = "http://api.smartonlineorders.com/";
-
+        //$this->url_api = "http://localhost/api/";
         $this->debug = false;
+       // $this->debug = true;
         $this->debug_get = false;
 
     }
@@ -153,10 +159,22 @@ class moo_OnlineOrders_CallAPI {
            return "Please verify your Key in page settings";
        }
     }
+    /*
+     * Advanced Importing functions
+     */
+    public function getOneCategory($cat_id)
+    {
+        return json_decode($this->callApi("categories/".$cat_id,$this->Token));
+    }
     //Functions to call the API for make Orders and payments
     public function getPayKey()
     {
         return $this->callApi("paykey",$this->Token);
+    }
+   //get themes
+    public function getThemes()
+    {
+        return json_decode($this->callApi("themes",$this->Token));
     }
     //Functions to call get the merchant logos
     public function getMerchantLogos()
@@ -181,7 +199,7 @@ class moo_OnlineOrders_CallAPI {
             {
                 $string = "";
                 $Theday = $days->{$days_name};
-                if(count($Theday->elements)>0)
+                if(@count($Theday->elements)>0)
                     foreach ($Theday->elements as $time)
                     {
                         $startTime   =  ($time->start!=0)?substr_replace(((strlen($time->start) == 4)?$time->start:((strlen($time->start) == 2)?'00'.$time->start:'0'.$time->start)), ':', 2, 0):'00:00';
@@ -272,6 +290,11 @@ class moo_OnlineOrders_CallAPI {
         return $this->callApi("modifiers",$this->Token);
 
     }
+    public function getModifiersWithoutSavingPage2()
+    {
+        return $this->callApi("modifiers_page2",$this->Token);
+
+    }
     public function updateOrderNote($orderId,$note)
     {
         return $this->callApi_Post("update_local_order/".$orderId,$this->Token,'note='.$note);
@@ -279,9 +302,9 @@ class moo_OnlineOrders_CallAPI {
 
 
     //manage orders
-    public function createOrder($total,$orderType,$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode,$instructions,$pickupTime,$cutomer,$note)
+    public function createOrder($total,$orderType,$paymentmethod,$taxAmount,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$tipAmount,$isDelivery,$couponCode,$instructions,$pickupTime,$customer,$note)
     {
-        return $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&deliveryName='.$deliveryfeeName.'&servicefee='.$serviceFee.'&servicefeeName='.$serviceFeeName.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode.'&instructions='.urlencode($instructions).'&pickupTime='.$pickupTime.'&note='.$note.'&customer='.json_encode($cutomer));
+        return $this->callApi_Post("create_order",$this->Token,'total='.$total.'&OrderType='.$orderType.'&paymentmethod='.$paymentmethod.'&taxAmount='.$taxAmount.'&deliveryfee='.$deliveryfee.'&deliveryName='.$deliveryfeeName.'&servicefee='.$serviceFee.'&servicefeeName='.$serviceFeeName.'&tipAmount='.$tipAmount.'&isDelivery='.$isDelivery.'&coupon='.$couponCode.'&instructions='.urlencode($instructions).'&pickupTime='.$pickupTime.'&note='.urlencode($note).'&customer='.urlencode(json_encode($customer)));
     }
     public function createOrderV2($options)
     {
@@ -290,10 +313,9 @@ class moo_OnlineOrders_CallAPI {
     }
     public function assignCustomer($customer)
     {
-        $res =  $this->callApi_Post("assign_customer",$this->Token,'customer='.json_encode($customer));
+        $res =  $this->callApi_Post("assign_customer",$this->Token,'customer='.urlencode(json_encode($customer)));
         return $res;
     }
-
     public function addlineToOrder($oid,$item_uuid,$qte,$special_ins)
     {
         return $this->callApi_Post("create_line_in_order",$this->Token,'oid='.$oid.'&item='.$item_uuid.'&qte='.$qte.'&special_ins='.urlencode($special_ins));
@@ -302,7 +324,6 @@ class moo_OnlineOrders_CallAPI {
     {
         return $this->callApi_Post("v2/create_lines",$this->Token,'oid='.$oid.'&lines='.json_encode($lines));
     }
-
     public function addlineWithPriceToOrder($oid,$item_uuid,$qte,$name,$price)
     {
         return $this->callApi_Post("create_line_in_order",$this->Token,'oid='.$oid.'&item='.$item_uuid.'&qte='.$qte.'&special_ins=&itemName='.$name.'&itemprice='.$price);
@@ -328,6 +349,7 @@ class moo_OnlineOrders_CallAPI {
     {
         return $this->callApi_Post("notifyv2",$this->Token,'orderId='.$oid.'&instructions='.urlencode($instructions).'&pickup_time='.$pickup_time.'&paymentmethod='.$paymentMethode);
     }
+
     // OrderTypes
     public function GetOneOrdersTypes($uuid)
     {
@@ -340,6 +362,10 @@ class moo_OnlineOrders_CallAPI {
     public function addOrderType($label,$taxable)
 	{
 		return $this->callApi_Post("order_types",$this->Token,'label='.$label.'&taxable='.$taxable);
+	}
+	public function updateOrderType($uuid,$label,$taxable)
+	{
+		return $this->callApi_Post("order_types/".$uuid,$this->Token,'label='.$label.'&taxable='.$taxable);
 	}
 
 	//Updtae the website for the merchant
@@ -367,7 +393,6 @@ class moo_OnlineOrders_CallAPI {
         $phone = str_replace('+','%2B',$phone);
         return $this->callApi_Post("sendsms",$this->Token,'to='.$phone.'&body='.$message);
     }
-
     public function moo_CustomerVerifPhone($token,$phone)
     {
         return $this->callApi_Post("customers/verifphone",$this->Token,'phone='.$phone.'&token='.$token);
@@ -393,9 +418,25 @@ class moo_OnlineOrders_CallAPI {
     {
         return $this->callApi_Post('customers/getaddress',$this->Token,'token='.$token);
     }
-    public function moo_AddAddress($address,$city,$state,$country,$zipcode,$lat,$lng,$token)
+    public function moo_GetCustomer($token)
     {
-        return $this->callApi_Post('customers/setaddress',$this->Token,'token='.$token.'&address='.$address.'&city='.$city.'&state='.$state.'&country='.$country.'&zipcode='.$zipcode.'&lat='.$lat.'&lng='.$lng);
+        return $this->callApi_Post('customers/get',$this->Token,'token='.$token);
+    }
+    public function moo_GetOrders($token,$page)
+    {
+        return $this->callApi_Post('customers/getorders/'.$page,$this->Token,'token='.$token);
+    }
+    public function moo_AddAddress($address,$line2,$city,$state,$country,$zipcode,$lat,$lng,$token)
+    {
+        return $this->callApi_Post('customers/setaddress',$this->Token,'token='.$token.'&address='.$address.'&line2='.$line2.'&city='.$city.'&state='.$state.'&country='.$country.'&zipcode='.$zipcode.'&lat='.$lat.'&lng='.$lng);
+    }
+    public function moo_updateCustomer($name,$email,$phone,$token)
+    {
+        return $this->callApi_Post('customers/update',$this->Token,'token='.$token.'&name='.$name.'&phone='.$phone.'&email='.$email);
+    }
+    public function updateCustomerPassword($current_pass,$new_pass,$token)
+    {
+        return $this->callApi_Post('customers/change_password',$this->Token,'token='.$token.'&current_password='.$current_pass.'&new_password='.$new_pass);
     }
     public function moo_DeleteAddresses($address_id,$token)
     {
@@ -459,8 +500,7 @@ class moo_OnlineOrders_CallAPI {
      * Sync functions
      * @since 1.0.6
      */
-    function getItem($uuid)
-    {
+    function getItem($uuid){
         if($uuid == "") return;
         $res = $this->callApi("items/".$uuid,$this->Token);
         if($res){
@@ -500,6 +540,10 @@ class moo_OnlineOrders_CallAPI {
         if( $uuid == "" ) return;
             return $this->callApi("tax_rates/".$uuid,$this->Token);
         return false;
+    }
+    function getTaxesRatesWithoutSaving()
+    {
+        return $this->callApi("tax_rates",$this->Token);
     }
 
 
@@ -583,7 +627,7 @@ class moo_OnlineOrders_CallAPI {
                 $count++;
             }
         }
-        if(count($taxes_rates)==$count)
+        if(@count($taxes_rates)==$count)
         {
             $wpdb->query('COMMIT'); // if the item Inserted in the DB
         }
@@ -643,7 +687,7 @@ class moo_OnlineOrders_CallAPI {
     {
         global $wpdb;
         $wpdb->query('START TRANSACTION');
-        $wpdb->show_errors();
+       // $wpdb->show_errors();
         $item = json_decode($res);
         //print_r($item);
         if(isset($item->message) && !isset($item->id) ) return;
@@ -683,8 +727,8 @@ class moo_OnlineOrders_CallAPI {
             if($item->itemGroup===NULL)
                 $res1 = $wpdb->insert("{$wpdb->prefix}moo_item",array(
                     'uuid' => $item->id,
-                    'name' => $item->name,
-                    'alternate_name' => $item->alternateName,
+                    'name' => substr($item->name,0,100),
+                    'alternate_name' => substr($item->alternateName,0,100),
                     'price' => $item->price,
                     'code' => $item->code,
                     'price_type' => $item->priceType,
@@ -699,8 +743,8 @@ class moo_OnlineOrders_CallAPI {
             else
                 $res1 = $wpdb->insert("{$wpdb->prefix}moo_item",array(
                     'uuid' => $item->id,
-                    'name' => $item->name,
-                    'alternate_name' => $item->alternateName,
+                    'name' => substr($item->name,0,100),
+                    'alternate_name' => substr($item->alternateName,0,100),
                     'price' => $item->price,
                     'code' => $item->code,
                     'price_type' => $item->priceType,
@@ -715,7 +759,6 @@ class moo_OnlineOrders_CallAPI {
                 ));
         }
 
-
         //save the taxes rates
         foreach($item->taxRates->elements as $tax_rate)
         {
@@ -724,11 +767,14 @@ class moo_OnlineOrders_CallAPI {
                 $table = array('elements'=>array($tax_rate));
                 $this->save_tax_rates(json_encode($table));
             }
+            if( $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_item_tax_rate where item_uuid = '{$item->id}' and tax_rate_uuid='{$tax_rate->id}'") == 0 )
+            {
+                $wpdb->insert("{$wpdb->prefix}moo_item_tax_rate",array(
+                    'tax_rate_uuid' => $tax_rate->id,
+                    'item_uuid' => $item->id
+                ));
+            }
 
-            $wpdb->insert("{$wpdb->prefix}moo_item_tax_rate",array(
-                'tax_rate_uuid' => $tax_rate->id,
-                'item_uuid' => $item->id
-            ));
         }
 
         //save modifierGroups
@@ -739,10 +785,14 @@ class moo_OnlineOrders_CallAPI {
             {
                 $this->getOneModifierGroups($modifier_group->id);
             }
-            $wpdb->insert("{$wpdb->prefix}moo_item_modifier_group",array(
-                'group_id' => $modifier_group->id,
-                'item_id' => $item->id
-            ));
+            if( $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_item_modifier_group where item_id = '{$item->id}' and group_id='{$modifier_group->id}'") == 0 )
+            {
+                $wpdb->insert("{$wpdb->prefix}moo_item_modifier_group",array(
+                    'group_id' => $modifier_group->id,
+                    'item_id' => $item->id
+                ));
+            }
+
         }
 
 
@@ -754,10 +804,14 @@ class moo_OnlineOrders_CallAPI {
                 $table = array('elements'=>array($tag));
                 $this->save_tags(json_encode($table));
             }
-            $wpdb->insert("{$wpdb->prefix}moo_item_tag",array(
-                'tag_uuid' => $tag->id,
-                'item_uuid' => $item->id
-            ));
+            if( $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_item_tag where item_uuid = '{$item->id}' and tag_uuid='{$tag->id}'") == 0 )
+            {
+                $wpdb->insert("{$wpdb->prefix}moo_item_tag",array(
+                    'tag_uuid' => $tag->id,
+                    'item_uuid' => $item->id
+                ));
+            }
+
         }
         //save New categories
         foreach($item->categories->elements as $category)
@@ -956,7 +1010,28 @@ class moo_OnlineOrders_CallAPI {
                 'price' => $modifier->price,
                 'group_id' => $modifier->modifierGroup->id
             ));
-        if($res>0) return true;
+        if($res>0)
+            return true;
+        return false;
+    }
+    public function update_taxRate($tax)
+    {
+        global $wpdb;
+        if($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_tax_rate where uuid='{$tax->id}'") > 0)
+            $res = $wpdb->update("{$wpdb->prefix}moo_tax_rate",array(
+                'name' => $tax->name,
+                'rate' => $tax->rate,
+                'is_default' => $tax->isDefault
+            ),array('uuid' => $tax->id));
+        else
+            $res = $wpdb->insert("{$wpdb->prefix}moo_tax_rate",array(
+                'uuid' => $tax->id,
+                'name' => $tax->name,
+                'rate' => $tax->rate,
+                'is_default' => $tax->isDefault
+            ));
+        if($res>0)
+            return true;
         return false;
     }
     public function send_an_email($order_id,$emails,$customer,$instructions,$pickup_time)
@@ -1136,6 +1211,136 @@ class moo_OnlineOrders_CallAPI {
         }
         //return json_decode($orderFromServer);
         //var_dump($result);
+        return $result;
+    }
+    public function getOrderDetails2($order,$orderFromServer)
+    {
+        $result = array();
+        if(isset($orderFromServer)) {
+            $result['uuid_order']=$orderFromServer->order->uuid;
+            $result['amount_order']=$orderFromServer->order->amount/100;
+            $result['order_type']=$orderFromServer->order->order_type;
+            $result['special_instruction']=$orderFromServer->order->special_instruction;
+            $result['coupon']=$orderFromServer->coupon;
+
+            if($orderFromServer->order->date != "") {
+                $result['date_order']= date('m/d/Y', $orderFromServer->order->date/1000);
+            }
+            if($orderFromServer->order->taxRemoved == "1") {
+                $result['taxRemoved']= true;
+            } else {
+                $result['taxRemoved']= false;
+            }
+
+            if (isset($orderFromServer->order->paymentMethode) && $orderFromServer->order->paymentMethode != ""){
+                $result['paymentMethode']=$orderFromServer->order->paymentMethode;
+            } else{
+                $result['paymentMethode'] = "No";
+            }
+            if (isset($orderFromServer->order->taxAmount) && $orderFromServer->order->taxAmount != ""){
+                $result['taxAmount']=$orderFromServer->order->taxAmount/100;
+            } else{
+                $result['taxAmount'] = $order->taxAmount;
+            }
+
+            if (isset($orderFromServer->order->deliveryAmount) && $orderFromServer->order->deliveryAmount != ""){
+                $result['deliveryAmount']=$orderFromServer->order->deliveryAmount/100;
+            } else {
+                $result['deliveryAmount']=$order->deliveryfee;
+            }
+            if (isset($orderFromServer->order->serviceFee) && $orderFromServer->order->serviceFee != ""){
+                $result['serviceFee'] = $orderFromServer->order->serviceFee/100;
+            } else {
+                $result['serviceFee'] = 0;
+            }
+
+            if (isset($orderFromServer->order->deliveryName) && $orderFromServer->order->deliveryName != "" && $orderFromServer->order->deliveryName != "null"&& $orderFromServer->order->deliveryName != null){
+                $result['deliveryName']=$orderFromServer->order->deliveryName;
+            } else {
+                $result['deliveryName']="Delivery Charges";
+            }
+            if (isset($orderFromServer->order->serviceFeeName) && $orderFromServer->order->serviceFeeName != "" && $orderFromServer->order->serviceFeeName != "null"&& $orderFromServer->order->serviceFeeName != null){
+                $result['serviceFeeName']=$orderFromServer->order->serviceFeeName;
+            } else {
+                $result['serviceFeeName']="Service Charges";
+            }
+
+            if (isset($orderFromServer->order->tipAmount) && $orderFromServer->order->tipAmount != ""){
+                $result['tipAmount']=$orderFromServer->order->tipAmount/100;
+                $result['amount_order'] += $result['tipAmount'];
+            } else {
+                $result['tipAmount']=$order->tipAmount;
+                $result['amount_order'] += $result['tipAmount'];
+            }
+            if (isset($orderFromServer->customer->name) && $orderFromServer->customer->name != ""){
+                $result['name_customer']=$orderFromServer->customer->name;
+            } else{
+                $result['name_customer']=$order->p_name;
+            }
+            if (isset($orderFromServer->customer->email) && $orderFromServer->customer->email != ""){
+                $result['email_customer'] = $orderFromServer->customer->email;
+            } else{
+                $result['email_customer']=$order->p_email;
+            }
+            if (isset($orderFromServer->customer->phone) && $orderFromServer->customer->phone != ""){
+                $result['phone_customer']=$orderFromServer->customer->phone;
+            } else {
+                $result['phone_customer']=$order->p_phone;
+            }
+            if (isset($orderFromServer->customer->address)&& $orderFromServer->customer->address == ""){
+                $result['address_customer']= $orderFromServer->customer->address;
+            } else{
+                $result['address_customer']=$order->p_address;
+            }
+            if (isset($orderFromServer->customer->city) && $orderFromServer->customer->city != ""){
+                $result['city_customer']=$orderFromServer->customer->city;
+            } else{
+                $result['city_customer']=$order->p_city;
+            }
+            if ($orderFromServer->customer->state && $orderFromServer->customer->state != ""){
+                $result['state_customer']=$orderFromServer->customer->state;
+            } else {
+                $result['state_customer']=$order->p_state;
+            }
+            if (isset($orderFromServer->customer->zipcode) && $orderFromServer->customer->zipcode != ""){
+                $result['zipcode']=$orderFromServer->customer->zipcode;
+            } else {
+                $result['zipcode']=$order->p_zipcode;
+            }
+            if (isset($orderFromServer->customer->lat) && $orderFromServer->customer->lat != ""){
+                $result['lat']=$orderFromServer->customer->lat;
+            } else {
+                $result['lat']=$order->p_lat;
+            }
+            if (isset($orderFromServer->customer->lng) && $orderFromServer->customer->lng != ""){
+                $result['lng']=$orderFromServer->customer->lng;
+            } else {
+                $result['lng']=$order->p_lng;
+            }
+            $result['payments']=$orderFromServer->payments;
+        } else {
+            $result['uuid_order']=$order->uuid;
+            $result['amount_order']=$order->amount;
+            $result['order_type']=$order->ordertype;
+            $result['special_instruction']=$order->instructions;
+            $result['date_order']=$order->date;
+            $result['paymentMethode']="";
+            $result['taxAmount']=$order->taxAmount;
+            $result['deliveryAmount']=$order->deliveryfee;
+            $result['tipAmount']=$order->tipAmount;
+            $result['name_customer']=$order->p_name;
+            $result['email_customer']=$order->p_email;
+            $result['phone_customer']=$order->p_phone;
+            $result['address_customer']=$order->p_address;
+            $result['city_customer']=$order->p_city;
+            $result['state_customer']=$order->p_state;
+            $result['zipcode']=$order->p_zipcode;
+            $result['lat']=$order->p_lat;
+            $result['lng']=$order->p_lng;
+            $result['payments']=array();
+            $result['coupon']=array();
+            $result['taxRemoved']=false;
+        }
         return $result;
     }
 

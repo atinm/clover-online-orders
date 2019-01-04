@@ -13,12 +13,12 @@
  * @package           Wordpress_Integration
  *
  * @wordpress-plugin
- * Plugin Name:       Merchantech Online Orders for Clover
- * Plugin URI:        http://www.merchantechapps.com
+ * Plugin Name:       Zaytech Online Orders for Clover
+ * Plugin URI:        http://www.zaytechapps.com
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.3.1
- * Author:            Merchantech
- * Author URI:        http://www.merchantechapps.com
+ * Version:           1.3.2
+ * Author:            Zaytech
+ * Author URI:        http://www.zaytechapps.com
  * License:           Clover app
  * License URI:       http://www.clover.com
  * Text Domain:       moo_OnlineOrders
@@ -76,6 +76,10 @@ function moo_OnlineOrders_shortcodes_searchBar($atts, $content) {
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
     return Moo_OnlineOrders_Shortcodes::moo_search_bar($atts, $content);
 }
+function moo_OnlineOrders_shortcodes_customerAccount($atts, $content) {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
+    return Moo_OnlineOrders_Shortcodes::moo_customer_account($atts, $content);
+}
 
 function moo_OnlineOrders_shortcodes_categorymsg($atts, $content) {
     if(isset($atts["cat_id"]) && $atts["message"])
@@ -120,11 +124,14 @@ function moo_OnlineOrders_RestAPI() {
 
 /* adding  shortcodes*/
 add_shortcode('moo_all_items', 'moo_OnlineOrders_shortcodes_allitems');
-add_shortcode('moo_checkout', 'moo_OnlineOrders_shortcodes_checkoutPage');
-add_shortcode('moo_buy_button', 'moo_OnlineOrders_shortcodes_buybutton');
 add_shortcode('moo_cart', 'moo_OnlineOrders_shortcodes_thecart');
+add_shortcode('moo_checkout', 'moo_OnlineOrders_shortcodes_checkoutPage');
+add_shortcode('moo_my_account', 'moo_OnlineOrders_shortcodes_customerAccount');
+
+add_shortcode('moo_buy_button', 'moo_OnlineOrders_shortcodes_buybutton');
 add_shortcode('moo_category_msg', 'moo_OnlineOrders_shortcodes_categorymsg');
 add_shortcode('moo_search', 'moo_OnlineOrders_shortcodes_searchBar');
+
 
 /* adding  widgets*/
 add_action( 'widgets_init', 'moo_OnlineOrders_widget_opening_hours' );
@@ -140,7 +147,7 @@ add_filter( 'wp_mail_content_type', function( $content_type ) {
     return 'text/html';
 });
 */
-if(get_option('moo_onlineOrders_version') != '131')
+if(get_option('moo_onlineOrders_version') != '132')
     add_action('plugins_loaded', 'moo_onlineOrders_check_version');
 
 /*
@@ -208,7 +215,7 @@ function moo_onlineOrders_check_version()
             if( !isset($defaultOptions["order_later_days_delivery"]) || $defaultOptions["order_later_days_delivery"] == "") $defaultOptions["order_later_days_delivery"] = "4";
             if( !isset($defaultOptions["copyrights"]) || $defaultOptions["copyrights"] == "") $defaultOptions["copyrights"] = 'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.2.8">Smart Online Order</a>';
 
-            update_option('moo_settings', $defaultOptions );
+           // update_option('moo_settings', $defaultOptions );
 
         case '127':
             $default_options = array(
@@ -231,11 +238,19 @@ function moo_onlineOrders_check_version()
                 if(!isset($MooOptions[$default_option["name"]]))
                     $MooOptions[$default_option["name"]]=$default_option["value"];
             }
-            update_option("moo_settings",$MooOptions);
-            update_option('moo_onlineOrders_version','128');
         case '128':
         case '130':
         case '131':
+        $MooOptions = $defaultOptions;
+        if(!isset($MooOptions['onePage_show_more_button'])) {
+            $MooOptions['onePage_show_more_button']='on';
+
+        }
+        $MooOptions['payment_creditcard'] = 'on';
+        $MooOptions['use_sms_verification'] = 'enabled';
+        update_option("moo_settings",$MooOptions);
+        update_option('moo_onlineOrders_version','132');
+        case '132':
             break;
     }
 }

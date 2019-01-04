@@ -11,26 +11,33 @@ var MooOrderTypeMinAmount = 0;
 var MooIsDeliveryError = true;
 var MooIsDeliveryOrder = false;
 
+if(moo_use_sms_verification == 'disabled') {
+    var MooPhoneVerificationActivated = false;
+} else {
+    var MooPhoneVerificationActivated = true;
+}
+
+
 if(typeof moo_checkout_login != 'undefined')
 {
     MooIsDisabled =(moo_checkout_login == "disabled")?true:false;
-}
-else
+} else {
     MooIsDisabled = true;
+}
 
 if(typeof moo_save_cards != 'undefined')
 {
     MooSaveCards =(moo_save_cards == "enabled")?true:false;
-}
-else
+} else {
     MooSaveCards = false;
+}
 
 if(typeof moo_save_cards_fees != 'undefined')
 {
     MooSaveCardsFees =(moo_save_cards_fees == "enabled")?true:false;
-}
-else
+} else {
     MooSaveCardsFees = false;
+}
 
 if(!MooIsDisabled && MooSaveCards && !MooIsGuest)
 {
@@ -105,7 +112,7 @@ catch (e) {
 
 var hash = window.location.hash;
 if (hash != "") {
-    console.log(hash);
+   // console.log(hash);
     switch (hash) {
         case "#register":
             moo_show_sigupform();
@@ -119,6 +126,9 @@ if (hash != "") {
     }
 }
 
+if(!MooPhoneVerificationActivated) {
+    MooPhoneIsVerified = true;
+}
 
 function moo_OrderTypeChanged(OrderTypeID)
 {
@@ -143,6 +153,8 @@ function moo_OrderTypeChanged(OrderTypeID)
 
                         if(MooCustomerChoosenAddress.address != '')
                             address_string += MooCustomerChoosenAddress.address+' ';
+                        if(MooCustomerChoosenAddress.line2 != '')
+                            address_string += MooCustomerChoosenAddress.line2+' ';
                         if(MooCustomerChoosenAddress.city != '')
                             address_string += MooCustomerChoosenAddress.city+', ';
                         if(MooCustomerChoosenAddress.state != '')
@@ -173,7 +185,7 @@ function moo_OrderTypeChanged(OrderTypeID)
                     if(moo_cash_upon_delivery!="on")
                     {
                         jQuery("#moo-checkout-form-payments-cash").parent().parent().hide();
-                        jQuery('input[name="payments"]:checked').val('');
+                        jQuery('input[name="payments"]:checked').val('creditcard');
                     }
                     else
                     {
@@ -194,12 +206,12 @@ function moo_OrderTypeChanged(OrderTypeID)
                     if(moo_cash_in_store != "on")
                     {
                         jQuery("#moo-checkout-form-payments-cash").parent().parent().hide();
-                        jQuery('input[name="payments"]:checked').val('');
+                        jQuery('input[name="payments"]:checked').val('creditcard');
                     }
                     else
                     {
                         jQuery("#moo-checkout-form-payments-cash").parent().parent().show();
-                        jQuery("#moo-checkout-form-payincash-label").text('Pay in Store');
+                        jQuery("#moo-checkout-form-payincash-label").text('Pay at location');
                     }
                 }
 
@@ -314,7 +326,7 @@ function moo_verifyCodeTryAgain(event)
 
 function moo_changePaymentMethod(type)
 {
-    if(type=='cash')
+    if(type == 'cash')
     {
         //Hide the tips
         jQuery('#moo-checkout-form-tips').hide();
@@ -331,12 +343,16 @@ function moo_changePaymentMethod(type)
             {
                 if(MooCustomer != null)
                     jQuery('#Moo_PhoneToVerify').val(MooCustomer[0].phone);
-
+                if(MooPhoneVerificationActivated)
+                {
+                    jQuery('#moo_cashPanel').show();
+                }
+            }
+        } else {
+            if(MooPhoneVerificationActivated) {
                 jQuery('#moo_cashPanel').show();
             }
         }
-        else
-            jQuery('#moo_cashPanel').show();
         jQuery('#moo_creditCardPanel').hide();
     }
     else
@@ -572,6 +588,7 @@ function moo_show_chooseaddressform(e)
                             html +='<div class="moo-address-block">';
                             html +='<span title="delete this address" onclick="moo_delete_address(event,'+OneAddress.id+')">X</span>';
                             html +=OneAddress.address+'<br />';
+                            html +=OneAddress.line2;
                             html +=OneAddress.city+', '+OneAddress.state+' '+OneAddress.zipcode+'<br />';
                             html +='<a class="MooSimplButon MooUseAddressButton" href="#" onclick="moo_useAddress(event,'+OneAddress.id+')">USE THIS ADDRESS</a>';
                             html +='</div></div>';
@@ -585,6 +602,7 @@ function moo_show_chooseaddressform(e)
                                 html +='<div class="moo-address-block">';
                                 html +='<span title="delete this address" onclick="moo_delete_address(event,'+OneAddress.id+')">X</span>';
                                 html +=OneAddress.address+'<br />';
+                                html +=OneAddress.line2;
                                 html +=OneAddress.city+', '+OneAddress.state+' '+OneAddress.zipcode+'<br />';
                                 html +='  <a class="MooSimplButon MooUseAddressButton" href="#" onclick="moo_useAddress(event,'+OneAddress.id+')">USE THIS ADDRESS</a>';
                                 html +='</div></div>';
@@ -621,7 +639,7 @@ function moo_show_chooseaddressform(e)
 function moo_login(e)
 {
     e.preventDefault();
-    jQuery(e.target).html('<i class="fa fa-circle-o-notch fa-spin"></i>').attr('onclick','');
+    jQuery(e.target).html('<i class="fas fa-circle-o-notch fa-spin"></i>').attr('onclick','');
 
     MooIsGuest = false;
     var email    =  jQuery('#inputEmail').val();
@@ -638,7 +656,7 @@ function moo_login(e)
     }
     jQuery
         .post(moo_params.ajaxurl,{'action':'moo_customer_login','email':email,"password":password}, function (data) {
-            jQuery(e.target).html('Login In').attr('onclick','moo_login(event)');
+            jQuery(e.target).html('Log In').attr('onclick','moo_login(event)');
             if(data.status == 'success')
             {
                 moo_show_chooseaddressform(e);
@@ -731,7 +749,7 @@ function moo_signin(e)
         swal("Please enter your phone");
         return;
     }
-    jQuery(e.target).html('<i class="fa fa-circle-o-notch fa-spin"></i>').attr('onclick','');
+    jQuery(e.target).html('<i class="fas fa-circle-o-notch fa-spin"></i>').attr('onclick','');
     jQuery
         .post(moo_params.ajaxurl,{'action':'moo_customer_signup','title':title,'full_name':full_name,'phone':phone,'email':email,"password":password}, function (data) {
             if(data.status == 'success')
@@ -761,7 +779,7 @@ function moo_resetpassword(e)
         swal('Please enter your email');
     else
     {
-        jQuery(e.target).html('<i class="fa fa-circle-o-notch fa-spin"></i>').attr('onclick','');
+        jQuery(e.target).html('<i class="fas fa-circle-o-notch fa-spin"></i>').attr('onclick','');
         jQuery
             .post(moo_params.ajaxurl,{'action':'moo_customer_resetpassword','email':email}, function (data) {
                 if(data.status == 'success')
@@ -828,7 +846,7 @@ function moo_ConfirmAddressOnMap(e)
         return;
     }
     var address_string = Object.keys(address).map(function(k){return address[k]}).join(" ");
-    jQuery.get('https://maps.googleapis.com/maps/api/geocode/json?&address='+address_string+'&key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc',function (data) {
+    jQuery.get('https://maps.googleapis.com/maps/api/geocode/json?&address='+encodeURIComponent(address_string)+'&key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc',function (data) {
         if(data.results.length>0)
         {
             var location = data.results[0].geometry.location;
@@ -850,6 +868,7 @@ function moo_getAddressFromForm()
 {
     var address = {};
     address.address =  jQuery('#inputMooAddress').val();
+    address.line2 =  jQuery('#inputMooAddress2').val();
     address.city =  jQuery('#inputMooCity').val();
     address.state =  jQuery('#inputMooState').val();
     address.zipcode =  jQuery('#inputMooZipcode').val();
@@ -862,7 +881,7 @@ function moo_getAddressFromForm()
 function moo_addAddress(e)
 {
     e.preventDefault();
-    jQuery(e.target).html('<i class="fa fa-circle-o-notch fa-spin"></i>').attr('onclick','');
+    jQuery(e.target).html('<i class="fas fa-circle-o-notch fa-spin"></i>').attr('onclick','');
     var address = moo_getAddressFromForm();
     if(address.lat == "")
     {
@@ -878,7 +897,7 @@ function moo_addAddress(e)
         else
         {
             jQuery
-                .post(moo_params.ajaxurl,{'action':'moo_customer_addAddress','address':address.address,'city':address.city,'state':address.state,'zipcode':address.zipcode,"lat":address.lat,"lng":address.lng}, function (data) {
+                .post(moo_params.ajaxurl,{'action':'moo_customer_addAddress','address':address.address,'line2':address.line2,'city':address.city,'state':address.state,'zipcode':address.zipcode,"lat":address.lat,"lng":address.lng}, function (data) {
                     if(data.status == 'failure' || data.status == 'expired')
                     {
                         swal({ title: "Your session has been expired",text:"Please login again",   type: "error",   confirmButtonText: "Login again" });
@@ -990,9 +1009,8 @@ function moo_delete_address(event,address_id)
             cancelButtonText: "No, cancel!",
             closeOnConfirm: false,
             closeOnCancel: false
-        },
-        function(isConfirm){
-            if (isConfirm) {
+    }).then(function(result){
+        if (result.value) {
                     jQuery
                         .post(moo_params.ajaxurl,{'action':'moo_customer_deleteAddresses','address_id':address_id}, function (data) {
                             if(data.status == 'failure' || data.status == 'expired')
@@ -1110,7 +1128,7 @@ function moo_verify_form(form)
             else
             {
                 moo_OrderTypeChanged(selectedOrderType.ot_uuid);
-                swal('Please add the delivery address','You have choose a delivery method, we need your address','error');
+                swal('Please add the delivery address','You have chosen a delivery method, we need your address','error');
                 return false;
             }
         }
@@ -1179,6 +1197,16 @@ function moo_verify_form(form)
                         if(form.cardNumber === '' || !regex_exp.credicard.test(form.cardNumber) )
                         {
                             swal('please enter a valid credit card number',"",'error');
+                            return false;
+                        }
+                        if(form.cardcvv  === ''  )
+                        {
+                            swal('please enter a valid Card CVV',"",'error');
+                            return false;
+                        }
+                        if(form.zipcode  === ''  )
+                        {
+                            swal('please enter a valid Zip Code',"",'error');
                             return false;
                         }
                         if(typeof form.cardNumber !== 'undefined')

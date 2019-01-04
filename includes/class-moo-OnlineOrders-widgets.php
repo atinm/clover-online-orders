@@ -27,7 +27,7 @@ class Moo_OnlineOrders_Widgets_Opening_hours extends WP_Widget{
         $current_hours = $api->getOpeningHours() ;
 
         echo '<div style="padding-left:15px">';
-        if(count($current_hours)>0 && $current_hours!="Please setup you business hours on Clover")
+        if(@count($current_hours)>0 && $current_hours!="Please setup you business hours on Clover")
         {
             foreach ($current_hours as $key=>$value) {
                 $value = str_replace('AND',"<br/>",$value);
@@ -83,7 +83,7 @@ class Moo_OnlineOrders_Widgets_best_selling extends WP_Widget{
         $model   = new moo_OnlineOrders_Model();
         $products = $model->getBestSellingProducts(intval($nb_product)) ;
         echo '<div style="padding-left:15px">';
-        if(count($products)>0)
+        if(@count($products)>0)
         {
             echo '<ul>';
             foreach ($products as $product) {
@@ -153,7 +153,7 @@ class Moo_OnlineOrders_Widgets_categories extends WP_Widget{
         $model   = new moo_OnlineOrders_Model();
         $categories = $model->getCategories4wigdets() ;
         echo '<div style="padding-left:15px">';
-        if(count($categories)>0)
+        if(@count($categories)>0)
         {
             echo '<ul>';
             foreach ($categories as $category) {

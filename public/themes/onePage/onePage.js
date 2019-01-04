@@ -49,13 +49,6 @@ jQuery(document).ready(function()
                 jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",window.height+'px');
             }
 
-          //  jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",window.height+'px');
-            /*
-            if(window.width>260)
-                jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",window.height+'px');
-             else
-                jQuery(".moo-stick-to-content").addClass('moo-fixed').width('100%').css("top",window.height+'px');
-             */
         }
         else
         {
@@ -64,8 +57,7 @@ jQuery(document).ready(function()
     });
 
 });
-function MooLoadBaseStructure(elm_id,callback)
-{
+function MooLoadBaseStructure(elm_id,callback) {
     var html = '<div class="moo-row">'+
         '<div  class="moo-is-sticky moo-new-icon" onclick="mooShowCart(event)">' +
         '<div class="moo-new-icon__count" id="moo-cartNbItems">'+((window.nb_items_in_cart>0)?window.nb_items_in_cart:'')+'</div>' +
@@ -92,8 +84,7 @@ function MooLoadBaseStructure(elm_id,callback)
 
     callback();
 }
-function MooSetLoading()
-{
+function MooSetLoading() {
     jQuery('#MooLoadingSection').show();
 }
 
@@ -109,20 +100,32 @@ function MooCLickOnCategory(event,elm)
 //get all the categories of the store
 function mooGetCategories()
 {
-    jQuery.get(moo_RestUrl+"moo-clover/v1/categories?expand=five_items", function (data) {
-        if(data!=null && data.length>0)
-            moo_renderCategories(data);
-        else
-        {
-            var element = document.getElementById("moo-onlineStore-categories");
-            var html     = 'You don\'t have any category please import your inventory';
-            jQuery(element).html(html);
-        }
-    });
+    if(window.moo_theme_setings.onePage_show_more_button==='off') {
+        jQuery.get(moo_RestUrl+"moo-clover/v1/categories?expand=all_items", function (data) {
+            if(data!=null && data.length>0) {
+                moo_renderCategories(data,false);
+            } else {
+                var element = document.getElementById("moo-onlineStore-categories");
+                var html     = 'You don\'t have any category please import your inventory';
+                jQuery(element).html(html);
+            }
+        });
+    } else {
+        jQuery.get(moo_RestUrl+"moo-clover/v1/categories?expand=five_items", function (data) {
+            if(data!=null && data.length>0) {
+                moo_renderCategories(data,true);
+            } else {
+                var element = document.getElementById("moo-onlineStore-categories");
+                var html     = 'You don\'t have any category please import your inventory';
+                jQuery(element).html(html);
+            }
+        });
+    }
+
 
 }
 //Render all categories to html element and insert it into the page
-function moo_renderCategories($cats)
+function moo_renderCategories($cats,withButton)
 {
     var element = document.getElementById("moo-onlineStore-categories");
     var html     = '<nav id="moo-menu-navigation" class="moo-stick-to-content">';
@@ -131,11 +134,13 @@ function moo_renderCategories($cats)
 
     for(i in $cats){
         var category = $cats[i];
-        if(category.five_items.length >0 )
-        {
+        if(typeof category !== 'object')
+            continue;
+        if(category.items.length >0 ) {
             html +='<li><a href="#cat-'+category.uuid.toLowerCase()+'" onclick="MooCLickOnCategory(event,this)">'+category.name+'</a></li>';
-            moo_renderItems(category);
+            moo_renderItems(category,withButton);
         }
+
     }
     html    += "</ul></nav>";
     jQuery(element).html(html).promise().done(function() {
@@ -191,7 +196,7 @@ function moo_renderCategories($cats)
 }
 
 //Render items of the selected category to html element and insert it into the page
-function moo_renderItems(category)
+function moo_renderItems(category,withButton)
 {
     var element = document.getElementById("moo-onlineStore-items");
     var html    =   '<div id="cat-'+category.uuid.toLowerCase()+'" class="moo-menu-category">'+
@@ -201,8 +206,10 @@ function moo_renderItems(category)
                     '</div>'+
                     '<div class="moo-menu-category-content" id="moo-items-for-'+category.uuid.toLowerCase()+'">';
 
-    for(i in category.five_items){
-        var item = category.five_items[i];
+    for(i in category.items){
+        var item = category.items[i];
+        if(typeof item != 'object')
+            continue;
         var item_price = parseFloat(item.price);
             item_price = item_price/100;
             item_price = formatPrice(item_price.toFixed(2));
@@ -212,8 +219,7 @@ function moo_renderItems(category)
 
         html += '<div class="moo-menu-item moo-menu-list-item" >'+
                 ' <div class="moo-row">';
-        if(item.image != null && item.image.url != null && item.image.url != "")
-        {
+        if(item.image != null && item.image.url != null && item.image.url != "") {
             html += '    <div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-12 moo-col-xs-12 moo-image-zoom">'+
                     '<a href="'+item.image.url+'" data-effect="mfp-zoom-in"><img src="'+item.image.url+'" class="moo-img-responsive moo-image-zoom"></a>'+
                     '    </div>'+
@@ -221,9 +227,7 @@ function moo_renderItems(category)
                     '         <div class="moo-item-name">'+item.name+'</div>'+
                     '         <span class="moo-text-muted moo-text-sm">'+item.description+'</span>'+
                     '    </div>';
-        }
-        else
-        {
+        } else {
             html += '    <div class="moo-col-lg-8 moo-col-md-8 moo-col-sm-12 moo-col-xs-12">'+
                     '         <div class="moo-item-name">'+item.name+'</div>'+
                     '         <span class="moo-text-muted moo-text-sm">'+item.description+'</span>'+
@@ -233,19 +237,14 @@ function moo_renderItems(category)
         {
             html += '    <div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-12 moo-col-xs-12 moo-text-sm-right">'+
                 '    <span></span>';
-        }
-        else
-        {
+        } else {
             html += '    <div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-12 moo-col-xs-12 moo-text-sm-right">'+
                 '    <span class="moo-price">$'+item_price+'</span>';
         }
 
-        if(item.stockCount == "out_of_stock")
-        {
+        if(item.stockCount == "out_of_stock") {
             html += '<button class="moo-btn-sm moo-hvr-sweep-to-top">Out Of Stock</button>';
-        }
-        else
-        {
+        } else {
             //Checking the Qty window show/hide and add add to cart button
             if(window.moo_theme_setings.onePage_qtyWindow != null && window.moo_theme_setings.onePage_qtyWindow == "on")
             {
@@ -277,9 +276,11 @@ function moo_renderItems(category)
         html += '</div>'+
                 '</div>';
     }
-    category.name.replace("'","");
-    if(category.five_items.length == 5)
-    html += '<div class="moo-menu-item moo-menu-list-item"><div class="moo-row moo-align-items-center"><a href="#" class="moo-bt-more moo-show-more" onclick="mooClickOnLoadMoreItems(event,\''+category.uuid+'\',\''+category.name+'\')"> Show More </a><i class="fa fa-chevron-down" aria-hidden="true" style=" display: block; color:red "></i></div></div>';
+    category.name = category.name.replace("'","");
+    category.name = category.name.replace('"',"");
+    if(category.items.length == 5 && withButton) {
+        html += '<div class="moo-menu-item moo-menu-list-item"><div class="moo-row moo-align-items-center"><a href="#" class="moo-bt-more moo-show-more" onclick="mooClickOnLoadMoreItems(event,\''+category.uuid+'\',\''+category.name+'\')"> Show More <i class="fas fa-chevron-down" aria-hidden="true" style=" display: block;"></i></a></div></div>';
+    }
     html    += "</div>";
 
     jQuery(element).append(html).promise().then(function () {
@@ -304,7 +305,8 @@ function mooClickOnLoadMoreItems(event,cat_id,cat_name)
             var html ='';
             for(var i in data.items){
                 var item = data.items[i];
-
+                if(typeof item != 'object')
+                    continue;
                 var item_price = parseFloat(item.price);
                 item_price = item_price/100;
                 item_price = item_price.toFixed(2);
@@ -626,8 +628,8 @@ function mooShowCart(event)
                     cart_html+='<div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-2 moo-col-xs-2  moo-cart-line-itemQty">'+line.qty+'</div>';
                     cart_html+= '<div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-3 moo-col-xs-3  moo-cart-line-itemPrice">$'+formatPrice(line_price.toFixed(2))+'</div>';
                     cart_html+= '<div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-2 moo-col-xs-2  moo-cart-line-itemActions">';
-                    cart_html+=  '<i style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fa fa-pencil-square-o" aria-hidden="true" onclick="mooUpdateSpecialInsinCart(\''+line_id+'\',\''+line.special_ins+'\')"></i>'+
-                        '<i style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fa fa-trash" aria-hidden="true" onclick="mooRemoveLineFromCart(\''+line_id+'\')"></i></div></div>';
+                    cart_html+=  '<i style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fas fa-pencil-square" aria-hidden="true" onclick="mooUpdateSpecialInsinCart(\''+line_id+'\',\''+line.special_ins+'\')"></i>'+
+                        '<i style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fas fa-trash" aria-hidden="true" onclick="mooRemoveLineFromCart(\''+line_id+'\')"></i></div></div>';
                 });
                 cart_html += '</div>';
                 //Set teh cart total

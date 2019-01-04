@@ -5,15 +5,12 @@
 function moo_getLatLong() {
     if(moo_merchantLat == "" || moo_merchantLng == "" ||moo_merchantLat == null || moo_merchantLng == null) {
         jQuery.get('https://maps.googleapis.com/maps/api/geocode/json?&address='+encodeURI(moo_merchantAddress)+'&key=AIzaSyBwB0ahDw6k1CLf9mZxfXd7j5I7rq1bw70',function (data) {
-            if(data.results.length>0)
-            {
+            if(data.results.length>0) {
                 var location = data.results[0].geometry.location;
                 moo_initMap(location,18);
                 jQuery('#Moo_Lat').val(location.lat);
                 jQuery('#Moo_Lng').val(location.lng);
-            }
-            else
-            {
+            } else {
                 var location = {};
                 location.lat = 40.748817 ;
                 location.lng = -73.985428;
@@ -22,9 +19,7 @@ function moo_getLatLong() {
                 jQuery('#Moo_Lng').val(location.lng);
             }
         })
-    }
-    else
-    {
+    } else {
         var Merchantlocation = {};
         Merchantlocation.lng = parseFloat(moo_merchantLng);
         Merchantlocation.lat = parseFloat(moo_merchantLat);

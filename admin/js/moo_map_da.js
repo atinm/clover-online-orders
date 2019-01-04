@@ -506,9 +506,7 @@ function moo_setup_existing_zones() {
             google.maps.event.addListener(tmp_zone.shape, 'radius_changed', function() {
                 document.querySelector('#moo_Circleradius').innerText = "Radius : "+(tmp_zone.shape.getRadius()/1609.34).toFixed(3)+" Miles / "+(tmp_zone.shape.getRadius()/1000).toFixed(3)+" Kilometers";
             });
-        }
-
-        else
+        } else{
             tmp_zone.shape = new google.maps.Polygon({
                 fillColor: tmp_zone.color,
                 strokeColor: tmp_zone.color,
@@ -517,7 +515,8 @@ function moo_setup_existing_zones() {
                 strokeOpacity: 0.8,
                 map:map,
                 paths:tmp_zone.path
-        });
+            });
+        }
 
         moo_delivery_areas.push(tmp_zone);
     }

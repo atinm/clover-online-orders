@@ -55,7 +55,7 @@ function moo_updateCart()
                         html +='<td style="text-align: left;">$'+modifierPrice+'</td>';
                         html +='<td></td>';
                         html +='<td></td>';
-                        html +='<td style="text-align: left;"><i class="fa fa-close" style="cursor: pointer;" onclick="moo_cart_DeleteItemModifier(\''+uuid+'\',\''+item+'\')"></i></td>';
+                        html +='<td style="text-align: left;"><i class="fas fa-close" style="cursor: pointer;" onclick="moo_cart_DeleteItemModifier(\''+uuid+'\',\''+item+'\')"></i></td>';
                         html +="</tr>";
                         subtotal += modifierPrice*product.quantity;
                     }
@@ -63,7 +63,7 @@ function moo_updateCart()
 
                     html +='<tr class="warning MooLineModifier4_'+item+'" ><td colspan="3"></td>';
                     html +='<td id="moo_itemsubtotal_'+item+'">$'+total+'</td>'; //Sub total  ( price + taxes )
-                    html +='<td><i class="fa fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item+'\')"></i></td>'; //Controlles Btn
+                    html +='<td><i class="fas fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item+'\')"></i></td>'; //Controlles Btn
                     html +="</tr>";
                     html +='<tr class="warning MooLineModifier4_'+item+'" ><td colspan="6"></td></tr>';
 
@@ -91,7 +91,7 @@ function moo_updateCart()
                         '</div>' +
                         '</td>';
                     html +='<td id="moo_itemsubtotal_'+item+'">$'+total+'</td>'; //Sub total  ( price + taxes )
-                    html +='<td><i class="fa fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item+'\')"></i></td>'; //Controlles Btn
+                    html +='<td><i class="fas fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item+'\')"></i></td>'; //Controlles Btn
                     html +="</tr>";
                 }
 

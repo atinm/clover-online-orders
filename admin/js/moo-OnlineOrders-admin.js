@@ -227,11 +227,14 @@ jQuery(document).ready(function() {
     });
     jQuery('.moo-color-field').wpColorPicker();
     jQuery('#CouponExpiryDate').datepicker({
-        dateFormat: 'yy-mm-dd'
+        dateFormat: 'mm-dd-yy'
+    });
+    jQuery('#CouponStartDate').datepicker({
+        dateFormat: 'mm-dd-yy'
     });
 
 });
-/* --- Modifier Group --- */
+    /* --- Modifier Group --- */
     function edit_name_GGroup(event,id){
         event.preventDefault();
         jQuery("#label_"+id+" .getname").css("display","none");
@@ -1155,6 +1158,25 @@ function MooPanel_UpdateModifiers(event)
 
     });
 }
+function MooPanel_UpdateTaxes(event)
+{
+    event.preventDefault();
+    window.bar.animate(0.01);
+    window.bar.setText('1 %');
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_taxes'}, function (data)
+        {
+            window.bar.animate(1.0);
+            window.bar.setText('100 %');
+        }
+    ).done(function () {
+        swal("taxes updated");
+        window.bar.animate(1.0);
+        window.bar.setText('100 %');
+
+    });
+
+
+}
 function moo_upadateItemsPerPage(page)
 {
     var received = 0;
@@ -1247,19 +1269,30 @@ function moo_saveOrderType(e,uuid) {
     e.preventDefault();
     var name = jQuery('#label_'+ uuid).val();
     var isEnabled = jQuery('#select_En_' + uuid).prop('checked')?'1':'0';
-    //var isEnabled = jQuery('#select_En_'+ uuid).val();
     var taxable = jQuery('#select_Tax_'+ uuid).val();
     var type = jQuery('#select_type_'+ uuid).val();
     var minAmount = jQuery('#minAmount_'+ uuid).val();
     var data = {'action':'moo_update_ordertype',"name":name,"enable":isEnabled,"taxable":taxable,"type":type,"uuid":uuid,"minAmount":minAmount};
     jQuery.post(moo_params.ajaxurl,data, function (data) {
-            if(data.data=="1")
-            {
-                swal('The order type "'+name+'" was updated');
+           // console.log(data);
+            if(data && data.data=="1") {
+                if(data.updated) {
+                    swal({
+                        text:'The order type "'+name+'" was updated'
+                    });
+                } else {
+                    swal({
+                        text:'The order type "'+name+'" was updated only locally, maybe you removed this order type from your account in Clover'
+                    });
+                }
                 Moo_GetOrderTypes();
             }
         }
-    );
+    ).fail(function (data) {
+        swal({
+            text:'The order type "'+name+'" removed from your account in Clover, please create an other one'
+        });
+    });
 
 }
 function moo_showCustomerMap(event,lat,lng)
@@ -1471,5 +1504,31 @@ function mooCleanByPage(page,pbar,typeOfDate)
         {
             jQuery(id).html(nb + ' ' + typeOfDate.replace("_"," ") +' Cleaned, You can click on Next')
         }
+    });
+}
+
+function mooImportOneCategory(cat_id) {
+    swal({
+        html:
+        '<div class="moo-msgPopup">Checking the items</div>' +
+        '<img src="'+ moo_params['plugin_img']+'/loading.gif" class="moo-imgPopup"/>',
+        showConfirmButton: false
+    });
+    jQuery.get(moo_RestUrl+'moo-clover/v1/inventory/categories/'+cat_id,function (data) {
+        if(data.status =='success'){
+            swal({
+                title:"The category updated",
+                text:"You have "+data.clover_nb_items+" in your Clover account, and "+data.nb_items+" in your website, don't forget to refresh teh page",
+                type:"success"
+            });
+        } else {
+            swal({
+                title:"An error has occured",
+                text:"try again",
+                type:"error"
+            });
+        }
+
+
     });
 }

@@ -483,7 +483,7 @@ class WP_List_Table_MOO {
 	 * @return string
 	 */
 	protected function row_actions( $actions, $always_visible = false ) {
-		$action_count = count( $actions );
+		$action_count = @count( $actions );
 		$i = 0;
 
 		if ( !$action_count )
@@ -545,7 +545,7 @@ class WP_List_Table_MOO {
 		 */
 		$months = apply_filters( 'months_dropdown_results', $months, $post_type );
 
-		$month_count = count( $months );
+		$month_count = @count( $months );
 
 		if ( !$month_count || ( 1 == $month_count && 0 == $months[0]->month ) )
 			return;

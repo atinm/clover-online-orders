@@ -1,3 +1,6 @@
+@import url('//fonts.googleapis.com/css?family=Oswald');
+@import url('//fonts.googleapis.com/css?family=Encode+Sans+Condensed');
+@import url('//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css');
 /**
  * All of the CSS for your admin-specific functionality should be
  * included in this file.
@@ -38,7 +41,7 @@
     right: 5px;
     bottom: 5px;
     border: 3px solid transparent;
-    border-top-color: #1e5429;
+    border-top-color: #1F3C71;
     border-radius: 50%;
 
     -webkit-animation: spin 3s linear infinite;
@@ -201,7 +204,7 @@
     width: 176px;
     min-height: 673px;
     float: left;
-    background: #a0a5aa;
+    background: #1F3C71;
     text-shadow: 1px 1px #54595d;
     color: #ffffff;
     left: 0;
@@ -227,7 +230,7 @@
     background: #FAFAFA;
     padding: 20px 20px 50px;
     float: left;
-    width: 593px;
+    width: 689px;
     border: 1px solid #e5e5e5;
     -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.04);
     box-shadow: 0 1px 1px rgba(0,0,0,.04);
@@ -253,9 +256,15 @@
      margin: 0;
 
  }
+#MooPanel_sidebar ul>li a {
+    color: #ffffff;
+    text-decoration: none;
+}#MooPanel_sidebar ul>li a>i {
+   float: right;
+}
 #MooPanel_sidebar ul>li:hover
 {
-    background-color: #496F4E;
+    background-color: rgb(23, 67, 148);
 }
 #MooPanel_tabContent2,#MooPanel_tabContent3,#MooPanel_tabContent4,#MooPanel_tabContent5, #MooPanel_tabContent6,
 #MooPanel_tabContent7,#MooPanel_tabContent8,#MooPanel_tabContent9,#MooPanel_tabContent10,#MooPanel_tabContent11,
@@ -267,7 +276,7 @@
 {
     position: relative;
     border:0 none;
-    background: #5E7F62;
+    background: #174394;
     color: #fff;
 }
 
@@ -618,7 +627,6 @@
 }
 #MooPanel_sidebar {
     width: 20%;
-    background-color: #1e5429;
     min-height: 0 !important;
     border-radius: 10px;
     font-family: verdana, SANS-SERIF;
@@ -628,7 +636,7 @@
     height: 12px;
     overflow-y: scroll;
     width: 75.8%;
-    min-height: 587px;
+    min-height: 641px;
     padding: 20px 20px 20px;
     border-radius: 10px;
     /*background: white;*/
@@ -650,7 +658,7 @@
 #MooPanel h2 {
     padding: 0;
     margin: 0 10px 16px;
-    color: #1e5429;
+    color: #1F3C71;
     font-size: 40px;
     font-family: NeutraTextAltBold,proxima-nova,Futura,"Helvetica Neue",sans-serif;
     font-weight: 700;
@@ -666,7 +674,7 @@
     padding: 0 !important;
     border-bottom: none !important;
     font-family: NeutraTextAltBold,proxima-nova,Futura,"Helvetica Neue",sans-serif;
-    color: #5E7F62;
+    color: #1F3C71;
     font-size: 19px !important;
     /*margin-left: 10px !important;
     margin-top: 10px !important;*/
@@ -684,8 +692,8 @@ div.normal_text {
     /*border: 1px solid black;*/
 }
 div#MooPanel .button {
-    background-color: #5E7F62 !important;
-    border-color: #1e5429 !important;
+    background-color: #1F3C71 !important;
+    border-color: #1F3C71 !important;
     box-shadow: none !important;
     text-shadow: none !important;
     color: #fff !important;
@@ -697,8 +705,8 @@ div#MooPanel .button {
     line-height: 34px !important;
 }
 div#MooPanel .button-small {
-    background-color: #5E7F62 !important;
-    border-color: #1e5429 !important;
+    background-color: #1F3C71 !important;
+    border-color: #1F3C71 !important;
     box-shadow: none !important;
     text-shadow: none !important;
     color: #fff !important;
@@ -728,8 +736,8 @@ div#MooPanel div#moo_progressbar_container {
 
 }
 .moo-onoffswitch-checkbox:checked + .moo-onoffswitch-label .moo-onoffswitch-switch {
-    background-color: #5E7F62;
-    border-color: green;
+    background-color: #174394;
+    border-color: rgb(23, 67, 148);
     margin-right: 4px;
 }
 .moo-onoffswitch-label {
@@ -775,13 +783,13 @@ div#MooPanel_tabContent4 div.button_center {
 #MooPanel_main .stats .stat .value {
     line-height: 0.8em;
     margin-top: 30px;
-    color: #1e5429;
+    color: #000000;
 }
 #MooPanel_main .stats .stat .type {
     margin-top: 12px;
     font-weight: bold;
     font-size: 14px;
-    color: #456c4a;
+    color: #000000;
 }
 div.input_label_center {
     width: 70%;
@@ -798,9 +806,9 @@ div.input_label_center label {
     width: 79px;
 }
 div#MooPanel input[type=text]:focus, input[type=search]:focus, input[type=radio]:focus, input[type=tel]:focus, input[type=time]:focus, input[type=url]:focus, input[type=week]:focus, input[type=password]:focus, input[type=checkbox]:focus, input[type=color]:focus, input[type=date]:focus, input[type=datetime]:focus, input[type=datetime-local]:focus, input[type=email]:focus, input[type=month]:focus, input[type=number]:focus, select:focus, textarea:focus {
-    border-color: #1e5429 !important;
-    -webkit-box-shadow: 0 0 2px rgba(30,84,41,.8) !important;
-    box-shadow: 0 0 2px rgba(30,84,41,.8) !important;
+    border-color: #1F3C71 !important;
+    -webkit-box-shadow: 0 0 2px rgba(23, 67, 148,.8) !important;
+    box-shadow: 0 0 2px rgba(23, 67, 148,.8) !important;
 }
 div.input_label_center input {
     width: 100%;
@@ -1170,8 +1178,8 @@ table.table_category td.bt-cat{
     margin-bottom: 15px;
 }
 div#moo_uploadImgBtn .button {
-    background-color: #5E7F62 !important;
-    border-color: #1e5429 !important;
+    background-color: #174394 !important;
+    border-color: #1F3C71 !important;
     box-shadow: none !important;
     text-shadow: none !important;
     color: #fff !important;
@@ -1424,7 +1432,7 @@ table.main_table{
     border: 1px solid #ddd;
 }
 table.main_table tr.top_table{
-    background-color: #1e5429 !important;
+    background-color: #1F3C71 !important;
     color: #fff;
 }
 table.main_table th{

@@ -3,10 +3,6 @@
     swal.setDefaults({ customClass: 'moo-custom-dialog-class' });
     jQuery( document ).ready(function($) {
         jQuery('#moo_OnlineStoreContainer').removeClass('moo_loading');
-        jQuery('.demo').imagesRotation({
-            interval: 1000,     // ms
-            intervalFirst: 500, // first image change, ms
-            callback: null});      // first argument would be the current image url
     });
 
 })(jQuery);

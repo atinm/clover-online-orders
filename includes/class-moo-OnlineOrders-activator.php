@@ -432,6 +432,16 @@ class Moo_OnlineOrders_Activator {
                 'post_title'     => 'Cart',
                 'post_type'      => 'page',
                 'post_content'   => '[moo_cart]'
+            ),
+            'login_page'=>array(
+                'comment_status' => 'closed',
+                'ping_status'    =>  'closed' ,
+                'post_author'    => 1,
+                'post_name'      => 'My Orders',
+                'post_status'    => 'publish' ,
+                'post_title'     => 'My Orders',
+                'post_type'      => 'page',
+                'post_content'   => '[moo_my_account]'
             )
         );
         $defaultOptions = (array)get_option( 'moo_settings' );
@@ -451,17 +461,24 @@ class Moo_OnlineOrders_Activator {
             $cart_page_id  =  wp_insert_post( $pages['cart'], false );
             $defaultOptions['cart_page'] = $cart_page_id ;
         }
+        if(!isset($defaultOptions['login_page']) || $defaultOptions['login_page'] == "")
+        {
+            $login_page_id  =  wp_insert_post( $pages['login_page'], false );
+            $defaultOptions['login_page'] = $login_page_id ;
+        }
 
         // Save the version of the plugin in the Database
-         update_option('moo_onlineOrders_version', '131');
+         update_option('moo_onlineOrders_version', '132');
 
-        if( !isset($defaultOptions["default_style"]) || $defaultOptions["default_style"] == "" || $defaultOptions["default_style"] == "style2" ) $defaultOptions["default_style"] = "style1";
+        if( !isset($defaultOptions["default_style"]) || $defaultOptions["default_style"] == "" || $defaultOptions["default_style"] == "style2" ) $defaultOptions["default_style"] = "onePage";
         if( !isset($defaultOptions["hours"]) || $defaultOptions["hours"] == "") $defaultOptions["hours"] = "business";
+        if( !isset($defaultOptions["payment_creditcard"]) || $defaultOptions["payment_creditcard"] == "") $defaultOptions["payment_creditcard"] = "on";
         if( !isset($defaultOptions["payment_cash"]) || $defaultOptions["payment_cash"] == "") $defaultOptions["payment_cash"] = "on";
         if( !isset($defaultOptions["payment_cash_delivery"]) || $defaultOptions["payment_cash_delivery"] == "") $defaultOptions["payment_cash_delivery"] = "on";
         if( !isset($defaultOptions["scp"]) || $defaultOptions["scp"] == "") $defaultOptions["scp"] = "on";
         if( !isset($defaultOptions["checkout_login"]) || $defaultOptions["checkout_login"] == "") $defaultOptions["checkout_login"] = "disabled";
         if( !isset($defaultOptions["use_coupons"]) || $defaultOptions["use_coupons"] == "") $defaultOptions["use_coupons"] = "disabled";
+        if( !isset($defaultOptions["use_sms_verification"]) || $defaultOptions["use_sms_verification"] == "") $defaultOptions["use_sms_verification"] = "enabled";
         if( !isset($defaultOptions["use_special_instructions"]) || $defaultOptions["use_special_instructions"] == "") $defaultOptions["use_special_instructions"] = "enabled";
         if( !isset($defaultOptions["save_cards"]) || $defaultOptions["save_cards"] == "") $defaultOptions["save_cards"] = "disabled";
         if( !isset($defaultOptions["save_cards_fees"]) || $defaultOptions["save_cards_fees"] == "") $defaultOptions["save_cards_fees"] = "disabled";
@@ -472,7 +489,7 @@ class Moo_OnlineOrders_Activator {
         if( !isset($defaultOptions["order_later_days_delivery"]) || $defaultOptions["order_later_days_delivery"] == "") $defaultOptions["order_later_days_delivery"] = "4";
         if( !isset($defaultOptions["order_later_asap_for_p"]) || $defaultOptions["order_later_asap_for_p"] == "") $defaultOptions["order_later_asap_for_p"] = "off";
         if( !isset($defaultOptions["order_later_asap_for_d"]) || $defaultOptions["order_later_asap_for_d"] == "") $defaultOptions["order_later_asap_for_d"] = "off";
-        if( !isset($defaultOptions["copyrights"]) || $defaultOptions["copyrights"] == "") $defaultOptions["copyrights"] = 'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.2.8">Smart Online Order</a>';
+        if( !isset($defaultOptions["copyrights"]) || $defaultOptions["copyrights"] == "") $defaultOptions["copyrights"] = 'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.3.1">Smart Online Order</a>';
         if( !isset($defaultOptions["mg_settings_displayInline"]) || $defaultOptions["mg_settings_displayInline"] == "") $defaultOptions["mg_settings_displayInline"] = 'disabled';
         if( !isset($defaultOptions["mg_settings_qty_for_all"]) || $defaultOptions["mg_settings_qty_for_all"] == "") $defaultOptions["mg_settings_qty_for_all"] = 'enabled';
         if( !isset($defaultOptions["mg_settings_qty_for_zeroPrice"]) || $defaultOptions["mg_settings_qty_for_zeroPrice"] == "") $defaultOptions["mg_settings_qty_for_zeroPrice"] = 'enabled';

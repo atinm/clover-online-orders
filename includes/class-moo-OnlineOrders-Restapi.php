@@ -125,12 +125,29 @@ class Moo_OnlineOrders_Restapi
             )
         ) );
 
+        /*
+         * Inventory importing & syncynig functions
+         */
+        register_rest_route( $this->namespace, '/inventory/categories/(?P<cat_id>[a-zA-Z0-9-]+)', array(
+            array(
+                'methods'   => 'GET',
+                'callback'  => array( $this, 'importCategory' )
+            )
+        ) );
+
         // theme settings
         // get the store interface settings
         register_rest_route( $this->namespace, '/theme_settings/(?P<theme_name>[a-zA-Z0-9-]+)', array(
             array(
                 'methods'   => 'GET',
                 'callback'  => array( $this, 'getThemeSettings' )
+            )
+        ) );
+        register_rest_route( $this->namespace, '/theme_settings/(?P<theme_name>[a-zA-Z0-9-]+)', array(
+            array(
+                'methods'   => 'POST',
+                'callback'  => array( $this, 'saveThemeSettings' ),
+                'permission_callback' => array( $this, 'permissionCheck' )
             )
         ) );
         // modifiers settings
@@ -151,8 +168,87 @@ class Moo_OnlineOrders_Restapi
                 'callback'  => array( $this, 'search' )
             )
         ) );
-    }
+        /*
+         * Dashboard functions
+         */
+        // Get Installed themes
+        register_rest_route( $this->namespace, '/dashboard/installed_themes', array(
+            array(
+                'methods'   => 'GET',
+                'callback'  => array( $this, 'getInstalledThemes' )
+            )
+        ) );
+        register_rest_route( $this->namespace, '/dashboard/installed_themes', array(
+            array(
+                'methods'   => 'POST',
+                'callback'  => array( $this, 'activeTheme' ),
+                'permission_callback' => array( $this, 'permissionCheck' )
+            )
+        ) );
+        register_rest_route( $this->namespace, '/dashboard/all_themes', array(
+            array(
+                'methods'   => 'GET',
+                'callback'  => array( $this, 'getAllThemes' )
+            )
+        ) );
 
+        //Customer account functions
+
+        register_rest_route( $this->namespace, '/customers', array(
+            array(
+                'methods'   => 'GET',
+                'callback'  => array( $this, 'getCustomer' )
+            )
+        ) );
+        register_rest_route( $this->namespace, '/customers', array(
+            array(
+                'methods'   => 'POST',
+                'callback'  => array( $this, 'updateCustomer' )
+            )
+        ) );
+        register_rest_route( $this->namespace, '/customers/password', array(
+            array(
+                'methods'   => 'POST',
+                'callback'  => array( $this, 'updateCustomerPassword' )
+            )
+        ) );
+        register_rest_route( $this->namespace, '/customers/orders', array(
+            array(
+                'methods'   => 'GET',
+                'callback'  => array( $this, 'getOrdersForCustomer' )
+            )
+        ) );
+        register_rest_route( $this->namespace, '/customers/favorites', array(
+            array(
+                'methods'   => 'GET',
+                'callback'  => array( $this, 'getCustomerFavorites' )
+            )
+        ) );
+        register_rest_route( $this->namespace, '/customers/addresses', array(
+            array(
+                'methods'   => 'GET',
+                'callback'  => array( $this, 'getCustomerAddressess' )
+            )
+        ) );
+        register_rest_route( $this->namespace, '/customers/orders/(?P<uuid>(.)+)/reorder', array(
+            array(
+                'methods'   => 'POST',
+                'callback'  => array( $this, 'reOrder' )
+            )
+        ) );
+        // Change your api key
+        register_rest_route( $this->namespace, '/dashboard/change_api_key', array(
+            array(
+                'methods'   => 'POST',
+                'callback'  => array( $this, 'changeApiKey' ),
+                'permission_callback' => array( $this, 'permissionCheck' )
+            )
+        ) );
+
+    }
+    public function permissionCheck( $request ) {
+        return current_user_can( 'manage_options' );
+    }
     public function getCategories( $request )
     {
         $params = $request->get_params();
@@ -171,9 +267,8 @@ class Moo_OnlineOrders_Restapi
                     );
                     if(isset($params["expand"]))
                     {
-                        if($params["expand"] == 'five_items')
-                        {
-                            $c['five_items'] = array();
+                        if($params["expand"] == 'five_items') {
+                            $c['items'] = array();
                             if($cat->items !="") {
                                 $items_uuids = explode(",",$cat->items);
                                 $track_stock = $this->api->getTrackingStockStatus();
@@ -224,9 +319,63 @@ class Moo_OnlineOrders_Restapi
                                     $final_item["has_modifiers"]=   ($this->model->itemHasModifiers($item->uuid)->total>0)?true:false;
                                     $final_item["image"]= $this->model->getDefaultItemImage($item->uuid);
 
-                                    array_push($c['five_items'],$final_item);
+                                    array_push($c['items'],$final_item);
                                 }
-                                usort($c['five_items'],array('Moo_OnlineOrders_Restapi','moo_sort_items'));
+                                usort($c['items'],array('Moo_OnlineOrders_Restapi','moo_sort_items'));
+                            }
+                        } else {
+                            if($params["expand"] == 'all_items') {
+                                $c['items'] = array();
+                                if($cat->items !="") {
+                                    $items_uuids = explode(",",$cat->items);
+                                    $track_stock = $this->api->getTrackingStockStatus();
+                                    if($track_stock == true)
+                                        $itemStocks = $this->api->getItemStocks();
+                                    else
+                                        $itemStocks = false;
+
+                                    foreach ($items_uuids as $items_uuid) {
+                                        if($items_uuid == "") continue;
+
+                                        $item = $this->model->getItem($items_uuid);
+                                        $final_item = array();
+
+                                        //Check if the item if it's disabled
+                                        if($item->visible == 0 || $item->hidden == 1 || $item->price_type=='VARIABLE') continue;
+
+                                        //Check the stock
+                                        if($track_stock)
+                                            $itemStock = self::getItemStock($itemStocks,$item->uuid);
+                                        else
+                                            $itemStock = false;
+
+
+                                        if($item->outofstock == 1 || ($track_stock == true && $itemStock != false && isset($itemStock->stockCount)  && $itemStock->stockCount < 1))
+                                        {
+                                            $final_item['stockCount'] = "out_of_stock";
+                                        }
+                                        else
+                                        {
+                                            if(isset($itemStock->stockCount))
+                                                $final_item['stockCount'] = $itemStock->stockCount;
+                                            else
+                                                $final_item['stockCount'] = ($track_stock)?"tracking_stock":"not_tracking_stock";
+                                        }
+                                        $final_item["uuid"]=$item->uuid;
+                                        $final_item["name"]=$item->name;
+                                        $final_item["description"]  =   stripslashes ($item->description);
+                                        $final_item["price"]        =   $item->price;
+                                        $final_item["price_type"]   =   $item->price_type;
+                                        $final_item["unit_name"]    =   $item->unit_name;
+                                        $final_item["unit_name"]    =   $item->unit_name;
+                                        $final_item["sort_order"]   =   intval($item->sort_order);
+                                        $final_item["has_modifiers"]=   ($this->model->itemHasModifiers($item->uuid)->total>0)?true:false;
+                                        $final_item["image"]= $this->model->getDefaultItemImage($item->uuid);
+
+                                        array_push($c['items'],$final_item);
+                                    }
+                                    usort($c['items'],array('Moo_OnlineOrders_Restapi','moo_sort_items'));
+                                }
                             }
                         }
                     }
@@ -362,6 +511,7 @@ class Moo_OnlineOrders_Restapi
 
 
         usort($response["items"], array('Moo_OnlineOrders_Restapi','moo_sort_items'));
+
         // Return all of our post response data.
         return $response;
     }
@@ -745,6 +895,10 @@ class Moo_OnlineOrders_Restapi
     {
         return $a["sort_order"]>$b["sort_order"];
     }
+    public static function moo_sort_installed_themes($a,$b)
+    {
+        return $a->name<$b->name;
+    }
     /* Clean's functions */
     public function cleanItems( $request )
     {
@@ -1018,6 +1172,25 @@ class Moo_OnlineOrders_Restapi
         $response["settings"]   = $res;
         return $response;
     }
+    /* Save the theme settings */
+    public function saveThemeSettings( $request )
+    {
+        $response = array();
+        if ( !isset($request["theme_name"]) ) {
+            return new WP_Error( 'theme_name_required', 'Please provide ethe theme name', array( 'status' => 404 ) );
+        }
+        $name = $request["theme_name"];
+        $body = json_decode($request->get_body(),true);
+        $settings = (array) get_option("moo_settings");
+        if(is_array($body) && count($body)>0){
+            foreach ($body as $key=>$val) {
+                $settings[$name.'_'.$val["name"]] = $val["value"];
+            }
+        }
+        update_option("moo_settings",$settings);
+        $response["status"] = 'success';
+        return $response;
+    }
     /* Get the  Modifier Groups Settings */
     public function getModifierGroupsSettings( $request )
     {
@@ -1052,6 +1225,484 @@ class Moo_OnlineOrders_Restapi
 
         $response["settings"]   =  $res;
         return $response;
+    }
+    /*
+     * Dashboard's functions
+     */
+    public function getInstalledThemes($request) {
+        $result = array();
+        $settings = (array) get_option("moo_settings");
+        $currentTheme = $settings["default_style"];
+        $path = plugin_dir_path(dirname(__FILE__))."public/themes";
+        $directories = scandir($path);
+        foreach ($directories as $dir) {
+            if(file_exists($path."/".$dir."/manifest.json")){
+                $theme_settings = json_decode(file_get_contents($path."/".$dir."/manifest.json"));
+                if(!isset($theme_settings->name) || $theme_settings->name === ''){
+                    continue;
+                }
+                $theme_settings->is_active = ($theme_settings->identifier == $currentTheme)?true:false;
+                array_push($result,$theme_settings);
+            }
+        }
+        usort($result, array('Moo_OnlineOrders_Restapi','moo_sort_installed_themes'));
+        return array(
+            "status"=>"ok",
+            "data"=>$result
+        );
+    }
+    public function getAllThemes($request) {
+        $result = $this->api->getThemes();
+
+        if(count($result)>0) {
+            return array(
+                "status"=>"nok",
+                "data"=>$result);
+        }
+
+        return array("status"=>"nok");
+    }
+    public function activeTheme($request) {
+        $request_body   = json_decode($request->get_body(),true);
+        $result = array();
+        $settings = (array) get_option("moo_settings");
+        $theme    = sanitize_text_field($request_body['theme']);
+        if($theme != "")
+        {
+            //change theme
+            $settings["default_style"] = $theme;
+            //load theme settings from manifest
+            $path = plugin_dir_path(dirname(__FILE__))."public/themes";
+            if(file_exists($path."/".$theme."/manifest.json")){
+                $theme_manifest = json_decode(file_get_contents($path."/".$theme."/manifest.json"),true);
+                foreach ($theme_manifest['settings'] as $item_settings) {
+                    if(!isset($settings[$theme.'_'.$item_settings["id"]])) {
+                        $settings[$theme.'_'.$item_settings["id"]] = $item_settings["default"];
+                    }
+                }
+            }
+            //save changes
+            update_option("moo_settings",$settings);
+            $response = array(
+                'status'	=> 'success'
+            );
+        }
+        else
+        {
+            $response = array(
+                'status'	=> 'error',
+                'message'   => 'Selected theme not found'
+            );
+        }
+
+       return $response;
+    }
+    public function changeApiKey($request) {
+        $request_body   = json_decode($request->get_body(),true);
+        $result = array();
+        $settings = (array) get_option("moo_settings");
+        $new_api_key    = sanitize_text_field($request_body['api_key']);
+
+        //check the api key
+
+        $result = true;
+        if($result) {
+            //remove the current data
+
+            //import new data
+
+            //change api key
+
+            //return result
+
+            //change theme
+            $settings["api_key"] = $new_api_key;
+            //save changes
+            update_option("moo_settings",$settings);
+            $response = array(
+                'status'	=> 'success'
+            );
+        } else {
+            $response = array(
+                'status'	=> 'error',
+                'message'   => 'the new api key is not a valid key'
+            );
+        }
+
+       return $response;
+    }
+
+    /*
+     * Importing & syncing functions
+     */
+    public function importCategory( $request ){
+        global $wpdb;
+        $response = array();
+        $nbItemsPerCategory = 0;
+        if ( !isset($request["cat_id"]) || empty( $request["cat_id"] ) ) {
+            return new WP_Error( 'category_id_required', 'Category id not found', array( 'status' => 404 ) );
+        }
+        $category_uuid = sanitize_text_field($request["cat_id"]);
+        //Get the category details
+        $category = $this->api->getOneCategory($category_uuid);
+        $string_items_ids ="";
+        //Save the items
+        if(isset($category->items) && isset($category->items->elements)) {
+            $cloverNbItems = @count($category->items->elements);
+            foreach ($category->items->elements as $item) {
+                if(isset($item->id)) {
+                    $string_items_ids .= $item->id.",";
+                    if($this->model->getItem($item->id) == null){
+                        $this->api->getItem($item->id);
+                    } else {
+                        $nbItemsPerCategory++;
+                    }
+                }
+            }
+        } else {
+            $cloverNbItems = 0;
+        }
+        $wpdb->update("{$wpdb->prefix}moo_category",array(
+            'items' =>  $string_items_ids
+        ),array('uuid'=>$category->id));
+
+        return array(
+            "status"=>'success',
+            "clover_nb_items"=>$cloverNbItems,
+            "nb_items"=>$nbItemsPerCategory
+        );
+    }
+
+    /*
+     * Function for customers profils
+     */
+    public function getCustomer($request){
+        if(isset($_SESSION['moo_customer_token']) && $_SESSION['moo_customer_token']!="") {
+            $token = $_SESSION['moo_customer_token'];
+
+            $res = $this->api->moo_GetCustomer($token);
+            $result= json_decode($res);
+            if($result->status == 'success')
+            {
+                return array(
+                    "status"=>"success",
+                    "customer"=>$result->customer[0] ,
+                );
+            } else {
+                $_SESSION['moo_customer_token'] = false;
+                $_SESSION['moo_customer'] = null;
+                return array(
+                    "status"=>$result->status
+                );
+            }
+
+        } else {
+            return array("status"=>"failed","message"=>"not logged user");
+        }
+
+    }
+    public function getOrdersForCustomer($request){
+        if(isset($_SESSION['moo_customer_token']) && $_SESSION['moo_customer_token']!="") {
+            $token = $_SESSION['moo_customer_token'];
+            if(isset($request['page'])) {
+                $page = intval($request['page']);
+            } else {
+                $page = 1;
+            }
+
+            $res = $this->api->moo_GetOrders($token,$page);
+            $result= json_decode($res);
+            if($result->status == 'success')
+            {
+               // $_SESSION['moo_customer'] = $result->customer;
+                $orders = array();
+                foreach ($result->orders as $order) {
+                    $orderId = sanitize_text_field($order->order->uuid);
+                    $order_items = $this->model->getItemsOrder($orderId);
+                    $orderDetail = $this->model->getOneOrder($orderId);
+                    $oneOrder = $this->api->getOrderDetails2($orderDetail,$order);
+
+                    if(isset($oneOrder['payments']) && count($oneOrder['payments'])>0 )
+                    {
+                        $orderPayments = $oneOrder['payments'];
+                        foreach ($orderPayments as $p) {
+                            if ($p->result == "APPROVED")
+                            {
+                                $oneOrder['status'] = "Paid";
+                            }
+                        }
+                        if($oneOrder['status'] == "")
+                        {
+                            $oneOrder['status'] = "Not Paid";
+                        }
+                    } else {
+                        if($oneOrder['paymentMethode'] == 'cash')
+                        {
+                            $oneOrder['status'] ='Will Pay Cash';
+                        } else {
+                            $oneOrder['status'] = 'Not paid';
+                        }
+
+                    }
+                    foreach ($order_items as $order_item) {
+                        if($order_item->modifiers != ""){
+                            $order_item->list_modifiers = array();
+                            $string = substr($order_item->modifiers, 0, strlen($order_item->modifiers)-1);
+                            $data_modifier = explode( ',', $string);
+                            foreach ($data_modifier as $modifier){
+                                $getModifier = $this->model->getModifier($modifier);
+                                array_push($order_item->list_modifiers,$getModifier);
+                            }
+                        }
+                    }
+                    //var_dump($order_items);
+                    $oneOrder['items'] = $order_items;
+                    array_push($orders,$oneOrder);
+                }
+                return array(
+                    "status"=>"success",
+                    "orders"=>$orders,
+                    "total_orders"=>$result->total_orders->nb,
+                    "current_page"=>$page,
+                );
+            } else {
+                $_SESSION['moo_customer_token'] = false;
+                $_SESSION['moo_customer'] = null;
+                return array(
+                    "status"=>$result->status
+                );
+            }
+
+        } else {
+            return array("status"=>"failed","message"=>"not logged user");
+        }
+
+    }
+    public function getCustomerFavorites($request){
+
+        if(isset($_SESSION['moo_customer_email']) && $_SESSION['moo_customer_email']!="") {
+            $customer_email = $_SESSION['moo_customer_email'];
+            $items = $this->model->moo_GetBestItems4Customer($customer_email);
+        } else {
+            return array("status"=>"failed","message"=>"not logged user");
+        }
+
+        $response = array();
+        $response["items"]= array();
+        $track_stock = $this->api->getTrackingStockStatus();
+        if($track_stock == true) {
+            $itemStocks = $this->api->getItemStocks();
+        } else {
+            $itemStocks = false;
+        }
+
+        foreach ($items as $item) {
+            $final_item = array();
+            //Check if the item if it's disabled
+            if($item->visible == 0 || $item->hidden == 1 || $item->price_type=='VARIABLE') continue;
+
+            //Check the stock
+            if($track_stock)
+                $itemStock = self::getItemStock($itemStocks,$item->uuid);
+            else
+                $itemStock = false;
+
+
+            if($item->outofstock == 1 || ($track_stock == true && $itemStock != false && isset($itemStock->stockCount)  && $itemStock->stockCount < 1))
+            {
+                $final_item['stockCount'] = "out_of_stock";
+            }
+            else
+            {
+                if(isset($itemStock->stockCount))
+                    $final_item['stockCount'] = $itemStock->stockCount;
+                else
+                    $final_item['stockCount'] = ($track_stock)?"tracking_stock":"not_tracking_stock";
+            }
+            $final_item["uuid"]=$item->uuid;
+            $final_item["name"]=$item->name;
+            $final_item["description"]  =   stripslashes ($item->description);
+            $final_item["price"]        =   $item->price;
+            $final_item["price_type"]   =   $item->price_type;
+            $final_item["unit_name"]    =   $item->unit_name;
+            $final_item["unit_name"]    =   $item->unit_name;
+            $final_item["sort_order"]   =   intval($item->sort_order);
+            $final_item["has_modifiers"]=   ($this->model->itemHasModifiers($item->uuid)->total>0)?true:false;
+            $final_item["image"]= $this->model->getDefaultItemImage($item->uuid);
+
+            array_push($response['items'],$final_item);
+        }
+
+
+        usort($response["items"], array('Moo_OnlineOrders_Restapi','moo_sort_items'));
+        // Return all of our post response data.
+        return $response;
+
+    }
+    public function getCustomerAddressess($request){
+
+        if(isset($_SESSION['moo_customer_token']) && $_SESSION['moo_customer_token']!="") {
+            $token = $_SESSION['moo_customer_token'];
+            $res = $this->api->moo_GetAddresses($token);
+            $result= json_decode($res);
+            if($result->status == 'success') {
+                $res = array("status"=>"success","addresses"=>$result->addresses);
+                $_SESSION['moo_customer'] = $result->customer;
+                return $res;
+            } else {
+                $_SESSION['moo_customer_token'] = false;
+                $_SESSION['moo_customer'] = null;
+                $_SESSION['moo_customer_email'] = null;
+            }
+        }
+        return array("status"=>"failed","message"=>"not logged user");
+
+    }
+    public function reOrder($request){
+        $MooOptions = (array)get_option('moo_settings');
+        $cart_page_id     = $MooOptions['cart_page'];
+        $cart_page_url    =  get_page_link($cart_page_id);
+        if(isset($request['uuid'])) {
+            $order_uuid = sanitize_text_field($request['uuid']);
+        } else {
+            return new WP_Error( 'rest_not_found', 'Sorry, order nor found.', array( 'status' => 404 ) );
+        }
+        if(isset($request["cart"]) && $request["cart"] == 'empty') {
+            //empty the cart
+            unset($_SESSION['items']);
+            unset($_SESSION['itemsQte']);
+        }
+
+        $order_items = $this->model->getItemsOrder($order_uuid);
+        foreach ($order_items as $item) {
+            $item_uuid = $item->item_uuid;
+            $cart_line_id = $item->item_uuid;
+            $qte = $item->quantity;
+            $list_modifiers = array();
+            if($item->modifiers != ""){
+                $string = substr($item->modifiers, 0, strlen($item->modifiers)-1);
+                $data_modifier = explode( ',', $string);
+                foreach ($data_modifier as $modifier_uuid){
+                    $cart_line_id .= '_'.$modifier_uuid;
+                    $getModifier = $this->model->getModifier($modifier_uuid);
+                    array_push($list_modifiers,$getModifier);
+                }
+            }
+            if($item){
+                //Check the stock before inserting the item to the cart
+                if($this->api->getTrackingStockStatus()) {
+                    $itemStocks = $this->api->getItemStocks();
+                    $itemStock  = $this->getItemStock($itemStocks,$item->item_uuid);
+                    if(isset($_SESSION['items']) && isset($_SESSION['itemsQte'][$item_uuid]) ) {
+                        if($itemStock != false && isset($itemStock->stockCount) && (($_SESSION['itemsQte'][$item_uuid]+$qte)>$itemStock->stockCount))
+                        {
+
+                            $response = array(
+                                'status'	=> 'error',
+                                'message'   => "Unfortunately, we are low on stock, you can't order the item ".$item->name,
+                                'quantity'   => $itemStock->stockCount
+                            );
+                            //return error
+                            return $response;
+                        }
+                        else
+                        {
+                            $_SESSION['itemsQte'][$item_uuid] += $qte;
+                        }
+
+                    } else {
+                        if($itemStock != false && isset($itemStock->stockCount) && $qte>$itemStock->stockCount) {
+                            $response = array(
+                                'status'	=> 'error',
+                                'message'   => "Unfortunately, we are low on stock, you can't order the item ".$item->name,
+                                'quantity'   => $itemStock->stockCount
+                            );
+                            //return error
+                            return $response;
+                        } else {
+                            $_SESSION['itemsQte'][$item_uuid] = $qte;
+                        }
+
+                    }
+                }
+
+                if(isset($_SESSION['items']) && array_key_exists($cart_line_id,$_SESSION['items']) ) {
+                    $_SESSION['items'][$cart_line_id]['quantity']+=$qte;
+                } else {
+                    $_SESSION['items'][$cart_line_id] = array(
+                        'item'=>$item,
+                        'quantity'=>$qte,
+                        'special_ins'=>$item->special_ins,
+                        'tax_rate'=>$this->model->getItemTax_rate( $item_uuid ),
+                        'modifiers'=>array()
+                    );
+                }
+                //Adding modifiers
+                foreach ($list_modifiers as $modifier) {
+                    $modifier_uuid = $modifier->uuid;
+                    $modifierInfos = (array)$modifier;
+                    $q = 1;
+                    $modifierInfos["qty"] = ($q<1)?1:$q;
+                    $_SESSION['items'][$cart_line_id]['modifiers'][$modifier_uuid] = $modifierInfos;
+                }
+            } else {
+                $response = array(
+                    'status'	=> 'error',
+                    'message'   => 'An item not found in our system, maybe we stop selling it or it is out of stock'
+                );
+
+                return $response;
+
+            }
+        }
+        $response = array(
+            'status'	=> 'success',
+            'cart_url'	=> $cart_page_url,
+            'message'   => 'items added to cart'
+        );
+
+        return $response;
+    }
+    public function updateCustomer($request){
+
+        if(isset($_SESSION['moo_customer_token']) && $_SESSION['moo_customer_token']!="") {
+            $token = $_SESSION['moo_customer_token'];
+            $name = sanitize_text_field($request['name']);
+            $email = sanitize_text_field($request['email']);
+            $phone = sanitize_text_field($request['phone']);
+            $res = $this->api->moo_updateCustomer($name,$email,$phone,$token);
+            $result= json_decode($res);
+            if($result->status == 'success') {
+                $res = array("status"=>"success");
+                return $res;
+            }
+        }
+        return array("status"=>"failed","message"=>"not logged user");
+
+    }
+    public function updateCustomerPassword($request){
+
+        if(isset($_SESSION['moo_customer_token']) && $_SESSION['moo_customer_token']!="") {
+            $token = $_SESSION['moo_customer_token'];
+            $current_password = sanitize_text_field($request['current_password']);
+            $new_pâssword = sanitize_text_field($request['new_password']);
+
+            if(strlen($new_pâssword)<6) {
+                $res =array("status"=>"failed","message"=>"The new password must contain 6 chars at min");
+                return $res;
+            }
+            $res = $this->api->updateCustomerPassword(sha1($current_password),sha1($new_pâssword),$token);
+            $result= json_decode($res);
+            if($result->status == 'success') {
+                $res = array("status"=>"success");
+                return $res;
+            } else {
+                $res =array("status"=>"failed","message"=>"The current password in incorrect");
+                return $res;
+            }
+        }
+        return array("status"=>"failed","message"=>"not logged user");
+
     }
 
     /* Static functions for internal use */
