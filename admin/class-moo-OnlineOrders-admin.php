@@ -687,7 +687,7 @@ class moo_OnlineOrders_Admin {
         <div class="wrap">
             <div class="moo_dashboard_logo">
                 <div class="moo_dashboard_logo_img">
-                    <a href="http://smartonlineorder.com" title="Smart Online Order">
+                    <a href="http://smartonlineorder.com" title="Smart Online Order" target="_blank">
                         <img src="//api.smartonlineorders.com/assets/images/small-logo.png" alt="Smart online order logo">
                     </a>
                 </div>

@@ -1,9 +1,9 @@
 {
     "identifier":"jTheme",
-    "name":"Store interface 5",
+    "name":"Store Interface 5",
     "screenshots":"https://api.smartonlineorders.com/assets/images/interface-5.png",
     "version":"1.0",
-    "description":"This store interface is great if you want to use images to showcase your Clover Inventory.",
+    "description":"This Store Interface is great if you want to use images to showcase your Clover Inventory.",
     "settings":[
         {
             "id":"width",

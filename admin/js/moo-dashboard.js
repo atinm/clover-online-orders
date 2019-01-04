@@ -84,9 +84,8 @@ function mooRenderHtmlOneTheme(theme,activeOrInstall) {
     if(theme.is_active){
         html += '<div class="moo_dashboard_addon_box_led new"><i class="fas fa-star"></i>Activated</div>';
     }
-        html += '<a target="_blank" href="" title="More details">'+
-                '<img src="'+theme.screenshots+'">'+
-                '</a> </div>'+
+        html += '<img src="'+theme.screenshots+'">'+
+                '<a target="_blank" href="" title="More details"></a> </div>'+
                 '<div class="moo_dashboard_addon_box_title">'+theme.name+'</div>'+
                 '<div class="moo_dashboard_addon_box_excerpt">'+
                 '<p class="moo_dashboard_addon_box_excerpt_content">'+theme.description+'</p>'+

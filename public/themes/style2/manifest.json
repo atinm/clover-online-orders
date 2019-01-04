@@ -1,9 +1,9 @@
 {
     "identifier":"style2",
-    "name":"Store interface 3",
+    "name":"Store Interface 3",
     "screenshots":"https://api.smartonlineorders.com/assets/images/interface-3.png",
     "version":"1.0",
-    "description":"This store interface if perfect if you want a simple way of showcasing your menu.",
+    "description":"This Store Interface if perfect if you want a simple way of showcasing your menu.",
     "settings":[
         {
             "id":"width",
