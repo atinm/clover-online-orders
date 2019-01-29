@@ -27,7 +27,6 @@ After installing the **Smart Online Order for Clover** plugin, add the pages 'Or
 Below are just a few websites currently using Smart Online Order with their Clover POS Some websites we built, other websites were built by the merchant themselves or hired developers. For Non-Wordpress websites, (we can create for them the online order page and then it gets linked to their website. Here are some actual customers below. Most have Wordpress websites and some don't.
 
 [Burger Restaurant](https://chicknchuck.com/)
-[Twisted Fresh](https://twistedfresh.com/)
 [Full Service Restaurant](https://www.theoriginalturkey.com)
 [Island Smoothie Cafe](https://www.islandsmoothiecafe.com)
 [Cafe at Airport](https://arrowheadtaphouse.com)
