@@ -135,7 +135,7 @@ function  moo_renderCategories($cats) {
                 html +='<div class="moo-col-md-'+nbItemsPerRowCssCol+'">';
             }
             html +='<a class="link" href="#cat-'+ category.uuid.toLowerCase() +'" id="cat-'+category.uuid.toLowerCase()+'" data-cat-id="'+category.uuid.toLowerCase()+'" onclick="MooClickOnCategory(event,this)">';
-            html += '<div class="image-wrapper"><img src="'+imageCatUrl+'"/></div>';
+            html += '<div class="image-wrapper" style="background: url('+imageCatUrl+') no-repeat center;background-size:100%;"></div>';
 
 
             html +='<div class="cat-name-wrapper"><span class="moo-category-name">'+
@@ -207,8 +207,8 @@ function moo_renderItems(data) {
                     html +='<div class="moo-col-md-'+nbItemsPerRowCssCol+'">';
                 }
                 html +='<a title="'+item.description+'" class="link" href="#item-'+item.uuid.toLowerCase()+'" data-item-id="'+item.uuid.toLowerCase()+'" onclick="MooClickOnItem(event,this)">';
-                html += '<div class="image-wrapper"><img src="'+itemimgUrl+'" /></div>';
-                //html += '<div class="image-wrapper" style="background: url('+itemimgUrl+') no-repeat center;background-size:100%;"><img src="'+itemimgUrl+'" /></div>';
+                html += '<div class="image-wrapper" style="background: url('+itemimgUrl+') no-repeat center;background-size:100%;"></div>';
+
 
 
             html +=   '<h2 class="title"><span class="brand "></span>'+

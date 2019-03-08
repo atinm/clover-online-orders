@@ -4,9 +4,6 @@
     display: block;
     text-decoration: none;
     background-color: #fff;
-    padding-top: 100%;
-    position: relative;
-    margin-bottom: 15px;
 }
 .link:hover {
     box-shadow: 0 0 0 2px;
@@ -15,17 +12,12 @@
     color : #d60002;
 }
 .link>.image-wrapper {
-    /*width: 100%;*/
-    /* min-height: 240px; */
-    /*padding-left: 10px;*/
-    /*padding-right: 10px;*/
-    /*margin-top: 19px;*/
-    /*position: relative;*/
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
+    width: 100%;
+    min-height: 240px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-top: 19px;
+    position: relative;
 }
 .link>.image-wrapper .moo-image {
     width: 100%;
