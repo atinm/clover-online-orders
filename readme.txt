@@ -304,5 +304,5 @@ First Release
 
 == Upgrade Notice ==
 
-= 1.3.3 =
+= 1.3.4 =
 Integration with Perfect Coupons App by Zaytech. It's now possible to create and print coupons on your Clover POS device and then allow customers to redeem the the coupon online
