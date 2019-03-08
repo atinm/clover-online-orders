@@ -105,7 +105,7 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 == Changelog ==
 = 1.3.3 =
 * Full support of Wordpress Network (Subdomains & Subdirectories)
-* Integration with Coupons App by Zaytech. It's now possible to create and print coupons on your Clover POS device and then allow customers to redeem the the coupon online
+* Integration with Perfect Coupons App by Zaytech. It's now possible to create and print coupons on your Clover POS device and then allow customers to redeem the the coupon online
 * Fixed an issue where a comma was converting to a forward slash for item descriptions
 * Added "Trending" items the "My Orders" or "My Account" Page. This allows customers to see their most purchased orders as well as most purchased items by all customers.
 * Added the ability to change text under special Instruction in Checkout Page
@@ -305,4 +305,4 @@ First Release
 == Upgrade Notice ==
 
 = 1.3.3 =
-Integration with Coupons App by Zaytech. It's now possible to create and print coupons on your Clover POS device and then allow customers to redeem the the coupon online
+Integration with Perfect Coupons App by Zaytech. It's now possible to create and print coupons on your Clover POS device and then allow customers to redeem the the coupon online
