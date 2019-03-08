@@ -140,7 +140,7 @@ class Moo_OnlineOrders_Public {
 
 
 
-        wp_register_style( 'moo-modifiersPanel',plugins_url( '/css/moo_modifiersPanel.min.css', __FILE__ ),array('moo-grid-css','moo-magnific-popup'), $this->version);
+        wp_register_style( 'moo-modifiersPanel',plugins_url( '/css/moo-modifiersPanel.min.css', __FILE__ ),array('moo-grid-css','moo-magnific-popup'), $this->version);
         //wp_register_style( 'moo-modifiersPanel',"//api.smartonlineorders.com/assets/css/moo_ModifiersPanel.min.css",array('moo-grid-css','moo-magnific-popup'), $this->version);
         wp_enqueue_style( 'moo-modifiersPanel' );
 
@@ -240,7 +240,7 @@ class Moo_OnlineOrders_Public {
             wp_register_script('moo-magnific-modal', plugins_url( '/js/magnific.min.js', __FILE__ ),array(), $this->version);
             wp_enqueue_script( 'moo-magnific-modal', array( 'jquery' ) );
 
-            wp_register_script('moo-modifiersPanel-js', plugins_url( '/js/moo_modifiersPanel.min.js', __FILE__ ),array(), $this->version);
+            wp_register_script('moo-modifiersPanel-js', plugins_url( '/js/moo-modifiersPanel.min.js', __FILE__ ),array(), $this->version);
             //wp_register_script('moo-modifiersPanel-js', "//api.smartonlineorders.com/assets/js/moo_ModifiersPanel.min.js",array(), $this->version);
             wp_enqueue_script('moo-modifiersPanel-js',array('jquery','moo-magnific-modal'));
 
