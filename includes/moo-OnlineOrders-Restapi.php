@@ -29,7 +29,7 @@ class Moo_OnlineOrders_Restapi
     /*
      * isProduction : it's a flag to hide all php notices in production mode
      */
-    private $isProduction = false;
+    private $isProduction = true;
 
     /**
      * The namespace and the version of the api
