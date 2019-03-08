@@ -1191,7 +1191,7 @@ class moo_OnlineOrders_Admin {
                 if(isset(json_decode($result)->status) && json_decode($result)->status =='success')
                 {
                     $api->updateWebsiteHooks(esc_url(admin_url('admin-post.php')));
-                    $api->updateWebsiteHooks(get_rest_url());
+                    $api->updateWebsite(get_rest_url());
                     $errorToken = "( Token valid )";
                 } else {
                     $errorToken="( Token expired )";

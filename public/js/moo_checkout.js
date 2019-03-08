@@ -1314,9 +1314,10 @@ function moo_get_form(callback)
     form.address = MooCustomerChoosenAddress;
     form.deliveryAmount = MooDeliveryfees;
     form.serviceCharges = MooServicefees;
-
-    form.cardNumber = form.cardNumber.trim();
-    form.cardNumber = form.cardNumber.replace(/\s+/g,"");
+    if(form.cardNumber !== undefined ){
+        form.cardNumber = form.cardNumber.trim();
+        form.cardNumber = form.cardNumber.replace(/\s+/g,"");
+    }
     callback(form);
 }
 function moo_finalize_order(e)

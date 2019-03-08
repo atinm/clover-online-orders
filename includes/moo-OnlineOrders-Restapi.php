@@ -346,7 +346,7 @@ class Moo_OnlineOrders_Restapi
         {
             foreach ($cats as $cat) {
 
-                if($cat->show_by_default=="1")
+                if($cat->show_by_default == "1")
                 {
                     $c = array(
                         "uuid"=>$cat->uuid,
