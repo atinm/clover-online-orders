@@ -3,7 +3,7 @@ Contributors: Zaytech
 Donate link: http://www.zaytechapps.com/
 Tags: clover,online orders for clover,zaytech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
 Requires at least: 4.7.1
-Tested up to: 5.0.4
+Tested up to: 5.1.0
 Requires PHP: 5.2.0
 Stable tag: 1.3.3
 License: GPLv2 or later
