@@ -229,7 +229,7 @@ function moo_renderItems(data) {
                  html += '</span>'+
                 '</div>'+
                 '</div>';
-                if(window.moo_theme_setings.showItemDescription !== undefined && window.moo_theme_setings.showItemDescription !== null && window.moo_theme_setings.showItemDescription === 'on') {
+                if(window.moo_theme_setings.jTheme_showItemDescription !== undefined && window.moo_theme_setings.jTheme_showItemDescription !== null && window.moo_theme_setings.jTheme_showItemDescription === 'on') {
                     html += '<div class="moo_item_description">'+item.description+'</div>';
                 }
                 html += '<div class="btn-wrapper"><span class="moo-category-name">';
