@@ -404,24 +404,19 @@ function moo_update_totals()
             jQuery('#moo-cart-tax').html("0.00");
 
 
-        if(moo_Total.coupon == null)
-        {
+        if(moo_Total.coupon == null) {
             //Hide the coupon section in total
             jQuery('#MooCouponInTotalsSection').hide();
-        }
-        else
-        {
+        } else {
             //Show coupon section in total
             jQuery('#MooCouponInTotalsSection').show();
             jQuery('#mooCouponName').html(moo_Total.coupon.name);
 
-            if(moo_Total.coupon.type == 'amount')
+            if(moo_Total.coupon.type.toUpperCase() == 'AMOUNT')
             {
                 var t = parseFloat(moo_Total.coupon.value);
                 jQuery('#mooCouponValue').html("- "+formatPrice(t.toFixed(2)));
-            }
-            else
-            {
+            } else {
                 var t = parseFloat(moo_Total.coupon.value)*parseFloat(moo_Total.sub_total)/100;
                 jQuery('#mooCouponValue').html("- "+formatPrice(t.toFixed(2)));
             }
@@ -429,7 +424,7 @@ function moo_update_totals()
             //update the total when the order is not taxable
             if(!MooOrderTypeIsTaxable)
             {
-                if(moo_Total.coupon.type == 'amount')
+                if(moo_Total.coupon.type.toUpperCase() == 'AMOUNT')
                     new_total =  parseFloat(moo_Total.total) + tips_amount + MooDeliveryfees + MooServicefeesD - moo_Total.coupon.value;
                 else
                     new_total =  parseFloat(moo_Total.sub_total) + tips_amount + MooDeliveryfees + MooServicefeesD - new_total*moo_Total.coupon.value/100;

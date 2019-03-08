@@ -118,14 +118,14 @@ function moo_updateCartTotal()
 
                         html +="<tr  class='moo_cart_total'>";
                         html +="<td colspan='1' style='text-align: right;'>"+data.coupon.name+"</td>";
-                        if(data.coupon.type=="amount")
-                            html +="<td colspan='3'>-$"+data.coupon.value+"</td>";
-                        else
-                            html +="<td colspan='3'>-$"+(data.coupon.value*data.sub_total/100)+"</td>";
+                        if(data.coupon.type.toUpperCase()=="AMOUNT") {
+                            html +="<td colspan='3'>-"+formatPrice(data.coupon.value.toFixed(2))+"</td>";
+                        } else {
+                            var val = data.coupon.value*data.sub_total/100;
+                            html +="<td colspan='3'>-"+(formatPrice(val.toFixed(2)))+"</td>";
+                        }
                         html +="</tr>";
-                    }
-                    else
-                    {
+                    } else {
                         html +="<tr  class='moo_cart_total'>";
                         html +="<td colspan='1' style='text-align: right;'>Tax:</td>";
                         html +="<td colspan='3'>$"+data.total_of_taxes_without_discounts+"</td>";

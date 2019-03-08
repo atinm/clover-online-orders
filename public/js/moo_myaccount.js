@@ -1,12 +1,14 @@
+window.moo_current_request = null;
+var hash = window.location.hash;
+
 jQuery(document).ready(function() {
-    if(moo_customer_logged==='yes') {
+    if(moo_customer_logged === 'yes') {
         moo_my_account_myorders_perPage(1);
     }
 });
-console.log(typeof moo_fb_app_id);
-if(typeof moo_fb_app_id != 'undefined')
+if(typeof moo_fb_app_id !== undefined && moo_fb_app_id !== null)
 {
-    if(moo_fb_app_id != "")
+    if(moo_fb_app_id !== "")
     {
         window.fbAsyncInit = function() {
             FB.init({
@@ -27,8 +29,8 @@ if(typeof moo_fb_app_id != 'undefined')
     }
 }
 
-var hash = window.location.hash;
-if (hash != "") {
+
+if (hash !== "") {
    // console.log(hash);
     switch (hash) {
         case "#register":
@@ -43,43 +45,8 @@ if (hash != "") {
     }
 }
 
-function moo_verifyPhone(event) {
-    event.preventDefault();
-    var phone_number=jQuery('#Moo_PhoneToVerify').val();
-    jQuery('#moo_verifPhone_sending').hide();
-    jQuery('#moo_verifPhone_verified').hide();
-    jQuery('#Moo_VerificationCode').val('');
-    jQuery('#moo_verifPhone_verificatonCode').show();
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_send_sms','phone':phone_number});
-}
-
-function moo_verifyCode(event) {
-    event.preventDefault();
-    var code=jQuery('#Moo_VerificationCode').val();
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_check_verification_code','code':code}, function (data) {
-        if(data.status == 'success')
-        {
-            jQuery('#moo_verifPhone_sending').hide();
-            jQuery('#moo_verifPhone_verificatonCode').hide();
-            jQuery('#moo_verifPhone_verified').css("display","inline-block");
-            swal({ title: 'Phone verified', text: 'Please have your payment ready when picking up from the store and don\'t forget to finalize your order below',   type: "success",timer:5000,   confirmButtonText: "OK" });
-            if(MooCustomer != null)
-            {
-                MooCustomer[0].phone_verified = '1';
-            }
-            MooPhoneIsVerified = true;
-            jQuery('#MooContactPhone').prop("readonly",true);
-        }
-        else
-            swal({ title: "Code invalid", text: 'this code is invalid please try again',   type: "error",timer:5000,   confirmButtonText: "Try again" });
-    });
-}
-
-function moo_verifyCodeTryAgain(event) {
-    event.preventDefault();
-    jQuery('#moo_verifPhone_sending').show();
-    jQuery('#moo_verifPhone_verificatonCode').hide();
-    jQuery('#moo_verifPhone_verified').hide();
+function formatPrice (p) {
+    return p.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
 }
 
 function moo_show_sigupform(e)
@@ -131,96 +98,6 @@ function moo_show_form_adding_address()
     jQuery('#moo-addaddress-form').show();
 }
 
-function moo_show_chooseaddressform(e) {
-    if(typeof e !== "undefined")
-        e.preventDefault();
-
-    var addresses = null;
-    var cards = null;
-    if(MooIsGuest || MooIsDisabled)
-    {
-        MooCustomerAddress = null;
-        MooCustomer        = null;
-        moo_show_form_adding_address();
-    }
-    else
-    {
-        jQuery('#moo-customerPanelContent').html('<p style="text-align:center">Please wait ...</p>');
-
-        jQuery('#moo-login-form').hide();
-        jQuery('#moo-signing-form').hide();
-        jQuery('#moo-forgotpassword-form').hide();
-        jQuery('#moo-customerPanel').show();
-        jQuery('#moo-addaddress-form').hide();
-
-        jQuery
-            .post(moo_params.ajaxurl,{'action':'moo_customer_getAddresses'}, function (data) {
-                if(data.status == 'success')
-                {
-                    addresses =  data.addresses;
-                    cards = data.cards;
-                    MooCustomerAddress = addresses;
-                    MooCustomer = data.customer;
-
-                    if(MooCustomer[0].phone_verified == "1")
-                        MooPhoneIsVerified = true;
-
-                    if(addresses.length>0)
-                    {
-                        var html="";
-                        if(addresses.length==1)
-                        {
-                            var OneAddress = addresses[0];
-                            html +='<div class="moo-col-md-4 moo-col-md-offset-4">';
-                            html +='<div class="moo-address-block">';
-                            html +='<span title="delete this address" onclick="moo_delete_address(event,'+OneAddress.id+')">X</span>';
-                            html +=OneAddress.address+'<br />';
-                            html +=OneAddress.city+', '+OneAddress.state+' '+OneAddress.zipcode+'<br />';
-                            html +='<a class="MooSimplButon MooUseAddressButton" href="#" onclick="moo_useAddress(event,'+OneAddress.id+')">USE THIS ADDRESS</a>';
-                            html +='</div></div>';
-                        }
-                        else
-                        {
-                            for(i in addresses)
-                            {
-                                var OneAddress = addresses[i];
-                                html +='<div class="moo-col-md-4 ">';
-                                html +='<div class="moo-address-block">';
-                                html +='<span title="delete this address" onclick="moo_delete_address(event,'+OneAddress.id+')">X</span>';
-                                html +=OneAddress.address+'<br />';
-                                html +=OneAddress.city+', '+OneAddress.state+' '+OneAddress.zipcode+'<br />';
-                                html +='  <a class="MooSimplButon MooUseAddressButton" href="#" onclick="moo_useAddress(event,'+OneAddress.id+')">USE THIS ADDRESS</a>';
-                                html +='</div></div>';
-                            }
-                        }
-                        //Display addresses
-                        jQuery('#moo-customerPanelContent').html(html);
-                    }
-                    else
-                        moo_show_form_adding_address();
-
-                    if(cards!= null && cards.length > 0)
-                        mooShowSavedCards(cards);
-                }
-                else
-                if(data.status = 'expired')
-                {
-                    MooCustomerAddress = null;
-                    MooCustomer = null;
-                    swal({ title: "Your session is expired", type: "error",timer:5000,   confirmButtonText: "Login again" });
-                    moo_show_loginform();
-                }
-            })
-            .fail(function(data) {
-                MooCustomerAddress = null;
-                MooCustomer        = null;
-                swal({ title: "Your session is expired", type: "error",timer:5000,   confirmButtonText: "Login again" });
-                moo_show_loginform();
-            });
-    }
-
-}
-
 function moo_login(e) {
     e.preventDefault();
     jQuery(e.target).html('<i class="fas fa-circle-notch fa-spin"></i>').attr('onclick','eventPrevent(event)');
@@ -229,10 +106,12 @@ function moo_login(e) {
     var password =  jQuery('#inputPassword').val();
     if(email === '') {
         swal({ title: "Please enter your email",text:"",  timer:5000, type: "error" });
+        jQuery(e.target).html('Login In').attr('onclick','moo_login(event)');
         return;
     } else {
         if(password === '') {
             swal({ title: "Please enter your password",text:"",  timer:5000, type: "error"});
+            jQuery(e.target).html('Login In').attr('onclick','moo_login(event)');
             return;
         } else {
             jQuery
@@ -242,6 +121,7 @@ function moo_login(e) {
                         moo_showCustomerPanel(e);
                     } else {
                         swal({ title: "Invalid User Name or Password",text:"Please click on forgot password or Please register as new user.",   type: "error",timer:5000,   confirmButtonText: "Try again" });
+                        jQuery(e.target).html('Login In').attr('onclick','moo_login(event)');
                     }
                 })
                 .fail(function(data) {
@@ -343,22 +223,19 @@ function moo_resetpassword(e)
 {
     e.preventDefault();
     var email     = jQuery('#inputEmail4Reset').val();
-    if(email=='')
+    if(email === '') {
         swal('Please enter your email');
-    else
-    {
+    } else {
         jQuery(e.target).html('<i class="fas fa-circle-notch fa-spin"></i>').attr('onclick','eventPrevent(event)');
 
         jQuery
             .post(moo_params.ajaxurl,{'action':'moo_customer_resetpassword','email':email}, function (data) {
-                if(data.status == 'success')
+                if(data.status === 'success')
                 {
                     jQuery(e.target).html('Reset').attr('onclick','moo_resetpassword(event)');
                     swal("If the e-mail you specified exists in our system, then you will receive an e-mail shortly to reset your password.");
                     moo_show_loginform();
-                }
-                else
-                {
+                } else {
                     jQuery(e.target).html('Reset').attr('onclick','moo_resetpassword(event)');
                     swal({ title: "could not reset your password",text:"Please try again or contact us",   type: "error",   confirmButtonText: "Try again" });
                 }
@@ -373,16 +250,16 @@ function moo_resetpassword(e)
 
 function moo_initMapAddress()
 {
-    var Merchantlocation = {};
-    Merchantlocation.lat = parseFloat(document.getElementById("inputMooLat").value);
-    Merchantlocation.lng = parseFloat( document.getElementById("inputMooLng").value);
+    var customerLocation = {};
+    customerLocation.lat = parseFloat(document.getElementById("cp_MooLat").value);
+    customerLocation.lng = parseFloat( document.getElementById("cp_MooLng").value);
     var map = new google.maps.Map(document.getElementById('MooMapAddingAddress'), {
         zoom: 16,
-        center: Merchantlocation
+        center: customerLocation
     });
 
     var marker = new google.maps.Marker({
-        position: Merchantlocation,
+        position: customerLocation,
         map: map,
         icon:{
             url:moo_params['plugin_img']+'/moo_marker.png'
@@ -400,8 +277,8 @@ function moo_initMapAddress()
 
 function moo_updateMarkerPosition(newPosition)
 {
-    jQuery('#inputMooLat').val(newPosition.lat());
-    jQuery('#inputMooLng').val(newPosition.lng());
+    jQuery('#cp_MooLat').val(newPosition.lat());
+    jQuery('#cp_MooLng').val(newPosition.lng());
 }
 
 function moo_ConfirmAddressOnMap(e)
@@ -409,7 +286,7 @@ function moo_ConfirmAddressOnMap(e)
 
     e.preventDefault();
     var address = moo_getAddressFromForm();
-    if( address.address == '' || address.city == '')
+    if( address.address === '' || address.city === '')
     {
         swal({ title: "Address missing",text:"Please enter your address",   type: "error",   confirmButtonText: "OK" });
         return;
@@ -419,8 +296,8 @@ function moo_ConfirmAddressOnMap(e)
         if(data.results.length>0)
         {
             var location = data.results[0].geometry.location;
-            document.getElementById("inputMooLat").value = location.lat;
-            document.getElementById("inputMooLng").value = location.lng;
+            document.getElementById("cp_MooLat").value = location.lat;
+            document.getElementById("cp_MooLng").value = location.lng;
             moo_initMapAddress();
             jQuery('#MooMapAddingAddress').show();
             jQuery('#mooButonAddAddress').show();
@@ -436,12 +313,13 @@ function moo_ConfirmAddressOnMap(e)
 function moo_getAddressFromForm()
 {
     var address = {};
-    address.address =  jQuery('#inputMooAddress').val();
-    address.city =  jQuery('#inputMooCity').val();
-    address.state =  jQuery('#inputMooState').val();
-    address.zipcode =  jQuery('#inputMooZipcode').val();
-    address.lat =  jQuery('#inputMooLat').val();
-    address.lng =  jQuery('#inputMooLng').val();
+    address.address =  jQuery('#cp_MooAddress').val();
+    address.line2 =  jQuery('#cp_MooAddress2').val();
+    address.city =  jQuery('#cp_MooCity').val();
+    address.state =  jQuery('#cp_MooState').val();
+    address.zipcode =  jQuery('#cp_MooZipcode').val();
+    address.lat =  jQuery('#cp_MooLat').val();
+    address.lng =  jQuery('#cp_MooLng').val();
     address.country =  "";
     return address;
 }
@@ -449,61 +327,49 @@ function moo_getAddressFromForm()
 function moo_addAddress(e)
 {
     e.preventDefault();
-    jQuery(e.target).html('<i class="fas fa-circle-o-notch fa-spin"></i>').attr('onclick','');
+    jQuery(e.target).html('<i class="fas fa-circle-notch fa-spin"></i>').attr('onclick','');
     var address = moo_getAddressFromForm();
-    if(address.lat == "")
+    if(address.lat === "")
     {
-        swal({ title: "Please confirm your address on the map",text:"By confirming  your address on the map you will help the driver to deliver your order faster, and you will help us to calculate your delivery fee better",   type: "error",   confirmButtonText: "Confirm"});
+        swal({
+            title: "Please confirm your address on the map",text:"By confirming  your address on the map you will help the driver to deliver your order faster, and you will help us to calculate your delivery fee better",
+            type: "error",
+            confirmButtonText: "Confirm"
+        });
+        jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
     }
     else {
-        if(MooIsGuest || MooIsDisabled)
-        {
-            MooCustomerChoosenAddress = address;
-            moo_checkout_form();
-            jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
-        }
-        else
-        {
-            jQuery
-                .post(moo_params.ajaxurl,{'action':'moo_customer_addAddress','address':address.address,'city':address.city,'state':address.state,'zipcode':address.zipcode,"lat":address.lat,"lng":address.lng}, function (data) {
-                    if(data.status == 'failure' || data.status == 'expired')
+
+        jQuery
+            .post(moo_params.ajaxurl,{'action':'moo_customer_addAddress','address':address.address,'city':address.city,'state':address.state,'zipcode':address.zipcode,"lat":address.lat,"lng":address.lng}, function (data) {
+                if(data.status === 'failure' || data.status === 'expired')
+                {
+                    swal({ title: "Your session has been expired",text:"Please login again",   type: "error",   confirmButtonText: "Login again" });
+                    moo_show_loginform();
+                    jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
+                }
+                else
+                    if(data.status === 'success')
                     {
-                        swal({ title: "Your session has been expired",text:"Please login again",   type: "error",   confirmButtonText: "Login again" });
-                        moo_show_loginform();
+                        swal({ title: "Address added",text:"Loading your addresses",   type: "success",   confirmButtonText: "ok" });
+                        moo_my_account_addresses(e);
                         jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
                     }
                     else
-                        if(data.status == 'success')
-                        {
-                            moo_show_chooseaddressform(e);
-                            jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
-                        }
-                        else
-                        {
-                            swal({ title: "Address not added to your account",text:"Please try again or contact us",   type: "error",   confirmButtonText: "Try again" });
-                            jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
-                        }
-                })
-                .fail(function(data) {
-                    console.log(data.responseText);
-                    jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
-                    swal({ title: "Connection lost",text:"Please try again",   type: "error",   confirmButtonText: "Try again" });
-                });
-        }
+                    {
+                        swal({ title: "Address not added to your account",text:"Please try again or contact us",   type: "error",   confirmButtonText: "Try again" });
+                        jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
+                    }
+            })
+            .fail(function(data) {
+                console.log(data.responseText);
+                jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
+                swal({ title: "Connection lost",text:"Please try again",   type: "error",   confirmButtonText: "Try again" });
+            });
+
 
     }
 
-}
-
-function moo_useAddress(e,address_id)
-{
-    e.preventDefault();
-    for(i in MooCustomerAddress)
-    {
-        if(MooCustomerAddress[i].id==address_id)
-            MooCustomerChoosenAddress = MooCustomerAddress[i]
-    }
-    moo_checkout_form();
 }
 
 function moo_showCustomerPanel()
@@ -520,6 +386,7 @@ function moo_showCustomerPanel()
 }
 function moo_delete_address(event,address_id)
 {
+    event.preventDefault();
     swal({
             title: "Are you sure?",
             text: "You will not be able to recover this address",
@@ -527,38 +394,85 @@ function moo_delete_address(event,address_id)
             showCancelButton: true,
             confirmButtonColor: "#DD6B55",
             confirmButtonText: "Yes, delete it!",
-            showLoaderOnConfirm: true,
-            cancelButtonText: "No, cancel!",
-            closeOnConfirm: false,
-            closeOnCancel: false
+            showLoaderOnConfirm: false,
+            cancelButtonText: "No, cancel!"
         },
         function(isConfirm){
-            if (isConfirm) {
-                    jQuery
-                        .post(moo_params.ajaxurl,{'action':'moo_customer_deleteAddresses','address_id':address_id}, function (data) {
-                            if(data.status == 'failure' || data.status == 'expired')
-                            {
-                                swal({ title: "Your session has been expired",text:"Please login again",   type: "error",   confirmButtonText: "Login again" });
-                                moo_show_loginform();
-                            }
-                            else
-                            if(data.status == 'success')
-                            {
-                                swal("Deleted!", "Your address has been deleted.", "success");
-                                moo_show_chooseaddressform(event);
-                            }
-                            else
-                                swal({ title: "Address not deleted",text:"Please try again or contact us",   type: "error",   confirmButtonText: "Try again" });
-                        })
-                        .fail(function(data) {
-                            console.log(data.responseText);
-                            swal({ title: "Connection lost",text:"Address not deleted, please try again",   type: "error",   confirmButtonText: "Try again" });
-                        });
+        if (isConfirm) {
+                jQuery.post(moo_params.ajaxurl,{'action':'moo_customer_deleteAddresses','address_id':address_id}, function (data) {
+                        if(data.status === 'failure' || data.status === 'expired')
+                        {
+                            swal({ title: "Your session has been expired",text:"Please login again",   type: "error",   confirmButtonText: "Login again" });
+                            moo_show_loginform();
+                        }
+                        else
+                        if(data.status == 'success')
+                        {
+                            swal("Deleted!", "Your address has been deleted.", "success");
+                            moo_my_account_addresses(event);
+                        }
+                        else
+                            swal({ title: "Address not deleted",text:"Please try again or contact us",   type: "error",   confirmButtonText: "Try again" });
+                    })
+                    .fail(function(data) {
+                        console.log(data.responseText);
+                        swal({ title: "Connection lost",text:"Address not deleted, please try again",   type: "error",   confirmButtonText: "Try again" });
+                    });
 
-            } else {
-                swal("Cancelled","","error");
+        } else {
+            swal("Cancelled","","error");
+        }
+    });
+
+    swal({
+        title: "Are you sure?",
+        text: 'You will not be able to recover this address',
+        type: 'warning',
+        showCancelButton: true,
+        showLoaderOnConfirm: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!',
+        preConfirm: function(data) {
+            return new Promise(function (resolve, reject) {
+
+                jQuery.post(moo_params.ajaxurl,{'action':'moo_customer_deleteAddresses','address_id':address_id}, function (data) {
+                    if(data.status === 'failure' || data.status === 'expired') {
+                        moo_show_loginform();
+                        reject(false);
+                    } else {
+                        if(data.status == 'success') {
+                            moo_my_account_addresses(event);
+                            setTimeout(function(){ resolve(true); }, 2000);
+                        } else {
+                            reject(false);
+                        }
+                    }
+
+                }).fail(function(data) {
+                    console.log(data.responseText);
+                    reject(false);
+                    });
+            });
+        }
+    }).then(function (result) {
+        if(result.value) {
+            swal({
+                title:"Your address has been deleted.",
+                type:'success'
+
+            });
+        } else {
+            if(!result.dismiss) {
+                swal({
+                    title: "Address not deleted",
+                    text:"Please try again or contact us",
+                    type:'error'
+
+                });
             }
-        });
+        }
+    });
 }
 
 function moo_displayLoadingSection() {
@@ -601,18 +515,40 @@ function  moo_my_account_myfavorits(e) {
         e.preventDefault();
     }
     moo_nav_cpanel_setactive('moo_nav_favorits');
-    var cpContent = jQuery("#moo_cp_content");
     moo_displayLoadingSection();
-    var globalHtml  = '<div class="moo_cp_content_header"><h1>Most Purchased</h1></div>';
-    globalHtml += '<div class="moo_cp_content_body">';
-    jQuery
-        .get(moo_RestUrl+"moo-clover/v1/customers/favorites", function (data) {
-             mooRenderItemsForFavorits(data.items);
-        })
-        .fail(function(data) {
-            console.log(data.responseText);
-            swal({ title: "Error",text:"An error has occurred please try again",   type: "error",   confirmButtonText: "Try again" });
-        });
+    if( window.moo_current_request !== null ) {
+        window.moo_current_request.abort();
+    }
+    window.moo_current_request=jQuery.get(moo_RestUrl+"moo-clover/v1/customers/favorites", function (data) {
+                                         mooRenderItemsForFavorits(data.items);
+                                    })
+                                    .fail(function(data) {
+                                        if(data.responseText !== undefined){
+                                            console.log(data.responseText);
+                                            swal({ title: "Error",text:"An error has occurred please try again",   type: "error",   confirmButtonText: "Try again" });
+                                        }
+                                    });
+
+}
+function  moo_my_account_trending(e) {
+    if(e !== undefined) {
+        e.preventDefault();
+    }
+    moo_nav_cpanel_setactive('moo_nav_trending');
+    moo_displayLoadingSection();
+    if( window.moo_current_request !== null ) {
+        window.moo_current_request.abort();
+    }
+    window.moo_current_request=jQuery.get(moo_RestUrl+"moo-clover/v1/items/most_purchase", function (data) {
+                                        mooRenderItemsForMostPurchase(data.items);
+                                    })
+                                    .fail(function(data) {
+                                        if(data.responseText !== undefined){
+                                            console.log(data.responseText);
+                                            swal({ title: "Error",text:"An error has occurred please try again",   type: "error",   confirmButtonText: "Try again" });
+                                        }
+                                    });
+
 }
 function  moo_my_account_addresses(e) {
     if(e !== undefined) {
@@ -621,20 +557,24 @@ function  moo_my_account_addresses(e) {
     moo_nav_cpanel_setactive('moo_nav_addresses');
     var cpContent = jQuery("#moo_cp_content");
     moo_displayLoadingSection();
+    if( window.moo_current_request !== null ) {
+        window.moo_current_request.abort();
+    }
     var globalHtml  = '<div class="moo_cp_content_header"><h1>Addresses</h1></div>';
     globalHtml += '<div class="moo_cp_content_body">';
-    jQuery
-        .get(moo_RestUrl+"moo-clover/v1/customers/addresses", function (data) {
-            if(data.status ==='success') {
-                mooRenderAddresses(data.addresses);
-            } else {
-                wal({ title: "Error",text:"An error has occurred please try again",   type: "error",   confirmButtonText: "Try again" });
-            }
-        })
-        .fail(function(data) {
-            console.log(data.responseText);
-            swal({ title: "Error",text:"An error has occurred please try again",   type: "error",   confirmButtonText: "Try again" });
-        });
+    window.moo_current_request = jQuery.get(moo_RestUrl+"moo-clover/v1/customers/addresses", function (data) {
+                                        if(data.status ==='success') {
+                                            mooRenderAddresses(data.addresses);
+                                        } else {
+                                            wal({ title: "Error",text:"An error has occurred please try again",   type: "error",   confirmButtonText: "Try again" });
+                                        }
+                                    })
+                                    .fail(function(data) {
+                                        if(data.responseText !== undefined){
+                                            console.log(data.responseText);
+                                            swal({ title: "Error",text:"An error has occurred please try again",   type: "error",   confirmButtonText: "Try again" });
+                                        }
+                                    });
 }
 function  moo_my_account_profil(e) {
     if(e !== undefined) {
@@ -643,20 +583,25 @@ function  moo_my_account_profil(e) {
     moo_nav_cpanel_setactive('moo_nav_profil');
     var cpContent = jQuery("#moo_cp_content");
     moo_displayLoadingSection();
-    jQuery
-        .get(moo_RestUrl+"moo-clover/v1/customers", function (data) {
-            console.log(data);
-            if(data.status ==='success') {
-                mooRenderProfil(data.customer);
-            } else {
-                wal({ title: "Error",text:"An error has occurred please try again",   type: "error",   confirmButtonText: "Try again" });
-            }
-        })
-        .fail(function(data) {
-            console.log(data.responseText);
-            swal({ title: "Error",text:"An error has occurred please try again",   type: "error",   confirmButtonText: "Try again" });
-        });
+    if( window.moo_current_request !== null ) {
+        window.moo_current_request.abort();
+    }
+    window.moo_current_request = jQuery.get(moo_RestUrl+"moo-clover/v1/customers", function (data) {
+                                            if(data.status ==='success') {
+                                                mooRenderProfil(data.customer);
+                                            } else {
+                                                swal({ title: "Error",text:"An error has occurred please try again",   type: "error",   confirmButtonText: "Try again" });
+                                            }
+                                        })
+                                        .fail(function(data) {
+                                            if(data.responseText !== undefined){
+                                                console.log(data.responseText);
+                                                swal({ title: "Error",text:"An error has occurred please try again",   type: "error",   confirmButtonText: "Try again" });
+                                            }
+
+                                        });
 }
+
 function  moo_my_account_myorders_selectPage(e,page) {
     if(e !== undefined) {
         e.preventDefault();
@@ -668,11 +613,13 @@ function  moo_my_account_myorders_perPage(page) {
     var cpContent = jQuery("#moo_cp_content");
     moo_displayLoadingSection();
     moo_nav_cpanel_setactive('moo_nav_orders');
+    if( window.moo_current_request !== null ) {
+        window.moo_current_request.abort();
+    }
     //load all orders
     var globalHtml  = '<div class="moo_cp_content_header"><h1>List of orders</h1></div>';
         globalHtml += '<div class="moo_cp_content_body">';
-    jQuery
-        .get(moo_RestUrl+"moo-clover/v1/customers/orders?page="+page, function (data) {
+    window.moo_current_request = jQuery.get(moo_RestUrl+"moo-clover/v1/customers/orders?page="+page, function (data) {
             if(data.status === 'success') {
                 if(data.orders.length > 0) {
                     for(i in data.orders){
@@ -741,17 +688,19 @@ function  moo_my_account_myorders_perPage(page) {
                         }
                     }
                 } else {
-                    cpContent.html("You don't have any order yet")
+                    cpContent.html("This feature was recently added or yout account is new. You don't have any previous orders yet.")
                 }
             } else {
                 swal({ title: "Error",text:"your session has expired",   type: "error",timer:5000 });
                 moo_refresh_page();
             }
         })
-        .fail(function(data) {
-            console.log(data.responseText);
-            swal({ title: "Error",text:"An error has occurred please try again",   type: "error",timer:5000,   confirmButtonText: "Try again" });
-        });
+                                    .fail(function(data) {
+                                        if(data.responseText !== undefined){
+                                            console.log(data.responseText);
+                                            swal({ title: "Error",text:"An error has occurred please try again",   type: "error",   confirmButtonText: "Try again" });
+                                        }
+                                    });
 }
 function moo_reOrder(order_uuid) {
     //display loading
@@ -828,97 +777,182 @@ function moo_reOrder(order_uuid) {
 }
 function mooRenderItemsForFavorits(items){
     window.moo_nbItemsPerLine = 3;
-    var html  = '<div class="moo_cp_content_header"><h1>Favorites items</h1></div>';
+    var html  = '<div class="moo_cp_content_header"><h1>Your Top Purchases</h1></div>';
     html += '<div class="moo_cp_content_body">';
-    for(var i in items){
-        var item = items[i];
-        if(typeof item  !== 'object') {
-            continue;
-        }
-        var item_price = parseFloat(item.price);
-        item_price = item_price/100;
-        item_price = item_price.toFixed(2);
+    if(items.length > 0) {
+        for(var i in items){
+            var item = items[i];
+            if(typeof item  !== 'object') {
+                continue;
+            }
+            var item_price = parseFloat(item.price);
+            item_price = item_price/100;
+            item_price = formatPrice(item_price.toFixed(2));
 
-        if(item.price > 0 && item.price_type === "PER_UNIT")
-            item_price += '/'+item.unit_name;
-        if( i % window.moo_nbItemsPerLine === 0) {
-            html +='<div class="moo-col-md-'+(12/window.moo_nbItemsPerLine)+'" style="clear: both">';
-        } else {
-            html +='<div class="moo-col-md-'+(12/window.moo_nbItemsPerLine)+'">';
+            if(item.price > 0 && item.price_type === "PER_UNIT")
+                item_price += '/'+item.unit_name;
+            if( i % window.moo_nbItemsPerLine === 0) {
+                html +='<div class="moo-col-md-'+(12/window.moo_nbItemsPerLine)+'" style="clear: both">';
+            } else {
+                html +='<div class="moo-col-md-'+(12/window.moo_nbItemsPerLine)+'">';
 
-        }
-        html +='<a title="'+item.description+'" class="link" href="#item-'+item.uuid.toLowerCase()+'" data-item-id="'+item.uuid.toLowerCase()+'" >';
+            }
+            html +='<a title="'+item.description+'" class="link" href="#item-'+item.uuid.toLowerCase()+'" data-item-id="'+item.uuid.toLowerCase()+'" >';
 
-        if(item.image !== null && item.image.url !== null && item.image.url !== "")
-        {
-            html += '<div class="image-wrapper" style="background: url('+item.image.url+') no-repeat center;background-size:100%;"></div>';
-        }
-        else
-        {
-            html +='<div class="image-wrapper">'+
-                '<img class="moo-image" alt="" data-image-vertical="1" width="100%" height="100%" src="'+moo_params['plugin_img']+'/noImg.png" />'+
-                '</div>';
-        }
-
-        html +=   '<h2 class="title"><span class="brand "></span>'+
-            '<span class="name">'+item.name+'</span>'+
-            '</h2>'+
-            '<div class="price-container clearfix">'+
-            '<div class="price-box">'+
-            '<span class="price">';
-        // '<span>799</span>'+
-        if(parseFloat(item.price) === 0)
-        {
-            html += '<span></span>';
-        }
-        else
-        {
-            html += '<span>$'+item_price+'</span>';
-        }
-        html += '</span>'+
-            '</div>'+
-            '</div>'+
-            '<div class="btn-wrapper"><span class="moo-category-name">';
-        if(item.stockCount === "out_of_stock")
-        {
-            html += '<button class="osh-btn"><span class="label">OUT OF STOCK</span></button>';
-        }
-        else
-        {
-            //Checking the Qty window show/hide and add add to cart button
-            if(true)
+            if(item.image !== null && item.image.url !== null && item.image.url !== "")
             {
-                if(item.has_modifiers)
+                html += '<div class="image-wrapper"><img class="moo-image" alt="" data-image-vertical="1" width="100%" height="100%" src="'+ item.image.url +'" /></div>';
+            } else {
+                html +='<div class="image-wrapper">'+
+                    '<img class="moo-image" alt="" data-image-vertical="1" width="100%" height="100%" src="'+moo_params['plugin_img']+'/noImg.png" />'+
+                    '</div>';
+            }
+
+            html +=   '<h2 class="title"><span class="brand "></span>'+
+                '<span class="name">'+item.name+'</span>'+
+                '</h2>'+
+                '<div class="price-container clearfix">'+
+                '<div class="price-box">'+
+                '<span class="price">';
+            // '<span>799</span>'+
+            if(parseFloat(item.price) === 0) {
+                html += '<span></span>';
+            } else {
+                html += '<span>$'+item_price+'</span>';
+            }
+            html += '</span>'+
+                '</div>'+
+                '</div>'+
+                '<div class="btn-wrapper"><span class="moo-category-name">';
+            if(item.stockCount === "out_of_stock") {
+                html += '<button class="osh-btn"><span class="label">OUT OF STOCK</span></button>';
+            } else {
+                //Checking the Qty window show/hide and add add to cart button
+                if(true)
                 {
-                    //check qty window for modifiers
-                    if(true)
-                        html += '<button class="osh-btn" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtnFIWM)"><span class="label">Choose Qty & Options</span></button>';
+                    if(item.has_modifiers)
+                    {
+                        //check qty window for modifiers
+                        if(true)
+                            html += '<button class="osh-btn" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtnFIWM)"><span class="label">Choose Qty & Options</span></button>';
+                        else
+                            html += '<button class="osh-btn" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)"><span class="label">Choose Options & Qty</span></button>';
+                    }
                     else
-                        html += '<button class="osh-btn" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)"><span class="label">Choose Options & Qty</span></button>';
+                        html += '<button class="osh-btn" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)"><span class="label">Add to cart</span></button>';
+
                 }
                 else
-                    html += '<button class="osh-btn" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)"><span class="label">Add to cart</span></button>';
+                {
+                    if(item.has_modifiers)
+                        html += '<button class="osh-btn" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)"><span class="label"> Choose Options & Qty </span></button>';
+                    else
+                        html += '<button class="osh-btn" onclick="moo_clickOnOrderBtn(event,\''+item.uuid+'\',1)"><span class="label">Add to cart</span> </button>';
+
+                }
 
             }
-            else
-            {
-                if(item.has_modifiers)
-                    html += '<button class="osh-btn" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)"><span class="label"> Choose Options & Qty </span></button>';
-                else
-                    html += '<button class="osh-btn" onclick="moo_clickOnOrderBtn(event,\''+item.uuid+'\',1)"><span class="label">Add to cart</span> </button>';
 
-            }
-
+            html +='</span></div></a></div>';
         }
-
-        html +='</span></div></a></div>';
+    } else {
+        html += '<p>There are no orders yet</p>';
     }
+
     html    += "</div>";
 
     // Then add theme to dom and do some changes after finsihed the rendriign
     jQuery("#moo_cp_content").html(html).promise().done(function() {
         console.log("Favorits items loaded")
     });
+}
+function mooRenderItemsForMostPurchase(items){
+    window.moo_nbItemsPerLine = 3;
+    var html  = '<div class="moo_cp_content_header"><h1>Top orders for all customers</h1></div>';
+    html += '<div class="moo_cp_content_body">';
+    if(items.length > 0) {
+        for(var i in items){
+            var item = items[i];
+            if(typeof item  !== 'object') {
+                continue;
+            }
+            var item_price = parseFloat(item.price);
+            item_price = item_price/100;
+            item_price = item_price.toFixed(2);
+
+            if(item.price > 0 && item.price_type === "PER_UNIT")
+                item_price += '/'+item.unit_name;
+            if( i % window.moo_nbItemsPerLine === 0) {
+                html +='<div class="moo-col-md-'+(12/window.moo_nbItemsPerLine)+'" style="clear: both">';
+            } else {
+                html +='<div class="moo-col-md-'+(12/window.moo_nbItemsPerLine)+'">';
+
+            }
+            html +='<a title="'+item.description+'" class="link" href="#item-'+item.uuid.toLowerCase()+'" data-item-id="'+item.uuid.toLowerCase()+'" >';
+
+            if(item.image !== null && item.image.url !== null && item.image.url !== "")
+            {
+                html += '<div class="image-wrapper"><img class="moo-image" alt="" data-image-vertical="1" width="100%" height="100%" src="'+ item.image.url +'" /></div>';
+            } else {
+                html +='<div class="image-wrapper">'+
+                    '<img class="moo-image" alt="" data-image-vertical="1" width="100%" height="100%" src="'+moo_params['plugin_img']+'/noImg.png" />'+
+                    '</div>';
+            }
+
+            html +=   '<h2 class="title"><span class="brand"></span>'+
+                '<span class="name">'+item.name+'</span>'+
+                '</h2>'+
+                '<div class="price-container clearfix">'+
+                '<div class="price-box">'+
+                '<span class="price">';
+            // '<span>799</span>'+
+            if(parseFloat(item.price) === 0) {
+                html += '<span></span>';
+            } else {
+                html += '<span>$'+item_price+'</span>';
+            }
+            html += '</span>'+
+                '</div>'+
+                '</div>'+
+                '<div class="btn-wrapper"><span class="moo-category-name">';
+            if(item.stockCount === "out_of_stock") {
+                html += '<button class="osh-btn"><span class="label">OUT OF STOCK</span></button>';
+            } else {
+                //Checking the Qty window show/hide and add add to cart button
+                if(true)
+                {
+                    if(item.has_modifiers)
+                    {
+                        //check qty window for modifiers
+                        if(true)
+                            html += '<button class="osh-btn" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtnFIWM)"><span class="label">Choose Qty & Options</span></button>';
+                        else
+                            html += '<button class="osh-btn" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)"><span class="label">Choose Options & Qty</span></button>';
+                    }
+                    else
+                        html += '<button class="osh-btn" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)"><span class="label">Add to cart</span></button>';
+
+                }
+                else
+                {
+                    if(item.has_modifiers)
+                        html += '<button class="osh-btn" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)"><span class="label"> Choose Options & Qty </span></button>';
+                    else
+                        html += '<button class="osh-btn" onclick="moo_clickOnOrderBtn(event,\''+item.uuid+'\',1)"><span class="label">Add to cart</span> </button>';
+
+                }
+
+            }
+
+            html +='</span></div></a></div>';
+        }
+    } else {
+        html += '<p>There are no orders yet</p>';
+    }
+     html    += "</div>";
+    // Then add theme to dom and do some changes after finished the rendriign
+    jQuery("#moo_cp_content").html(html);
+
 }
 function mooRenderAddresses(addresses){
     var html  = '<div class="moo_cp_content_header"><h1>My Addresses</h1><span><a class="osh-btn moo_pull_right" href="#" onclick="moo_add_new_address()">ADD NEW</a></span></div>';
@@ -933,11 +967,11 @@ function mooRenderAddresses(addresses){
 
             html +='<div class="moo-col-md-12 moo_border moo_cp_content_oneOrder">'; // start address line
             html +='<div class="moo-col-md-6 moo_right_border moo_cp_content_oneOrderCol moo_cp_content_oneOrderItems">';
-            html += '<span class="moo_cp_orders_ordernumber">'+address.address+'</span>';
+            html += '<span class="moo_cp_orders_ordernumber">'+address.address+', '+address.line2+'</span>';
             html += '<span class="moo_cp_orders_orderdate">'+address.city+', '+address.zipcode+'</span>';
             html +='</div>';
-            html +='<div class="moo-col-md-4 moo_right_border moo_cp_content_oneOrderCol moo_cp_content_oneOrderTotal">'+address.state+'</div>';
-            html +='<div class="moo-col-md-2 moo_cp_content_oneOrderCol moo_center_text  moo_cp_content_oneOrderButton"><a class="osh-btn" href="#" onclick="moo_delete_address(event,\''+address.id+'\')">REMOVE</a></div>';
+            html +='<div class="moo-col-md-3 moo_right_border moo_cp_content_oneOrderCol moo_cp_content_oneOrderTotal">'+address.state+'</div>';
+            html +='<div class="moo-col-md-3 moo_cp_content_oneOrderCol moo_center_text  moo_cp_content_oneOrderButton"><a class="osh-btn" href="#" onclick="moo_delete_address(event,\''+address.id+'\')">REMOVE</a></div>';
             html +='</div>'; // fin address line
             html +='</div>'; // Fin principal div
         }
@@ -948,7 +982,7 @@ function mooRenderAddresses(addresses){
 
     // Then add theme to dom and do some changes after finsihed the rendriign
     jQuery("#moo_cp_content").html(html).promise().done(function() {
-        console.log("Address loaded")
+      //  console.log("Address loaded")
     });
 }
 function moo_add_new_address(){
@@ -992,7 +1026,7 @@ function moo_add_new_address(){
 
     // Then add theme to dom and do some changes after finsihed the rendriign
     jQuery("#moo_cp_content").html(html).promise().done(function() {
-        console.log("Adding new address")
+        //console.log("Adding new address")
     });
 }
 function mooRenderProfil(user){
@@ -1046,9 +1080,7 @@ function mooRenderProfil(user){
         html += "</div>";
 
     // Then add theme to dom and do some changes after finsihed the rendriign
-    jQuery("#moo_cp_content").html(html).promise().done(function() {
-        console.log("Adding new address")
-    });
+    jQuery("#moo_cp_content").html(html);
 }
 
 function moo_nav_cpanel_setactive(element) {
@@ -1056,6 +1088,11 @@ function moo_nav_cpanel_setactive(element) {
         jQuery(ele).removeClass('moo_nav_active');
     });
     jQuery('#'+element).addClass('moo_nav_active');
+}
+function moo_nav_cpanel_removeactive() {
+    jQuery('.moo_nav_cpanel').each(function( index, ele ) {
+        jQuery(ele).removeClass('moo_nav_active');
+    });
 }
 function eventPrevent(event) {
     event.preventDefault();
@@ -1160,7 +1197,6 @@ function moo_clickOnOrderBtn(event,item_id,qty) {
             text:"Check your internet connection or contact us",
             type:"error"
         });
-        console.log(data);
     }).done(function ( data ) {
         if(typeof data.nb_items != "undefined")
             jQuery("#moo-cartNbItems").text(data.nb_items)
@@ -1236,19 +1272,6 @@ function moo_show_oderInfo(uuid) {
 
     });
 }
-function moo_getAddressFromForm()
-{
-    var address = {};
-    address.address =  jQuery('#cp_MooAddress').val();
-    address.line2 =  jQuery('#cp_MooAddress2').val();
-    address.city =  jQuery('#cp_MooCity').val();
-    address.state =  jQuery('#cp_MooState').val();
-    address.zipcode =  jQuery('#cp_MooZipcode').val();
-    address.lat =  jQuery('#cp_MooLat').val();
-    address.lng =  jQuery('#cp_MooLng').val();
-    address.country =  "";
-    return address;
-}
 function moo_getprofilInfoFromForm()
 {
     var user = {};
@@ -1256,69 +1279,6 @@ function moo_getprofilInfoFromForm()
     user.email =  jQuery('#cp_MooEmail').val();
     user.phone =  jQuery('#cp_MooPhone').val();
     return user;
-}
-function moo_initMapAddress()
-{
-    var location = {};
-    location.lat = parseFloat(document.getElementById("inputMooLat").value);
-    location.lng = parseFloat( document.getElementById("inputMooLng").value);
-    var map = new google.maps.Map(document.getElementById('MooMapAddingAddress'), {
-        zoom: 16,
-        center: location
-    });
-
-    var marker = new google.maps.Marker({
-        position: location,
-        map: map,
-        icon:{
-            url:moo_params['plugin_img']+'/moo_marker.png'
-        },
-        draggable:true
-    });
-    google.maps.event.addListener(marker, 'drag', function() {
-        moo_updateMarkerPosition(marker.getPosition());
-    });
-    var infowindow = new google.maps.InfoWindow({
-        content: "Drag&Drop to change the location"
-    });
-    infowindow.open(map,marker);
-}
-function moo_addAddress(e)
-{
-    e.preventDefault();
-    jQuery(e.target).html('<i class="fas fa-circle-notch fa-spin"></i>').attr('onclick','');
-    var address = moo_getAddressFromForm();
-    if(address.lat == "")
-    {
-        swal({ title: "Please confirm your address on the map",text:"By confirming  your address on the map you will help the driver to deliver your order faster, and you will help us to calculate your delivery fee better",   type: "error",   confirmButtonText: "Confirm"});
-    }
-    else {
-        jQuery
-            .post(moo_params.ajaxurl,{'action':'moo_customer_addAddress','address':address.address,'line2':address.line2,'city':address.city,'state':address.state,'zipcode':address.zipcode,"lat":address.lat,"lng":address.lng}, function (data) {
-                if(data.status == 'failure' || data.status == 'expired')
-                {
-                    swal({ title: "Your session has been expired",text:"Please login again",   type: "error",   confirmButtonText: "Login again" });
-                    jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
-                    moo_refresh_page()
-                } else {
-                    if(data.status == 'success') {
-                        jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
-                        moo_my_account_addresses(e);
-                    } else {
-                        swal({ title: "Address not added to your account",text:"Please try again or contact us",   type: "error",   confirmButtonText: "Try again" });
-                        jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
-                    }
-                }
-
-            })
-            .fail(function(data) {
-                console.log(data.responseText);
-                jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
-                swal({ title: "Connection lost",text:"Please try again",   type: "error",   confirmButtonText: "Try again" });
-            });
-
-    }
-
 }
 function moo_updateProfil(e) {
     e.preventDefault();
@@ -1335,13 +1295,14 @@ function moo_updateProfil(e) {
         }).then(function () {},function (dismiss) {});
 
         jQuery.post(moo_RestUrl+"moo-clover/v1/customers",user,function(response){
-            if(response.status=='success'){
+            if(response.status == 'success'){
                 swal({ title: "Updated",text:'your personal information were updated',   type: "success" });
             } else {
                 swal({ title: "Connection lost",text:"Please try again",   type: "error",   confirmButtonText: "Try again" });
             }
         }).fail(function(data) {
             swal({ title: "Error",text:"An error has occurred please try again",   type: "error",   confirmButtonText: "Try again" });
+            moo_nav_cpanel_removeactive();
         });
     }
 }
@@ -1353,11 +1314,9 @@ function moo_changePassword(e) {
 
     if(currentPassword === '' || newPassword === '' || repeatnewPassword === '') {
         swal({ title: "Fill all fields",text:"Please fill the current and new password",   type: "error",   confirmButtonText: "OK" });
-        return;
     } else {
         if(newPassword !== repeatnewPassword) {
             swal({ title: "Attention !",text:"Password does not match the confirm password",   type: "error",   confirmButtonText: "OK" });
-            return;
         } else {
             jQuery.post(moo_RestUrl+"moo-clover/v1/customers/password",{"current_password":currentPassword,"new_password":newPassword},function(response){
                 if(response.status=='success'){
@@ -1370,72 +1329,6 @@ function moo_changePassword(e) {
             });
         }
     }
-}
-function moo_ConfirmAddressOnMap(e)
-{
-
-    e.preventDefault();
-    var address = moo_getAddressFromForm();
-    if( address.address == '' || address.city == '')
-    {
-        swal({ title: "Address missing",text:"Please enter your address",   type: "error",   confirmButtonText: "OK" });
-        return;
-    }
-    var address_string = Object.keys(address).map(function(k){return address[k]}).join(" ");
-    jQuery.get('https://maps.googleapis.com/maps/api/geocode/json?&address='+encodeURIComponent(address_string)+'&key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc',function (data) {
-        if(data.results.length>0)
-        {
-            var location = data.results[0].geometry.location;
-            document.getElementById("inputMooLat").value = location.lat;
-            document.getElementById("inputMooLng").value = location.lng;
-            moo_initMapAddress();
-            jQuery('#MooMapAddingAddress').show();
-            jQuery('#mooButonAddAddress').show();
-        }
-        else
-        {
-            swal({ title: "We weren't able to locate this address,try again",text:"",   type: "error",   confirmButtonText: "OK" });
-        }
-    });
-
-}
-function moo_delete_address(event,address_id) {
-    swal({
-            title: "Are you sure?",
-            text: "You will not be able to recover this address",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: "Yes, delete it!",
-            showLoaderOnConfirm: true,
-            cancelButtonText: "No, cancel!",
-            closeOnConfirm: false,
-            closeOnCancel: false
-        }).then(function(result){
-            if (result.value) {
-                jQuery
-                    .post(moo_params.ajaxurl,{'action':'moo_customer_deleteAddresses','address_id':address_id}, function (data) {
-                        if(data.status == 'failure' || data.status == 'expired') {
-                            swal({ title: "Your session has been expired",text:"Please login again",   type: "error",   confirmButtonText: "Login again" });
-                            moo_refresh_page();
-                        } else {
-                            if(data.status == 'success') {
-                                swal("Deleted!", "Your address has been deleted.", "success");
-                                moo_my_account_addresses(event);
-                            } else {
-                                swal({ title: "Address not deleted",text:"Please try again or contact us",   type: "error",   confirmButtonText: "Try again" });
-                            }
-                        }
-                    })
-                    .fail(function(data) {
-                        console.log(data.responseText);
-                        swal({ title: "Connection lost",text:"Address not deleted, please try again",   type: "error",   confirmButtonText: "Try again" });
-                    });
-
-            } else {
-                swal("Cancelled","","error");
-            }
-        });
 }
 function moo_refresh_page() {
     location.reload();

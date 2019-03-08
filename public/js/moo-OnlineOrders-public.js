@@ -3,13 +3,29 @@
     swal.setDefaults({ customClass: 'moo-custom-dialog-class' });
     jQuery( document ).ready(function($) {
         jQuery('#moo_OnlineStoreContainer').removeClass('moo_loading');
+        if(document.getElementById("moo_OnlineStoreContainer") !== null && document.getElementById("moo-checkout")  === null && document.getElementById("moo-my-account")  === null) {
+           if(moo_params.custom_sa_title !== "") {
+               swal({
+                   title:moo_params.custom_sa_title,
+                   text:moo_params.custom_sa_content
+               });
+           }
+        } else {
+            if(document.getElementById("moo-checkout") !== null){
+                if(moo_params.custom_sa_title !== "" && moo_params.custom_sa_onCheckoutPage === "on") {
+                    swal({
+                        title:moo_params.custom_sa_title,
+                        text:moo_params.custom_sa_content
+                    });
+                }
+            }
+        }
     });
 
 })(jQuery);
 
 
-function moo_btn_addToCartFIWM(event,item_uuid,qty)
-{
+function moo_btn_addToCartFIWM(event,item_uuid,qty) {
 
     event.preventDefault();
     //Change button content to loading
@@ -20,12 +36,9 @@ function moo_btn_addToCartFIWM(event,item_uuid,qty)
         //Change button text
         jQuery(target).text("ADD TO CART");
 
-        if(data != null)
-        {
+        if(data != null) {
                 mooBuildModifiersPanel(data.modifier_groups,item_uuid,qty);
-        }
-        else
-        {
+        } else {
             //Change butn text
             jQuery(target).text("ADD TO CART");
             swal({ title: "Error", text: 'We cannot Load the options for this item, please refresh the page or contact us',   type: "error",   confirmButtonText: "ok" });

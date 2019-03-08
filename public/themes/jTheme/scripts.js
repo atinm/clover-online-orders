@@ -8,12 +8,12 @@ jQuery(document).ready(function() {
 
     /* Load the them settings then draw tha layout an get the categories with the first five items */
     jQuery.get(moo_RestUrl+"moo-clover/v1/theme_settings/jTheme", function (data) {
-        if(data != null && data.settings != null)
-        {
+        if(data != null && data.settings != null) {
             window.moo_theme_setings = data.settings;
             window.nb_items_in_cart  = data.nb_items;
         }
     }).done(function () {
+        //console.log(window.moo_theme_setings);
         //Check the hash to see if we will load one category
         var hash = window.location.hash;
         if (hash !== "") {
@@ -26,8 +26,11 @@ jQuery(document).ready(function() {
                                 if(data.items !== null) {
                                     moo_renderItems(data);
                                 } else {
-                                    //TODO: Error message
-                                    console.log("Error :  No item found");
+                                    MooHideLoading();
+                                    var t ='<button class="osh-btn" onclick="moo_backToCategories(\''+params[1]+'\')">' +
+                                        '<span class="label">Back to Categories</span>'+
+                                        '</button>';
+                                    jQuery("#moo-onlineStore-items").html('<h3>No item found</h3>'+t);
                                 }
 
                             }).fail(function () {
@@ -45,8 +48,6 @@ jQuery(document).ready(function() {
                 MooLoadBaseStructure('#moo_OnlineStoreContainer',mooGetCategories);
                 MooSetLoading();
             }
-
-            console.log(params);
 
         } else {
             MooLoadBaseStructure('#moo_OnlineStoreContainer',mooGetCategories);
@@ -105,21 +106,36 @@ function mooGetCategories() {
 function  moo_renderCategories($cats) {
     // the categories section in the DOM
     var element = document.getElementById("moo-onlineStore-categories");
+    var nbItemsPerRow = 4;
+    if( window.moo_theme_setings.jTheme_nbItemsPerRow !== undefined && window.moo_theme_setings.jTheme_nbItemsPerRow !== null && window.moo_theme_setings.jTheme_nbItemsPerRow !== "" ) {
+        nbItemsPerRow = parseInt(window.moo_theme_setings.jTheme_nbItemsPerRow,10);
+        if(nbItemsPerRow <= 0)
+            nbItemsPerRow = 4;
 
+    }
+    var nbItemsPerRowCssCol = Math.floor((12/nbItemsPerRow));
     // Here your code that will convert the data to html
     var html = '<div class="moo-row">';
     for(var i in $cats){
         var category = $cats[i];
         if(category.uuid !== undefined ) {
-            if(category.image_url !== null && category.image_url !== "") {
-                var imageCatUrl = category.image_url;
-            } else {
-                var imageCatUrl = moo_params['plugin_img']+'/noImg2.png';
-            }
 
-            html +='<div class="moo-col-md-3">'+
-                '<a class="link" href="#cat-'+ category.uuid.toLowerCase() +'" id="cat-'+category.uuid.toLowerCase()+'" data-cat-id="'+category.uuid.toLowerCase()+'" onclick="MooClickOnCategory(event,this)">';
-            html += '<div class="image-wrapper" style="background: url('+imageCatUrl+') no-repeat center;background-size:100%;"></div>';
+            if(typeof attr_categories !== 'undefined' && attr_categories !== undefined && attr_categories !== null && typeof attr_categories === 'object') {
+                if(attr_categories.indexOf(category.uuid.toUpperCase()) === -1){
+                    continue;
+                }
+            }
+            var imageCatUrl = moo_params['plugin_img']+'/noImg3.png';
+            if(category.image_url !== null && category.image_url !== "") {
+                imageCatUrl = category.image_url;
+            }
+            if( i % nbItemsPerRow === 0) {
+                html +='<div class="moo-col-md-'+nbItemsPerRowCssCol+'" style="clear: both">';
+            } else {
+                html +='<div class="moo-col-md-'+nbItemsPerRowCssCol+'">';
+            }
+            html +='<a class="link" href="#cat-'+ category.uuid.toLowerCase() +'" id="cat-'+category.uuid.toLowerCase()+'" data-cat-id="'+category.uuid.toLowerCase()+'" onclick="MooClickOnCategory(event,this)">';
+            html += '<div class="image-wrapper"><img src="'+imageCatUrl+'"/></div>';
 
 
             html +='<div class="cat-name-wrapper"><span class="moo-category-name">'+
@@ -133,8 +149,6 @@ function  moo_renderCategories($cats) {
     // Then add theme to dom and do some changes after finsihed the rendriign
     jQuery(element).html(html).promise().done(function() {
         MooHideLoading();
-        console.log("Categories loaded")
-
     });
 }
 
@@ -148,8 +162,11 @@ function MooClickOnCategory(event,elm)
         if(data.items !== null) {
             moo_renderItems(data);
         } else {
-            //TODO: Error message
-            console.log("Error :  No item found");
+            MooHideLoading();
+            var t ='<button class="osh-btn" onclick="moo_backToCategories(\''+cat_id+'\')">' +
+                '<span class="label">Back to Categories</span>'+
+                '</button>';
+            jQuery("#moo-onlineStore-items").html('<h3>No item found</h3>'+t);
         }
 
     });
@@ -158,6 +175,14 @@ function MooClickOnCategory(event,elm)
 function moo_renderItems(data) {
     // the categories section in the DOM
     var element = document.getElementById("moo-onlineStore-items");
+    var nbItemsPerRow = 4;
+    if( window.moo_theme_setings.jTheme_nbItemsPerRow !== undefined && window.moo_theme_setings.jTheme_nbItemsPerRow !== null && window.moo_theme_setings.jTheme_nbItemsPerRow !== "" ) {
+        nbItemsPerRow = parseInt(window.moo_theme_setings.jTheme_nbItemsPerRow,10);
+        if(nbItemsPerRow <= 0)
+            nbItemsPerRow = 4;
+
+    }
+    var nbItemsPerRowCssCol = Math.floor((12/nbItemsPerRow));
     // Here your code that will convert the data to html
     var html = '<div class="moo-row">';
     html +='<h3>'+data.name+'</h3>';
@@ -170,23 +195,20 @@ function moo_renderItems(data) {
 
             if(item.price > 0 && item.price_type === "PER_UNIT")
                 item_price += '/'+item.unit_name;
-            if(item.image !== null && item.image.url !== null && item.image.url !== "")
-            {
+            if(item.image !== null && item.image.url !== null && item.image.url !== "") {
                 var itemimgUrl = item.image.url;
-            }
-            else
-            {
-                var itemimgUrl = moo_params['plugin_img']+'/noImg.png';
-            }
-
-            if( i % 4 === 0) {
-                html +='<div class="moo-col-md-3" style="clear: both">';
             } else {
-                html +='<div class="moo-col-md-3">';
-
+                var itemimgUrl = moo_params['plugin_img']+'/noImg3.png';
             }
+
+                if( i % nbItemsPerRow === 0) {
+                    html +='<div class="moo-col-md-'+nbItemsPerRowCssCol+'" style="clear: both">';
+                } else {
+                    html +='<div class="moo-col-md-'+nbItemsPerRowCssCol+'">';
+                }
                 html +='<a title="'+item.description+'" class="link" href="#item-'+item.uuid.toLowerCase()+'" data-item-id="'+item.uuid.toLowerCase()+'" onclick="MooClickOnItem(event,this)">';
-                html += '<div class="image-wrapper" style="background: url('+itemimgUrl+') no-repeat center;background-size:100%;"></div>';
+                html += '<div class="image-wrapper"><img src="'+itemimgUrl+'" /></div>';
+                //html += '<div class="image-wrapper" style="background: url('+itemimgUrl+') no-repeat center;background-size:100%;"><img src="'+itemimgUrl+'" /></div>';
 
 
             html +=   '<h2 class="title"><span class="brand "></span>'+
@@ -204,10 +226,13 @@ function moo_renderItems(data) {
                 {
                     html += '<span>$'+item_price+'</span>';
                 }
-            html += '</span>'+
+                 html += '</span>'+
                 '</div>'+
-                '</div>'+
-                '<div class="btn-wrapper"><span class="moo-category-name">';
+                '</div>';
+                if(window.moo_theme_setings.showItemDescription !== undefined && window.moo_theme_setings.showItemDescription !== null && window.moo_theme_setings.showItemDescription === 'on') {
+                    html += '<div class="moo_item_description">'+item.description+'</div>';
+                }
+                html += '<div class="btn-wrapper"><span class="moo-category-name">';
             if(item.stockCount === "out_of_stock")
             {
                 html += '<button class="osh-btn"><span class="label">OUT OF STOCK</span></button>';
@@ -242,7 +267,7 @@ function moo_renderItems(data) {
             html +='</span></div></a></div>';
         }
     }
-    html    += "</div>";
+    html += "</div>";
     if(data.uuid) {
         html    += '<div class="moo-back-to-categories"><button class="osh-btn" onclick="moo_backToCategories(\''+data.uuid.toLowerCase()+'\')">' +
                 '<span class="label">Back to Categories</span>'+

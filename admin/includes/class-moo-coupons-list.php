@@ -29,26 +29,6 @@ class Coupons_List_Moo extends WP_List_Table_MOO {
         $res = $api->getCoupons($per_page,$page_number-1);
         $res = json_decode($res,true);
         return $res['elements'];
-       /*
-        *
-        $sql = "SELECT * FROM {$wpdb->prefix}moo_order";
-        if ( ! empty( $_REQUEST['orderby'] ) ) {
-            $sql .= ' ORDER BY ' . esc_sql( $_REQUEST['orderby'] );
-            $sql .= ! empty( $_REQUEST['order'] ) ? ' ' . esc_sql( $_REQUEST['order'] ) : ' ASC';
-        }
-        else
-        {
-            $sql .= ' ORDER BY _id desc';
-        }
-
-        $sql .= " LIMIT $per_page";
-
-        $sql .= ' OFFSET ' . ( $page_number - 1 ) * $per_page;
-
-        $result = $wpdb->get_results( $sql, 'ARRAY_A' );
-        var_dump($result);
-        return $result;
-        */
     }
     /** Text displayed when no customer data is available */
     public function no_items() {

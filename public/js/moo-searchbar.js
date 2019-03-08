@@ -72,7 +72,6 @@ function mooRenderItemsForSearch(items){
             html +='<div class="moo-col-md-'+(12/window.moo_nbItemsPerLine)+'" style="clear: both">';
         } else {
             html +='<div class="moo-col-md-'+(12/window.moo_nbItemsPerLine)+'">';
-
         }
         html +='<a title="'+item.description+'" class="link" href="#item-'+item.uuid.toLowerCase()+'" data-item-id="'+item.uuid.toLowerCase()+'" onclick="MooClickOnItem(event,this)">';
 

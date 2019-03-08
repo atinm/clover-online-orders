@@ -1,9 +1,10 @@
-jQuery(document).ready(function() {
+jQuery(document).ready(function($) {
     //Load the content of the opened tab
     mooLoadInstalledThemes();
+    //$(".moo_dashboard_inputColor").wpColorPicker();
+    console.log("hello world from dashboard")
 });
-function moo_dashboard_tab_clicked(tab)
-{
+function moo_dashboard_tab_clicked(tab) {
     var Nb_Tabs=2; // Number for tabs
     for(var i=1;i<=Nb_Tabs;i++) {
         jQuery('#mooDashbboardTabContent'+i).hide();
@@ -138,8 +139,8 @@ function mooChooseTheme(event,identifier) {
         if(data.status == "success"){
             mooLoadInstalledThemes();
             swal({
-                title: "Theme changed",
-                text: 'The theme changed',
+                title: "Store Interface Changed",
+                text: 'The store interface changed',
                 type: "success",
                 confirmButtonText: "ok"
             });
@@ -154,6 +155,14 @@ function mooChooseTheme(event,identifier) {
         }
     });
 
+}
+function mooChangedInputColorValue(id){
+    var value = jQuery('#'+id).val();
+    jQuery('#'+id+"_val").val(value);
+}
+function mooChangedInputColorTextValue(id){
+    var value = jQuery('#'+id+"_val").val();
+    jQuery('#'+id).val(value);
 }
 
 function moo_save_theme_customization(event,theme) {

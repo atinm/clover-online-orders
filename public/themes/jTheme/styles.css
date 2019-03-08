@@ -1,22 +1,31 @@
 
 .link {
-    box-shadow: 0 0 0 1px #e5e5e5 !important;
+    box-shadow: 0 0 0 1px #e5e5e5;
     display: block;
     text-decoration: none;
     background-color: #fff;
+    padding-top: 100%;
+    position: relative;
+    margin-bottom: 15px;
 }
 .link:hover {
-    box-shadow: 0 0 0 2px #d60002;
+    box-shadow: 0 0 0 2px;
     text-decoration: none;
     background-color: #fff;
+    color : #d60002;
 }
 .link>.image-wrapper {
-    width: 100%;
-    min-height: 240px;
-    padding-left: 10px;
-    padding-right: 10px;
-    margin-top: 19px;
-    position: relative;
+    /*width: 100%;*/
+    /* min-height: 240px; */
+    /*padding-left: 10px;*/
+    /*padding-right: 10px;*/
+    /*margin-top: 19px;*/
+    /*position: relative;*/
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
 }
 .link>.image-wrapper .moo-image {
     width: 100%;
@@ -107,9 +116,9 @@
     line-height: 20px;
     color: #d0021b;
 }
-.osh-btn {
+.link .btn-wrapper .osh-btn, .moo-back-to-categories .osh-btn {
     text-transform: uppercase !important;
-    background: #F68B1E !important;
+    background: #F68B1E;
     border: 1px solid #F68B1E;
     cursor: pointer;
     font-family: Roboto,Helvetica,Arial,sans-serif;
@@ -125,7 +134,22 @@
     font-weight: 700;
     color: #fff;
 }
-.osh-btn, .osh-btn>.additional-content, .osh-btn>.label, .osh-btn>.sub-label, .osh-btn>i {
+.link .btn-wrapper .osh-btn, .link .btn-wrapper .osh-btn>.additional-content, .link .btn-wrapper .osh-btn>.label, .link .btn-wrapper .osh-btn>.sub-label, .link .btn-wrapper .osh-btn>i {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1.42857;
+    font-weight: normal;
+    font-family: Roboto,Helvetica,Arial,sans-serif;
+    font-size: 12px;
+}
+.link>.moo_item_description  {
+    text-align: center;
+    font-size: 13px;
+    color: black;
+    padding: 3px;
+    min-height: 97px;
+}
+.moo-back-to-categories .osh-btn, .moo-back-to-categories .osh-btn>.additional-content, .moo-back-to-categories .osh-btn>.label, .moo-back-to-categories .osh-btn>.sub-label, .moo-back-to-categories .osh-btn>i {
     display: inline-block;
     vertical-align: middle;
     line-height: 1.42857;

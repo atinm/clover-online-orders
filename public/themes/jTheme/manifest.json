@@ -3,28 +3,105 @@
     "name":"Store Interface 5",
     "screenshots":"https://api.smartonlineorders.com/assets/images/interface-5.png",
     "version":"1.0",
-    "description":"This Store Interface is great if you want to use images to showcase your Clover Inventory.",
+    "description":"This Store Interface is great if you want to use images to showcase your Clover Inventory. Click customize if you want to show description",
     "settings":[
         {
             "id":"width",
             "label":"Page width",
             "type":"input_text",
-            "info":"Default page width recommendation is 1024px. <br /> You can make changes here",
+            "info":"Default page width recommendation is 1024px. <br /> You can make changes here.",
             "default":"1024"
         },
         {
             "id":"qtyWindow",
             "label":"Show Quantity Pop Up window after adding any item to cart",
             "type":"onoff",
-            "info":"This will show the Quantity selection window when selecting 'add to cart' button. The customer can still change the quantity later in the checkout process",
+            "info":"This will show the Quantity selection window when selecting 'add to cart' button. The customer can still change the quantity later in the checkout process.",
             "default":"off"
         },
         {
             "id":"qtyWindowForModifiers",
             "label":"Show Quantity Pop Up window for items with modifiers",
             "type":"onoff",
-            "info":"This will show the Quantity selection window for items with modifiers when selecting 'Choose Qty & Options' The customer can still change the Quantity later in the checkout processs. Note : this doesn't affect modifier Qty selection",
+            "info":"This will show the Quantity selection window for items with modifiers when selecting 'Choose Qty & Options' The customer can still change the Quantity later in the checkout processs. Note : this doesn't affect modifier Qty selection.",
             "default":"off"
+        },
+        {
+            "id":"nbItemsPerRow",
+            "label":"Number of items per row",
+            "type":"input_number",
+            "info":"Change the default number of items/categories per row. You can choose from 1 to 12. <br /> We recommend  3 or 4.",
+            "default":"4"
+        },
+        {
+            "id":"showItemDescription",
+            "label":"Display Items Description",
+            "type":"onoff",
+            "info":"This will allow you show the items descriptions under items names.",
+            "default":"off"
+        },
+        {
+            "id":"color1",
+            "label":"Color 1",
+            "type":"color",
+            "info":"Used in : buttons background, icon cart background.",
+            "default":"#F68B1E",
+            "css": [
+                {
+                    "cssSelector":".moo-new-icon",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":".swal2-popup .swal2-styled.swal2-confirm",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":".moo-new-icon",
+                    "cssProperty":"border-color"
+                },
+                {
+                    "cssSelector":".link .btn-wrapper .osh-btn",
+                    "cssProperty":"background"
+                },
+                {
+                    "cssSelector":".moo-back-to-categories .osh-btn",
+                    "cssProperty":"background"
+                }
+            ]
+        },
+        {
+            "id":"color2",
+            "label":"Color 2",
+            "type":"color",
+            "info":"Used in text on buttons.",
+            "default":"#ffffff",
+            "css": [
+                {
+                    "cssSelector":".moo-new-icon",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":".swal2-popup .swal2-styled.swal2-confirm",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":".link .btn-wrapper .osh-btn, .moo-back-to-categories .osh-btn",
+                    "cssProperty":"color"
+                }
+            ]
+        },
+        {
+            "id":"color3",
+            "label":"Color 3",
+            "type":"color",
+            "info":"Used on border when hover on items or categories.",
+            "default":"#d60002",
+            "css": [
+                {
+                    "cssSelector":".link:hover",
+                    "cssProperty":"color"
+                }
+            ]
         }
     ]
 }

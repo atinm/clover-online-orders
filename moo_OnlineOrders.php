@@ -16,7 +16,7 @@
  * Plugin Name:       Smart Online Order for Clover
  * Plugin URI:        http://www.zaytechapps.com
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.3.2
+ * Version:           1.3.3
  * Author:            Zaytech
  * Author URI:        http://www.zaytechapps.com
  * License:           Clover app
@@ -31,53 +31,60 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * The code that runs during plugin activation.
- * This action is documented in includes/class-moo-OnlineOrders-activator.php
+ * The core plugin class that is used to define internationalization,
+ * admin-specific hooks, and public-facing site hooks.
  */
-function activate_moo_OnlineOrders() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-activator.php';
+require plugin_dir_path( __FILE__ ) . 'includes/moo-OnlineOrders.php';
+
+/**
+ * The code that runs during plugin activation.
+ * This action is documented in includes/moo-OnlineOrders-activator.php
+ */
+function activate_moo_OnlineOrders($network_wide) {
+    require_once plugin_dir_path( __FILE__ ) . 'includes/moo-OnlineOrders-activator.php';
+    if (function_exists('is_multisite') && is_multisite() && $network_wide ) {
+        Moo_OnlineOrders_Activator::activateOnNetwork();
+        return;
+    }
     Moo_OnlineOrders_Activator::activate();
 }
 
 /**
  * The code that runs during plugin deactivation.
- * This action is documented in includes/class-moo-OnlineOrders-deactivator.php
+ * This action is documented in includes/moo-OnlineOrders-deactivator.php
  */
 function deactivate_moo_OnlineOrders() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-deactivator.php';
+
+	require_once plugin_dir_path( __FILE__ ) . 'includes/moo-OnlineOrders-deactivator.php';
     Moo_OnlineOrders_Deactivator::deactivate();
 }
 
-
-register_activation_hook( __FILE__, 'activate_moo_OnlineOrders' );
-register_deactivation_hook( __FILE__, 'deactivate_moo_OnlineOrders' );
-
-
 function moo_OnlineOrders_shortcodes_allitems($atts, $content) {
-    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
+    require_once plugin_dir_path( __FILE__ ) . 'includes/moo-OnlineOrders-shortcodes.php';
     return Moo_OnlineOrders_Shortcodes::TheStore($atts, $content);
 }
 
 function moo_OnlineOrders_shortcodes_checkoutPage($atts, $content) {
-    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
-    return Moo_OnlineOrders_Shortcodes::checkoutPage($atts, $content);
+    require_once plugin_dir_path( __FILE__ ) . 'includes/shortcodes/checkoutPage.php';
+    $checkoutPage = new CheckoutPage();
+    return $checkoutPage->render($atts, $content);
 }
 
 function moo_OnlineOrders_shortcodes_buybutton($atts, $content) {
-    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
+    require_once plugin_dir_path( __FILE__ ) . 'includes/moo-OnlineOrders-shortcodes.php';
     return Moo_OnlineOrders_Shortcodes::moo_BuyButton($atts, $content);
 }
 
 function moo_OnlineOrders_shortcodes_thecart($atts, $content) {
-    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
+    require_once plugin_dir_path( __FILE__ ) . 'includes/moo-OnlineOrders-shortcodes.php';
     return Moo_OnlineOrders_Shortcodes::theCart($atts, $content);
 }
 function moo_OnlineOrders_shortcodes_searchBar($atts, $content) {
-    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
+    require_once plugin_dir_path( __FILE__ ) . 'includes/moo-OnlineOrders-shortcodes.php';
     return Moo_OnlineOrders_Shortcodes::moo_search_bar($atts, $content);
 }
 function moo_OnlineOrders_shortcodes_customerAccount($atts, $content) {
-    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-shortcodes.php';
+    require_once plugin_dir_path( __FILE__ ) . 'includes/moo-OnlineOrders-shortcodes.php';
     return Moo_OnlineOrders_Shortcodes::moo_customer_account($atts, $content);
 }
 
@@ -97,30 +104,33 @@ function moo_OnlineOrders_shortcodes_categorymsg($atts, $content) {
 }
 
 
-
 /*
 * Widgets Contents
 */
 function moo_OnlineOrders_widget_opening_hours() {
-    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-widgets.php';
+    require_once plugin_dir_path( __FILE__ ) . 'includes/moo-OnlineOrders-widgets.php';
     register_widget( 'Moo_OnlineOrders_Widgets_Opening_hours' );
 }
 function moo_OnlineOrders_widget_best_selling()
 {
-    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-widgets.php';
+    require_once plugin_dir_path( __FILE__ ) . 'includes/moo-OnlineOrders-widgets.php';
     register_widget( 'Moo_OnlineOrders_Widgets_best_selling' );
 }
 function Moo_OnlineOrders_Widgets_categories()
 {
-    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-widgets.php';
+    require_once plugin_dir_path( __FILE__ ) . 'includes/moo-OnlineOrders-widgets.php';
     register_widget( 'Moo_OnlineOrders_Widgets_categories' );
 }
 
 function moo_OnlineOrders_RestAPI() {
-    require_once plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders-Restapi.php';
+    require_once plugin_dir_path( __FILE__ ) . 'includes/moo-OnlineOrders-Restapi.php';
     $rest_api = new Moo_OnlineOrders_Restapi();
     $rest_api->register_routes();
 }
+
+/* Activate and deactivate hooks*/
+register_activation_hook( __FILE__, 'activate_moo_OnlineOrders' );
+register_deactivation_hook( __FILE__, 'deactivate_moo_OnlineOrders' );
 
 /* adding  shortcodes*/
 add_shortcode('moo_all_items', 'moo_OnlineOrders_shortcodes_allitems');
@@ -138,17 +148,53 @@ add_action( 'widgets_init', 'moo_OnlineOrders_widget_opening_hours' );
 add_action( 'widgets_init', 'moo_OnlineOrders_widget_best_selling' );
 add_action( 'widgets_init', 'Moo_OnlineOrders_Widgets_categories' );
 
-/* Rest Api adding*/
+/* Rest Api */
 add_action( 'rest_api_init', 'moo_OnlineOrders_RestAPI' );
 
+// add links to plugin
 
-/*
-add_filter( 'wp_mail_content_type', function( $content_type ) {
-    return 'text/html';
+add_filter( 'plugin_action_links_' . plugin_basename(__FILE__), 'moo_add_action_links' );
+
+function moo_add_action_links( $links ) {
+    $plugin_links_1 = array(
+        '<a href="admin.php?page=moo_index">Settings</a>',
+        '<a href="http://docs.smartonlineorder.com/">Docs</a>',
+        '<a href="https://smartonlineorder.com/contact-us/">Support</a>',
+    );
+    if (function_exists('is_multisite') && is_multisite() && is_plugin_active_for_network( plugin_basename( __FILE__ ) ) ) {
+            $plugin_links_2 = array(
+                '<a href="admin.php?page=moo_deactivateAndClean">Clean inventory</a>',
+            );
+    } else {
+        $plugin_links_2 = array(
+            '<a href="admin.php?page=moo_deactivateAndClean">Deactivate & clean inventory</a>',
+        );
+    }
+
+    return array_merge( $plugin_links_1, $links, $plugin_links_2 );
+}
+
+add_action( 'admin_init', function() {
+    if( isset( $_GET['page'] ) &&  $_GET['page'] === 'moo_deactivateAndClean')
+    {
+        require_once plugin_dir_path( __FILE__)."/includes/moo-OnlineOrders-deactivator.php";
+
+        if(function_exists("is_plugin_active_for_network") && !is_plugin_active_for_network( plugin_basename( __FILE__ ) )){
+            Moo_OnlineOrders_Deactivator::deactivateAndClean();
+            deactivate_plugins( plugin_basename( __FILE__ ), true );
+        } else {
+            Moo_OnlineOrders_Deactivator::onlyClean();
+        }
+
+        $url = admin_url( 'plugins.php?deactivate=true' );
+        header( "Location: $url" );
+        die();
+    }
 });
-*/
-if(get_option('moo_onlineOrders_version') != '132')
+
+if(get_option('moo_onlineOrders_version') != '133')
     add_action('plugins_loaded', 'moo_onlineOrders_check_version');
+
 
 /*
  * This function for updating the database structure when the version changed and updated it automatically
@@ -189,8 +235,7 @@ function moo_onlineOrders_check_version()
                           `modifiers` TEXT NOT NULL,
                           `special_ins` VARCHAR(255) NOT NULL,
                           PRIMARY KEY (`_id`, `item_uuid`, `order_uuid`)
-                            )
-                        ENGINE = InnoDB;");
+                            );");
 
             $store_page     = get_option('moo_store_page');
             $checkout_page  = get_option('moo_checkout_page');
@@ -198,7 +243,7 @@ function moo_onlineOrders_check_version()
             if( !isset($defaultOptions["store_page"]) || $defaultOptions["store_page"] == "" ) $defaultOptions["store_page"] = $store_page;
             if( !isset($defaultOptions["checkout_page"]) || $defaultOptions["checkout_page"] == "") $defaultOptions["checkout_page"] = $checkout_page;
             if( !isset($defaultOptions["cart_page"]) || $defaultOptions["cart_page"] == "") $defaultOptions["cart_page"] = $cart_page;
-            if( !isset($defaultOptions["checkout_login"]) || $defaultOptions["checkout_login"] == "") $defaultOptions["checkout_login"] = "disabled";
+            if( !isset($defaultOptions["checkout_login"]) || $defaultOptions["checkout_login"] == "") $defaultOptions["checkout_login"] = "enabled";
             if( !isset($defaultOptions["use_coupons"]) || $defaultOptions["use_coupons"] == "") $defaultOptions["use_coupons"] = "disabled";
         case '125':
             $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_item` CHANGE `description` `description` TEXT ");
@@ -215,7 +260,6 @@ function moo_onlineOrders_check_version()
             if( !isset($defaultOptions["order_later_days_delivery"]) || $defaultOptions["order_later_days_delivery"] == "") $defaultOptions["order_later_days_delivery"] = "4";
             if( !isset($defaultOptions["copyrights"]) || $defaultOptions["copyrights"] == "") $defaultOptions["copyrights"] = 'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.2.8">Smart Online Order</a>';
 
-           // update_option('moo_settings', $defaultOptions );
 
         case '127':
             $default_options = array(
@@ -244,22 +288,41 @@ function moo_onlineOrders_check_version()
         $MooOptions = $defaultOptions;
         if(!isset($MooOptions['onePage_show_more_button'])) {
             $MooOptions['onePage_show_more_button']='on';
-
         }
         $MooOptions['payment_creditcard'] = 'on';
         $MooOptions['use_sms_verification'] = 'enabled';
-        update_option("moo_settings",$MooOptions);
-        update_option('moo_onlineOrders_version','132');
+
         case '132':
+            $MooOptions = $defaultOptions;
+            if(!isset($MooOptions['my_account_page'])) {
+                $MooOptions['my_account_page']='';
+            }
+            if(!isset($MooOptions['text_under_special_instructions'])) {
+                $MooOptions['text_under_special_instructions']='*additional charges may apply and not all changes are possible';
+            }
+            if(!isset($MooOptions['use_couponsApp'])) {
+                $MooOptions['use_couponsApp']= "off";
+            }
+            if(!isset($MooOptions['custom_sa_content'])) {
+                $MooOptions['custom_sa_content']= "";
+            }
+            if(!isset($MooOptions['custom_sa_title'])) {
+                $MooOptions['custom_sa_title']= "";
+            }
+            if(!isset($MooOptions['custom_sa_onCheckoutPage'])) {
+                $MooOptions['custom_sa_onCheckoutPage']= "off";
+            }
+            if(!isset($MooOptions['closing_msg'])) {
+                $MooOptions['closing_msg']= "";
+            }
+
+            update_option("moo_settings",$MooOptions);
+            update_option('moo_onlineOrders_version','133');
+        case '133':
             break;
     }
 }
 
-/**
- * The core plugin class that is used to define internationalization,
- * admin-specific hooks, and public-facing site hooks.
- */
-require plugin_dir_path( __FILE__ ) . 'includes/class-moo-OnlineOrders.php';
 
 /**
  * Begins execution of the plugin.

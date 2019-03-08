@@ -1,17 +1,11 @@
 jQuery(document).ready(function($){
+
     window.moo_loading = '<svg xmlns="http://www.w3.org/2000/svg" width="44px" height="44px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="uil-default"><rect x="0" y="0" width="100" height="100" fill="none" class="bk"></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(0 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(30 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.08333333333333333s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(60 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.16666666666666666s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(90 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.25s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(120 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.3333333333333333s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(150 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.4166666666666667s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(180 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(210 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5833333333333334s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(240 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.6666666666666666s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(270 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.75s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(300 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.8333333333333334s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(330 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.9166666666666666s" repeatCount="indefinite"></animate></rect></svg>';
     window.moo_first_time = true;
     window.moo_nb_allItems =0;
-    moo_Update_stats();
-    Moo_GetOrderTypes();
 
-    $("div.faq_question").click(function() {
-        var clicked = $(this);
-        // Get next element to current element
-        clicked = clicked.next();
-        // Show or hide the next element
-        clicked.toggle();
-    });
+
+
     $('.moo-edit-description-button').magnificPopup({
         type:'inline',
         closeBtnInside: true,
@@ -23,9 +17,26 @@ jQuery(document).ready(function($){
         closeBtnInside: true,
         midClick: true // Allow opening popup on middle mouse click. Always set it to true if you don't provide alternative source in href.
     });
+    $("#show_menu").click(function(e) {
+        e.preventDefault();
+        $("#MooPanel_main>#menu_for_mobile>ul").toggle();
+    });
+    // check if we ae on settings page
+    if(document.getElementById("MooPanel") !== null) {
+        moo_Update_stats();
+        Moo_GetOrderTypes();
 
-    if($('#moo_progressbar_container').length == 1)
-         window.bar = new ProgressBar.Line('#moo_progressbar_container', {
+        $("div.faq_question").click(function() {
+            var clicked = $(this);
+            // Get next element to current element
+            clicked = clicked.next();
+            // Show or hide the next element
+            clicked.toggle();
+        });
+
+
+        if($('#moo_progressbar_container').length == 1)
+            window.bar = new ProgressBar.Line('#moo_progressbar_container', {
                 strokeWidth: 4,
                 easing: 'easeInOut',
                 duration: 1400,
@@ -49,30 +60,13 @@ jQuery(document).ready(function($){
                 },
                 from: {color: '#FFEA82'},
                 to: {color: '#ED6A5A'}
-        });
+            });
 
-    $('div#MooPanel_tabContent4 input#MooDefaultStyle').each(function (i,val) {
-        var v = $(val).attr('value');
-        if($(val).prop('checked'))
-        {
-            $('div#MooPanel_tabContent4 input[value='+v+']').next().css('border', '2px solid rgb(34, 255, 79)');
-            $('#mooInterface-'+v).show();
-        }
-        else
-        {
-            $('div#MooPanel_tabContent4 input[value='+v+']').next().css('border', '1px solid #999');
-            $('#mooInterface-'+v).hide();
-        }
-    });
-
-    $('div#MooPanel_tabContent4 input#MooDefaultStyle').click(function(event) {
-        var elm = $(event.target);
-        var value = elm.attr('value');
         $('div#MooPanel_tabContent4 input#MooDefaultStyle').each(function (i,val) {
             var v = $(val).attr('value');
-            if(v == value)
+            if($(val).prop('checked'))
             {
-                $('div#MooPanel_tabContent4 input[value='+value+']').next().css('border', '2px solid rgb(34, 255, 79)');
+                $('div#MooPanel_tabContent4 input[value='+v+']').next().css('border', '2px solid rgb(34, 255, 79)');
                 $('#mooInterface-'+v).show();
             }
             else
@@ -80,63 +74,114 @@ jQuery(document).ready(function($){
                 $('div#MooPanel_tabContent4 input[value='+v+']').next().css('border', '1px solid #999');
                 $('#mooInterface-'+v).hide();
             }
-        })
-    });
+        });
+
+        $('div#MooPanel_tabContent4 input#MooDefaultStyle').click(function(event) {
+            var elm = $(event.target);
+            var value = elm.attr('value');
+            $('div#MooPanel_tabContent4 input#MooDefaultStyle').each(function (i,val) {
+                var v = $(val).attr('value');
+                if(v == value)
+                {
+                    $('div#MooPanel_tabContent4 input[value='+value+']').next().css('border', '2px solid rgb(34, 255, 79)');
+                    $('#mooInterface-'+v).show();
+                }
+                else
+                {
+                    $('div#MooPanel_tabContent4 input[value='+v+']').next().css('border', '1px solid #999');
+                    $('#mooInterface-'+v).hide();
+                }
+            })
+        });
 
 
-    $("#show_menu").click(function() {
-        $("#menu_for_mobile ul").toggle();
-    });
 
 
-    $('#orderCategory input').bind('click.sortable mousedown.sortable',function(ev){
-        ev.target.focus();
-    });
-    name_cat = "";
-    $(".table_category").on("click",".edit_name",function(event){
-        event.preventDefault();
-        var idCat   = $(this).parent().parent().find("td:eq(0)").text();
-        var idCatStr   = '"'+idCat+'"';
-        var nameCat = $(this).parent().parent().find("td:eq(2)").text();
-        var id_name = $(this).parent().parent().find("td:eq(2)").attr("id");
-        name_cat = '"'+nameCat+'"';
-        var c_html = "";
-        c_html +="<div class='input-change-name'>";
-        c_html += "<div class='input-name'>";
-        c_html += "<input type='text' value='"+nameCat+"' id='newName"+idCat+"' class='newname'>";
-        c_html += "</div>";
-       // c_html += "<div class='button-name'>";
-        c_html += "<div class='bt-valider'>";
-        c_html +='<a href="#" class="vald-change-name" onclick=\'vald_change_name(event,'+idCatStr+',"D")\'>';
-        c_html +='<span id="moo_valide_change1" data-ot="valider_change_name" data-ot-target="#moo_valide_change1">';
-        c_html +="<img src='"+moo_params.plugin_url+"/public/img/valider.png' alt='Validate change'>";
-        c_html +="</span>";
-        c_html +="</a>";
-        c_html += "</div>";
-        c_html += "<div class='bt-annuler'>";
-        c_html +='<a href="#" class="annuler-change-name" onclick=\'annuler_change_name(event,'+idCatStr+',"D",'+name_cat+')\'>';
-        c_html += "<img src='"+moo_params.plugin_url+"/public/img/annuler.png' alt='Annuler change'>";
-        c_html +="</a>";
-        c_html += "</div>";
-        //c_html += "</div>";
-        c_html += "</div>";
-        $("#"+id_name).html(c_html);
-    });
-    /* --- Modifier Group --- */
 
-    $('.moo_ModifierGroup input').bind('click.sortable mousedown.sortable',function(ev){
-        ev.target.focus();
-    });
-    $('.sub-group input').bind('click.sortable mousedown.sortable',function(ev){
-        ev.target.focus();
-    });
+        $('#orderCategory input').bind('click.sortable mousedown.sortable',function(ev){
+            ev.target.focus();
+        });
+        name_cat = "";
+        $(".table_category").on("click",".edit_name",function(event){
+            event.preventDefault();
+            var idCat   = $(this).parent().parent().find("td:eq(0)").text();
+            var idCatStr   = '"'+idCat+'"';
+            var nameCat = $(this).parent().parent().find("td:eq(2)").text();
+            var id_name = $(this).parent().parent().find("td:eq(2)").attr("id");
+            name_cat = '"'+nameCat+'"';
+            var c_html = "";
+            c_html +="<div class='input-change-name'>";
+            c_html += "<div class='input-name'>";
+            c_html += "<input type='text' value='"+nameCat+"' id='newName"+idCat+"' class='newname'>";
+            c_html += "</div>";
+            // c_html += "<div class='button-name'>";
+            c_html += "<div class='bt-valider'>";
+            c_html +='<a href="#" class="vald-change-name" onclick=\'vald_change_name(event,'+idCatStr+',"D")\'>';
+            c_html +='<span id="moo_valide_change1" data-ot="valider_change_name" data-ot-target="#moo_valide_change1">';
+            c_html +="<img src='"+moo_params.plugin_url+"/public/img/valider.png' alt='Validate change'>";
+            c_html +="</span>";
+            c_html +="</a>";
+            c_html += "</div>";
+            c_html += "<div class='bt-annuler'>";
+            c_html +='<a href="#" class="annuler-change-name" onclick=\'annuler_change_name(event,'+idCatStr+',"D",'+name_cat+')\'>';
+            c_html += "<img src='"+moo_params.plugin_url+"/public/img/annuler.png' alt='Annuler change'>";
+            c_html +="</a>";
+            c_html += "</div>";
+            //c_html += "</div>";
+            c_html += "</div>";
+            $("#"+id_name).html(c_html);
+        });
+        /* --- Modifier Group --- */
+
+        $('.moo_ModifierGroup input').bind('click.sortable mousedown.sortable',function(ev){
+            ev.target.focus();
+        });
+        $('.sub-group input').bind('click.sortable mousedown.sortable',function(ev){
+            ev.target.focus();
+        });
+    }
 
    /* Remove loader*/
-    $('body').addClass('loaded')
+    $('body').addClass('loaded');
     //Force removing loader after 10 seconds
     setTimeout(function(){ $('body').addClass('loaded') }, 10000);
 
     $('.moo-color-field').wpColorPicker();
+
+    if (window.location.hash != "") {
+        switch (window.location.hash) {
+            case "#apikey":
+                tab_clicked(1);
+                break;
+            case "#inventory":
+                tab_clicked(2);
+                break;
+            case "#ordertypes":
+                tab_clicked(3);
+                break;
+            case "#categories":
+                tab_clicked(5);
+                break;
+            case "#modifiergroups":
+                tab_clicked(6);
+                break;
+            case "#checkout":
+                tab_clicked(7);
+                break;
+            case "#store":
+                tab_clicked(8);
+                break;
+            case "#delivery":
+                tab_clicked(9);
+                break;
+            case "#help":
+                tab_clicked(10);
+                break;
+            case "#faq":
+                tab_clicked(11);
+                break;
+        }
+    }
 });
 
 jQuery(document).ready(function() {
@@ -234,116 +279,115 @@ jQuery(document).ready(function() {
     });
 
 });
-    /* --- Modifier Group --- */
-    function edit_name_GGroup(event,id){
-        event.preventDefault();
-        jQuery("#label_"+id+" .getname").css("display","none");
-        jQuery("#label_"+id+" .change-name").css("display","block");
-    }
-    function validerChangeNameGG(event,id){
-        event.preventDefault();
-        var newName = jQuery("#newName_"+id).val();
-        //
-        jQuery("#label_"+id+" .getname").css("display","block");
-        jQuery("#label_"+id+" .change-name").css("display","none");
-        jQuery("#label_"+id+" .getname").text(newName);
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_change_modifiergroup_name',"mg_uuid":id,"mg_name":newName}, function (data) {
-            //console.log(data);
-            }
-        );
-    }
-    function annulerChangeNameGG(event,id,name){
-        event.preventDefault();
-        var name = jQuery("#label_"+id+" .getname").text();
-        jQuery("#label_"+id+" .getname").css("display","block");
-        jQuery("#label_"+id+" .change-name").css("display","none");
-        jQuery("#label_"+id+" .change-name input").val(name);
-    }
-
-    function show_sub(event,id){
-        event.preventDefault();
-        jQuery('#detail_group_'+id).slideToggle('fast', function() {
-            if (jQuery(this).is(':visible')) {
-                jQuery("#plus_"+id).attr('src',moo_params.plugin_url+'/public/img/substract.png');
-            } else {
-                jQuery("#plus_"+id).attr('src',moo_params.plugin_url+'/public/img/add.png');
-            }
-        });
-        //jQuery('#detail_group_'+id).slideToggle();
-    }
-    function edit_name_GModifer(event,id){
-        event.preventDefault();
-        jQuery("#label_"+id+" .getname").css("display","none");
-        jQuery("#label_"+id+" .change-name-modifier").css("display","block");
-    }
-    function validerChangeNameModifier(event,id){
-        event.preventDefault();
-        var newName = jQuery("#newName_"+id).val();
-        //
-        jQuery("#label_"+id+" .getname").css("display","block");
-        jQuery("#label_"+id+" .change-name-modifier").css("display","none");
-        jQuery("#label_"+id+" .getname").text(newName);
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_change_modifier_name',"m_uuid":id,"m_name":newName}, function (data) {
-                //console.log(data);
-            }
-        );
-    }
-    function annulerChangeNameModifier(event,id,name){
-        event.preventDefault();
-        var name = jQuery("#label_"+id+" .getname").text();
-        jQuery("#label_"+id+" .getname").css("display","block");
-        jQuery("#label_"+id+" .change-name-modifier").css("display","none");
-        jQuery("#label_"+id+" .change-name-modifier input").val(name);
-    }
 /* --- Modifier Group --- */
-    function vald_change_name(event,uuid,v) {
-        event.preventDefault();
-        var name = jQuery("#name_"+uuid).val();
-        var newname = jQuery("#newName"+uuid).val();
-        if ( v=="D" ){jQuery("td#name_"+uuid).html(newname);}
-        else{
-            jQuery("#newName"+uuid).prop('disabled', true);
-            jQuery("#bt_MV_"+uuid).remove();
-            jQuery("#bt_MA_"+uuid).remove();
+function edit_name_GGroup(event,id){
+    event.preventDefault();
+    jQuery("#label_"+id+" .getname").css("display","none");
+    jQuery("#label_"+id+" .change-name").css("display","block");
+}
+function validerChangeNameGG(event,id){
+    event.preventDefault();
+    var newName = jQuery("#newName_"+id).val();
+    //
+    jQuery("#label_"+id+" .getname").css("display","block");
+    jQuery("#label_"+id+" .change-name").css("display","none");
+    jQuery("#label_"+id+" .getname").text(newName);
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_change_modifiergroup_name',"mg_uuid":id,"mg_name":newName}, function (data) {
+        //console.log(data);
         }
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_change_name_category','newName':newname,"id_cat":uuid}, function(response){
-            if(response == 1){
-               // console.log(response);
-            }
-            else{
-                jQuery("td#name_"+uuid).html(name_cat);
-            }
-        });
-    }
+    );
+}
+function annulerChangeNameGG(event,id,name){
+    event.preventDefault();
+    var name = jQuery("#label_"+id+" .getname").text();
+    jQuery("#label_"+id+" .getname").css("display","block");
+    jQuery("#label_"+id+" .change-name").css("display","none");
+    jQuery("#label_"+id+" .change-name input").val(name);
+}
 
-
-    function annuler_change_name(event,uuid,v,lastname){
-        event.preventDefault();
-        if (v=="D"){jQuery("td#name_"+uuid).html(name_cat);}
-        else{
-            jQuery("#newName"+uuid).val(lastname);
-            jQuery("#newName"+uuid).prop('disabled', true);
-            jQuery("#bt_MV_"+uuid).remove();
-            jQuery("#bt_MA_"+uuid).remove();
+function show_sub(event,id){
+    event.preventDefault();
+    jQuery('#detail_group_'+id).slideToggle('fast', function() {
+        if (jQuery(this).is(':visible')) {
+            jQuery("#plus_"+id).attr('src',moo_params.plugin_url+'/public/img/substract.png');
+        } else {
+            jQuery("#plus_"+id).attr('src',moo_params.plugin_url+'/public/img/add.png');
         }
+    });
+    //jQuery('#detail_group_'+id).slideToggle();
+}
+function edit_name_GModifer(event,id){
+    event.preventDefault();
+    jQuery("#label_"+id+" .getname").css("display","none");
+    jQuery("#label_"+id+" .change-name-modifier").css("display","block");
+}
+function validerChangeNameModifier(event,id){
+    event.preventDefault();
+    var newName = jQuery("#newName_"+id).val();
+    //
+    jQuery("#label_"+id+" .getname").css("display","block");
+    jQuery("#label_"+id+" .change-name-modifier").css("display","none");
+    jQuery("#label_"+id+" .getname").text(newName);
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_change_modifier_name',"m_uuid":id,"m_name":newName}, function (data) {
+            //console.log(data);
+        }
+    );
+}
+function annulerChangeNameModifier(event,id,name){
+    event.preventDefault();
+    var name = jQuery("#label_"+id+" .getname").text();
+    jQuery("#label_"+id+" .getname").css("display","block");
+    jQuery("#label_"+id+" .change-name-modifier").css("display","none");
+    jQuery("#label_"+id+" .change-name-modifier input").val(name);
+}
+/* --- Modifier Group --- */
+function vald_change_name(event,uuid,v) {
+    event.preventDefault();
+    var name = jQuery("#name_"+uuid).val();
+    var newname = jQuery("#newName"+uuid).val();
+    if ( v=="D" ){jQuery("td#name_"+uuid).html(newname);}
+    else{
+        jQuery("#newName"+uuid).prop('disabled', true);
+        jQuery("#bt_MV_"+uuid).remove();
+        jQuery("#bt_MA_"+uuid).remove();
     }
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_change_name_category','newName':newname,"id_cat":uuid}, function(response){
+        if(response == 1){
+           // console.log(response);
+        }
+        else{
+            jQuery("td#name_"+uuid).html(name_cat);
+        }
+    });
+}
 
-    function MooChangeM_Status(uuid)
-    {
-        var mg_status = jQuery('#myonoffswitch_'+uuid).prop('checked');
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_update_modifier_status',"mg_uuid":uuid,"mg_status":mg_status}, function (data) {
-                console.log(data);
-            }
-        );
+
+function annuler_change_name(event,uuid,v,lastname){
+    event.preventDefault();
+    if (v == "D"){jQuery("td#name_"+uuid).html(name_cat);}
+    else{
+        jQuery("#newName"+uuid).val(lastname);
+        jQuery("#newName"+uuid).prop('disabled', true);
+        jQuery("#bt_MV_"+uuid).remove();
+        jQuery("#bt_MA_"+uuid).remove();
     }
+}
+
+function MooChangeM_Status(uuid)
+{
+    var mg_status = jQuery('#myonoffswitch_'+uuid).prop('checked');
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_modifier_status',"mg_uuid":uuid,"mg_status":mg_status}, function (data) {
+            console.log(data);
+        }
+    );
+}
 
 function delete_img_category(event,uuid,responsive){
     event.preventDefault();
     var image = "";
     if(responsive == 'D'){
         tr_new(uuid,image);
-         }
-    else {
+    } else {
         img_row(uuid,image)
     }
     jQuery.post(moo_params.ajaxurl,{'action':'moo_delete_img_category',"uuid":uuid}, function(data){
@@ -489,9 +533,8 @@ function tab_clicked(tab)
     }
     jQuery('#MooPanel_tabContent'+tab).show();
     jQuery('#MooPanel_tab'+tab).addClass("MooPanel_Selected");
-    jQuery('#MooPanel_sidebar').css('min-height',jQuery('#MooPanel_main').height()+72+'px');
 
-    if(tab==9 &&  window.moo_first_time == true)
+    if(tab === 9 &&  window.moo_first_time === true)
     {
         moo_getLatLongforMapDa();
         window.moo_first_time = false;
@@ -506,15 +549,19 @@ function MooPanel_ImportItems(event)
     jQuery('#MooPanelSectionImport').html(window.moo_loading);
     Moo_ImportCategories();
 }
-var flag_key_noy_found=false;
-function Moo_ImportCategories()
+function MooPanel_RefreshPage(event)
 {
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_import_categories'}, function (data) {
-            if(data.status == 'Success')
-            {
+    event.preventDefault();
+    window.location.reload();
+}
+var flag_key_noy_found = false;
 
-                if(data.data == "Please verify your Key in page settings") {
-                    flag_key_noy_found=true;
+function Moo_ImportCategories() {
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_import_categories'}, function (data) {
+            if(data.status === 'Success')
+            {
+                if(data.data === "Please verify your Key in page settings") {
+                    flag_key_noy_found = true;
                     jQuery('#MooPanelSectionImport').html('Please verify your API Key<br/> ');
                 }
                 else
@@ -525,26 +572,28 @@ function Moo_ImportCategories()
         }
     ).done(function () {
             Moo_ImportLabels();
-        });
+    });
 }
 
 function Moo_ImportLabels()
 {
-    if(!flag_key_noy_found)
+    if(!flag_key_noy_found) {
         jQuery.post(moo_params.ajaxurl,{'action':'moo_import_labels'}, function (data) {
-                if(data.status=='Success')
+                if(data.status === 'Success')
                     jQuery('#MooPanelSectionImport').append('<br/> '+data.data);
                 else
                     jQuery('#MooPanelSectionImport').append('<br/> '+"Error when importing the label, please try again");
             }
         ).done(function () {
-                Moo_ImportTaxes();
-            });
+            Moo_ImportTaxes();
+        });
+    }
+
 }
 function Moo_ImportTaxes()
 {
     jQuery.post(moo_params.ajaxurl,{'action':'moo_import_taxes'}, function (data) {
-            if(data.status=='Success')
+            if(data.status ==='Success')
                 jQuery('#MooPanelSectionImport').append('<br/> '+data.data);
             else
                 jQuery('#MooPanelSectionImport').append('<br/> '+"Error when importing the taxes rates, please try again");
@@ -553,20 +602,28 @@ function Moo_ImportTaxes()
             Moo_ImportItems();
         });
 }
-function Moo_ImportItems()
-{
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_import_items'}, function (data) {
-            if(data.status=='Success')
-                jQuery('#MooPanelSectionImport').append('<br/> '+data.data);
-            else
-                jQuery('#MooPanelSectionImport').append('<br/> '+"Error when importing the products, please try again");
+function Moo_ImportItems() {
+    Moo_ImportItemsV2(0);
+}
+function Moo_ImportItemsV2(page) {
+    var received = 0;
+    var productsNb = 0;
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_import_items_v2','page':page}, function (data) {
+            received = data.received;
+            productsNb = data.currentNb;
         }
     ).done(function () {
-            jQuery('#MooPanelSectionImport').html("All of your data was successfully imported from Clover POS"+'<br/> ');
+        if(received > 0) {
+            jQuery('#MooPanelSectionImportItems').html(productsNb + " Items imported"+'<br/> ');
+            Moo_ImportItemsV2(page+1);
+        } else {
+            jQuery('#MooPanelSectionImport').html("All of your data was successfully imported from Your Clover POS. Please click refresh button below or re-upload this page"+'<br/> ');
+            jQuery('#MooPanelSectionImportItems').html('');
+            jQuery('#MooPanelButtonImport').html('<a href="#" onclick="MooPanel_RefreshPage(event)" class="button button-secondary" style="margin-bottom: 35px;" >Refresh</a>');
             moo_Update_stats();
             Moo_GetOrderTypes();
-            window.location.reload();
-        });
+        }
+    });
 }
 
 function Moo_GetOrderTypes(){
@@ -663,10 +720,9 @@ function Moo_GetOrderTypes(){
     });
 }
 
-function moo_Update_stats()
-{
+function moo_Update_stats() {
     jQuery.post(moo_params.ajaxurl,{'action':'moo_get_stats'}, function (data) {
-            if(data.status=='Success'){
+            if(data.status === 'Success'){
                 window.moo_nb_allItems = data.products;
                 jQuery({someValue: 0}).animate({someValue: data.products}, {
                     duration: 5000,
@@ -700,24 +756,21 @@ function moo_Update_stats()
     );
 }
 
-function MooChangeOT_Status(uuid)
-{
+function MooChangeOT_Status(uuid) {
     var ot_status = jQuery('#myonoffswitch_'+uuid).prop('checked');
     jQuery.post(moo_params.ajaxurl,{'action':'moo_update_ot_status',"ot_uuid":uuid,"ot_status":ot_status}, function (data) {
            console.log(data);
         }
     );
 }
-function MooChangeOT_Status_Mobile(uuid)
-{
+function MooChangeOT_Status_Mobile(uuid) {
     var ot_status = jQuery('#myonoffswitch_mobile_'+uuid).prop('checked');
     jQuery.post(moo_params.ajaxurl,{'action':'moo_update_ot_status',"ot_uuid":uuid,"ot_status":ot_status}, function (data) {
             console.log(data);
         }
     );
 }
-function MooChangeOT_showSa_Mobile(uuid)
-{
+function MooChangeOT_showSa_Mobile(uuid) {
     var ot_showSa = jQuery('#myonoffswitch_sa_mobile_'+uuid).prop('checked');
     jQuery.post(moo_params.ajaxurl,{'action':'moo_update_ot_showSa',"ot_uuid":uuid,"show_sa":ot_showSa}, function (data) {
             console.log(data);
@@ -740,7 +793,7 @@ function moo_addordertype(e)
     var taxable = document.querySelector('#Moo_AddOT_taxable_oui').checked ;
     var show_sa = jQuery("#Moo_AddOT_delivery_oui").prop("checked");
     var minAmount = document.querySelector('#Moo_AddOT_minAmount').value;
-    if(label == "")
+    if(label === "")
         swal("Error","Please enter a label for your order Type","error");
     else
     {
@@ -748,12 +801,17 @@ function moo_addordertype(e)
         jQuery('#Moo_AddOT_btn').hide();
 
         jQuery.post(moo_params.ajaxurl,{'action':'moo_add_ot',"label":label,"taxable":taxable,"minAmount":minAmount,"show_sa":show_sa}, function (data) {
-            if(data.status=='success')
+            if(data.status === 'success')
             {
-                if(data.message == '401 Unauthorized')
+                if(data.message === '401 Unauthorized')
                     jQuery('#Moo_AddOT_loading').html('Verify your API key');
                 else
                 {
+                    swal({
+                        title:"Order type added",
+                        type:'success'
+
+                    });
                     Moo_GetOrderTypes();
                     jQuery('#Moo_AddOT_loading').html('');
                     jQuery('#Moo_AddOT_btn').show();
@@ -774,23 +832,58 @@ function moo_addordertype(e)
 function Moo_deleteOrderType(e,uuid)
 {
     e.preventDefault();
-    jQuery.post(moo_params.ajaxurl,{'action':'moo_delete_ot',"uuid":uuid}, function (data) {
-            Moo_GetOrderTypes();
+    swal({
+        text: 'Please confirm that you want delete this order type',
+        type: 'warning',
+        showCancelButton: true,
+        showLoaderOnConfirm: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!',
+        preConfirm: function(data) {
+            return new Promise(function (resolve, reject) {
+                jQuery.post(moo_params.ajaxurl,{'action':'moo_delete_ot',"uuid":uuid}, function (data) {
+                    if(data !== null && data.status === 'success') {
+                        Moo_GetOrderTypes();
+                        setTimeout(function(){ resolve(true); }, 3000);
+                    } else {
+                        reject(false);
+                    }
+                }).fail(function ( data ) {
+                    reject(false);
+                });
+            });
         }
-    );
+    }).then(function (result) {
+        if(result.value) {
+            swal({
+                title:"Order type deleted",
+                type:'success'
+
+            });
+        } else {
+            if(!result.dismiss) {
+                swal({
+                    title:"Order type not deleted, try again",
+                    type:'error'
+
+                });
+            }
+        }
+    });
 }
 
 function MooSendFeedBack(e)
 {
     e.preventDefault();
-    var msg =  jQuery("#Moofeedback").val();
+    var msg   =  jQuery("#Moofeedback").val();
     var email =  jQuery("#MoofeedbackEmail").val();
     var name  =  jQuery("#MoofeedBackFullName").val();
     var bname =  jQuery("#MoofeedBackBusinessName").val();
     var phone =  jQuery("#MoofeedBackPhone").val();
     var website =  jQuery("#MoofeedBackWebsiteName").val();
 
-    if(msg == '')
+    if(msg === '')
     {
         swal("Error","Please enter your message","error");
     }
@@ -802,11 +895,11 @@ function MooSendFeedBack(e)
             'message':msg,
             'email':email,
             'phone':phone,
-            'website':website,
+            'website':website
         };
         jQuery("#MooSendFeedBackBtn").hide();
         jQuery.post(moo_params.ajaxurl,{'action':'moo_send_feedback','data':data}, function (data) {
-            if(data.status == "Success"){
+            if(data.status === "Success"){
                 swal("Thank you","Your feedback has been sent. We will get back to you shortly","success");
                 jQuery("#Moofeedback").val("");
                 jQuery("#MooSendFeedBackBtn").show();
@@ -1158,6 +1251,27 @@ function MooPanel_UpdateModifiers(event)
 
     });
 }
+function MooPanel_UpdateOrderTypes(event)
+{
+    event.preventDefault();
+    window.bar.animate(0.01);
+    window.bar.setText('1 %');
+    jQuery.post(moo_params.ajaxurl,{'action':'moo_update_order_types'}, function (data) {
+            window.bar.animate(1.0);
+            window.bar.setText('100 %');
+    }).done(function () {
+        Moo_GetOrderTypes();
+        swal({
+            title:"Order Types updated",
+            text:"All new ordertypes are marked as for pickup orders without a minimum amount, please check ordertypes section to update theme and enable what you want use"
+        });
+        window.bar.animate(1.0);
+        window.bar.setText('100 %');
+
+    });
+
+
+}
 function MooPanel_UpdateTaxes(event)
 {
     event.preventDefault();
@@ -1169,7 +1283,7 @@ function MooPanel_UpdateTaxes(event)
             window.bar.setText('100 %');
         }
     ).done(function () {
-        swal("taxes updated");
+        swal("Taxes updated");
         window.bar.animate(1.0);
         window.bar.setText('100 %');
 
@@ -1177,32 +1291,26 @@ function MooPanel_UpdateTaxes(event)
 
 
 }
-function moo_upadateItemsPerPage(page)
-{
+function moo_upadateItemsPerPage(page) {
     var received = 0;
     jQuery.post(moo_params.ajaxurl,{'action':'moo_update_items','page':page}, function (data)
     {
         received = data.received;
         var percent_loaded = data.received*100/window.moo_nb_allItems;
 
-        if(percent_loaded == null)
+        if( percent_loaded === null )
             percent_loaded = 1;
 
-        if(window.moo_nb_allItems!=0)
-        {
+        if (window.moo_nb_allItems !== 0 ) {
             window.bar.animate(bar.value()+percent_loaded/100);
-           // window.bar.setText(Math.round(percent_loaded+bar.value()*100) + ' %');
         }
     }
     ).done(function () {
-        if(received>0)
-        {
+        if(received>0) {
             window.itemReceived += received;
             moo_upadateItemsPerPage(page+1);
             window.bar.setText(window.itemReceived+' items updated');
-        }
-        else
-        {
+        } else {
             swal("Items updated");
             window.bar.animate(1.0);
             window.bar.setText('100 %');
@@ -1211,6 +1319,7 @@ function moo_upadateItemsPerPage(page)
         }
     });
 }
+
 function moo_bussinessHours_Details(status)
 {
      if(status)
@@ -1238,12 +1347,12 @@ function moo_editItemDescription(event,item_uuid)
     var new_description = jQuery('#edit-description-content-'+item_uuid).val();
     jQuery.magnificPopup.close();
     jQuery.post(moo_params.ajaxurl,{'action':'moo_save_items_description',"item_uuid":item_uuid,"description":new_description}, function (data) {
-            if(data.status == 'Success') {
-                if(data.data==true) {
+            if(data.status === 'Success') {
+                if(data.data === true) {
                     swal("The description was updated");
-                }
-                else
+                } else {
                     swal("Error when saving your changes, please try again","","error");
+                }
 
             }
             else
@@ -1290,7 +1399,7 @@ function moo_saveOrderType(e,uuid) {
         }
     ).fail(function (data) {
         swal({
-            text:'The order type "'+name+'" removed from your account in Clover, please create an other one'
+            text:'The order type "'+name+'" was removed from your account in Clover.com, You may need to re-create another one'
         });
     });
 
@@ -1320,47 +1429,57 @@ function mooDeleteCoupon(e)
     e.preventDefault();
     var url = jQuery(e.target).attr("href");
     swal({
-            title: "Are you sure?",
-            text: "Please confirm that you want delete this coupon",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: "Confirm",
-            cancelButtonText: "Cancel",
-            closeOnConfirm: false,
-            closeOnCancel: false
-        },
-        function(isConfirm){
-            if (isConfirm == false) {
-                swal("Cancelled","","error");
-            }
-            else
-            {
-                swal.close();
-                window.location.href = url;
-            }
+        text: 'Please confirm that you want delete this coupon',
+        type: 'warning',
+        showCancelButton: true,
+        showLoaderOnConfirm: false,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+
+    }).then(function (data) {
+        if(data) {
+            swal.close();
+            window.location.href = url;
+        } else {
+            swal({
+                title:"Coupon not deleted, try again",
+                type:'error'
+
+            });
+        }
     });
 }
 
 function moo_login2checkoutClicked(status)
 {
-    if(status==true)
-    {
+    if(status === true) {
         jQuery(".moo_login2checkout").show();
-    }
-    else
-    {
+    } else {
         jQuery(".moo_login2checkout").hide();
+    }
+}
+function moo_click_on_textUnderSI(status)
+{
+    if(status === true) {
+        jQuery(".moo_textUnderSI").show();
+    } else {
+        jQuery(".moo_textUnderSI").hide();
+    }
+}
+function moo_couponsStatusClicked(status)
+{
+    if(status === true) {
+        jQuery("#moo_use_couponsapp").show();
+    } else {
+        jQuery("#moo_use_couponsapp").hide();
     }
 }
 function moo_saveCardsClicked(status)
 {
-    if(status==true)
-    {
+    if(status==true) {
         jQuery(".moo_saveCardsClicked").show();
-    }
-    else
-    {
+    } else {
         jQuery(".moo_saveCardsClicked").hide();
     }
 }
@@ -1518,7 +1637,7 @@ function mooImportOneCategory(cat_id) {
         if(data.status =='success'){
             swal({
                 title:"The category updated",
-                text:"You have "+data.clover_nb_items+" in your Clover account, and "+data.nb_items+" in your website, don't forget to refresh teh page",
+                text:"You have "+data.clover_nb_items+" in your Clover account, and "+data.nb_items+" in your website, don't forget to refresh the page",
                 type:"success"
             });
         } else {
@@ -1530,5 +1649,57 @@ function mooImportOneCategory(cat_id) {
         }
 
 
+    });
+}
+function mooUpdateOneCategory(cat_id) {
+    swal({
+        html:
+        '<div class="moo-msgPopup">Checking the items</div>' +
+        '<img src="'+ moo_params['plugin_img']+'/loading.gif" class="moo-imgPopup"/>',
+        showConfirmButton: false
+    });
+    jQuery.get(moo_RestUrl+'moo-clover/v1/inventory/categories/'+cat_id,function (data) {
+        if(data.status =='success'){
+            swal({
+                title:"Successfully Updated",
+               // text:"You have "+data.clover_nb_items+" in your Clover account, and "+data.nb_items+" in your website, don't forget to refresh the page",
+                text:"You may need to refresh the page to see the changes",
+                type:"success"
+            });
+        } else {
+            swal({
+                title:"An error has occured",
+                text:"try again",
+                type:"error"
+            });
+        }
+
+
+    });
+}
+
+function expandSection(element) {
+    jQuery(element).parent().toggleClass("MooPanelItemExpanded")
+}
+function expandAllSections(element) {
+    if(jQuery(element).text() ==='[ Collapse All ]'){
+        var parent = jQuery(element).parent();
+        jQuery("#"+parent.attr("id")+" .MooPanelItem").each(function (i, el) {
+            jQuery(el).removeClass("MooPanelItemExpanded")
+        });
+        jQuery(element).text("[ Expand All ]");
+    } else {
+        var parent = jQuery(element).parent();
+        jQuery("#"+parent.attr("id")+" .MooPanelItem").each(function (i, el) {
+            jQuery(el).addClass("MooPanelItemExpanded")
+        });
+        jQuery(element).text("[ Collapse All ]");
+    }
+
+}
+function mooSaveChanges(event,element) {
+    swal({
+        title: 'Saving your changes, please wait ..',
+        showConfirmButton: false
     });
 }

@@ -1,6 +1,6 @@
 <?php
 
-class moo_OnlineOrders_Model {
+class Moo_OnlineOrders_Model {
 
     public $db;
 
@@ -12,7 +12,7 @@ class moo_OnlineOrders_Model {
     }
     function getCategories()
     {
-        return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_category ORDER BY 4");
+        return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_category ORDER BY sort_order");
     }
     function getCategories4wigdets()
     {
@@ -44,6 +44,16 @@ class moo_OnlineOrders_Model {
         return $this->db->get_row("UPDATE {$this->db->prefix}moo_item i SET hidden = 1
                                     WHERE i.uuid = '{$uuid}'
                                     ");
+    }
+    function addHttpsToImages()
+    {
+        $this->db->get_row("UPDATE {$this->db->prefix}moo_category set image_url = Replace(image_url, 'http://', 'https://')  ;");
+        return $this->db->get_row("UPDATE {$this->db->prefix}moo_images set url = Replace(url, 'http://', 'https://')  ;");
+    }
+    function addHttpToImages()
+    {
+        $this->db->get_row("UPDATE {$this->db->prefix}moo_category set image_url = Replace(image_url, 'https://', 'http://')  ;");
+        return $this->db->get_row("UPDATE {$this->db->prefix}moo_images set url = Replace(url, 'https://', 'http://')  ;");
     }
     function hideCategory($uuid)
     {
@@ -368,6 +378,29 @@ function getItemsWithVariablePrice()
         );
 
     }
+    public function update_category($category)
+    {
+        $items_ids = "";
+        foreach ($category->items->elements as $item)
+            $items_ids .= $item->id . ",";
+
+        if ($this->db->get_var("SELECT COUNT(*) FROM {$this->db->prefix}moo_category where uuid='{$category->id}'") > 0)
+            $res = $this->db->update("{$this->db->prefix}moo_category", array(
+                'name' => $category->name,
+                'items' => $items_ids
+            ), array('uuid' => $category->id));
+        else
+            $res = $this->db->insert("{$this->db->prefix}moo_category", array(
+                'uuid' => $category->id,
+                'name' => $category->name,
+                'sort_order' => $category->sortOrder,
+                'show_by_default' => 1,
+                'items' => $items_ids
+            ));
+
+        if ($res > 0) return true;
+        return false;
+    }
     function ChangeCategoryName($cat_uuid,$name)
     {
         $uuid = esc_sql($cat_uuid);
@@ -655,8 +688,6 @@ function getItemsWithVariablePrice()
 
     function saveItemWithImage($uuid,$description,$images) {
         $uuid = esc_sql($uuid);
-        $description = esc_sql($description);
-
         $compteur = 0;
 
         if($description != "")
@@ -682,8 +713,6 @@ function getItemsWithVariablePrice()
     function saveItemDescription($uuid,$description)
     {
         $uuid = esc_sql($uuid);
-        $description = esc_sql($description);
-
         $this->db->update("{$this->db->prefix}moo_item", array('description' => $description), array( 'uuid' => $uuid ));
         return true;
     }

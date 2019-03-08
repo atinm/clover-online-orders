@@ -25,12 +25,37 @@
                     "cssProperty":"background-color"
                 },
                 {
+                    "cssSelector":".moo-cart-empty",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":".moo-cart-line>.moo-cart-line-EditPanel",
+                    "cssProperty":"color"
+                },
+                {
                     "cssSelector":".moo-cart-total-grandtotal>.moo-cart-total-price",
                     "cssProperty":"color"
                 },
                 {
                     "cssSelector":".moo-items-panel .mooItemPrice",
                     "cssProperty":"color"
+                }
+            ]
+        },
+        {
+            "id":"categoryTitleFontSize",
+            "label":"The font size of the categories names",
+            "type":"input_text",
+            "info":"This will allow you to change the default size of the categories names <br /> insert here the size ",
+            "default":"22px",
+            "css":[
+                {
+                    "cssSelector":".moo-panel-title",
+                    "cssProperty":"font-size"
+                },
+                {
+                    "cssSelector":".moo-panel-heading .fa-minus, .fa-plus",
+                    "cssProperty":"font-size"
                 }
             ]
         }

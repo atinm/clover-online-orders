@@ -9,12 +9,12 @@
     }
 
 }
-.moo_cp_wrap {
+#moo-customerPanelContent .moo_cp_wrap {
     position: relative;
    /* min-height: 765px; */
     background-color: #ffffff;
 }
-nav, section {
+#moo-customerPanelContent .moo_cp_wrap nav, section {
     display: block;
 
 }
@@ -23,14 +23,14 @@ nav, section {
     border-radius: 4px;
     background-color: #fff;
 }
-.moo_cp_nav {
+#moo-customerPanelContent .moo_cp_wrap .moo_cp_nav {
     z-index: 1;
     padding: 0;
 }
-.moo_cp_content {
+#moo-customerPanelContent .moo_cp_wrap .moo_cp_content {
     min-height: 613px;
 }
-.moo_cp_nav > ul {
+#moo-customerPanelContent .moo_cp_wrap .moo_cp_nav > ul {
     list-style: none !important;
     margin-right: 0 !important;
     margin-left: 0 !important;
@@ -38,17 +38,21 @@ nav, section {
     padding: 0 !important;
 
 }
-.moo_cp_nav > ul >li {
+#moo-customerPanelContent .moo_cp_wrap .moo_cp_nav > ul >li {
     padding: 15px;
     border-right: none;
     border-left: none;
     border-top: 1px solid #00000014;
 }
 
-.moo_cp_content_header h1{
+#moo-customerPanelContent .moo_cp_wrap .moo_cp_content_header h1{
    font-family: 'Rubik', sans-serif;
-       text-transform: uppercase;
-    font-size: 28px;
+   text-transform: uppercase;
+   font-size: 22px;
+}
+#moo-customerPanelContent .moo_cp_wrap .moo_cp_content_body h2{
+   font-family: 'Rubik', sans-serif;
+   font-size: 18px;
 }
 
 .moo_cp_nav li a {
@@ -83,9 +87,9 @@ nav, section {
 }
 
 .mooLoadingSection {
-    font-size: 68px;
+    font-size: 50px;
     text-align: center;
-    margin-top: 30%;
+   /* margin-top: 30%; */
 }
 div[id^="moo_order_info_"] {
     display: none;
@@ -111,6 +115,9 @@ div[id^="moo_order_info_"] {
 .moo_cp_content_body {
     padding: 20px;
     clear : both;
+}
+.moo_cp_content_oneAddressLigne {
+    margin-bottom: 2px;
 }
 .moo_cp_content_oneOrder {
     min-height: 55px;
@@ -223,33 +230,32 @@ Loader icon
 }
 
 
-.link {
+.moo_cp_content_body .link {
     box-shadow: 0 0 0 1px #e5e5e5;
     display: block;
     text-decoration: none;
 }
-.link:hover {
+.moo_cp_content_body.link:hover {
     box-shadow: 0 0 0 2px #d60002;
     text-decoration: none;
 }
-.link>.image-wrapper {
+.moo_cp_content_body .link>.image-wrapper {
     width: 100%;
-   /* min-height: 262px;*/
     padding-left: 10px;
     padding-right: 10px;
     margin-top: 19px;
     position: relative;
 }
-.link>.image-wrapper .moo-image {
+.moo_cp_content_body .link>.image-wrapper .moo-image {
     width: 100%;
     height: 100%;
     max-width: 100%;
 }
-.link>.title {
+.moo_cp_content_body .link>.title {
     padding: 0 10px;
     margin: 0;
 }
-.link>.title>.brand {
+.moo_cp_content_body .link>.title>.brand {
     display: block;
     font-family: Roboto,Helvetica,Arial,sans-serif;
     font-weight: 400;
@@ -260,7 +266,7 @@ Loader icon
     margin: 4px 0;
     padding-bottom: 4px;
 }
-.link>.title>.name, .moo-category-name {
+.moo_cp_content_body .link>.title>.name, .moo-category-name {
     font-weight: bold;
     color: #000;
     margin: 3px 0 5px;
@@ -271,59 +277,59 @@ Loader icon
     display: -webkit-box;
     max-height: 2.824em;
 }
-.link>.title>.name, .moo-category-name {
+.moo_cp_content_body .link>.title>.name, .moo-category-name {
     font-size: 13px;
     line-height: 17px;
     font-family: Roboto,Helvetica,Arial,sans-serif;
 }
-.link>.title>.name {
+.moo_cp_content_body .link>.title>.name {
     font-size: 13px;
 }
 .moo-category-name {
     font-size: 15px;
 }
-.link>.title>.name, .moo-category-name {
+.moo_cp_content_body .link>.title>.name, .moo-category-name {
     overflow: hidden;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     text-align: center;
 }
-.link>.price-container {
+.moo_cp_content_body .link>.price-container {
     margin-left: 0;
     min-height: 27px;
 }
-.link>.btn-wrapper, .link>.sizes-wrapper {
+.moo_cp_content_body .link>.btn-wrapper, .link>.sizes-wrapper {
     padding-top: 15px;
     padding-bottom: 15px;
     background-color: #f8f8f8;
     text-align: center;
     min-height: 69px;
 }
-.link>.cat-name-wrapper{
+.moo_cp_content_body .link>.cat-name-wrapper{
     padding-top: 15px;
     padding-bottom: 15px;
     background-color: #f8f8f8;
     text-align: center;
 }
 
-.link>.price-container .price-box {
+.moo_cp_content_body .link>.price-container .price-box {
     white-space: normal;
 }
 
-.link>.brand, .link>.name, .link>.price-container .price-box {
+.moo_cp_content_body .link>.brand, .link>.name, .link>.price-container .price-box {
     text-align: center;
     font-size: 0;
     margin-top: 5px;
     margin-left: 10px;
     margin-right: 10px;
 }
-.moo-category-name{
+.moo-category-name {
     text-align: center;
     margin-top: 5px;
     margin-left: 10px;
     margin-right: 10px;
 }
-.link>.price-container .price-box>.price {
+.moo_cp_content_body .link>.price-container .price-box>.price {
     font-family: Roboto,Helvetica,Arial,sans-serif;
     font-weight: 700;
     font-size: 16px;

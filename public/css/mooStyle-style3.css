@@ -207,6 +207,9 @@
 {
     margin-top: 0px;
 }
+.mooItemContent {
+    color : #000;
+}
 @media (max-width: 480px) {
 
     .moo-panel-group .moo-panel

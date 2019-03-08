@@ -63,7 +63,7 @@
         position: absolute;
         bottom: 1rem;
         left: 2rem;
-        font-size: 4.5rem;
+        font-size: 40px;
         z-index: 2;
         margin-bottom: 20px;
         font-family: "Oswald",sans-serif;
@@ -112,8 +112,7 @@
     content: ' ';
     background-image: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
 }
-.moo-choose-category
-{
+.moo-choose-category {
     font-size: 24px;
     font-family: "Oswald",sans-serif;
     color: #000;
@@ -159,6 +158,9 @@
     margin: 0px !important;
     padding-left: 15px;
 }
+.moo-nav li::before {
+    content: none;
+}
 
 .moo-nav-menu li a {
     padding: 5px 0;
@@ -175,7 +177,7 @@
 }
 .moo-menu-category .moo-menu-category-title {
     position: relative;
-    height: 35vh;
+    height: 30vh;
     min-height: 160px;
     color: #fff;
     padding: 3rem;

@@ -5,7 +5,7 @@ Tags: clover,online orders for clover,zaytech online orders,Clover online orders
 Requires at least: 4.7.1
 Tested up to: 5.0.4
 Requires PHP: 5.2.0
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,6 +27,7 @@ After installing the **Smart Online Order for Clover** plugin, add the pages 'Or
 Below are just a few websites currently using Smart Online Order with their Clover POS Some websites we built, other websites were built by the merchant themselves or hired developers. For Non-Wordpress websites, (we can create for them the online order page and then it gets linked to their website. Here are some actual customers below. Most have Wordpress websites and some don't.
 
 [Burger Restaurant](https://chicknchuck.com/)
+[Twisted Fresh](https://twistedfresh.com/)
 [Full Service Restaurant](https://www.theoriginalturkey.com)
 [Island Smoothie Cafe](https://www.islandsmoothiecafe.com)
 [Cafe at Airport](https://arrowheadtaphouse.com)
@@ -102,6 +103,20 @@ No, this plug-in is not by Clover. It is from Zaytech. Both this plug-in and Sma
 Please let us know so we can implement additional features.  925-234-5554 / support@zaytechapps.com
 
 == Changelog ==
+= 1.3.3 =
+* Full support of Wordpress Network (Subdomains & Subdirectories)
+* Integration with Coupons App by Zaytech. It's now possible to create and print coupons on your Clover POS device and then allow customers to redeem the the coupon online
+* Fixed an issue where a comma was converting to a forward slash for item descriptions
+* Added "Trending" items the "My Orders" or "My Account" Page. This allows customers to see their most purchased orders as well as most purchased items by all customers.
+* Added the ability to change text under special Instruction in Checkout Page
+* Added more customization options to store interface 3 & 4 & 5
+* Added the ability the display different categories in different pages, (add the attribute categories to the shortcode for example [moo_all_items categories='K05C3JC47FHY6,1QKMPCAN4GVF4'] )
+* Added the ability to choose a custom message when store is closed
+* Added the ability to display a store announcement (Pop-Up) when customers visit the Order Online Page
+* Added changes to page settings to facilitate navigation
+* Fixed import items issue when there are more than 1000 items
+* Other improvements and fixes
+
 = 1.3.2 =
 * Fixed modifiers manual sync issue when there are more than 1000 modifiers
 * Fixed and Improved Categories and Items sync
@@ -289,5 +304,5 @@ First Release
 
 == Upgrade Notice ==
 
-= 1.3.2 =
-Use the new shortcode [moo_my_account] in a empty page to add Re-order feature
+= 1.3.3 =
+Integration with Coupons App by Zaytech. It's now possible to create and print coupons on your Clover POS device and then allow customers to redeem the the coupon online

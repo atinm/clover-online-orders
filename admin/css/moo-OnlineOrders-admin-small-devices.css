@@ -5,7 +5,9 @@
 	width: 100%;
 	padding: 0px;
 }
-
+#MooPanel h2 {
+	font-size: 20px;
+}
 div#MooPanel .button {
     height: 28px !important;
     line-height: 15px !important;
@@ -38,6 +40,10 @@ div#MooPanel_tabContent4 form div.MooPanelItem div.Moo_option-item div label img
 }
 #menu_for_mobile ul {
 	display: none;
+}
+#menu_for_mobile ul a {
+	text-decoration: none;
+	color : #000000;
 }
 div.MooPanelItem span.moo_adding-zone-btn {
     margin-top: 18px;
@@ -76,41 +82,6 @@ td:before {
 	padding-right: 10px;
 	white-space: nowrap;
 }
-/*
-Label the data
-*/
-/*
-td:nth-of-type(1):before {
-	content: "First Name";
-}
-div.table_mobile td:nth-of-type(2):before {
-	content: "Last Name";
-}
-div.table_mobile td:nth-of-type(3):before {
-	content: "Job Title";
-}
-div.table_mobile td:nth-of-type(4):before {
-	content: "Favorite Color";
-}
-div.table_mobile td:nth-of-type(5):before {
-	content: "Wars of Trek?";
-}
-div.table_mobile td:nth-of-type(6):before {
-	content: "Porn Name";
-}
-div.table_mobile td:nth-of-type(7):before { 
-	content: "Date of Birth"; 
-}
-div.table_mobile td:nth-of-type(8):before { 
-	content: "Dream Vacation City"; 
-}
-div.table_mobile td:nth-of-type(9):before { 
-	content: "GPA"; 
-}
-div.table_mobile td:nth-of-type(10):before { 
-	content: "Arbitrary Data"; 
-}
-*/
 div#MooOrderTypesContent {
 	width: 100% !important;
 }

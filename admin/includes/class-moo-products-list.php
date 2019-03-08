@@ -33,14 +33,10 @@ class Products_List_Moo extends WP_List_Table_MOO {
             $category = $wpdb->get_row("SELECT items from {$wpdb->prefix}moo_category WHERE uuid='{$category_id}'",'ARRAY_A');
             $category_items = explode(',',$category['items']);
         }
-        if(isset($_POST) && !empty($_POST['s']))
-        {
+        if(isset($_POST) && !empty($_POST['s'])) {
             $sql = "SELECT * FROM {$wpdb->prefix}moo_item where name like '%".esc_sql($_POST['s'])."%'";
-        }
-        else
-        {
-            if($category_id!="")
-            {
+        } else {
+            if($category_id!="") {
                 if(count($category_items)>0)
                 {
                     $items_txt = implode("','", $category_items);
@@ -209,7 +205,7 @@ class Products_List_Moo extends WP_List_Table_MOO {
         $actions['edit'] = sprintf( '<a href="?page=%s&action=%s&item_uuid=%s">Add / Edit Images</a>',
             'moo_items', 'update_item',esc_attr($item['uuid']));
         $actions['edit_description'] = sprintf( '<a class="moo-edit-description-button" href="#edit-description-popup-%s">Add / Edit description</a><div id="edit-description-popup-%s" class="white-popup mfp-hide"><textarea id="edit-description-content-%s" style="width: 100&#37;"  rows="5">%s</textarea><button class="button" onclick="moo_editItemDescription(event,\'%s\')">Save</button></div>',
-            esc_attr($item['uuid']),esc_attr($item['uuid']),esc_attr($item['uuid']),esc_attr($item['description']),esc_attr($item['uuid']));
+            esc_attr($item['uuid']),esc_attr($item['uuid']),esc_attr($item['uuid']),stripslashes($item['description']),esc_attr($item['uuid']));
 
         return $title . $this->row_actions( $actions );
     }

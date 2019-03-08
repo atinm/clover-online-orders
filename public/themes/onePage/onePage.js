@@ -100,12 +100,12 @@ function MooCLickOnCategory(event,elm)
 //get all the categories of the store
 function mooGetCategories()
 {
-    if(window.moo_theme_setings.onePage_show_more_button==='off') {
+    if(window.moo_theme_setings.onePage_show_more_button === 'off') {
         jQuery.get(moo_RestUrl+"moo-clover/v1/categories?expand=all_items", function (data) {
             if(data!=null && data.length>0) {
                 moo_renderCategories(data,false);
             } else {
-                var element = document.getElementById("moo-onlineStore-categories");
+                var element = document.getElementById("moo-onlineStore-items");
                 var html     = 'You don\'t have any category please import your inventory';
                 jQuery(element).html(html);
             }
@@ -115,7 +115,7 @@ function mooGetCategories()
             if(data!=null && data.length>0) {
                 moo_renderCategories(data,true);
             } else {
-                var element = document.getElementById("moo-onlineStore-categories");
+                var element = document.getElementById("moo-onlineStore-items");
                 var html     = 'You don\'t have any category please import your inventory';
                 jQuery(element).html(html);
             }
@@ -136,6 +136,11 @@ function moo_renderCategories($cats,withButton)
         var category = $cats[i];
         if(typeof category !== 'object')
             continue;
+        if(typeof attr_categories !== 'undefined' && attr_categories !== undefined && attr_categories !== null && typeof attr_categories === 'object') {
+            if(attr_categories.indexOf(category.uuid.toUpperCase()) === -1){
+                continue;
+            }
+        }
         if(category.items.length >0 ) {
             html +='<li><a href="#cat-'+category.uuid.toLowerCase()+'" onclick="MooCLickOnCategory(event,this)">'+category.name+'</a></li>';
             moo_renderItems(category,withButton);
@@ -157,41 +162,7 @@ function moo_renderCategories($cats,withButton)
             var top = (jQuery(hash).offset() != null)?jQuery(hash).offset().top:""; //Getting Y of target element
             window.scrollTo(0, top);
         }
-        // Custome css or theme customisation applicatio
-        if(window.moo_theme_setings != null && typeof window.moo_theme_setings != "undefined")
-        {
-            //Force page width changing
-            /*
-            if(window.moo_theme_setings.onePage_width != null)
-                jQuery("#moo_OnlineStoreContainer").width(window.moo_theme_setings.onePage_width );
-            */
-            //Change the categories background color
-            if(window.moo_theme_setings.onePage_categoriesBackgroundColor != null)
-            {
-                jQuery(".moo-bg-dark").css("background-color",window.moo_theme_setings.onePage_categoriesBackgroundColor );
-                jQuery(".moo-menu-category .moo-menu-category-title").css("background-color",window.moo_theme_setings.onePage_categoriesBackgroundColor );
-                //Change the cart icon colors
-                jQuery(".moo-new-icon").css("background-color",window.moo_theme_setings.onePage_categoriesBackgroundColor );
-                jQuery(".moo-new-icon").css("border-color",window.moo_theme_setings.onePage_categoriesBackgroundColor );
-            }
-            //Change the categories font color
-            if(window.moo_theme_setings.onePage_categoriesFontColor != null)
-            {
-                jQuery(".moo-nav-menu li a").css("color",window.moo_theme_setings.onePage_categoriesFontColor );
-                jQuery(".moo-menu-category .moo-menu-category-title .moo-title").css("color",window.moo_theme_setings.onePage_categoriesFontColor );
 
-                //Change the cart icon colors
-                jQuery(".moo-new-icon").css("color",window.moo_theme_setings.onePage_categoriesFontColor );
-                jQuery(".moo-new-icon__cart-panier").css("color",window.moo_theme_setings.onePage_categoriesFontColor );
-                jQuery(".moo-new-icon__group").css("fill",window.moo_theme_setings.onePage_categoriesFontColor );
-            }
-            //Change the categories font-family
-            if(window.moo_theme_setings.onePage_fontFamily != null)
-            {
-                jQuery(".moo-nav-menu li a").css("font-family",window.moo_theme_setings.onePage_fontFamily );
-                jQuery(".moo-menu-category .moo-menu-category-title .moo-title").css("font-family",window.moo_theme_setings.onePage_fontFamily );
-            }
-        }
     });
 }
 
@@ -747,7 +718,7 @@ function mooRemoveLineFromCart(line_id)
                         jQuery("#moo-cartNbItems").text(data.nb_items)
                 });
             })
-        },
+        }
     }).then(function (data) {
         if(data)
             swal({

@@ -10,31 +10,30 @@ var MooOrderTypeIsTaxable = true;
 var MooOrderTypeMinAmount = 0;
 var MooIsDeliveryError = true;
 var MooIsDeliveryOrder = false;
+var MooPhoneVerificationActivated = true;
 
-if(moo_use_sms_verification == 'disabled') {
-    var MooPhoneVerificationActivated = false;
-} else {
-    var MooPhoneVerificationActivated = true;
+if(moo_use_sms_verification === 'disabled') {
+     MooPhoneVerificationActivated = false;
 }
 
 
-if(typeof moo_checkout_login != 'undefined')
+if(typeof moo_checkout_login !== undefined)
 {
-    MooIsDisabled =(moo_checkout_login == "disabled")?true:false;
+    MooIsDisabled =(moo_checkout_login === "disabled");
 } else {
     MooIsDisabled = true;
 }
 
-if(typeof moo_save_cards != 'undefined')
+if(typeof moo_save_cards !== undefined)
 {
-    MooSaveCards =(moo_save_cards == "enabled")?true:false;
+    MooSaveCards =(moo_save_cards === "enabled");
 } else {
     MooSaveCards = false;
 }
 
-if(typeof moo_save_cards_fees != 'undefined')
+if(typeof moo_save_cards_fees !== undefined)
 {
-    MooSaveCardsFees =(moo_save_cards_fees == "enabled")?true:false;
+    MooSaveCardsFees =(moo_save_cards_fees === "enabled");
 } else {
     MooSaveCardsFees = false;
 }
@@ -47,9 +46,9 @@ if(!MooIsDisabled && MooSaveCards && !MooIsGuest)
     });
 }
 
-if(typeof moo_fb_app_id != 'undefined')
+if(typeof moo_fb_app_id !== undefined && moo_fb_app_id !== null)
 {
-    if(moo_fb_app_id!="")
+    if(moo_fb_app_id !== "")
     {
         window.fbAsyncInit = function() {
             FB.init({
@@ -575,13 +574,12 @@ function moo_show_chooseaddressform(e)
                     MooCustomerAddress = addresses;
                     MooCustomer = data.customer;
 
-                    if(MooCustomer[0].phone_verified == "1")
+                    if(MooCustomer[0]!== undefined && MooCustomer[0].phone_verified == "1")
                         MooPhoneIsVerified = true;
 
-                    if(addresses.length>0)
-                    {
+                    if(addresses.length>0) {
                         var html="";
-                        if(addresses.length==1)
+                        if(addresses.length == 1)
                         {
                             var OneAddress = addresses[0];
                             html +='<div class="moo-col-md-4 moo-col-md-offset-4">';
@@ -639,19 +637,19 @@ function moo_show_chooseaddressform(e)
 function moo_login(e)
 {
     e.preventDefault();
-    jQuery(e.target).html('<i class="fas fa-circle-o-notch fa-spin"></i>').attr('onclick','');
+    jQuery(e.target).html('<i class="fas fa-circle-notch fa-spin"></i>').attr('onclick','');
 
     MooIsGuest = false;
     var email    =  jQuery('#inputEmail').val();
     var password =  jQuery('#inputPassword').val();
-    if(email == '')
-    {
+    if(email == '') {
         swal({ title: "Please enter your email",text:"",  timer:5000, type: "error" });
+        jQuery(e.target).html('Login In').attr('onclick','moo_login(event)');
         return;
     }
-    if(password == '')
-    {
+    if(password == '') {
         swal({ title: "Please enter your password",text:"",  timer:5000, type: "error"});
+        jQuery(e.target).html('Login In').attr('onclick','moo_login(event)');
         return;
     }
     jQuery
@@ -749,7 +747,7 @@ function moo_signin(e)
         swal("Please enter your phone");
         return;
     }
-    jQuery(e.target).html('<i class="fas fa-circle-o-notch fa-spin"></i>').attr('onclick','');
+    jQuery(e.target).html('<i class="fas fa-circle-notch fa-spin"></i>').attr('onclick','');
     jQuery
         .post(moo_params.ajaxurl,{'action':'moo_customer_signup','title':title,'full_name':full_name,'phone':phone,'email':email,"password":password}, function (data) {
             if(data.status == 'success')
@@ -779,7 +777,7 @@ function moo_resetpassword(e)
         swal('Please enter your email');
     else
     {
-        jQuery(e.target).html('<i class="fas fa-circle-o-notch fa-spin"></i>').attr('onclick','');
+        jQuery(e.target).html('<i class="fas fa-circle-notch fa-spin"></i>').attr('onclick','');
         jQuery
             .post(moo_params.ajaxurl,{'action':'moo_customer_resetpassword','email':email}, function (data) {
                 if(data.status == 'success')
@@ -800,6 +798,11 @@ function moo_resetpassword(e)
                 swal({ title: "could not reset your password",text:"Please try again or contact us",   type: "error",   confirmButtonText: "Try again" });
             });
     }
+}
+function moo_cancel_resetpassword(e)
+{
+    e.preventDefault();
+    moo_show_loginform();
 }
 
 function moo_initMapAddress()
@@ -881,7 +884,7 @@ function moo_getAddressFromForm()
 function moo_addAddress(e)
 {
     e.preventDefault();
-    jQuery(e.target).html('<i class="fas fa-circle-o-notch fa-spin"></i>').attr('onclick','');
+    jQuery(e.target).html('<i class="fas fa-circle-notch fa-spin"></i>').attr('onclick','');
     var address = moo_getAddressFromForm();
     if(address.lat == "")
     {
@@ -1044,7 +1047,7 @@ function moo_verify_form(form)
     var message_errors = {};
     var selectedOrderType=null;
     regex_exp.email =  /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    regex_exp.credicard = /\d{13,16}/;
+    regex_exp.credicard = /^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|(222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11}|62[0-9]{14})$/;
     regex_exp.cvv = /^[0-9]*$/;
 
     //gte the selected ordertype
@@ -1110,15 +1113,14 @@ function moo_verify_form(form)
         {
             if(MooCustomerChoosenAddress!==null)
             {
-                if(MooCustomerChoosenAddress.lat ==='' || MooCustomerChoosenAddress.lng ==='')
+                if(MooCustomerChoosenAddress.lat === '' || MooCustomerChoosenAddress.lng === '')
                 {
                     swal('Please verify your address',"We can't found this address on the map, please choose an other address",'error');
                     return false;
                 }
                 else
                 {
-                    if(MooIsDeliveryError===true)
-                    {
+                    if(MooIsDeliveryError === true) {
                         moo_OrderTypeChanged(selectedOrderType.ot_uuid);
                         swal('Please verify your address',"",'error');
                         return false;
@@ -1217,6 +1219,7 @@ function moo_verify_form(form)
                         form.cardEncrypted = cryptCardNumber(form.cardNumber);
                         form.firstSix = firstSix(form.cardNumber);
                         form.lastFour = lastFour(form.cardNumber);
+                        form.cardNumber = null;
                     }
                     moo_SendForm(form);
                 }
@@ -1311,6 +1314,9 @@ function moo_get_form(callback)
     form.address = MooCustomerChoosenAddress;
     form.deliveryAmount = MooDeliveryfees;
     form.serviceCharges = MooServicefees;
+
+    form.cardNumber = form.cardNumber.trim();
+    form.cardNumber = form.cardNumber.replace(/\s+/g,"");
     callback(form);
 }
 function moo_finalize_order(e)
@@ -1335,25 +1341,21 @@ function mooCouponApply(e)
 {
     e.preventDefault();
     var coupon_code = jQuery('#moo_coupon').val();
-    if(coupon_code == "")
-    {
+    if(coupon_code == "") {
         swal({
             title:'Please enter your coupon code',
             timer:5000
         });
-    }
-    else
-    {
+    } else {
         swal({
             title:'Checking your coupon...',
             showConfirmButton:false
         });
         jQuery
             .post(moo_params.ajaxurl,{'action':'moo_coupon_apply','moo_coupon_code':coupon_code}, function (data) {
-                if(data!==null && data.status==="success")
-                {
+                if(data!==null && data.status==="success") {
                     moo_Total = data.total;
-                    if(data.type === "amount")
+                    if(data.type.toUpperCase() === "AMOUNT")
                         swal({ title: "Coupon applied", text: "Success! You have received a discount of $"+data.value,   type: "success",timer:5000, confirmButtonText: "Ok" });
                     else
                         swal({ title: "Coupon applied", text: "Success! You have received a discount of "+data.value+"%",   type: "success",timer:5000, confirmButtonText: "Ok" });
@@ -1363,9 +1365,7 @@ function mooCouponApply(e)
                     jQuery("#moo_remove_coupon").show();
 
                     moo_update_totals();
-                }
-                else
-                {
+                } else {
                     jQuery("#moo_remove_coupon").hide();
                     jQuery("#moo_enter_coupon").show();
                     swal({ title: "Error", text: data.message,   type: "error",timer:5000,   confirmButtonText: "Try again" });

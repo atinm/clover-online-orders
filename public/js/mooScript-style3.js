@@ -32,8 +32,13 @@ function moo_renderCategories($cats)
     var html     = '<div class="moo-panel-group">';
     for(i in $cats){
         var category = $cats[i];
-        if(typeof category != 'object')
+        if(typeof category !== 'object')
             continue;
+        if(typeof attr_categories !== 'undefined' && attr_categories !== null && attr_categories !== undefined && typeof attr_categories === 'object') {
+            if(attr_categories.indexOf(category.uuid.toUpperCase()) === -1){
+                continue;
+            }
+        }
         html += moo_buildOneCategoryHtmlLine(category.name,category.uuid);
     }
     html    += "</div>";
@@ -113,16 +118,16 @@ function moo_ClickOnCategory(cat_id)
         //Scroll to the selected category
         //document.getElementById('moo_category_'+cat_id).scrollIntoView();
 
-        var content = jQuery(document.getElementById("moo_items_for_"+cat_id)).html();
+        var content = jQuery(document.getElementById("moo_items_for_"+cat_id));
 
-        if(content=="Loading Items")
+        if( content.html() === "Loading Items" )
             //get Items for this category
             jQuery.get(moo_RestUrl+"moo-clover/v1/categories/"+cat_id+"/items", function (data) {
                 if(data.items != null)
                     moo_renderItems(data.items,cat_id);
-                else
-                    //TODO: Error message
-                    console.log("Error :  No item found");
+                else {
+                    content.html("No item found");
+                }
             });
 
     }
@@ -131,8 +136,6 @@ function moo_ClickOnCategory(cat_id)
 // Fire when clicking on an item
 function moo_ClickOnItem(item_id)
 {
-    console.log(item_id);
-
     if(jQuery("#moo_itemDetails_for_"+item_id).is(':visible'))
     {
         jQuery("#moo_itemDetails_for_"+item_id).slideUp();
@@ -256,37 +259,58 @@ function moo_buildOneCategoryHtmlLine(cat_name,cat_id)
 function moo_buildOneItemHtmlLine(item)
 {
     var html = '';
-    html +='<div class="moo-panel moo-panel-default">';
-    html +='<div class="moo-panel-heading-for-items" id="moo_item_'+item.uuid+'" onclick="moo_ClickOnItem(\''+item.uuid+'\')">';
-    html +='<div class="moo-row">';
-    html +='<div class="moo-panel-title moo-col-md-9 moo-col-sm-9 moo-col-xs-8 mooItem">'+item.name+'</div>';
-    html +='<div class="moo-col-md-3 moo-col-sm-3 moo-col-xs-4 moo-text-right mooItemPrice">';
 
-    if(item.price>0)
-    {
-        var price = parseFloat(item.price/100);
-        if(item.price_type == "PER_UNIT")
-            html +='$'+price.toFixed(2)+"/"+item.unit_name;
+    if(item.stockCount == "out_of_stock") {
+        html +='<div class="moo-panel moo-panel-default">';
+        html +='<div class="moo-panel-heading-for-items">';
+        html +='<div class="moo-row">';
+        html +='<div class="moo-panel-title moo-col-md-9 moo-col-sm-9 moo-col-xs-8 mooItem">'+item.name+' ( OUT OF STOCK)</div>';
+        html +='<div class="moo-col-md-3 moo-col-sm-3 moo-col-xs-4 moo-text-right mooItemPrice">';
+
+        if(item.price>0)
+        {
+            var price = parseFloat(item.price/100);
+            if(item.price_type == "PER_UNIT")
+                html +='$'+price.toFixed(2)+"/"+item.unit_name;
+            else
+                html +='$'+price.toFixed(2);
+        }
+
+        html +='</div></div></div>';
+    } else {
+        html +='<div class="moo-panel moo-panel-default">';
+        html +='<div class="moo-panel-heading-for-items" id="moo_item_'+item.uuid+'" onclick="moo_ClickOnItem(\''+item.uuid+'\')">';
+        html +='<div class="moo-row">';
+        html +='<div class="moo-panel-title moo-col-md-9 moo-col-sm-9 moo-col-xs-8 mooItem">'+item.name+'</div>';
+        html +='<div class="moo-col-md-3 moo-col-sm-3 moo-col-xs-4 moo-text-right mooItemPrice">';
+
+        if(item.price>0)
+        {
+            var price = parseFloat(item.price/100);
+            if(item.price_type == "PER_UNIT")
+                html +='$'+price.toFixed(2)+"/"+item.unit_name;
+            else
+                html +='$'+price.toFixed(2);
+        }
+
+        html +='</div></div></div>';
+        html +='<div class="moo-panel-body moo-collapse" id="moo_itemDetails_for_'+item.uuid+'">';
+        if(item.image!=null && item.description !="")
+            html += mooBuildItemLine(item);
         else
-            html +='$'+price.toFixed(2);
-    }
-
-    html +='</div></div></div>';
-    html +='<div class="moo-panel-body moo-collapse" id="moo_itemDetails_for_'+item.uuid+'">';
-
-    if(item.image!=null && item.description !="")
-        html += mooBuildItemLine(item);
-    else
         if(item.image!=null && item.description =="")
             html += mooBuildItemLineWithoutDescription(item);
         else
-            if(item.image==null && item.description != "")
-                html += mooBuildItemLineWithoutImage(item);
-            else
-                if(item.image==null && item.description == "")
-                    html += mooBuildItemLineWithoutImageAndDescription(item);
+        if(item.image==null && item.description != "")
+            html += mooBuildItemLineWithoutImage(item);
+        else
+        if(item.image==null && item.description == "")
+            html += mooBuildItemLineWithoutImageAndDescription(item);
 
-    html +='</div></div>';
+        html +='</div>';
+    }
+
+    html +='</div>';
     return html;
 }
 // Build the html line for the item line when the item has a description and image
@@ -294,20 +318,19 @@ function mooBuildItemLine(item)
 {
     var html = '';
     html +='   <div class="moo-row mooItemContent">';
-    html +='       <div class="moo-col-lg-9 moo-col-md-9 moo-col-sm-12 col-xs-12">';
+    html +='       <div class="moo-col-lg-9 moo-col-md-9 moo-col-sm-12 moo-col-xs-12">';
     html +='            <div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-12 moo-col-xs-12 moo-image-zoom">';
     html +='                <a href="'+item.image.url+'" data-effect="mfp-zoom-in"><img src="'+item.image.url+'" class="moo-img-responsive moo-image-zoom"></a>';
-    html +='            </div><!-- /.col-lg-4 col-md-4 col-sm-4 col-xs-8 -->';
+    html +='            </div><!-- /.col-lg-4 col-md-4 col-sm-4 moo-col-xs-8 -->';
     html +='            <div class="moo-col-lg-8 moo-col-md-8 moo-col-sm-12 moo-col-xs-12">';
     html +='                <p>'+item.description+'</p>';
-    html +='            </div><!-- /.col-lg-8 col-md-8 col-sm-8 col-xs-12 -->';
-    html +='        </div><!-- /.col-lg-10 col-md-10 col-sm-12 col-xs-12 -->';
+    html +='            </div><!-- /.col-lg-8 col-md-8 col-sm-8 moo-col-xs-12 -->';
+    html +='        </div><!-- /.col-lg-10 col-md-10 col-sm-12 moo-col-xs-12 -->';
     html +='        <div class="moo-col-lg-3 moo-col-md-3 moo-col-sm-12 moo-col-xs-12">';
 
-    if(item.stockCount == "out_of_stock")
+    if(item.stockCount == "out_of_stock") {
         html +="OUT OF STOCK";
-    else
-    {
+    } else {
         html += mooBuildItemQty(item.stockCount,item.uuid);
 
         if(item.has_modifiers)
@@ -325,9 +348,9 @@ function mooBuildItemLineWithoutImage(item)
 {
     var html = '';
     html +='   <div class="moo-row mooItemContent">';
-    html +='       <div class="moo-col-lg-9 moo-col-md-9 moo-col-sm-12 col-xs-12">';
+    html +='       <div class="moo-col-lg-9 moo-col-md-9 moo-col-sm-12 moo-col-xs-12">';
     html +='            <p>'+item.description+'</p>';
-    html +='        </div><!-- /.col-lg-10 col-md-10 col-sm-12 col-xs-12 -->';
+    html +='        </div><!-- /.col-lg-10 col-md-10 col-sm-12 moo-col-xs-12 -->';
     html +='        <div class="moo-col-lg-3 moo-col-md-3 moo-col-sm-12 moo-col-xs-12">';
 
     if(item.stockCount == "out_of_stock")
@@ -340,7 +363,7 @@ function mooBuildItemLineWithoutImage(item)
         else
             html +='<a href="#" class="moo-btn moo-btn-default moo-btn-block moo-btn-block-margin" onclick="moo_clickOnOrderBtn(event,\''+item.uuid+'\')" data-loading-text="Adding...">Add to cart</a>';
     }
-    html +='      </div><!-- /.col-lg-2 col-md-2 col-sm-3 col-xs-4 -->';
+    html +='      </div><!-- /.col-lg-2 col-md-2 col-sm-3 moo-col-xs-4 -->';
     html +='   </div><!-- /.mooItemContent -->';
     return html;
 }
@@ -349,7 +372,7 @@ function mooBuildItemLineWithoutDescription(item)
 {
     var html = '';
     html +='   <div class="moo-row mooItemContent">'+
-    '       <div class="moo-col-lg-8 moo-col-md-8 moo-col-sm-12 col-xs-12">'+
+    '       <div class="moo-col-lg-8 moo-col-md-8 moo-col-sm-12 moo-col-xs-12">'+
     '            <div class="moo-col-lg-5 moo-col-md-5 moo-col-sm-12 moo-col-xs-12 moo-image-zoom">'+
     '                 <a href="'+item.image.url+'" data-effect="mfp-zoom-in"><img src="'+item.image.url+'" class="moo-img-responsive moo-image-zoom"></a>'+
     '            </div><!-- /.col-lg-4 col-md-4 col-sm-4 col-xs-8 -->'+
@@ -378,14 +401,15 @@ function mooBuildItemLineWithoutImageAndDescription(item)
 {
     var html = '';
     html ='   <div class="moo-row mooItemContent">'+
-          '       <div class="moo-col-lg-8 moo-col-md-8 moo-col-sm-12 col-xs-12 moo-col-lg-offset-2 moo-col-md-offset-2">'+
+          '       <div class="moo-col-lg-8 moo-col-md-8 moo-col-sm-12 moo-col-xs-12 moo-col-lg-offset-2 moo-col-md-offset-2">'+
           '            <div class="moo-col-lg-6 moo-col-md-6 moo-col-sm-12 moo-col-xs-12">'+
           '                <p>'+mooBuildItemQty(item.stockCount,item.uuid)+'</p>'+
           '            </div><!-- /.col-lg-4 col-md-4 col-sm-4 col-xs-8 -->'+
           '            <div class="moo-col-lg-6 moo-col-md-6 moo-col-sm-12 moo-col-xs-12">';
 
-    if(item.stockCount == "out_of_stock")
+    if(item.stockCount == "out_of_stock") {
         html +="OUT OF STOCK";
+    }
     else
     {
         if(item.has_modifiers)
@@ -405,12 +429,11 @@ function mooBuildItemQty(stockCount,item_uuid)
     if(stockCount == "not_tracking_stock" ||  stockCount == "tracking_stock" )
     {
         var QtyMax = 10;
-    }
-    else
-    {
+    } else {
         var QtyMax = parseInt(stockCount);
     }
-
+    if(isNaN(QtyMax))
+        return '';
     html +='        <select id="moo-itemQty-for-'+item_uuid+'" class="moo-form-control">';
     for(var i=1;i<=QtyMax;i++)
         html +='        <option value="'+i+'">'+i+'</option>';
@@ -425,7 +448,6 @@ function mooUpdateCart()
     var cart_element =jQuery("#moo-onlineStore-cart>.moo-cart-container") ;
 
     //Display loading icon
-    //TODO::Loading icon
     cart_element.append('<div id="moo-overlay"><img src="'+moo_params['plugin_img']+'/eclipse.gif" id="moo-img-load" width="50"/></div>');
 
     var cart_html = '<div class="moo-row moo-cart-heading">'+
@@ -441,9 +463,7 @@ function mooUpdateCart()
           cart_html += '<div class="moo-row moo-cart-content">';
           if(data.items != null && Object.keys(data.items).length>0)
           {
-              jQuery.each(data.items,function(line_id,line)
-
-              {
+              jQuery.each(data.items,function(line_id,line) {
                   var price = parseFloat(line.item.price)/100;
                   var line_price = price * line.qty;
 
@@ -488,11 +508,11 @@ function mooUpdateCart()
                       '</div>'+
                       '<div class="moo-row moo-cart-total moo-cart-total-tax">'+
                       '<div class="moo-col-lg-9 moo-col-md-9 moo-col-sm-7 moo-col-xs-7 moo-cart-total-label">TAX</div>'+
-                      '<div class="moo-col-lg-3 moo-col-md-3 moo-col-sm-5 moo-col-xs-5  moo-cart-total-price">$'+data.total.total_of_taxes+'</div>'+
+                      '<div class="moo-col-lg-3 moo-col-md-3 moo-col-sm-5 moo-col-xs-5  moo-cart-total-price">$'+data.total.total_of_taxes_without_discounts+'</div>'+
                       '</div>'+
                       '<div class="moo-row moo-cart-total moo-cart-total-grandtotal">'+
                       '<div class="moo-col-lg-8 moo-col-md-8 moo-col-sm-6 moo-col-xs-6 moo-cart-total-label">TOTAL</div>'+
-                      '<div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-66 moo-col-xs-6 moo-cart-total-price">$'+data.total.total+'</div>'+
+                      '<div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-66 moo-col-xs-6 moo-cart-total-price">$'+data.total.total_without_discounts+'</div>'+
                       '</div>'+
                       '</div>';
               //Set checkout btn

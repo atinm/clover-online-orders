@@ -25,7 +25,17 @@
             "label":"Font family",
             "type":"input_text",
             "info":"Default font family is Oswald. To use other fonts make sure it is imported by your theme. You can also use custom css to import from Google fonts",
-            "default":"Oswald,sans-serif"
+            "default":"Oswald,sans-serif",
+            "css":[
+                {
+                    "cssSelector":".moo-nav-menu li a",
+                    "cssProperty":"font-family"
+                },
+                {
+                    "cssSelector":".moo-menu-category .moo-menu-category-title .moo-title",
+                    "cssProperty":"font-family"
+                }
+            ]
         },
         {
             "id":"categoriesTopMargin",
@@ -39,14 +49,65 @@
             "label":"Categories font color",
             "type":"color",
             "info":"This will change the font color of categories names",
-            "default":"#ffffff"
+            "default":"#ffffff",
+            "css":[
+                {
+                    "cssSelector":".moo-nav-menu li a",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":".moo-menu-category .moo-menu-category-title .moo-title",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":".moo-new-icon",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":".moo-new-icon__cart-panier",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":"moo-new-icon__group",
+                    "cssProperty":"fill"
+                }
+            ]
         },
         {
             "id":"categoriesBackgroundColor",
             "label":"Categories background color",
             "type":"color",
-            "info":"This will change the background color of the categories section and the categories titles when there are no images",
-            "default":"#282b2e"
+            "info":"This will change the background color of the categories section",
+            "default":"#282b2e",
+            "css" :[
+                {
+                    "cssSelector":".moo-menu-category",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":".moo-bg-dark",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":".moo-new-icon",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":".moo-new-icon",
+                    "cssProperty":"border-color"
+                }
+            ]
+        },
+        {
+            "id":"categoriesTitlesBackgroundColor",
+            "label":"Categories titles background color",
+            "type":"color",
+            "info":"This will change the background color of the categories titles when there are no images",
+            "default":"#282b2e",
+            "css" :{
+                "cssSelector":".moo-menu-category .moo-menu-category-title",
+                "cssProperty":"background-color"
+            }
         },
         {
             "id":"buttonsBorderColor",
@@ -82,6 +143,19 @@
                 {
                     "cssSelector":".moo-show-more",
                     "cssProperty":"color"
+                }
+            ]
+        },
+        {
+            "id":"descriptiontextFontSize",
+            "label":"Font size of descriptions",
+            "type":"input_text",
+            "info":"This will change font size for descriptiions under items names <br/> default value is 15px",
+            "default":"15px",
+            "css" :[
+                {
+                    "cssSelector":".moo-text-sm",
+                    "cssProperty":"font-size"
                 }
             ]
         },

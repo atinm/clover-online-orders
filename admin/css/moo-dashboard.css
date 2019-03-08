@@ -10,8 +10,12 @@
 }
 .moo_dashboard_logo_links {
     line-height: 0;
-    font-size: 12px;
+    font-size: 16px;
     margin-top: -2px;
+    font-family: 'Eina','Questrial', sans-serif;
+}
+.moo_dashboard_logo_links>a {
+  text-decoration: none;
 }
 .moo_dashboard_header_version{
     background: #1F3C71;
@@ -29,7 +33,7 @@
     font-weight: 400;
     border-radius: 3px;
     text-transform: uppercase;
-    font-family: oswald;
+    font-family: 'Eina','Questrial', sans-serif;
 }
 .moo_dashboard_title_icon {
     background: #1F3C71;
@@ -45,11 +49,15 @@
 
 .moo_dashboard_wrapper{
     margin-top: 20px;
+    font-family: 'Eina','Questrial', sans-serif;
 }
 .pull-left {
     float: left;
     margin-right: 10px;
     margin-left: 0px;
+}
+.pull-right {
+    float: right;
 }
 .pull-left.noMargin, .pull-right.noMargin {
     margin-left: 0px;
@@ -173,7 +181,7 @@
 }
 .moo_dashboard_submit_button {
     background: #1F3C71;
-    font-family: 'Open Sans',Arial,sans-serif;
+    font-family: 'Eina','Open Sans',Arial,sans-serif;
     font-size: 14px;
     border: none;
     border-radius: 0;
@@ -195,6 +203,7 @@
 }
 .moo_dashboard_addon_box_button.moo_dashboard_addon_manage {
     background: #1F3C71;
+    color : #ffffff;
 }
 .moo_dashboard_addon_box_thumb img {
     width: 100%;
@@ -239,7 +248,7 @@
 .moo_dashboard_option .moo_dashboard_option_desc {
     margin: 5px 0 0;
     color: #999;
-    font-size: 14px;
+    font-size: 15px;
     max-width: 70%;
 }
 .moo_dashboard_buttons_actions {
@@ -271,6 +280,7 @@
     height: 40px;
     margin-top: 5px;
     margin-bottom: 5px;
+    font-size: 13px;
 }
 .moo_dashboard_button i {
     color: #FFF !important;
@@ -285,7 +295,7 @@
     padding: 100px;
     text-align: center;
     font-size: 50px;
-    font-family: monospace;
+    font-family: 'Eina',monospace;
     color: #1F3C71;
     line-height: 50px;
 }
@@ -303,7 +313,7 @@
         padding: 10px;
         text-align: center;
         font-size: 20px;
-        font-family: monospace;
+        font-family: 'Eina',monospace;
         color: #1F3C71;
         line-height: 30px;
     }

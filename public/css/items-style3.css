@@ -74,17 +74,17 @@
 
 .moo_item_flip .moo_item_flip_container
 {
-   // border: 1px solid #000000;
-    //border-bottom: 0px;
+   /* border: 1px solid #000000; */
+   /* border-bottom: 0px; */
     min-height: 73px;
-    //background-color: #ffffff;
+    background-color: #ffffff;
     padding: 0;
 
 }
 .moo_item_flip_container:hover
 {
 
-   // border: 1px solid #ffffff;
+   /* border: 1px solid #ffffff; */
 
 }
 

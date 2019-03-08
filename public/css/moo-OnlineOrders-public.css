@@ -97,8 +97,7 @@
     width: 80px;
     margin: 15px;
 }
-.moo-msgPopup
-{
+.moo-msgPopup {
     font-size: 33px;
     font-family: 'Fjalla One';
 }
@@ -402,22 +401,29 @@ select
     line-height: 36px;
     background-color: #fff;
 }
-.login-social-section{
+.login-social-section {
     height: 220px;
     font-size: 20px;
     text-align: center;
 }
+.login-social-section p {
+    font-size: 25px;
+    font-family: ProximaNovaAltExtraCondensedBold;
+}
 .login-top-section
 {
     text-align: left;
-    font-size:14px !important;
+    font-size: 18px !important;
     margin-bottom: 30px;
     margin-top: 18px;
+    font-family: ProximaNovaAltExtraCondensedBold;
 }
 .login-top-section .login-header
 {
     text-align: left;
-    font-size:20px;
+    font-size:25px;
+    font-family: ProximaNovaAltExtraCondensedBold;
+    margin-bottom: 10px;
 }
 #Mooinstructions
 {
@@ -489,16 +495,14 @@ select
     left: 20%;
     bottom: 15px;
 }
-.MooAddressBtnActions
-{
+.MooAddressBtnActions {
     float: left;
     text-align: center;
     width: 100%;
     border-top: 1px solid;
     padding: 10px;
 }
-.MooSimplButon:hover
-{
+.MooSimplButon:hover {
      background: #f17e0a;
      color : #ffffff;
      box-shadow:none;
@@ -516,8 +520,7 @@ select
     border-radius: 0;
     text-decoration: none
 }
-#mooButonLogin:hover,#mooButonAddAddress:hover,#mooButonResetPasswrod:hover,#mooButonLoginAsGuest:hover,#mooButonConfirmAddress:hover
-{
+#mooButonLogin:hover,#mooButonAddAddress:hover,#mooButonResetPasswrod:hover,#mooButonLoginAsGuest:hover,#mooButonConfirmAddress:hover {
      background: #4691A4;
      box-shadow:none;
      -moz-box-shadow:none;
@@ -525,12 +528,10 @@ select
      text-decoration: none;
      cursor: pointer;
 }
-.moo-centred
-{
+.moo-centred {
  text-align: center;
 }
-.moo-address-block
-{
+.moo-address-block {
     background-color: #fff;
     padding: 20px 20px 45px 20px;
     margin-bottom: 10px;
@@ -539,35 +540,30 @@ select
     font-weight: bold;
     height: 140px;
     color: #000;
-}.moo-address-block>span
-{
+}
+.moo-address-block>span {
      position: absolute;
      top: 3px;
      right: 22px;
      cursor: pointer;
      font-size: 17px;
 }
-.moo-checkout-form-leftside
-{
+.moo-checkout-form-leftside {
     border: 1px solid #eee;
 }
-.moo-checkout-form-rightside
-{
+.moo-checkout-form-rightside {
     border: 1px solid #0b0b0b;
 }
-#moo-checkout-form-btnActions
-{
+#moo-checkout-form-btnActions {
     float: left;
     text-align: center;
     width: 100%;
 }
-.MooCartInCheckout
-{
+.MooCartInCheckout {
     border: 1px solid #eee;
     padding: 0px !important;
 }
-.MooCartInCheckout .moo-column-labels-checkout
-{
+.MooCartInCheckout .moo-column-labels-checkout {
      background-color: #f0f0f0;
      border: 1px solid #ccc;
      color: #999;
@@ -576,8 +572,8 @@ select
      padding: 15px;
      height: 50px;
     margin-bottom: 10px;
-}.MooCartInCheckout .moo-product
-{
+}
+.MooCartInCheckout .moo-product {
      padding-right: 10px;
      padding-left: 10px;
 }
@@ -752,7 +748,7 @@ button.mfp-close {
     padding: 6px 12px;
     font-size: 14px;
     line-height: 1.42857143;
-    border-radius: 4px;
+   /* border-radius: 4px; */
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -1173,7 +1169,6 @@ fieldset[disabled] .moo-btn-link:focus {
     padding: 10px 16px;
     font-size: 18px;
     line-height: 1.3333333;
-    border-radius: 6px;
 }
 .moo-btn-sm {
     padding: 5px 10px;
@@ -1213,7 +1208,6 @@ input[type="button"].moo-btn-block {
     background-color: #ffffff;
     background-image: none;
     border: 1px solid #cccccc;
-    border-radius: 4px;
     -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
     -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
@@ -1234,13 +1228,61 @@ input[type="button"].moo-btn-block {
 .moo-form-control:-ms-input-placeholder {
     color: #999999;
 }
-.moo-form-control::-webkit-input-placeholder {
+.moo-form-control:-ms-input-placeholder {
     color: #999999;
 }
 .moo-form-group
 {
     margin-bottom: 15px;
 }
+#moo-checkout .moo-form-control
+{
+    display: block;
+    width: 100%;
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555555;
+    background-color: #ffffff;
+    background-image: none;
+    border: 1px solid #cccccc;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+    -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+}
+#moo-checkout .moo-form-control:focus {
+    border-color: #66afe9;
+    outline: 0;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, 0.6);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, 0.6);
+    background-color: #fff !important;
+}
+#moo-checkout .moo-form-control::-moz-placeholder {
+    color: #999999;
+    opacity: 1;
+}
+#moo-checkout .moo-form-control:-ms-input-placeholder {
+    color: #999999;
+}
+#moo-checkout .moo-form-control::-webkit-input-placeholder {
+    color: #999999;
+}
+#moo-checkout .moo-form-group {
+    margin-bottom: 15px;
+}
+#moo-checkout #moo_verifPhone_sending .moo-form-inline>.moo-form-control {
+    display: inline;
+    width: 50%;
+}
+#moo-checkout #moo-login-form .login-header>a {
+    text-decoration: none;
+    cursor: pointer;
+    color : #3b5998;
+}
+
 @media (min-width: 768px) {
     .moo-form-inline .moo-form-group {
         display: inline-block;
@@ -1291,8 +1333,8 @@ input[type="button"].moo-btn-block {
         top: 0;
     }
 }
-.moo-new-icon
-{
+
+.moo-new-icon {
     border-radius: 3px 0 0 3px;
     padding: 8px 10px;
     text-align: center;

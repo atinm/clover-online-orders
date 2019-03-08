@@ -29,67 +29,139 @@
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 } else {
-
 	global $wpdb;
-    $defaultOptions = get_option( 'moo_settings' );
-	$store_page_id  = $defaultOptions['store_page'];
-	$cart_page_id   = $defaultOptions['cart_page'];
-	$checkout_page_id = $defaultOptions['checkout_page'];
 
-	if($store_page_id) wp_delete_post($store_page_id,true);
-	if($checkout_page_id) wp_delete_post($checkout_page_id,true);
-	if($cart_page_id) wp_delete_post($cart_page_id,true);
+    if (function_exists('is_multisite') && is_multisite()) {
+        $old_blog = $wpdb->blogid;
+        $blogids = $wpdb->get_col("SELECT blog_id FROM $wpdb->blogs");
+        foreach ($blogids as $blog_id) {
+            switch_to_blog($blog_id);
+            $defaultOptions = get_option( 'moo_settings' );
+            $store_page_id  = $defaultOptions['store_page'];
+            $cart_page_id   = $defaultOptions['cart_page'];
+            $checkout_page_id = $defaultOptions['checkout_page'];
 
-	/*-- Table `item_option`--*/
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_option` ;");
+            if($store_page_id) wp_delete_post($store_page_id,true);
+            if($checkout_page_id) wp_delete_post($checkout_page_id,true);
+            if($cart_page_id) wp_delete_post($cart_page_id,true);
 
-	/*-- Table `item_tax_rate` --*/
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_tax_rate` ;");
+            /*-- Table `item_option`--*/
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_option` ;");
 
-	/* -- Table `modifier_group` -- */
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_order` ;");
+            /*-- Table `item_tax_rate` --*/
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_tax_rate` ;");
 
-	/*-- Table `item_tag` --*/
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_tag` ;");
+            /* -- Table `modifier_group` -- */
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_order` ;");
 
-	/*-- Table `item_modifier_group` --*/
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_modifier_group` ;");
+            /*-- Table `item_tag` --*/
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_tag` ;");
 
-	/* -- Table `order_types -- */
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_images` ;");
+            /*-- Table `item_modifier_group` --*/
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_modifier_group` ;");
 
-	/* -- Table `item` -- */
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item` ;");
+            /* -- Table `order_types -- */
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_images` ;");
 
-	/* -- Table `orders` -- */
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_order` ;");
+            /* -- Table `item` -- */
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item` ;");
 
-	/*-- Table `option`--*/
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_option` ;");
+            /* -- Table `orders` -- */
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_order` ;");
 
-	/* -- Table `tag` --*/
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_tag` ;");
+            /*-- Table `option`--*/
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_option` ;");
 
-	/* -- Table `tax_rate` --*/
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_tax_rate` ;");
+            /* -- Table `tag` --*/
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_tag` ;");
 
-	/* -- Table `modifier` --*/
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_modifier` ;");
+            /* -- Table `tax_rate` --*/
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_tax_rate` ;");
 
-	/*-- Table `category` -- */
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_category` ;");
+            /* -- Table `modifier` --*/
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_modifier` ;");
 
-	/* -- Table `attribute` --*/
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_attribute` ;");
+            /*-- Table `category` -- */
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_category` ;");
 
-	/* -- Table `item_group` --*/
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_group` ;");
+            /* -- Table `attribute` --*/
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_attribute` ;");
 
-	/* -- Table `modifier_group` -- */
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_modifier_group` ;");
+            /* -- Table `item_group` --*/
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_group` ;");
 
-	/* -- Table `order_types -- */
-	$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_order_types` ;");
+            /* -- Table `modifier_group` -- */
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_modifier_group` ;");
 
-	update_option( 'moo_settings','');
+            /* -- Table `order_types -- */
+            $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_order_types` ;");
+
+            update_option( 'moo_settings','');
+        }
+        switch_to_blog($old_blog);
+    } else {
+        $defaultOptions = get_option( 'moo_settings' );
+        $store_page_id  = $defaultOptions['store_page'];
+        $cart_page_id   = $defaultOptions['cart_page'];
+        $checkout_page_id = $defaultOptions['checkout_page'];
+        $my_account_page_id = $defaultOptions['my_account_page'];
+
+        if($store_page_id) wp_delete_post($store_page_id,true);
+        if($checkout_page_id) wp_delete_post($checkout_page_id,true);
+        if($cart_page_id) wp_delete_post($cart_page_id,true);
+        if($my_account_page_id) wp_delete_post($my_account_page_id,true);
+
+        /*-- Table `item_option`--*/
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_option` ;");
+
+        /*-- Table `item_tax_rate` --*/
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_tax_rate` ;");
+
+        /* -- Table `modifier_group` -- */
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_order` ;");
+
+        /*-- Table `item_tag` --*/
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_tag` ;");
+
+        /*-- Table `item_modifier_group` --*/
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_modifier_group` ;");
+
+        /* -- Table `order_types -- */
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_images` ;");
+
+        /* -- Table `item` -- */
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item` ;");
+
+        /* -- Table `orders` -- */
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_order` ;");
+
+        /*-- Table `option`--*/
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_option` ;");
+
+        /* -- Table `tag` --*/
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_tag` ;");
+
+        /* -- Table `tax_rate` --*/
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_tax_rate` ;");
+
+        /* -- Table `modifier` --*/
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_modifier` ;");
+
+        /*-- Table `category` -- */
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_category` ;");
+
+        /* -- Table `attribute` --*/
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_attribute` ;");
+
+        /* -- Table `item_group` --*/
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_group` ;");
+
+        /* -- Table `modifier_group` -- */
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_modifier_group` ;");
+
+        /* -- Table `order_types -- */
+        $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_order_types` ;");
+
+        update_option( 'moo_settings','');
+    }
 }
