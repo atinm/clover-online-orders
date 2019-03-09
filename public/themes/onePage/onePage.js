@@ -118,6 +118,7 @@ function mooGetCategories()
                 var element = document.getElementById("moo-onlineStore-items");
                 var html     = 'You don\'t have any category please import your inventory';
                 jQuery(element).html(html);
+                jQuery('#MooLoadingSection').hide();
             }
         });
     }

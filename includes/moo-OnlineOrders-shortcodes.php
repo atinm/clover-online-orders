@@ -1681,7 +1681,10 @@ class Moo_OnlineOrders_Shortcodes {
         wp_localize_script("mooScript-style3", "moo_CheckoutPage",$checkout_page_url);
         wp_localize_script("mooScript-style3", "moo_StorePage",$store_page_url);
         wp_localize_script("mooScript-style3", "moo_RestUrl",get_rest_url());
-        wp_localize_script("mooScript-style3", "attr_categories",$categories);
+
+        if(count($categories) > 0) {
+            wp_localize_script("mooScript-style3", "attr_categories",$categories);
+        }
 
         ob_start();
         ?>
