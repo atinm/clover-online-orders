@@ -3,7 +3,7 @@ Contributors: Zaytech
 Donate link: http://www.zaytechapps.com/
 Tags: clover,online orders for clover,zaytech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
 Requires at least: 4.7.1
-Tested up to: 5.1.0
+Tested up to: 5.2.0
 Requires PHP: 5.2.0
 Stable tag: 1.3.5
 License: GPLv2 or later
@@ -27,7 +27,6 @@ After installing the **Smart Online Order for Clover** plugin, add the pages 'Or
 Below are just a few websites currently using Smart Online Order with their Clover POS Some websites we built, other websites were built by the merchant themselves or hired developers. For Non-Wordpress websites, (we can create for them the online order page and then it gets linked to their website. Here are some actual customers below. Most have Wordpress websites and some don't.
 
 [Burger Restaurant](https://chicknchuck.com/)
-[Twisted Fresh](https://twistedfresh.com/)
 [Full Service Restaurant](https://www.theoriginalturkey.com)
 [Island Smoothie Cafe](https://www.islandsmoothiecafe.com)
 [Cafe at Airport](https://arrowheadtaphouse.com)
