@@ -15,24 +15,21 @@ Smart Online Order for Clover allows you to receive orders from your Wordpress w
 
 With **Smart Online Order for Clover** you can easily integrate and import your Clover inventory to show on your website in real-time. This will allow you to accept Online Orders from your website.
 
-All you need is a Clover pos to easily display your menu on your website.
+All you need is a Clover POS to easily display your menu on your website.
 
 Allow customers to place orders from your website and then have the orders print to your Clover POS.
 
-All orders can either automatically print or you can have the orders manually print. View all orders from your Clover POS. View daily/weekly/monthly reports from your Clover.
-This plugin is the ideal solution to get your business on-line in less than 10 minutes.
+All orders can either automatically print or you can have the orders manually print. View all orders from your Clover POS. View daily/weekly/monthly reports from your Clover. This plugin is the ideal solution to get your business on-line in less than 10 minutes.
 
-It’s also easy to do it yourself, if you get stuck, there are step by step instructions on You Tube – Search “Smart Online Order” on YouTube
+It’s also easy to do it yourself, if you get stuck, there are step by step instructions on You Tube – Search “Smart Online Order” on YouTube.
+
 = How it works =
 
-After installing the Smart Online Order for Clover plugin, add the pages ‘Order Online’  ‘Checkout’ and “My Orders” by going to Appearance
-then Menu from the Wordpress Dashboard. Then sync your website with your Clover POS using “Import inventory”
+After installing the Smart Online Order for Clover plugin, add the pages "Order Online", "Checkout" and "My Orders" by going to Appearance then Menu from the Wordpress Dashboard. Then sync your website with your Clover POS using “Import inventory”.
 
 There are also shortcodes that you can use. You would simply add the short-codes in a new post/page or an existing one.
 
-If you already spent lots of time building out your Shop page using Woo-Commerce and would like to use your current Woo-Commerce
-inventory and then have those orders sent to the Clover – then, no worries we also have a solution for that. It is called
-**Woo-Commerce Payment Gateway for Clover**. You would still use the same app form the Clover App market “Smart Online Order” to receive your Woo-Commerce orders.
+If you already spent lots of time building out your Shop page using Woo-Commerce and would like to use your current Woo-Commerce inventory and then have those orders sent to the Clover – then, no worries we also have a solution for that. It is called **Woo-Commerce Payment Gateway for Clover**. You would still use the same app form the Clover App market “Smart Online Order” to receive your Woo-Commerce orders.
 
 [Click here to use Woo-Commerce payment integration](https://wordpress.org/plugins/woo-clover-gateway-by-zaytech/)
 
@@ -91,6 +88,7 @@ You can ask your web-developer if he recommends to showcase your Online Order pa
 
 
 Below are additional shortcodes :
+
 Cart Page
 
 `[moo_cart]`
@@ -99,7 +97,7 @@ Checkout page
 
 `[moo_checkout]`
 
-Checkout page
+My Orders page
 
 `[moo_my_account]`
 
