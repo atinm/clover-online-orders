@@ -92,20 +92,29 @@ You can ask your web-developer if he recommends to showcase your Online Order pa
 
 Below are additional shortcodes :
 Cart Page
+
 `[moo_cart]`
+
 Checkout page
+
 `[moo_checkout]`
+
 Checkout page
+
 `[moo_my_account]`
 
 You can also display only some categories by adding the attribute categories to the shortcode, so you can create different pages each page with specific categories (pickup and catering for example)
-`[moo_all_items categories="6QW02M6CY9MHJ,Y68F88C5NTZA0,9KS5GJYMJBD3T"]`
+
+`[moo_all_items categories="6QW02M6CY9MHJ,9KS5GJYMJBD3T"]`
 
 To display a search bar use this shortcode
+
 `[moo_search]`
 
 And to add only "add to cart button" useful if you want create new sections like Popular Items
+
 `[moo_buy_button id='6PJNZJVEHF0XE']`
+
 = VIDEO =
 
 Search Youtube "Smart Online Order" for Tutorial Videos
