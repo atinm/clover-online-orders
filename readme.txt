@@ -144,7 +144,7 @@ No, this plug-in is not by Clover. It is from Zaytech. Both this plug-in and Sma
 Please let us know so we can implement additional features.  925-234-5554 / support@zaytechapps.com
 
 == Changelog ==
-= 1.3.6=
+= 1.3.6 =
 
 * Added new Store Interface Six. This is a fun and interactive store interface with categories at the top
 * Added ability to have Custom Hours for Categories. For example, you can have specific hours that your lunch menu is available for Online Ordering
