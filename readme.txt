@@ -1,4 +1,4 @@
-﻿=== Smart Online Order for Clover ===
+=== Smart Online Order for Clover ===
 Contributors: Zaytech
 Donate link: http://www.zaytechapps.com/
 Tags: clover,online orders for clover,zaytech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
@@ -33,7 +33,7 @@ If you already spent lots of time building out your Shop page using Woo-Commerce
 
 [Click here to use Woo-Commerce payment integration](https://wordpress.org/plugins/woo-clover-gateway-by-zaytech/)
 
-[Click Here to compare the difference of whether to use your Clover Inventory or Woo-Commerce Inventory. You can also visit smartonlineorder.com](https://smartonlineorders.com/)
+[Click Here to compare the difference of whether to use your Clover Inventory or Woo-Commerce Inventory. You can also visit smartonlineorder.com](https://smartonlineorder.com/)
 
 For Non-Wordpress websites, (we can create the online order page using Wordpress and then you would link it to your website.
 The main difference of having a Wordpress website is that the Online Ordering can be up and running in less than 10 minutes. Give us a call or send us an email
