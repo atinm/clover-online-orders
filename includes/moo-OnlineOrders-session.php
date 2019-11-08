@@ -58,7 +58,7 @@ class MOO_SESSION {
         // if we will us ethe server session, check if not already started start it
         if($this->type === 'session') {
             if(!session_id()) {
-                $resultStarting = session_start();
+                $resultStarting = @session_start();
                 if(false === $resultStarting) {
                     //TODO:: what to do when session not started
                 } else {
