@@ -24,7 +24,7 @@
  * @subpackage Moo_OnlineOrders/includes
  * @author     mohammed EL BANYAOUI
  */
-class Moo_OnlineOrders_i18n {
+class  Moo_OnlineOrders_i18n {
 
 	/**
 	 * The domain specified for this plugin.

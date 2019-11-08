@@ -59,8 +59,8 @@ class Moo_OnlineOrders_Activator {
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_item` (
                       `_id` INT NOT NULL AUTO_INCREMENT,
                       `uuid` VARCHAR(45) NOT NULL ,
-                      `name` VARCHAR(100) NULL ,
-                      `alternate_name` VARCHAR(100) NULL ,
+                      `name` VARCHAR(255) NULL ,
+                      `alternate_name` VARCHAR(255) NULL ,
                       `description` TEXT NULL ,
                       `price` MEDIUMTEXT NULL ,
                       `code` VARCHAR(100) NULL ,
@@ -102,7 +102,7 @@ class Moo_OnlineOrders_Activator {
                       `paid` INT(1)  DEFAULT '0' ,
                       `refpayment` VARCHAR(50) NULL ,
                       `ordertype` VARCHAR(250) NULL ,
-                      `p_name` VARCHAR(100) NULL ,
+                      `p_name` VARCHAR(255) NULL ,
                       `p_address` VARCHAR(100) NULL ,
                       `p_city` VARCHAR(100) NULL ,
                       `p_state` VARCHAR(100) NULL ,
@@ -125,12 +125,15 @@ class Moo_OnlineOrders_Activator {
         $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_category` (
                        `_id` INT NOT NULL AUTO_INCREMENT,
                       `uuid` VARCHAR(100) NOT NULL ,
-                      `name` VARCHAR(250) NULL ,
+                      `name` VARCHAR(255) NULL ,
                       `sort_order` INT NULL ,
                       `show_by_default` INT(1) NOT NULL DEFAULT '1' ,
                       `items` TEXT NULL ,
                       `image_url` VARCHAR(255) NULL,
-                      `alternate_name` VARCHAR(100) NULL,
+                      `alternate_name` VARCHAR(255) NULL,
+                      `description` TEXT NULL,
+                      `time_availability` VARCHAR(10) NULL,
+                      `custom_hours` VARCHAR(100) NULL,
                       PRIMARY KEY (`_id`)  ,
                       UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC)  );");
 
@@ -470,37 +473,93 @@ class Moo_OnlineOrders_Activator {
         // Save the version of the plugin in the Database
          update_option('moo_onlineOrders_version', '133');
 
-        if( !isset($defaultOptions["default_style"]) || $defaultOptions["default_style"] == "" || $defaultOptions["default_style"] == "style2" ) $defaultOptions["default_style"] = "onePage";
-        if( !isset($defaultOptions["hours"]) || $defaultOptions["hours"] == "") $defaultOptions["hours"] = "business";
-        if( !isset($defaultOptions["payment_creditcard"]) || $defaultOptions["payment_creditcard"] == "") $defaultOptions["payment_creditcard"] = "on";
-        if( !isset($defaultOptions["payment_cash"]) || $defaultOptions["payment_cash"] == "") $defaultOptions["payment_cash"] = "on";
-        if( !isset($defaultOptions["payment_cash_delivery"]) || $defaultOptions["payment_cash_delivery"] == "") $defaultOptions["payment_cash_delivery"] = "on";
-        if( !isset($defaultOptions["scp"]) || $defaultOptions["scp"] == "") $defaultOptions["scp"] = "on";
-        if( !isset($defaultOptions["checkout_login"]) || $defaultOptions["checkout_login"] == "") $defaultOptions["checkout_login"] = "enabled";
-        if( !isset($defaultOptions["use_coupons"]) || $defaultOptions["use_coupons"] == "") $defaultOptions["use_coupons"] = "disabled";
-        if( !isset($defaultOptions["use_sms_verification"]) || $defaultOptions["use_sms_verification"] == "") $defaultOptions["use_sms_verification"] = "enabled";
-        if( !isset($defaultOptions["use_special_instructions"]) || $defaultOptions["use_special_instructions"] == "") $defaultOptions["use_special_instructions"] = "enabled";
-        if( !isset($defaultOptions["save_cards"]) || $defaultOptions["save_cards"] == "") $defaultOptions["save_cards"] = "disabled";
-        if( !isset($defaultOptions["save_cards_fees"]) || $defaultOptions["save_cards_fees"] == "") $defaultOptions["save_cards_fees"] = "disabled";
-        if( !isset($defaultOptions["service_fees_name"]) || $defaultOptions["service_fees_name"] == "") $defaultOptions["service_fees_name"] = "Service Charge";
-        if( !isset($defaultOptions["service_fees_type"]) || $defaultOptions["service_fees_type"] == "") $defaultOptions["service_fees_type"] = "amount";
-        if( !isset($defaultOptions["delivery_fees_name"]) || $defaultOptions["delivery_fees_name"] == "") $defaultOptions["delivery_fees_name"] = "Delivery Charge";
-        if( !isset($defaultOptions["order_later_minutes_delivery"]) || $defaultOptions["order_later_minutes_delivery"] == "") $defaultOptions["order_later_minutes_delivery"] = "60";
-        if( !isset($defaultOptions["order_later_days_delivery"]) || $defaultOptions["order_later_days_delivery"] == "") $defaultOptions["order_later_days_delivery"] = "4";
-        if( !isset($defaultOptions["order_later_asap_for_p"]) || $defaultOptions["order_later_asap_for_p"] == "") $defaultOptions["order_later_asap_for_p"] = "off";
-        if( !isset($defaultOptions["order_later_asap_for_d"]) || $defaultOptions["order_later_asap_for_d"] == "") $defaultOptions["order_later_asap_for_d"] = "off";
-        if( !isset($defaultOptions["copyrights"]) || $defaultOptions["copyrights"] == "") $defaultOptions["copyrights"] = 'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.3.1">Smart Online Order</a>';
-        if( !isset($defaultOptions["mg_settings_displayInline"]) || $defaultOptions["mg_settings_displayInline"] == "") $defaultOptions["mg_settings_displayInline"] = 'disabled';
-        if( !isset($defaultOptions["mg_settings_qty_for_all"]) || $defaultOptions["mg_settings_qty_for_all"] == "") $defaultOptions["mg_settings_qty_for_all"] = 'enabled';
-        if( !isset($defaultOptions["mg_settings_qty_for_zeroPrice"]) || $defaultOptions["mg_settings_qty_for_zeroPrice"] == "") $defaultOptions["mg_settings_qty_for_zeroPrice"] = 'enabled';
-        if( !isset($defaultOptions["use_couponsApp"]) || $defaultOptions["use_couponsApp"] == "") $defaultOptions["use_couponsApp"] = 'off';
-        if( !isset($defaultOptions["custom_sa_content"])) $defaultOptions["custom_sa_content"] = '';
-        if( !isset($defaultOptions["custom_sa_title"])) $defaultOptions["custom_sa_title"] = '';
-        if( !isset($defaultOptions["custom_sa_onCheckoutPage"])) $defaultOptions["custom_sa_onCheckoutPage"] = 'off';
-        if( !isset($defaultOptions["closing_msg"])) $defaultOptions["closing_msg"] = '';
-        if( !isset($defaultOptions["text_under_special_instructions"])) $defaultOptions["text_under_special_instructions"] = '*additional charges may apply and not all changes are possible';
+        $defaultOptions = self::applyDefaultOptions($defaultOptions);
 
         update_option('moo_settings', $defaultOptions );
 	}
+	public static function applyDefaultOptions($MooOptions) {
+        $default_options = array(
+            array("name"=>"api_key","value"=>""),
+            array("name"=>"lat","value"=>""),
+            array("name"=>"lng","value"=>""),
+            array("name"=>"hours","value"=>""),
+            array("name"=>"closing_msg","value"=>""),
+            array("name"=>"merchant_email","value"=>""),
+            array("name"=>"thanks_page","value"=>""),
+            array("name"=>"my_account_page","value"=>""),
+            array("name"=>"fb_appid","value"=>""),
+            array("name"=>"use_coupons","value"=>"disabled"),
+            array("name"=>"use_sms_verification","value"=>"enabled"),
+            array("name"=>"custom_css","value"=>""),
+            array("name"=>"custom_js","value"=>""),
+            array("name"=>"custom_sa_content","value"=>""),
+            array("name"=>"custom_sa_title","value"=>""),
+            array("name"=>"custom_sa_onCheckoutPage","value"=>"off"),
+            array("name"=>"copyrights","value"=>'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.3.5">Smart Online Order</a>'),
+            array("name"=>"default_style","value"=>"onePage"),
+            array("name"=>"track_stock","value"=>""),
+            array("name"=>"checkout_login","value"=>"enabled"),
+            array("name"=>"tips","value"=>""),
+            array("name"=>"payment_creditcard","value"=>"on"),
+            array("name"=>"payment_cash","value"=>"on"),
+            array("name"=>"payment_cash_delivery","value"=>"on"),
+            array("name"=>"scp","value"=>"on"),
+            array("name"=>"merchant_phone","value"=>""),
+            array("name"=>"order_later","value"=>"on"),
+            array("name"=>"order_later_days","value"=>"4"),
+            array("name"=>"order_later_minutes","value"=>"20"),
+            array("name"=>"order_later_days_delivery","value"=>"4"),
+            array("name"=>"order_later_minutes_delivery","value"=>"60"),
+            array("name"=>"order_later_asap_for_p","value"=>"off"),
+            array("name"=>"order_later_asap_for_d","value"=>"off"),
+            array("name"=>"free_delivery","value"=>""),
+            array("name"=>"fixed_delivery","value"=>""),
+            array("name"=>"other_zones_delivery","value"=>""),
+            array("name"=>"delivery_fees_name","value"=>"Delivery Charge"),
+            array("name"=>"zones_json","value"=>""),
+            array("name"=>"hide_menu","value"=>""),
+            array("name"=>"accept_orders_w_closed","value"=>"on"),
+            array("name"=>"show_categories_images","value"=>false),
+            array("name"=>"save_cards","value"=>"disabled"),
+            array("name"=>"save_cards_fees","value"=>"disabled"),
+            array("name"=>"service_fees","value"=>""),
+            array("name"=>"service_fees_name","value"=>"Service Charge"),
+            array("name"=>"service_fees_type","value"=>"amount"),
+            array("name"=>"use_special_instructions","value"=>"enabled"),
+            array("name"=>"onePage_fontFamily","value"=>"Oswald,sans-serif"),
+            array("name"=>"onePage_categoriesTopMargin","value"=>"0"),
+            array("name"=>"onePage_width","value"=>"1024"),
+            array("name"=>"onePage_categoriesFontColor","value"=>"#ffffff"),
+            array("name"=>"onePage_categoriesBackgroundColor","value"=>"#282b2e"),
+            array("name"=>"onePage_qtyWindow","value"=>"on"),
+            array("name"=>"onePage_qtyWindowForModifiers","value"=>"on"),
+            array("name"=>"onePage_backToTop","value"=>"off"),
+            array("name"=>"jTheme_width","value"=>"1024"),
+            array("name"=>"jTheme_qtyWindow","value"=>"on"),
+            array("name"=>"jTheme_qtyWindowForModifiers","value"=>"on"),
+            array("name"=>"style1_width","value"=>"1024"),
+            array("name"=>"style2_width","value"=>"1024"),
+            array("name"=>"style3_width","value"=>"1024"),
+            array("name"=>"mg_settings_displayInline","value"=>"disabled"),
+            array("name"=>"mg_settings_qty_for_all","value"=>"enabled"),
+            array("name"=>"mg_settings_qty_for_zeroPrice","value"=>"disabled"),
+            array("name"=>"text_under_special_instructions","value"=>"*additional charges may apply and not all changes are possible"),
+            array("name"=>"use_couponsApp","value"=>"off"),
+            array("name"=>"accept_orders","value"=>"enabled"),
+            array("name"=>"onePage_askforspecialinstruction","value"=>"off"),
+            array("name"=>"onePage_messageforspecialinstruction","value"=>"Type your instructions here, additional charges may apply and not all changes are possible"),
+            array("name"=>"jTheme_askforspecialinstruction","value"=>"off"),
+            array("name"=>"jTheme_messageforspecialinstruction","value"=>"Type your instructions here, additional charges may apply and not all changes are possible"),
+            array("name"=>"style2_askforspecialinstruction","value"=>"off"),
+            array("name"=>"style2_messageforspecialinstruction","value"=>"Type your instructions here, additional charges may apply and not all changes are possible"),
+        );
+
+        foreach ($default_options as $default_option) {
+            if(!isset($MooOptions[$default_option["name"]]))
+                $MooOptions[$default_option["name"]]=$default_option["value"];
+        }
+
+        return $MooOptions;
+    }
 
 }

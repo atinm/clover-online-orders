@@ -23,6 +23,7 @@
     padding-top: 15px;
     width: 100%;
     margin: 0 auto;
+    padding-bottom: 10px;
 }
 
 @media only screen and (max-width: 767px) {
@@ -69,7 +70,7 @@
         z-index: 999999;
         cursor: pointer;
         padding: 5px;
-        padding-right: 0px;
+        padding-right: 0;
     }
     #moo_cart_icon{
         background-image: url("../img/moo_cart_icon.png");
@@ -88,6 +89,7 @@
        /* min-width: 1024px; */
         padding-top: 15px;
         margin: 0 auto;
+        padding-bottom: 10px;
     }
 
 }
@@ -95,7 +97,7 @@
 .moo-imgPopup
 {
     width: 80px;
-    margin: 15px;
+    margin: 0 auto;
 }
 .moo-msgPopup {
     font-size: 33px;
@@ -160,7 +162,7 @@
 .FixedOnTop
 {
     position: fixed;
-    top: 0px;
+    top: 0;
     z-index: 99999999;
     padding: 5px !important;
     box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.7);
@@ -229,8 +231,7 @@
     font-size: 12px;
     margin-bottom: 20px;
     clear: both;
-    display: block;
-    text-align: center;
+    display: none;
 }
 .Moo_Copyright a
 {
@@ -249,6 +250,10 @@
     font-size: 16px;
     display: block;
     color: #000;
+}
+.moo_emptycart span a,.moo_emptycart span a
+{
+    text-decoration: none !important;
 }
 .moo_emptycart span a,.moo_emptycart span a:visited
 {
@@ -425,10 +430,11 @@ select
     font-family: ProximaNovaAltExtraCondensedBold;
     margin-bottom: 10px;
 }
-#Mooinstructions
+#moo-checkout #Mooinstructions
 {
     width: 100%;
     background-color: #fff;
+    height: 100px;
 }
 .moo-checkout-form-leftside
 {
@@ -685,12 +691,15 @@ select
     margin: 0 auto;
 }
 button.mfp-close {
-    padding: 8px;
     font-size: 40px;
 }
 #moo-checkout-form-savecard
 {
     display: none;
+}
+#moo-checkout #moo-login-form  .login-social-section a
+{
+    text-decoration: none;
 }
 .moo-alert {
     padding: 8px 35px 8px 14px;
@@ -851,6 +860,7 @@ fieldset[disabled] .moo-btn-default.focus {
     color: #ffffff;
     background-color: #3b5998;
     border-color: #2e6da4;
+    text-decoration: none !important;
 }
 .moo-btn-primary:focus,
 .moo-btn-primary.focus {
@@ -1167,7 +1177,7 @@ fieldset[disabled] .moo-btn-link:focus {
 }
 .moo-btn-lg {
     padding: 10px 16px;
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1.3333333;
 }
 .moo-btn-sm {
@@ -1392,4 +1402,10 @@ input[type="button"].moo-btn-block {
 .login-social-section{
     padding-right: 15px;
     padding-left: 15px;
+}
+#moo-chooseaddress-form .moologoutlabel{
+    color: red;
+}
+.swal2-popup .swal2-actions .moo-green-background {
+    background-color: green;
 }

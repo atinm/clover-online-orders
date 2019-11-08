@@ -3,7 +3,7 @@
     "name":"Store Interface 5",
     "screenshots":"https://api.smartonlineorders.com/assets/images/interface-5.png",
     "version":"1.0",
-    "description":"This Store Interface is great if you want to use images to showcase your Clover Inventory. Click customize if you want to show description",
+    "description":"This Store Interface is great if you want to use images to showcase your Clover Inventory.",
     "settings":[
         {
             "id":"width",
@@ -39,6 +39,20 @@
             "type":"onoff",
             "info":"This will allow you show the items descriptions under items names.",
             "default":"off"
+        },
+        {
+            "id":"askforspecialinstruction",
+            "label":"Show Special instructions Pop Up window after adding any item to cart",
+            "type":"onoff",
+            "info":"After item/modifier is added to cart, immediately show pop-up to allow customer to add special instructions to that item",
+            "default":"on"
+        },
+        {
+            "id":"messageforspecialinstruction",
+            "label":"Custom Text to appear in special instructions",
+            "type":"textaerea",
+            "info":" Custom Text to appear in special instructions after item is added to cart. This default message will appear to customers for special instructions -per line item, not the special instructions on the checkout page.",
+            "default":"Type your instructions here, additional charges may apply and not all changes are possible"
         },
         {
             "id":"color1",

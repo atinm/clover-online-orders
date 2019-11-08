@@ -15,7 +15,7 @@
 {
      color: #252525 !important;
      font-size: 22px !important;
-     line-height: 37px !important;
+     line-height: 45px !important;
      font-family: ProximaNovaAltExtraCondensedBold !important;
      font-weight: bold !important;
      margin: 0 !important;
@@ -31,7 +31,7 @@
     position: absolute;
     display: block;
     right: 10px;
-    top: 8px;
+    top: 12px;
 }
 
 .accordion-open span
@@ -155,7 +155,7 @@
 }
 .BtnCheckout
 {
-    text-decoration: none;
+    text-decoration: none !important;
     outline: none;
     color:#ffffff !important;
     margin-bottom: 10px;

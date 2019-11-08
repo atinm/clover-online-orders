@@ -8,22 +8,18 @@
         width: 100%;
     }
 }
-@media only screen and (max-width: 767px) {
+@media only screen and (max-width: 1024px) {
     .moo-nav-menu
     {
         max-height: 650px;
         overflow-y: scroll;
     }
     .moo-menu-category .moo-menu-category-title .moo-title {
-        position: absolute;
-        bottom: 1rem;
-        left: 2rem;
+        position: relative;
         font-size: 2rem;
         z-index: 2;
-        margin-bottom: 20px;
         font-family: "Oswald",sans-serif;
         color: #fff;
-        line-height: 70px;
     }
     .moo-item-name
     {
@@ -31,9 +27,13 @@
         font-size: 14px;
         font-family: "Open Sans", Arial, sans-serif;
     }
-    .moo-fixed
+    .moo-mobile-fixed
     {
-        position: relative;
+        position: fixed;
+        z-index: 11;
+        background: #fff;
+        top: 0;
+        right: 0;
     }
     .moo-text-sm-right
     {
@@ -49,8 +49,16 @@
     {
         margin-bottom: 20px;
     }
+    #moo-onlineStore-categories .moo-mobile-fixed .moo-choose-category {
+        color: #fff ;
+        background-color: #282b2e;
+        text-align: center;
+        text-transform: uppercase;
+        border-bottom: solid;
+        padding: 11px;
+    }
 }
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 1025px) {
 
     .moo-nav-menu
     {
@@ -60,15 +68,11 @@
         overflow-y: scroll;
     }
     .moo-menu-category .moo-menu-category-title .moo-title {
-        position: absolute;
-        bottom: 1rem;
-        left: 2rem;
+        position: relative;
         font-size: 40px;
         z-index: 2;
-        margin-bottom: 20px;
         font-family: "Oswald",sans-serif;
         color: #fff;
-        line-height: 70px;
     }
     .moo-item-name
     {
@@ -175,17 +179,35 @@
 .moo-menu-category {
     margin-bottom: 2rem;
 }
-.moo-menu-category .moo-menu-category-title {
+#moo_OnlineStoreContainer #moo-onlineStore-items .moo-menu-category .moo-menu-category-title {
     position: relative;
     height: 30vh;
     min-height: 160px;
     color: #fff;
-    padding: 3rem;
-    background-color: #282b2e;
+    padding: 2rem;
 }
+
+#moo_OnlineStoreContainer #moo-onlineStore-items .moo-menu-category .moo-menu-category-title .moo-title {
+    position: relative;
+    font-size: 40px;
+    z-index: 2;
+    font-family: "Oswald",sans-serif;
+    color: #fff;
+    line-height: 40px;
+}
+
+#moo_OnlineStoreContainer #moo-onlineStore-items .moo-menu-category .moo-menu-category-title .moo-category-description {
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
 .moo-menu-category .moo-menu-category-content {
     border: 1px solid #e0e0e0;
     background-color: #fff;
+}
+.moo-menu-category .moo-menu-category-content .moo-menu-list-item .moo-show-more{
+    text-decoration: none;
 }
 .moo-bg-image, .moo-bg-slideshow {
     position: absolute;
@@ -541,4 +563,13 @@ button.moo-btn-sm {
 .moo-new-icon__group
 {
     fill: #ffffff;
+}
+.moo-stick-to-content.moo-mobile-fixed .moo-choose-category i{
+    display: inline;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+}
+.moo-stick-to-content .moo-choose-category i{
+    display: none;
 }

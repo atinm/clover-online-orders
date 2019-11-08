@@ -160,7 +160,7 @@
     border-color: rgb(189, 185, 186);
     background: linear-gradient(rgb(245, 241, 240) 0%, rgb(248, 244, 243) 20%, rgb(246, 245, 243) 30%, rgb(249, 247, 248) 40%, rgb(255, 255, 255) 100%);
 }
-.moo-btn-default:hover,.moo-btn-default:visited,.moo-btn-default:active,.moo-btn-default:link
+#moo_OnlineStoreContainer #moo-onlineStore-categories .moo-btn-default:hover,.moo-btn-default:visited,.moo-btn-default:active,.moo-btn-default:link
 {
     border-color: #1c6aac;
     color: #fff;
@@ -340,11 +340,14 @@
 {
     border-right: 0.5px solid;
     border-left: 0.5px solid;
+    background-color: #fff;
+    border-color: #000;
 }
 .moo-cart-content
 {
     border: 0.5px solid;
     background-color: #fff;
+    border-color: #000;
 }
 .moo-cart-empty
 {
@@ -357,7 +360,7 @@
 {
 
 }
-.moo-cart-btns .BtnCheckout
+#moo-onlineStore-cart .moo-cart-container .moo-cart-btns .BtnCheckout
 {
     background-color: #D90000;
     text-decoration: none;
@@ -386,4 +389,7 @@
     top: 33%;
     left: 41%;
     width: 80px;
+}
+#moo_OnlineStoreContainer #moo-onlineStore-categories .moo-panel-default .moo-panel-body .moo-panel-group .moo-panel .moo-panel-body a {
+    text-decoration: none;
 }

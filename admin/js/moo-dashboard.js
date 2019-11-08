@@ -2,7 +2,7 @@ jQuery(document).ready(function($) {
     //Load the content of the opened tab
     mooLoadInstalledThemes();
     //$(".moo_dashboard_inputColor").wpColorPicker();
-    console.log("hello world from dashboard")
+    //console.log("hello world from dashboard")
 });
 function moo_dashboard_tab_clicked(tab) {
     var Nb_Tabs=2; // Number for tabs
@@ -80,10 +80,14 @@ function mooLoadAllThemes() {
 }
 
 function mooRenderHtmlOneTheme(theme,activeOrInstall) {
-    var html = '<div class="moo_dashboard_addon_box">'+
-                '<div class="moo_dashboard_addon_box_thumb">';
+    var html = '';
+
+
     if(theme.is_active){
+        html += '<div class="moo_dashboard_addon_box"  style="border: 2px solid #1F3C71;"><div class="moo_dashboard_addon_box_thumb">';
         html += '<div class="moo_dashboard_addon_box_led new"><i class="fas fa-star"></i>Activated</div>';
+    } else {
+        html += '<div class="moo_dashboard_addon_box"><div class="moo_dashboard_addon_box_thumb">';
     }
         html += '<img src="'+theme.screenshots+'">'+
                 '<a target="_blank" href="" title="More details"></a> </div>'+
@@ -98,7 +102,7 @@ function mooRenderHtmlOneTheme(theme,activeOrInstall) {
         html += '</p></div><div class="moo_dashboard_addon_box_action">';
                 if(activeOrInstall === 'activate') {
                     if(theme.is_active) {
-                        html += '<a href="#" class="moo_dashboard_addon_box_button moo_dashboard_submit_button moo_dashboard_addon_manage">'+
+                        html += '<a href="#" onclick="event.preventDefault()" class="moo_dashboard_addon_box_button moo_dashboard_submit_button moo_dashboard_addon_manage">'+
                             '<div>'+
                             '<span>ACTIVATED</span></div></a>';
                     } else {

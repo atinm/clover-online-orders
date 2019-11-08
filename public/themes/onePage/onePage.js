@@ -41,22 +41,43 @@ jQuery(document).ready(function()
         if (jQuery(window).scrollTop() > (container_top-header_height))
         {
             //console.log(navigator.userAgent);
-            if( window.innerWidth < 768 ) {
-                jQuery(".moo-stick-to-content").addClass('moo-fixed').width('100%').css("top",window.height+'px')
+            if( jQuery(window).width() <= 1024 ) {
+                if(!jQuery(".moo-stick-to-content").hasClass('moo-mobile-fixed')){
+
+                    jQuery(".moo-stick-to-content").addClass('moo-mobile-fixed').width('100%').css("top",window.height+'px');
+                    mooExpColCatMenu();
+                    jQuery(".moo-stick-to-content").attr('onclick', 'mooExpColCatMenu();');
+
+                }
+                links = jQuery('ul.moo-nav li a');
+                links.each(
+                    function () {
+                        var currentTop = jQuery(window).scrollTop();
+                        var page = jQuery(this).attr('href');
+                        var elemTop     = jQuery(page).offset().top;
+                        var elemBottom     = elemTop + jQuery(page).height();
+                        if((currentTop >= elemTop) &&(currentTop <= elemBottom))
+                            jQuery('.moo-choose-category').html(jQuery(jQuery(this).attr('href')).find('.moo-title').text()+'<i class="fas fa-chevron-down" aria-hidden="true"></i>');
+                    }
+                );
             }
             else
             {
                 jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",window.height+'px');
             }
-
         }
         else
         {
             jQuery(".moo-stick-to-content").removeClass('moo-fixed');
+            jQuery(".moo-stick-to-content").removeClass('moo-mobile-fixed');
+            jQuery(".moo-stick-to-content").removeAttr('onclick');
+            jQuery('.moo-choose-category').html('Choose a Category<i class="fas fa-chevron-down" aria-hidden="true"></i>');
+            if(jQuery('.moo-nav').css('display') === 'none') mooExpColCatMenu();
         }
     });
 
 });
+
 function MooLoadBaseStructure(elm_id,callback) {
     var html = '<div class="moo-row">'+
         '<div  class="moo-is-sticky moo-new-icon" onclick="mooShowCart(event)">' +
@@ -84,6 +105,7 @@ function MooLoadBaseStructure(elm_id,callback) {
 
     callback();
 }
+
 function MooSetLoading() {
     jQuery('#MooLoadingSection').show();
 }
@@ -93,7 +115,7 @@ function MooCLickOnCategory(event,elm)
     event.preventDefault();
     var page = jQuery(elm).attr('href');
     var speed = 750;
-    jQuery('html, body').animate( { scrollTop: jQuery(page).offset().top }, speed ); // Go
+    jQuery('html, body').animate( { scrollTop: jQuery(page).offset().top + 2 }, speed ); // Go
     return false;
 }
 
@@ -142,7 +164,7 @@ function moo_renderCategories($cats,withButton)
                 continue;
             }
         }
-        if(category.items.length >0 ) {
+        if(category.items.length > 0 ) {
             html +='<li><a href="#cat-'+category.uuid.toLowerCase()+'" onclick="MooCLickOnCategory(event,this)">'+category.name+'</a></li>';
             moo_renderItems(category,withButton);
         }
@@ -175,6 +197,7 @@ function moo_renderItems(category,withButton)
                     '<div class="moo-menu-category-title">'+
                     '   <div class="moo-bg-image" style="background-image: url(&quot;'+((category.image_url!=null)?category.image_url:"")+'&quot;);"></div>'+
                     '   <div class="moo-title">'+category.name+'</div>'+
+                    '   <div class="moo-category-description">'+category.description+'</div>'+
                     '</div>'+
                     '<div class="moo-menu-category-content" id="moo-items-for-'+category.uuid.toLowerCase()+'">';
 
@@ -217,28 +240,33 @@ function moo_renderItems(category,withButton)
         if(item.stockCount == "out_of_stock") {
             html += '<button class="moo-btn-sm moo-hvr-sweep-to-top">Out Of Stock</button>';
         } else {
-            //Checking the Qty window show/hide and add add to cart button
-            if(window.moo_theme_setings.onePage_qtyWindow != null && window.moo_theme_setings.onePage_qtyWindow == "on")
-            {
-                if(item.has_modifiers)
+            if(category.available === false) {
+                html += '<button class="moo-btn-sm moo-hvr-sweep-to-top">Not Available Yet</button>';
+            } else {
+                //Checking the Qty window show/hide and add add to cart button
+                if(window.moo_theme_setings.onePage_qtyWindow != null && window.moo_theme_setings.onePage_qtyWindow == "on")
                 {
-                    if(window.moo_theme_setings.onePage_qtyWindowForModifiers != null && window.moo_theme_setings.onePage_qtyWindowForModifiers == "on")
-                        html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtnFIWM)">Choose Qty & Options</button>';
+                    if(item.has_modifiers)
+                    {
+                        if(window.moo_theme_setings.onePage_qtyWindowForModifiers != null && window.moo_theme_setings.onePage_qtyWindowForModifiers == "on")
+                            html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtnFIWM)">Choose Qty & Options</button>';
+                        else
+                            html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty</button>';
+                    }
                     else
-                        html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty</button>';
+                        html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)">Add to cart</button>';
+
                 }
                 else
-                    html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)">Add to cart</button>';
+                {
+                    if(item.has_modifiers)
+                        html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty </button>';
+                    else
+                        html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtn(event,\''+item.uuid+'\',1)">Add to cart</button>';
 
+                }
             }
-            else
-            {
-                if(item.has_modifiers)
-                    html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty </button>';
-                else
-                    html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtn(event,\''+item.uuid+'\',1)">Add to cart</button>';
 
-            }
 
         }
 
@@ -445,21 +473,13 @@ function moo_clickOnOrderBtn(event,item_id,qty)
     jQuery.post(moo_RestUrl+"moo-clover/v1/cart", body,function (data) {
         if(data != null)
         {
-            if(data.status == "error")
-            {
+            if(data.status == "error") {
                 swal({
                     title:data.message,
                     type:"error"
                 });
-            }
-            else
-            {
-                swal({
-                    title:data.name,
-                    text:"Added to cart",
-                    timer:3000,
-                    type:"success"
-                });
+            } else {
+                mooShowAddingItemResult(data);
             }
         }
         else
@@ -495,33 +515,23 @@ function moo_clickOnOrderBtnFIWM(event,item_id,qty)
         //Change butn text
         jQuery(target).text(old_text);
 
-        if(data != null)
-        {
-            if(data.modifier_groups.length > 0)
-            {
-                if(typeof mooBuildModifiersPanel == "function")
-                {
-                    if(Object.keys(window.moo_mg_setings).length > 0)
-                    {
+        if(data != null) {
+            if(data.modifier_groups.length > 0) {
+                if(typeof mooBuildModifiersPanel == "function") {
+                    if(Object.keys(window.moo_mg_setings).length > 0) {
                         mooBuildModifiersPanel(data.modifier_groups,item_id,qty,window.moo_mg_setings);
-                    }
-                    else
-                    {
-                        mooBuildModifiersPanel(data.modifier_groups,item_id,qty);
+                    } else {
+                        mooBuildModifiersPanel(data.modifier_groups,item_id,qty,null);
                     }
                     swal.close();
-                }
-                else
-                {
+                } else {
                     swal('Try again','Please refresh the page, An error has occurred','error');
                 }
 
             }
             else
                 moo_clickOnOrderBtn(event,item_id,qty);
-        }
-        else
-        {
+        } else {
             //Change button text
             jQuery(target).text(old_text);
             swal({ title: "Error", text: 'We cannot Load the options for this item, please refresh the page or contact us',   type: "error",   confirmButtonText: "ok" });
@@ -632,11 +642,9 @@ function mooShowCart(event)
                     showCancelButton: true,
                     cancelButtonText : 'Close',
                     confirmButtonText : '<a href="'+moo_CheckoutPage+'" style="color:#ffffff">CHECKOUT</a>'
-                }).then(function () {
-                    console.log("conformed");
-                    window.location.href = moo_CheckoutPage;
-                },function () {
-
+                }).then(function (result) {
+                    if(result.value)
+                        window.location.href = moo_CheckoutPage;
                 });
             }
             else
@@ -782,11 +790,6 @@ function mooUpdateSpecialInsinCart(line_id,current_special_ins)
         allowOutsideClick: false
     }).then(function (data) {
         if(data)
-           /* swal({
-                type: 'success',
-                title: 'Done',
-                html: 'Special instructions submitted'
-            })*/
             mooShowCart();
         else
             swal({
@@ -802,6 +805,65 @@ function mooUpdateSpecialInsinCart(line_id,current_special_ins)
           }
     });
 
+}
+function mooUpdateSpecialInstructions(line_id)
+{
+    swal({
+        title: 'Add special Instructions',
+        input: 'textarea',
+        inputPlaceholder: (window.moo_theme_setings.onePage_messageforspecialinstruction!==undefined)?window.moo_theme_setings.onePage_messageforspecialinstruction:"",
+        showCancelButton: true,
+        confirmButtonText: 'Add',
+        showLoaderOnConfirm: true,
+        preConfirm: function (special_ins) {
+            return new Promise(function (resolve, reject) {
+                if(special_ins.length>255) {
+                    reject('Text too long, You cannot add more than 250 char')
+                } else {
+                    var body = {
+                        line_id:line_id,
+                        special_ins : special_ins
+                    };
+
+                    jQuery.post(moo_RestUrl+"moo-clover/v1/cart/update", body,function (data) {
+                        if(data != null && data.status == 'success')
+                        {
+                            resolve(true);
+                        }
+                        else
+                        {
+                            resolve(false);
+                        }
+                    }).fail(function ( data ) {
+                        resolve(false);
+                    });
+                }
+            })
+        },
+        allowOutsideClick: false
+    }).then(function (data) {
+        if(!data)
+        {
+            swal({
+                type: 'error',
+                title: 'Not added',
+                html: 'Special instructions not submitted try again'
+            })
+        }
+    });
+
+}
+function mooExpColCatMenu() {
+    jQuery(".moo-nav").animate({
+        height: 'toggle'
+    });
+    if(jQuery('.moo-choose-category').find('i').hasClass('fa-chevron-down')){
+        jQuery('.moo-choose-category').find('i').removeClass('fa-chevron-down');
+        jQuery('.moo-choose-category').find('i').addClass('fa-times');
+    }else{
+        jQuery('.moo-choose-category').find('i').removeClass('fa-times');
+        jQuery('.moo-choose-category').find('i').addClass('fa-chevron-down');
+    }
 }
 
 function moo_ZoomOnImages()
@@ -825,4 +887,30 @@ function moo_ZoomOnImages()
 }
 function formatPrice (p) {
     return p.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+}
+
+function mooShowAddingItemResult(data) {
+    if(window.moo_theme_setings.onePage_askforspecialinstruction === "on"){
+        swal({
+            title:data.name,
+            text:"Added to cart",
+            type:"success",
+            showCancelButton: true,
+            confirmButtonText: 'Add Special Instructions',
+            cancelButtonText: 'No Thanks',
+            cancelButtonClass:'moo-green-background'
+            //footer: '<a onclick="mooUpdateSpecialInsinCart(\''+data.line_id+'\',\'\')">Add special instruction</a>'
+        }).then(function (result) {
+            if(result.value) {
+                mooUpdateSpecialInstructions(data.line_id);
+            }
+        });
+    } else {
+        swal({
+            title:data.name,
+            text:"Added to cart",
+            timer:3000,
+            type:"success"
+        });
+    }
 }

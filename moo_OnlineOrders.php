@@ -16,7 +16,7 @@
  * Plugin Name:       Smart Online Order for Clover
  * Plugin URI:        http://www.zaytechapps.com
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.3.5
+ * Version:           1.3.6
  * Author:            Zaytech
  * Author URI:        http://www.zaytechapps.com
  * License:           Clover app
@@ -161,6 +161,7 @@ function moo_add_action_links( $links ) {
         '<a href="http://docs.smartonlineorder.com/">Docs</a>',
         '<a href="https://smartonlineorder.com/contact-us/">Support</a>',
     );
+
     if (function_exists('is_multisite') && is_multisite() && is_plugin_active_for_network( plugin_basename( __FILE__ ) ) ) {
             $plugin_links_2 = array(
                 '<a href="admin.php?page=moo_deactivateAndClean">Clean inventory</a>',
@@ -171,10 +172,9 @@ function moo_add_action_links( $links ) {
         );
     }
 
-    return array_merge( $plugin_links_1, $links, $plugin_links_2 );
+    return array_merge( $plugin_links_1, $links );
 }
-
-add_action( 'admin_init', function() {
+function moo_deactivateAndClean() {
     if( isset( $_GET['page'] ) &&  $_GET['page'] === 'moo_deactivateAndClean')
     {
         require_once plugin_dir_path( __FILE__)."/includes/moo-OnlineOrders-deactivator.php";
@@ -190,10 +190,12 @@ add_action( 'admin_init', function() {
         header( "Location: $url" );
         die();
     }
-});
-
-if(get_option('moo_onlineOrders_version') != '133')
+}
+add_action( 'admin_init', 'moo_deactivateAndClean');
+                 
+if(get_option('moo_onlineOrders_version') != '136') {
     add_action('plugins_loaded', 'moo_onlineOrders_check_version');
+}
 
 
 /*
@@ -208,26 +210,27 @@ if(get_option('moo_onlineOrders_version') != '133')
 function moo_onlineOrders_check_version()
 {
     global $wpdb;
+    $wpdb->hide_errors();
     $version = get_option('moo_onlineOrders_version');
     $defaultOptions = get_option( 'moo_settings' );
     switch ($version)
     {
         case '120':
             //Adding new fields in category table
-            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `image_url` VARCHAR(255) NULL");
-            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `alternate_name` VARCHAR(100) NULL");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `image_url` VARCHAR(255) NULL");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `alternate_name` VARCHAR(100) NULL");
 
         case '121':
-        	$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_modifier` ADD `sort_order` INT NULL");
-        	$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_modifier` ADD `show_by_default` INT NOT NULL DEFAULT '1'");
-        	$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_modifier_group` ADD `sort_order` INT NULL");
+        	@$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_modifier` ADD `sort_order` INT NULL");
+        	@$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_modifier` ADD `show_by_default` INT NOT NULL DEFAULT '1'");
+        	@$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_modifier_group` ADD `sort_order` INT NULL");
 	    case '122':
-	        $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `type` INT(1) NULL");
+	        @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `type` INT(1) NULL");
         case '123':
-            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_item` ADD `sort_order` INT NULL");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_item` ADD `sort_order` INT NULL");
         case '124':
-            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `sort_order` INT NULL");
-            $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_item_order` (
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `sort_order` INT NULL");
+            @$wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}moo_item_order` (
                           `_id` INT NOT NULL AUTO_INCREMENT,
                           `item_uuid` VARCHAR(100) NOT NULL,
                           `order_uuid` VARCHAR(100) NOT NULL,
@@ -237,6 +240,7 @@ function moo_onlineOrders_check_version()
                           PRIMARY KEY (`_id`, `item_uuid`, `order_uuid`)
                             );");
 
+            //Change where pages are saved
             $store_page     = get_option('moo_store_page');
             $checkout_page  = get_option('moo_checkout_page');
             $cart_page      = get_option('moo_cart_page');
@@ -244,10 +248,11 @@ function moo_onlineOrders_check_version()
             if( !isset($defaultOptions["checkout_page"]) || $defaultOptions["checkout_page"] == "") $defaultOptions["checkout_page"] = $checkout_page;
             if( !isset($defaultOptions["cart_page"]) || $defaultOptions["cart_page"] == "") $defaultOptions["cart_page"] = $cart_page;
             if( !isset($defaultOptions["checkout_login"]) || $defaultOptions["checkout_login"] == "") $defaultOptions["checkout_login"] = "enabled";
-            if( !isset($defaultOptions["use_coupons"]) || $defaultOptions["use_coupons"] == "") $defaultOptions["use_coupons"] = "disabled";
         case '125':
-            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_item` CHANGE `description` `description` TEXT ");
-            $wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `minAmount` VARCHAR(100) NULL DEFAULT '0' ");
+            //add description to items
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_item` CHANGE `description` `description` TEXT ");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `minAmount` VARCHAR(100) NULL DEFAULT '0' ");
+            //add default options for coupons feature
             if( !isset($defaultOptions["use_coupons"]) || $defaultOptions["use_coupons"] == "") $defaultOptions["use_coupons"] = "disabled";
         case '126':
             if( !isset($defaultOptions["use_special_instructions"]) || $defaultOptions["use_special_instructions"] == "") $defaultOptions["use_special_instructions"] = "enabled";
@@ -259,8 +264,6 @@ function moo_onlineOrders_check_version()
             if( !isset($defaultOptions["order_later_minutes_delivery"]) || $defaultOptions["order_later_minutes_delivery"] == "") $defaultOptions["order_later_minutes_delivery"] = "60";
             if( !isset($defaultOptions["order_later_days_delivery"]) || $defaultOptions["order_later_days_delivery"] == "") $defaultOptions["order_later_days_delivery"] = "4";
             if( !isset($defaultOptions["copyrights"]) || $defaultOptions["copyrights"] == "") $defaultOptions["copyrights"] = 'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.2.8">Smart Online Order</a>';
-
-
         case '127':
             $default_options = array(
                 array("name"=>"onePage_fontFamily","value"=>"Oswald,sans-serif"),
@@ -277,48 +280,76 @@ function moo_onlineOrders_check_version()
                 array("name"=>"mg_settings_qty_for_all","value"=>"enabled"),
                 array("name"=>"mg_settings_qty_for_zeroPrice","value"=>"enabled"),
             );
-            $MooOptions = $defaultOptions;
+
             foreach ($default_options as $default_option) {
-                if(!isset($MooOptions[$default_option["name"]]))
-                    $MooOptions[$default_option["name"]]=$default_option["value"];
+                if(!isset($defaultOptions[$default_option["name"]]))
+                    $defaultOptions[$default_option["name"]]=$default_option["value"];
             }
         case '128':
         case '130':
         case '131':
-        $MooOptions = $defaultOptions;
-        if(!isset($MooOptions['onePage_show_more_button'])) {
-            $MooOptions['onePage_show_more_button']='on';
-        }
-        $MooOptions['payment_creditcard'] = 'on';
-        $MooOptions['use_sms_verification'] = 'enabled';
-
+            if(!isset($defaultOptions['onePage_show_more_button'])) {
+                $defaultOptions['onePage_show_more_button']='on';
+            }
+            $defaultOptions['payment_creditcard'] = 'on';
+            $defaultOptions['use_sms_verification'] = 'enabled';
         case '132':
-            $MooOptions = $defaultOptions;
-            if(!isset($MooOptions['my_account_page'])) {
-                $MooOptions['my_account_page']='';
+            if(!isset($defaultOptions['my_account_page'])) {
+                $defaultOptions['my_account_page']='';
             }
-            if(!isset($MooOptions['text_under_special_instructions'])) {
-                $MooOptions['text_under_special_instructions']='*additional charges may apply and not all changes are possible';
+            if(!isset($defaultOptions['text_under_special_instructions'])) {
+                $defaultOptions['text_under_special_instructions']='*additional charges may apply and not all changes are possible';
             }
-            if(!isset($MooOptions['use_couponsApp'])) {
-                $MooOptions['use_couponsApp']= "off";
+            if(!isset($defaultOptions['use_couponsApp'])) {
+                $defaultOptions['use_couponsApp']= "off";
             }
-            if(!isset($MooOptions['custom_sa_content'])) {
-                $MooOptions['custom_sa_content']= "";
+            if(!isset($defaultOptions['custom_sa_content'])) {
+                $defaultOptions['custom_sa_content']= "";
             }
-            if(!isset($MooOptions['custom_sa_title'])) {
-                $MooOptions['custom_sa_title']= "";
+            if(!isset($defaultOptions['custom_sa_title'])) {
+                $defaultOptions['custom_sa_title']= "";
             }
-            if(!isset($MooOptions['custom_sa_onCheckoutPage'])) {
-                $MooOptions['custom_sa_onCheckoutPage']= "off";
+            if(!isset($defaultOptions['custom_sa_onCheckoutPage'])) {
+                $defaultOptions['custom_sa_onCheckoutPage']= "off";
             }
-            if(!isset($MooOptions['closing_msg'])) {
-                $MooOptions['closing_msg']= "";
+            if(!isset($defaultOptions['closing_msg'])) {
+                $defaultOptions['closing_msg']= "";
             }
-
-            update_option("moo_settings",$MooOptions);
-            update_option('moo_onlineOrders_version','133');
         case '133':
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `description` TEXT NULL");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `custom_hours` VARCHAR(100) NULL");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `time_availability` VARCHAR(10) NULL");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_item` CHANGE `description` `description` TEXT ");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `minAmount` VARCHAR(100) NULL DEFAULT '0' ");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `custom_hours` VARCHAR(100) NULL");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `time_availability` VARCHAR(10) NULL");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `use_coupons` INT(1) NULL DEFAULT 1");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `custom_message` VARCHAR(255) NULL DEFAULT 'Not available yet'");
+
+            if(!isset($defaultOptions['accept_orders'])) {
+                $defaultOptions['accept_orders']= "enabled";
+            }
+            if(!isset($defaultOptions['onePage_askforspecialinstruction'])) {
+                $defaultOptions['onePage_askforspecialinstruction'] = 'off';
+            }
+            if(!isset($defaultOptions['onePage_messageforspecialinstruction'])) {
+                $defaultOptions['onePage_messageforspecialinstruction'] = 'Type your instructions here, additional charges may apply and not all changes are possible';
+            }
+            if(!isset($defaultOptions['jTheme_askforspecialinstruction'])) {
+                $defaultOptions['jTheme_askforspecialinstruction'] = 'off';
+            }
+            if(!isset($defaultOptions['jTheme_messageforspecialinstruction'])) {
+                $defaultOptions['jTheme_messageforspecialinstruction'] = 'Type your instructions here, additional charges may apply and not all changes are possible';
+            }
+            if(!isset($defaultOptions['style2_askforspecialinstruction'])) {
+                $defaultOptions['style2_askforspecialinstruction'] = 'off';
+            }
+            if(!isset($defaultOptions['style2_messageforspecialinstruction'])) {
+                $defaultOptions['style2_messageforspecialinstruction'] = 'Type your instructions here, additional charges may apply and not all changes are possible';
+            }
+            update_option("moo_settings",$defaultOptions);
+            update_option('moo_onlineOrders_version','136');
+        case '136':
             break;
     }
 }
@@ -334,9 +365,7 @@ function moo_onlineOrders_check_version()
  * @since    1.0.0
  */
 function run_moo_OnlineOrders() {
-
 	$plugin = new moo_OnlineOrders();
 	$plugin->run();
-
 }
 run_moo_OnlineOrders();

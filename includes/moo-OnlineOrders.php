@@ -87,7 +87,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.3.5';
+		$this->version = '1.3.6';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -214,6 +214,8 @@ class moo_OnlineOrders {
 		$this->loader->add_action( 'admin_bar_menu', $plugin_admin, 'toolbar_link_to_settings',999 );
 		$this->loader->add_action( 'wpmu_new_blog', $plugin_admin, 'activate_plugin_in_network',10,6 );
 		$this->loader->add_action( 'delete_blog', $plugin_admin, 'delete_plugin_in_network',10,1 );
+		$this->loader->add_action( 'admin_notices', $plugin_admin, 'displayUpdateNotice' );
+
 
 	}
 
@@ -235,6 +237,8 @@ class moo_OnlineOrders {
 
         //allow redirection, even if my plugin starts to send output to the browser
         $this->loader->add_action( 'init', $plugin_public, 'do_output_buffer');
+        // Import inventory when hook fired
+        $this->loader->add_action( 'smart_online_order_import_inventory', $plugin_public, 'moo_ImportInventory');
 
         // Add Cart Button
         $this->loader->add_action( 'wp_footer', $plugin_public, 'addCartButton');
@@ -327,6 +331,10 @@ class moo_OnlineOrders {
         //Get list of saved OrderTypes
         $this->loader->add_action( 'wp_ajax_moo_getAllOrderTypes', $plugin_public, 'moo_getAllOrderTypes');
 
+        //Get list of all Categories
+        $this->loader->add_action( 'wp_ajax_moo_getAllCategories', $plugin_public, 'moo_getAllCategories');
+        $this->loader->add_action( 'wp_ajax_moo_getOneCategory', $plugin_public, 'moo_getOneCategory');
+
 		//Add new Order type
 		$this->loader->add_action( 'wp_ajax_moo_add_ot', $plugin_public, 'moo_AddOrderType');
 
@@ -391,30 +399,30 @@ class moo_OnlineOrders {
          * category save image
          */
         $this->loader->add_action( 'wp_ajax_moo_save_category_image', $plugin_public, 'save_image_category');
-        $this->loader->add_action( 'wp_ajax_nopriv_moo_save_category_image', $plugin_public, 'save_image_category');
+       // $this->loader->add_action( 'wp_ajax_nopriv_moo_save_category_image', $plugin_public, 'save_image_category');
         /*
          * category new order
          */
         $this->loader->add_action( 'wp_ajax_moo_new_order_categories', $plugin_public, 'new_order_categories');
-        $this->loader->add_action( 'wp_ajax_nopriv_moo_new_order_categories', $plugin_public, 'new_order_categories');
+      //  $this->loader->add_action( 'wp_ajax_nopriv_moo_new_order_categories', $plugin_public, 'new_order_categories');
         /*
          * delete image category
          */
         $this->loader->add_action( 'wp_ajax_moo_delete_img_category', $plugin_public, 'delete_img_category');
-        $this->loader->add_action( 'wp_ajax_nopriv_moo_delete_img_category', $plugin_public, 'delete_img_category');
+       // $this->loader->add_action( 'wp_ajax_nopriv_moo_delete_img_category', $plugin_public, 'delete_img_category');
         /*
          * change name category
          */
         $this->loader->add_action( 'wp_ajax_moo_change_name_category', $plugin_public, 'change_name_category');
-        $this->loader->add_action( 'wp_ajax_nopriv_moo_change_name_category', $plugin_public, 'change_name_category');
+       // $this->loader->add_action( 'wp_ajax_nopriv_moo_change_name_category', $plugin_public, 'change_name_category');
 
         // New order Modifiers Group
         $this->loader->add_action( 'wp_ajax_moo_new_order_group_modifier', $plugin_public, 'moo_NewOrderGroupModifier');
-        $this->loader->add_action( 'wp_ajax_moo_new_order_group_modifier', $plugin_public, 'moo_NewOrderGroupModifier');
+        // $this->loader->add_action( 'wp_ajax_moo_new_order_group_modifier', $plugin_public, 'moo_NewOrderGroupModifier');
 
         // New order Modifiers Group
         $this->loader->add_action( 'wp_ajax_moo_new_order_modifier', $plugin_public, 'moo_NewOrderModifier');
-        $this->loader->add_action( 'wp_ajax_moo_new_order_modifier', $plugin_public, 'moo_NewOrderModifier');
+      //  $this->loader->add_action( 'wp_ajax_moo_new_order_modifier', $plugin_public, 'moo_NewOrderModifier');
 
         /*
          * Reorder items
@@ -485,6 +493,11 @@ class moo_OnlineOrders {
 		 */
 		$this->loader->add_action( 'admin_post_moo_sync', $plugin_public, 'moo_SyncHandle');
 		$this->loader->add_action( 'admin_post_nopriv_moo_sync', $plugin_public, 'moo_SyncHandle');
+
+		/**
+         * Plugin upgrade wp_upe_upgrade_completed
+         */
+        $this->loader->add_action( 'wp_upe_upgrade_completed', $plugin_public, 'moo_pluginUpdated',1,2);
 
 	}
 

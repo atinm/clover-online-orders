@@ -80,7 +80,7 @@ class SyncRoutes extends BaseRoute
             $item_id = sanitize_text_field($request["item_id"]);
             $cloverItem = $this->api->getItemWithoutSaving($item_id);
             $currentItem = $this->model->getItem($item_id);
-            if(isset($cloverItem["message"]) && $cloverItem["message"] == 'Not Found') {
+            if(isset($cloverItem->message) && $cloverItem->message == 'Not Found') {
                 if(isset($currentItem)){
                    //Item exist and removed from Clover,hide from local database
                     $this->model->hideItem($item_id);
@@ -89,11 +89,11 @@ class SyncRoutes extends BaseRoute
                     return 'Updated, thanks';
                 }
             } else {
-                if(isset($cloverItem["id"])){
-                    if(isset($currentItem) && isset($currentItem->modified_time) && $currentItem->modified_time === $cloverItem['modifiedTime']){
+                if(isset($cloverItem->id)){
+                    if(isset($currentItem) && isset($currentItem->modified_time) && $currentItem->modified_time === $cloverItem->modifiedTime){
                         return 'Updated, thanks';
                     } else {
-                        $this->api->update_item((object)$cloverItem);
+                        $this->api->update_item($cloverItem);
                         return 'updated, thanks';
                     }
 

@@ -133,7 +133,7 @@ class Moo_OnlineOrders_Widgets_best_selling extends WP_Widget{
     }
 }
 
-class Moo_OnlineOrders_Widgets_categories extends WP_Widget{
+class Moo_OnlineOrders_Widgets_categories extends WP_Widget {
 
     function __construct() {
         parent::__construct( 'moo_widget_categories',"Clover orders : categories",array( 'description' => "Categories"));
@@ -184,6 +184,7 @@ class Moo_OnlineOrders_Widgets_categories extends WP_Widget{
 
         <?php
     }
+
     public function update( $new_instance, $old_instance ) {
         $instance = array();
         $instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';

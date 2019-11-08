@@ -72,6 +72,12 @@ class Moo_OnlineOrders_Public {
      */
     private $session;
 
+    /**
+     * Use embded jquery with worpdress on an other version
+     * @var bool
+     *
+     */
+    private $deregisterjQuery = false;
 
 	/**
 	 * Initialize the class and set its properties.
@@ -149,14 +155,14 @@ class Moo_OnlineOrders_Public {
 
 
         if($this->style == "style1"){
-            wp_register_style( 'custom-style-accordion', plugins_url( '/css/custom_style_accordion.min.css', __FILE__ ),array(),$this->version );
+            wp_register_style( 'custom-style-accordion', plugins_url( '/css/custom_style_accordion.css', __FILE__ ),array(),$this->version );
             wp_register_style( 'moo-simple-modal', plugins_url( '/css/simplemodal.css', __FILE__ ),array(), $this->version );
         } else {
             if($this->style == "style2") {
                 wp_register_style( 'mooStyle-style3', plugins_url( '/css/mooStyle-style3.css', __FILE__ ),array('moo-grid-css','moo-modifiersPanel'), $this->version );
             } else {
-                if($this->style == "style3")
-                {
+                if($this->style == "style3") {
+                    wp_register_style( 'moo-bootstrap-css',plugins_url( '/css/bootstrap.min.css', __FILE__ ),array(), $this->version);
                     wp_register_style( 'custom-style-accordion', plugins_url( '/css/custom_style_accordion.min.css', __FILE__ ),array(), $this->version );
                     wp_register_style( 'custom-style-items', plugins_url( '/css/items-style3.css', __FILE__ ),array(), $this->version );
                 } else {
@@ -166,8 +172,7 @@ class Moo_OnlineOrders_Public {
                         if(@count($f) == 2) {
                             $file_name = $f[0];
                             $file_extension = $f[1];
-                            if(strtoupper($file_extension) =="CSS")
-                            {
+                            if(strtoupper($file_extension) =="CSS") {
                                 wp_register_style( 'moo-'.$file_name.'-style' ,plugins_url( 'themes/'.$this->style.'/'.$file_name.'.'.$file_extension, __FILE__ ),array(), $this->version);
                             }
                         }
@@ -190,7 +195,15 @@ class Moo_OnlineOrders_Public {
 	 */
 	public function enqueue_scripts() {
 
-            wp_enqueue_script( 'jquery' );
+	        if($this->deregisterjQuery) {
+                wp_deregister_script( 'jquery' );
+                wp_register_script( 'jquery', "https://code.jquery.com/jquery-3.1.1.min.js", array(), $this->version );
+                wp_deregister_script( 'jquery-migrate' );
+                wp_register_script( 'jquery-migrate', "https://code.jquery.com/jquery-migrate-3.0.0.min.js", array(), $this->version );
+
+            } else {
+                wp_enqueue_script( 'jquery' );
+            }
 
             $MooOptions = (array)get_option('moo_settings');
 
@@ -241,7 +254,7 @@ class Moo_OnlineOrders_Public {
             wp_enqueue_script( 'moo-magnific-modal', array( 'jquery' ) );
 
             wp_register_script('moo-modifiersPanel-js', plugins_url( '/js/moo-modifiersPanel.min.js', __FILE__ ),array(), $this->version);
-            //wp_register_script('moo-modifiersPanel-js', "//api.smartonlineorders.com/assets/js/moo_ModifiersPanel.min.js",array(), $this->version);
+            //wp_register_script('moo-modifiersPanel-js', plugins_url( '/js/moo_modifiersPanel.js', __FILE__ ),array(), $this->version);
             wp_enqueue_script('moo-modifiersPanel-js',array('jquery','moo-magnific-modal'));
 
             if($this->style == "style1"){
@@ -285,9 +298,9 @@ class Moo_OnlineOrders_Public {
             wp_localize_script("moo_public_js", "moo_params",$params);
 
 
-            $cart_page_id  = $MooOptions['cart_page'];
+            $cart_page_id     = $MooOptions['cart_page'];
             $checkout_page_id = $MooOptions['checkout_page'];
-            $store_page_id = $MooOptions['store_page'];
+            $store_page_id    = $MooOptions['store_page'];
 
             $cart_page_url  =  get_page_link($cart_page_id);
             $checkout_page_url =  get_page_link($checkout_page_id);
@@ -367,7 +380,8 @@ class Moo_OnlineOrders_Public {
                             'quantity'   => $itemStock->stockCount
                         );
                     } else {
-                        $this->session->set(($cartLine["quantity"]+1),"items",$item_uuid);
+                        $cartLine["quantity"]++;
+                        $this->session->set($cartLine,"items",$item_uuid);
                         $this->session->set(($this->session->get("itemsQte",$item_uuid)+1),"itemsQte",$item_uuid);
                         $response = array(
                             'status'	=> 'success'
@@ -418,7 +432,8 @@ class Moo_OnlineOrders_Public {
                         }
                         else
                         {
-                            $this->session->set(($cartLine["quantity"]+1),"items",$item_key);
+                            $cartLine["quantity"]++;
+                            $this->session->set($cartLine,"items",$item_key);
                             $this->session->set(($this->session->get("itemsQte",$item_uuid)+1),"itemsQte",$item_uuid);
                             $response = array(
                                 'status'	=> 'success'
@@ -717,6 +732,8 @@ class Moo_OnlineOrders_Public {
 
             //get the taxes rates and calculate number of items
             foreach ($session->get("items") as $item) {
+               // var_dump($_SESSION);
+               // session_destroy();
                 if(!$item)
                     continue;
                 $nb_items += 1 * $item['quantity'];
@@ -1520,162 +1537,6 @@ class Moo_OnlineOrders_Public {
             wp_send_json($response);
         }
     }
-    private function moo_CreateOrder($ordertype,$taxable,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$paymentmethod,$tipAmount,$isDelivery,$instructions,$pickupTime,$customer,$note)
-    {
-        $total = self::moo_cart_getTotal(true);
-        $amount    = floatval(str_replace(',', '', $total['total']));
-        $sub_total = floatval(str_replace(',', '', $total['sub_total']));
-        $taxAmount = floatval(str_replace(',', '', $total['total_of_taxes']));
-
-
-        $couponCode = "";
-        $use_couponsApp = false;
-        $use_maxValue = false;
-
-        $coupon = $total['coupon'];
-
-        if($coupon != null)
-        {
-          if(!$taxable)
-          {
-              if($coupon["type"]=='amount')
-                  $sub_total -= $coupon['value'];
-              else
-                  $sub_total -= $coupon['value']*$sub_total/100;
-          }
-
-          $couponCode = $coupon["code"];
-
-          if(isset($coupon['use_couponsApp'])) {
-              $use_couponsApp = $coupon['use_couponsApp'];
-          }
-
-          if(isset($coupon['use_maxValue'])) {
-              $use_maxValue = $coupon['use_maxValue'];
-          }
-        }
-
-        if($total['status'] == 'success'){
-
-            $orderOptions = array (
-                "total"=>$amount,
-                "OrderType"=>$ordertype,
-                "paymentmethod"=>$paymentmethod,
-                "taxAmount"=>$taxAmount,
-                "deliveryfee"=>$deliveryfee,
-                "deliveryName"=>$deliveryfeeName,
-                "servicefee"=>$serviceFee,
-                "servicefeeName"=>$serviceFeeName,
-                "tipAmount"=>$tipAmount,
-                "isDelivery"=>$isDelivery,
-                "coupon"=>$couponCode,
-                "use_couponsApp"=>$use_couponsApp,
-                "use_maxValue_for_coupon"=>$use_maxValue,
-                "instructions"=>$instructions,
-                "pickupTime"=>$pickupTime,
-                "note"=>$note,
-                "customer"=>json_encode($customer)
-            );
-            if(!$taxable)
-                $orderOptions["total"] = $sub_total;
-
-            $order = $this->api->createOrder($orderOptions);
-            $order = json_decode($order);
-
-            if(isset($order->id)){
-                // Add Items to order
-                // deprecated : will changed in version to support bulk add
-                foreach($this->session->get("items") as $cartLine)
-                {
-                    // If the item is empty skip to the next iteration of the loop
-                    if(!isset($cartLine['item']) || $cartLine['item']->uuid == "delivery_fees" || $cartLine['item']->uuid == "service_fees") continue;
-
-                    // Create line item
-                    if(isset($cartLine['modifiers'])  && is_array($cartLine['modifiers']) && count($cartLine['modifiers']) > 0) {
-                        for($i=0;$i<$cartLine['quantity'];$i++){
-                            $res = $this->api->addlineToOrder($order->id,$cartLine['item']->uuid,'1',$cartLine['special_ins']);
-                            $lineId = json_decode($res)->id;
-                            foreach ($cartLine['modifiers'] as $modifier) {
-                                if(isset($modifier["qty"]) && intval($modifier["qty"])>1) {
-                                    for($k=0;$k<$modifier["qty"];$k++)
-                                        $this->api->addModifierToLine($order->id,$lineId,$modifier['uuid']);
-                                } else {
-                                    $this->api->addModifierToLine($order->id,$lineId,$modifier['uuid']);
-                                }
-                            }
-                        }
-                    } else {
-                        $this->api->addlineToOrder($order->id,$cartLine['item']->uuid,$cartLine['quantity'],$cartLine['special_ins']);
-                    }
-                }
-
-                // add all lines in one request
-                // for testing purpose
-                try{
-                    $this->api->addLinesToOrder($order->id,$this->session->get("items") );
-                } catch (Exception $e) {
-                    //echo $e->getMessage();
-                }
-
-
-                //Return teh order details after adding all lines
-                return
-                    array("OrderId"=>$order->id,"amount"=>$amount,"taxamount"=>$taxAmount,"taxable"=>$taxable,"sub_total"=>$sub_total,'order'=>$order);
-
-            } else {
-                if(isset($order->message) && $order->message !=''){
-                    $response = array(
-                        'status'	=> 'Error',
-                        'message'	=> 'Internal Error, we cannot create the order : '.$order->message.' <br> Please call the store and let them know so it can be resolved'
-                    );
-                    wp_send_json($response);
-                }
-                return false;
-            }
-        }
-        else
-            return false;
-
-
-    }
-    private function moo_PayOrder($cardEncrypted,$first6,$last4,$cvv,$expMonth,$expYear,$orderId,$amount,$taxAmount,$zip,$tipAmount){
-
-
-        $amount     = str_replace(',', '', $amount);
-        $taxAmount  = str_replace(',', '', $taxAmount);
-        $tipAmount  = str_replace(',', '', $tipAmount);
-
-        //$card_number = str_replace(' ','',trim($card_number));
-        $cvv       = sanitize_text_field($cvv);
-        $expMonth  = intval($expMonth);
-        $expYear   = intval($expYear);
-        $orderId   = sanitize_text_field($orderId);
-        $amount    = floatval($amount);
-        $taxAmount = floatval($taxAmount);
-
-        //$last4  = substr($card_number,-4);
-        //$first6 = substr($card_number,0,6);
-
-        $res = $this->api->payOrder($orderId,$taxAmount,$amount,$zip,$expMonth,$cvv,$last4,$expYear,$first6,$cardEncrypted,$tipAmount);
-        return $res;
-
-    }
-    private function moo_PayOrderUsingSpreedly($token,$orderId,$amount,$taxAmount,$tipAmount,$saveCard,$customerToken)
-    {
-
-
-        $amount = str_replace(',', '', $amount);
-        $taxAmount = str_replace(',', '', $taxAmount);
-        $tipAmount = str_replace(',', '', $tipAmount);
-
-        $orderId   = sanitize_text_field($orderId);
-        $amount    = floatval($amount);
-        $taxAmount = floatval($taxAmount);
-
-        $res = $this->api->moo_PayOrderUsingSpreedly($token,$orderId,$taxAmount,$amount,$tipAmount,$saveCard,$customerToken);
-        return $res;
-
-    }
 
     public function moo_GetOrderTypes()
     {
@@ -1744,16 +1605,50 @@ class Moo_OnlineOrders_Public {
 	public function moo_getAllOrderTypes()
     {
         $OrdersTypes = $this->model->getOrderTypes();
-       if(@count($OrdersTypes)>0)
+        $result  = array();
+        foreach ($OrdersTypes as $ordersType) {
+            $ordersType->label = stripcslashes($ordersType->label);
+            $ordersType->custom_message = stripcslashes($ordersType->custom_message);
+            array_push($result,$ordersType);
+        }
+       $response = array(
+           'status'	=> 'success',
+           'data'	=> json_encode($result)
+       );
+       wp_send_json($response);
+    }
+
+    public function moo_getAllCategories()
+    {
+        $categories = $this->model->getCategories();
+       if(@count($categories)>0)
        {
            $response = array(
                'status'	=> 'success',
-               'data'	=> json_encode($OrdersTypes)
+               'data'	=> json_encode($categories)
            );
            wp_send_json($response);
-       }
-        else
-        {
+       } else {
+            $response = array(
+                'status'	=> 'success',
+                'data'	=> "{}"
+            );
+            wp_send_json($response);
+        }
+
+
+    }
+    public function moo_getOneCategory()
+    {
+        $category_uuid   =  sanitize_text_field($_POST['uuid']);
+        $category = $this->model->getCategory($category_uuid);
+       if($category) {
+           $response = array (
+               'status'	=> 'success',
+               'data'	=> json_encode($category)
+           );
+           wp_send_json($response);
+       } else {
             $response = array(
                 'status'	=> 'success',
                 'data'	=> "{}"
@@ -1812,7 +1707,7 @@ class Moo_OnlineOrders_Public {
 
     // Function for Importing DATA, Response to The AJAX requests
 
-   public function moo_ImportCategories()
+     public function moo_ImportCategories()
    {
        $res = $this->api->getCategories();
        $this->api->getItemGroups();
@@ -1822,8 +1717,7 @@ class Moo_OnlineOrders_Public {
        );
        wp_send_json($response);
    }
-
-    public function moo_ImportLabels() {
+     public function moo_ImportLabels() {
         $res = $this->api->getModifierGroups();
         $this->api->getModifiers();
         $this->api->getAttributes();
@@ -1834,7 +1728,7 @@ class Moo_OnlineOrders_Public {
        );
        wp_send_json($response);
    }
-   public function moo_ImportTaxes(){
+     public function moo_ImportTaxes(){
        $this->api->getOrderTypes();
        $res= $this->api->getTaxRates();
        $response = array(
@@ -1843,7 +1737,7 @@ class Moo_OnlineOrders_Public {
        );
        wp_send_json($response);
    }
-    public function moo_ImportItems()
+     public function moo_ImportItems()
    {
        $res = $this->api->getItems();
        $response = array(
@@ -1852,7 +1746,7 @@ class Moo_OnlineOrders_Public {
        );
        wp_send_json($response);
    }
-   public function moo_ImportItemsV2() {
+     public function moo_ImportItemsV2() {
         $page = sanitize_text_field($_POST['page']);
         if($page<0 || !is_numeric($page))
             $page = 0;
@@ -1868,7 +1762,7 @@ class Moo_OnlineOrders_Public {
         );
         wp_send_json($response);
    }
-   public function moo_ImportOrderTypes()
+     public function moo_ImportOrderTypes()
    {
        $res = $this->api->getOrderTypes();
        $response = array(
@@ -1877,7 +1771,19 @@ class Moo_OnlineOrders_Public {
        );
        wp_send_json($response);
    }
-    public function moo_GetStats()
+     public function moo_ImportInventory(){
+       $this->api->getApiKey();
+       $this->api->getCategories();
+       $this->api->getItemGroups();
+       $this->api->getModifierGroups();
+       $this->api->getModifiers();
+       $this->api->getAttributes();
+       $this->api->getOptions();
+       $this->api->getOrderTypes();
+       $this->api->getTaxRates();
+       $this->api->getItems();
+   }
+     public function moo_GetStats()
    {
        $cats     = $this->model->NbCats();
        $labels   = $this->model->NbModifierGroups();
@@ -1893,17 +1799,23 @@ class Moo_OnlineOrders_Public {
        );
        wp_send_json($response);
    }
-    public function moo_UpdateOrdertype()
+     public function moo_UpdateOrdertype()
    {
-       $uuid = $_POST["uuid"];
-       $name = $_POST["name"];
-       $enable = $_POST["enable"];
+       $uuid    = $_POST["uuid"];
+       $name    = $_POST["name"];
+       $enable  = $_POST["enable"];
        $taxable = $_POST["taxable"];
-       $type = $_POST["type"];
+       $type    = $_POST["type"];
        $minAmount = $_POST["minAmount"];
-       $res = $this->model->updateOrderType($uuid,$name,$enable,$taxable,$type,$minAmount);
+       $availabilityCustomTime = $_POST["availabilityCustomTime"];
+       $availabilityTime = $_POST["availabilityTime"];
+       $useCoupons = $_POST["useCoupons"];
+       $customMessage = $_POST["customMessage"];
+
+       $res = $this->model->updateOrderType($uuid,$name,$enable,$taxable,$type,$minAmount,$availabilityTime,$availabilityCustomTime,$useCoupons,$customMessage);
        //update in Clover
        $cloverResponse  = $this->api->updateOrderType($uuid,$name,$taxable);
+       //var_dump($cloverResponse);
        $result = json_decode($cloverResponse,true);
        if(isset($result["message"]) && $result["message"] === 'Not Found') {
            $updated = false;
@@ -1918,7 +1830,7 @@ class Moo_OnlineOrders_Public {
        wp_send_json($response);
 
    }
-    public function moo_UpdateOrdertypesShowSa()
+     public function moo_UpdateOrdertypesShowSa()
    {
        $ot_uuid  = $_POST['ot_uuid'];
        $show_sa  = $_POST['show_sa'];
@@ -1960,21 +1872,6 @@ class Moo_OnlineOrders_Public {
            wp_send_json($response);
        }
 
-    // Filtering Items
-    // Get Items Filtered
-    public function moo_GetItemsFiltered()
-   {
-       require_once plugin_dir_path( dirname(__FILE__))."includes/class-moo-OnlineOrders-shortcodes.php";
-
-       $cat     = sanitize_text_field($_POST['Category']);
-       $filerBy = sanitize_text_field($_POST['FilterBy']);
-       $order   = sanitize_text_field($_POST['Order']);
-       $search  = sanitize_text_field($_POST['search']);
-
-       $html = Moo_OnlineOrders_Shortcodes::getItemsHtml($cat,$filerBy,$order,$search);
-       echo $html;
-       die();
-   }
 
     /* Manage Modifiers */
     public function moo_ChangeModifierGroupName()
@@ -2073,7 +1970,6 @@ class Moo_OnlineOrders_Public {
         );
         wp_send_json($response);
     }
-
     public function moo_UpdateCategoryStatus()
     {
         $cat_uuid  = sanitize_text_field($_POST['cat_uuid']);
@@ -2123,6 +2019,7 @@ class Moo_OnlineOrders_Public {
         }
 
     }
+
     /*
      *
      * Sync with Clover POS handle
@@ -2186,25 +2083,6 @@ class Moo_OnlineOrders_Public {
         );
         wp_send_json($response);
     }
-
-    public function moo_UpdateCategories()
-    {
-        $compteur = 0;
-        $res = json_decode($this->api->getCategoriesWithoutSaving());
-
-        if(isset($res->message) && !isset($res->elements) ) return;
-
-        foreach ($res->elements as $category)
-        {
-            if($this->api->update_category($category)) $compteur++;
-        }
-        $response = array(
-            'status'	 => 'Success',
-            'received'	 => @count($res->elements),
-            'updated'=>$compteur
-        );
-        wp_send_json($response);
-    }
     public function moo_UpdateModifiersG()
     {
         $compteur = 0;
@@ -2230,6 +2108,14 @@ class Moo_OnlineOrders_Public {
         if( $total == 1000) {
             $res2 = json_decode($this->api->getModifiersWithoutSavingPage2());
             $total += @count($res2->elements);
+            /*if( $total == 2000) {
+                $res3 = json_decode($this->api->getModifiersWithoutSavingPage3());
+                foreach ($res3->elements as $modifier) {
+                    if($this->api->update_modifier($modifier))
+                        $compteur++;
+                }
+            }*/
+
             foreach ($res2->elements as $modifier) {
                 if($this->api->update_modifier($modifier))
                     $compteur++;
@@ -2281,34 +2167,28 @@ class Moo_OnlineOrders_Public {
         );
         wp_send_json($response);
     }
-    private function sendEmailsAboutOrder($order_id,$merchant_emails,$customer_email)
+    public function moo_UpdateCategories()
     {
-        @$this->api->sendOrderEmails($order_id,$merchant_emails,$customer_email);
-    }
-    private function SendSmsToMerchant($orderID,$PaymentMethod,$pickuptime,$ordertype)
-    {
-            $MooOptions = (array)get_option('moo_settings');
-            if(isset($MooOptions['merchant_phone']) && $MooOptions['merchant_phone'] != '' )
-            {
-                $message = 'You have received a new order ('.$ordertype.') and this order '.$PaymentMethod.' '.$pickuptime.' It can be seen at this link http://www.clover.com/r/'.$orderID;
-                $phones = $MooOptions['merchant_phone'];
-                $phones = explode('__',$phones);
-                foreach ($phones as $phone) {
-                    $this->api->sendSmsTo($message,$phone);
-                }
+        $compteur = 0;
+        $res = json_decode($this->api->getCategoriesWithoutSaving());
 
-            }
-    }
-    private function SendSmsToCustomer($orderID,$phone)
-    {
-            if($phone != '' )
-            {
-                $message = 'Thank you for your order, You can see your receipt at this link http://www.clover.com/r/'.$orderID;
-                $this->api->sendSmsTo($message,$phone);
-            }
-    }
+        if(isset($res->message) && !isset($res->elements) ) return;
 
-    // visibility category
+        foreach ($res->elements as $category)
+        {
+            if($this->api->update_category($category)) $compteur++;
+        }
+        $response = array(
+            'status'	 => 'Success',
+            'received'	 => @count($res->elements),
+            'updated'=>$compteur
+        );
+        wp_send_json($response);
+    }
+    /* <<< END SYNC FUNCTIONS >>> */
+
+    /* <<< START FUNCTIONS TO MANAGE Categories >>> */
+
     public function visibility_category()
     {
         $id = $_POST["id_cat"];
@@ -2322,19 +2202,16 @@ class Moo_OnlineOrders_Public {
         $ret = $this->model->saveImageCategory($uuid,$url);
         wp_send_json($ret);
     }
-
     public function new_order_categories(){
         $newdata = $_POST["newtable"];
         $ret = $this->model->saveNewCategoriesorder($newdata);
         wp_send_json($ret);
     }
-
     public function delete_img_category(){
         $uuid = $_POST["uuid"];
         $ret = $this->model->moo_DeleteImgCategorie($uuid);
         wp_send_json($ret);
     }
-
     public function change_name_category(){
         $uuid = $_POST["id_cat"];
         $newName = $_POST["newName"];
@@ -2348,12 +2225,13 @@ class Moo_OnlineOrders_Public {
         update_option("moo_settings",$DefaultOption);
         wp_send_json($status);
     }
+    /* <<< END FUNCTIONS TO MANAGE Categories >>> */
+
     public function moo_NewOrderGroupModifier(){
         $newdata = $_POST["newtable"];
         $ret = $this->model->saveNewOrderGroupModifier($newdata);
         wp_send_json($ret);
     }
-
     public function moo_NewOrderModifier(){
         $group = sanitize_text_field($_POST["group_id"]);
         $newdata = $_POST["newtable"];
@@ -2365,6 +2243,8 @@ class Moo_OnlineOrders_Public {
         $res = $this->model->reOrderItems($OrderedItems);
         wp_send_json($res);
     }
+
+    /* <<< START FUNCTIONS TO MANAGE CUSTOMERS >>> */
     public function moo_CustomerLogin()
     {
         $email    = sanitize_text_field($_POST["email"]);
@@ -2422,13 +2302,15 @@ class Moo_OnlineOrders_Public {
         wp_send_json((array)$result);
 
     }
-
     public function moo_ResetPassword()
     {
         $email     = sanitize_text_field($_POST["email"]);
         $res = $this->api->moo_ResetPassword($email);
         wp_send_json(json_decode($res));
     }
+    /* <<< END FUNCTIONS TO MANAGE CUSTOMERS >>> */
+
+    /* <<< START FUNCTIONS TO MANAGE ADDRESS >>> */
     public function moo_setDefaultAddresses()
     {
 
@@ -2437,7 +2319,6 @@ class Moo_OnlineOrders_Public {
     {
 
     }
-
     public function moo_GetAddresses()
     {
         if(!$this->session->isEmpty("moo_customer_token"))
@@ -2525,6 +2406,13 @@ class Moo_OnlineOrders_Public {
             $res = array("status"=>"failure","message"=>'You must logged first');
         wp_send_json($res);
     }
+    /* <<< END FUNCTIONS TO MANAGE ADDRESS >>> */
+    /*
+     * Delete a saved card
+     * Used with spredly
+     * This function will be removed
+     * @deprecated
+     */
     public function moo_DeleteCreditCard()
     {
         if(!$this->session->isEmpty("moo_customer_token"))
@@ -2538,6 +2426,10 @@ class Moo_OnlineOrders_Public {
         }
         wp_send_json($result);
     }
+
+    /**
+     * Apply coupon to the Cart/order
+     */
     public function moo_CouponApply()
     {
         if(isset($this->settings["use_couponsApp"])) {
@@ -2600,6 +2492,10 @@ class Moo_OnlineOrders_Public {
         wp_send_json($res);
     }
 
+    /**
+     * Remove Coupon from Cart and recalc the total
+     * @return array
+     */
     public function moo_CouponRemove() {
         $this->session->delete("coupon");
         $res = array("status"=>"success");
@@ -2607,6 +2503,10 @@ class Moo_OnlineOrders_Public {
         wp_send_json($res);
     }
 
+    /**
+     * Re-order teh order types
+     * @return array
+     */
     public function moo_ReorderOrderTypes(){
         $table = $_POST["newtable"];
         $res = $this->model->saveNewOrderOfOrderTypes($table);
@@ -2614,6 +2514,280 @@ class Moo_OnlineOrders_Public {
     }
 
     /**
+     * PLugin update handle
+     */
+    public function moo_pluginUpdated($upgrader_object, $options){
+        $our_plugin = plugin_basename( __FILE__ );
+        die($our_plugin);
+        set_transient( 'moo_updated', 1 );
+        if( $options['action'] == 'update' && $options['type'] == 'plugin' && isset( $options['plugins'] ) ) {
+            foreach( $options['plugins'] as $plugin ) {
+                if( $plugin == $our_plugin ) {
+                    // Set a transient to record that our plugin has just been updated
+                    set_transient( 'moo_updated', 1 );
+                }
+            }
+        }
+
+    }
+
+
+    //Private functions
+
+    /**
+     * Create the Order
+     * @param $ordertype
+     * @param $taxable
+     * @param $deliveryfee
+     * @param $deliveryfeeName
+     * @param $serviceFee
+     * @param $serviceFeeName
+     * @param $paymentmethod
+     * @param $tipAmount
+     * @param $isDelivery
+     * @param $instructions
+     * @param $pickupTime
+     * @param $customer
+     * @param $note
+     * @return array|bool
+     */
+    private function moo_CreateOrder($ordertype,$taxable,$deliveryfee,$deliveryfeeName,$serviceFee,$serviceFeeName,$paymentmethod,$tipAmount,$isDelivery,$instructions,$pickupTime,$customer,$note)
+    {
+        $total = self::moo_cart_getTotal(true);
+        $amount    = floatval(str_replace(',', '', $total['total']));
+        $sub_total = floatval(str_replace(',', '', $total['sub_total']));
+        $taxAmount = floatval(str_replace(',', '', $total['total_of_taxes']));
+
+
+        $couponCode = "";
+        $use_couponsApp = false;
+        $use_maxValue = false;
+
+        $coupon = $total['coupon'];
+
+        if($coupon != null)
+        {
+            if(!$taxable)
+            {
+                if($coupon["type"]=='amount')
+                    $sub_total -= $coupon['value'];
+                else
+                    $sub_total -= $coupon['value']*$sub_total/100;
+            }
+
+            $couponCode = $coupon["code"];
+
+            if(isset($coupon['use_couponsApp'])) {
+                $use_couponsApp = $coupon['use_couponsApp'];
+            }
+
+            if(isset($coupon['use_maxValue'])) {
+                $use_maxValue = $coupon['use_maxValue'];
+            }
+        }
+
+        if($total['status'] == 'success'){
+
+            $orderOptions = array (
+                "total"=>$amount,
+                "OrderType"=>$ordertype,
+                "paymentmethod"=>$paymentmethod,
+                "taxAmount"=>$taxAmount,
+                "deliveryfee"=>$deliveryfee,
+                "deliveryName"=>$deliveryfeeName,
+                "servicefee"=>$serviceFee,
+                "servicefeeName"=>$serviceFeeName,
+                "tipAmount"=>$tipAmount,
+                "isDelivery"=>$isDelivery,
+                "coupon"=>$couponCode,
+                "use_couponsApp"=>$use_couponsApp,
+                "use_maxValue_for_coupon"=>$use_maxValue,
+                "instructions"=>$instructions,
+                "pickupTime"=>$pickupTime,
+                "note"=>$note,
+                "customer"=>json_encode($customer)
+            );
+            if(!$taxable)
+                $orderOptions["total"] = $sub_total;
+
+            $order = $this->api->createOrder($orderOptions);
+            $order = json_decode($order);
+
+            if(isset($order->id)){
+                // Add Items to order
+                // deprecated : will changed in version to support bulk add
+                foreach($this->session->get("items") as $cartLine)
+                {
+                    // If the item is empty skip to the next iteration of the loop
+                    if(!isset($cartLine['item']) || $cartLine['item']->uuid == "delivery_fees" || $cartLine['item']->uuid == "service_fees") continue;
+
+                    // Create line item
+                    if(isset($cartLine['modifiers'])  && is_array($cartLine['modifiers']) && count($cartLine['modifiers']) > 0) {
+                        for($i=0;$i<$cartLine['quantity'];$i++){
+                            $res = $this->api->addlineToOrder($order->id,$cartLine['item']->uuid,'1',$cartLine['special_ins']);
+                            $lineId = json_decode($res)->id;
+                            foreach ($cartLine['modifiers'] as $modifier) {
+                                if(isset($modifier["qty"]) && intval($modifier["qty"])>1) {
+                                    for($k=0;$k<$modifier["qty"];$k++)
+                                        $this->api->addModifierToLine($order->id,$lineId,$modifier['uuid']);
+                                } else {
+                                    $this->api->addModifierToLine($order->id,$lineId,$modifier['uuid']);
+                                }
+                            }
+                        }
+                    } else {
+                        $this->api->addlineToOrder($order->id,$cartLine['item']->uuid,$cartLine['quantity'],$cartLine['special_ins']);
+                    }
+                }
+
+                // add all lines in one request
+                // for testing purpose
+                try{
+                    $this->api->addLinesToOrder($order->id,$this->session->get("items") );
+                } catch (Exception $e) {
+                    //echo $e->getMessage();
+                }
+
+
+                //Return teh order details after adding all lines
+                return
+                    array("OrderId"=>$order->id,"amount"=>$amount,"taxamount"=>$taxAmount,"taxable"=>$taxable,"sub_total"=>$sub_total,'order'=>$order);
+
+            } else {
+                if(isset($order->message) && $order->message !=''){
+                    $response = array(
+                        'status'	=> 'Error',
+                        'message'	=> 'Internal Error, we cannot create the order : '.$order->message.' <br> Please call the store and let them know so it can be resolved'
+                    );
+                    wp_send_json($response);
+                }
+                return false;
+            }
+        }
+        else
+            return false;
+
+
+    }
+
+    /**
+     * Pay the Order
+     * @param $cardEncrypted
+     * @param $first6
+     * @param $last4
+     * @param $cvv
+     * @param $expMonth
+     * @param $expYear
+     * @param $orderId
+     * @param $amount
+     * @param $taxAmount
+     * @param $zip
+     * @param $tipAmount
+     * @return bool|string
+     */
+    private function moo_PayOrder($cardEncrypted,$first6,$last4,$cvv,$expMonth,$expYear,$orderId,$amount,$taxAmount,$zip,$tipAmount){
+
+
+        $amount     = str_replace(',', '', $amount);
+        $taxAmount  = str_replace(',', '', $taxAmount);
+        $tipAmount  = str_replace(',', '', $tipAmount);
+
+        //$card_number = str_replace(' ','',trim($card_number));
+        $cvv       = sanitize_text_field($cvv);
+        $expMonth  = intval($expMonth);
+        $expYear   = intval($expYear);
+        $orderId   = sanitize_text_field($orderId);
+        $amount    = floatval($amount);
+        $taxAmount = floatval($taxAmount);
+
+        //$last4  = substr($card_number,-4);
+        //$first6 = substr($card_number,0,6);
+
+        $res = $this->api->payOrder($orderId,$taxAmount,$amount,$zip,$expMonth,$cvv,$last4,$expYear,$first6,$cardEncrypted,$tipAmount);
+        return $res;
+
+    }
+
+    /**
+     * Pay the order using spreedly
+     * @param $token
+     * @param $orderId
+     * @param $amount
+     * @param $taxAmount
+     * @param $tipAmount
+     * @param $saveCard
+     * @param $customerToken
+     * @return bool|string
+     * @deprecated
+     */
+    private function moo_PayOrderUsingSpreedly($token,$orderId,$amount,$taxAmount,$tipAmount,$saveCard,$customerToken)
+    {
+
+
+        $amount = str_replace(',', '', $amount);
+        $taxAmount = str_replace(',', '', $taxAmount);
+        $tipAmount = str_replace(',', '', $tipAmount);
+
+        $orderId   = sanitize_text_field($orderId);
+        $amount    = floatval($amount);
+        $taxAmount = floatval($taxAmount);
+
+        $res = $this->api->moo_PayOrderUsingSpreedly($token,$orderId,$taxAmount,$amount,$tipAmount,$saveCard,$customerToken);
+        return $res;
+
+    }
+
+    /**
+     * This function to send emails about the order
+     * @param $order_id
+     * @param $merchant_emails
+     * @param $customer_email
+     */
+    private function sendEmailsAboutOrder($order_id,$merchant_emails,$customer_email)
+    {
+        @$this->api->sendOrderEmails($order_id,$merchant_emails,$customer_email);
+    }
+
+    /**
+     * Send sms to the merchant
+     * @param $orderID
+     * @param $PaymentMethod
+     * @param $pickuptime
+     * @param $ordertype
+     */
+    private function SendSmsToMerchant($orderID,$PaymentMethod,$pickuptime,$ordertype)
+    {
+        $MooOptions = (array)get_option('moo_settings');
+        if(isset($MooOptions['merchant_phone']) && $MooOptions['merchant_phone'] != '' )
+        {
+            $message = 'You have received a new order ('.$ordertype.') and this order '.$PaymentMethod.' '.$pickuptime.' It can be seen at this link http://www.clover.com/r/'.$orderID;
+            $phones = $MooOptions['merchant_phone'];
+            $phones = explode('__',$phones);
+            foreach ($phones as $phone) {
+                $this->api->sendSmsTo($message,$phone);
+            }
+
+        }
+    }
+
+    /**
+     * Send sms to customer
+     * @param $orderID
+     * @param $phone
+     *
+     * removed
+     * @deprecated 
+     */
+    private function SendSmsToCustomer($orderID,$phone)
+    {
+        if($phone != '' )
+        {
+            $message = 'Thank you for your order, You can see your receipt at this link http://www.clover.com/r/'.$orderID;
+            $this->api->sendSmsTo($message,$phone);
+        }
+    }
+    /**
+     * Parse items stocks and get the stock of an item passed via param
      * @param $items
      * @param $item_uuid
      * @return bool

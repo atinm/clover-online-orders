@@ -19,4 +19,12 @@ class BaseRoute
      */
     protected $namespace = 'moo-clover/v2';
 
+    public function permissionCheck( $request ) {
+        return current_user_can( 'manage_options' );
+    }
+    public static function sortBySortOrder($a,$b)
+    {
+        return $a["sort_order"]>$b["sort_order"];
+    }
+
 }

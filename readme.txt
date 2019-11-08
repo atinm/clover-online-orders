@@ -3,9 +3,9 @@ Contributors: Zaytech
 Donate link: http://www.zaytechapps.com/
 Tags: clover,online orders for clover,zaytech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
 Requires at least: 4.7.1
-Tested up to: 5.1.0
+Tested up to: 5.2.4
 Requires PHP: 5.2.0
-Stable tag: 1.3.5
+Stable tag: 1.3.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -144,6 +144,22 @@ No, this plug-in is not by Clover. It is from Zaytech. Both this plug-in and Sma
 Please let us know so we can implement additional features.  925-234-5554 / support@zaytechapps.com
 
 == Changelog ==
+= 1.3.6=
+
+* Added new Store Interface Six. This is a fun and interactive store interface with categories at the top
+* Added ability to have Custom Hours for Categories. For example, you can have specific hours that your lunch menu is available for Online Ordering
+* Added ability to have Custom Hours for Order Types. For example, you can have specific hours of when you would like to do delivery or pick-up order
+* Improved Clean Inventory feature for all items
+* Improved Search Feature [moo_search] by pressing “enter” to quickly list items
+* Added ability to quickly close the Order Online Page from the store settings. You can still close the store from clover.com and then putting closed on the business hours
+* Added ability to add description to categories
+* Added ability to display default message “Not Available Yet” when customer tries to purchase a category outside of ordering hours. Default Message can also be changed
+* Fixed some broken “help / documentation” links. Thanks Chris! for letting us know!
+* Added One Click Install feature that creates a Smart Online Order Page using the Clover Inventory. Great for those that don’t have a Wordpress Website. Hence, a user can use any website on any platform and simply link to the Order Online Page
+* Added optional ability to have special instructions pop-up after item/modifier is added, but just before item is added to cart. This feature was requested by merchants that wanted their customers names or any special instructions for each sandwich, especially when a lot of sandwiches were ordered.
+* Added ability to sync inventory while searching through the categories
+* Added ability to search for modifiers by name
+
 = 1.3.5 =
 * Full support of Wordpress Network (Subdomains & Subdirectories)
 * Integration with Perfect Coupons App by Zaytech. It's now possible to create and print coupons on your Clover POS device and then allow customers to redeem the the coupon online
@@ -345,5 +361,6 @@ First Release
 
 == Upgrade Notice ==
 
-= 1.3.5 =
-Integration with Perfect Coupons App by Zaytech. It's now possible to create and print coupons on your Clover POS device and then allow customers to redeem the the coupon online
+= 1.3.6 =
+
+Added new Store Interface Six and the ability to have Custom Hours for Categories or Order Types with other improvements end enhancements

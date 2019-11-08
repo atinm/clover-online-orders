@@ -2,10 +2,29 @@
  * Created by Mohammed El banyaoui on 7/31/2017.
  */
 
+
 jQuery(document).ready(function() {
+    window.moo_theme_setings = [];
+    window.nb_items_in_cart = 0;
+    window.moo_mg_setings = {};
     moo_displayLoading();
-    mooGetCategories();
-    mooUpdateCart();
+    jQuery.get(moo_RestUrl+"moo-clover/v1/theme_settings/style2", function (data) {
+        if(data != null && data.settings != null) {
+            window.moo_theme_setings = data.settings;
+            window.nb_items_in_cart  = data.nb_items;
+        }
+    }).done(function () {
+        mooGetCategories();
+        mooUpdateCart();
+    });
+    /* Load the modifiers settings and save them on a window's variable */
+    jQuery.get(moo_RestUrl+"moo-clover/v1/mg_settings", function (data) {
+        if(data != null && data.settings != null)
+        {
+            window.moo_mg_setings = data.settings;
+        }
+    });
+
 });
 
 
@@ -39,7 +58,7 @@ function moo_renderCategories($cats)
                 continue;
             }
         }
-        html += moo_buildOneCategoryHtmlLine(category.name,category.uuid);
+        html += moo_buildOneCategoryHtmlLine(category);
     }
     html    += "</div>";
     jQuery(element).html(html);
@@ -49,8 +68,9 @@ function moo_renderCategories($cats)
 }
 
 //Render items of the selected category to html element and insert it into the page
-function moo_renderItems($items,$cat_id)
+function moo_renderItems(data,$cat_id)
 {
+    var $items = data.items;
     var element = document.getElementById("moo_items_for_"+$cat_id);
     var html    = '<div class="moo-panel-group moo-items-panel">';
     for(i in $items){
@@ -124,7 +144,7 @@ function moo_ClickOnCategory(cat_id)
             //get Items for this category
             jQuery.get(moo_RestUrl+"moo-clover/v1/categories/"+cat_id+"/items", function (data) {
                 if(data.items != null)
-                    moo_renderItems(data.items,cat_id);
+                    moo_renderItems(data,cat_id);
                 else {
                     content.html("No item found");
                 }
@@ -167,17 +187,10 @@ function moo_clickOnOrderBtn(event,item_id)
 
     /* Add to cart the item */
     jQuery.post(moo_RestUrl+"moo-clover/v1/cart", body,function (data) {
-        if(data != null)
-        {
-            swal({
-                title:"Item added",
-                timer:3000,
-                type:"success"
-            });
+        if(data != null) {
             mooUpdateCart();
-        }
-        else
-        {
+            mooShowAddingItemResult(data);
+        } else {
             swal({
                 title:"Item not added, try again",
                 type:"error"
@@ -207,7 +220,7 @@ function moo_clickOnOrderBtnFIWM(event,item_id)
 
     jQuery.get(moo_RestUrl+"moo-clover/v1/items/"+item_id, function (data) {
         //Change butn text
-        jQuery(target).text("Add to cart");
+        jQuery(target).text("Choose options");
 
         if(data != null)
         {
@@ -215,7 +228,7 @@ function moo_clickOnOrderBtnFIWM(event,item_id)
             {
                 if(typeof mooBuildModifiersPanel == "function")
                 {
-                    mooBuildModifiersPanel(data.modifier_groups,item_id,qty);
+                    mooBuildModifiersPanel(data.modifier_groups,item_id,qty, window.moo_mg_setings);
                     swal.close();
                 }
                 else
@@ -230,30 +243,41 @@ function moo_clickOnOrderBtnFIWM(event,item_id)
         else
         {
             //Change butn text
-            jQuery(target).text("Add to cart");
+            jQuery(target).text("Choose options");
             swal({ title: "Error", text: 'We cannot Load the options for this item, please refresh the page or contact us',   type: "error",   confirmButtonText: "ok" });
         }
     }).fail(function (data) {
         //Change butn text
-        jQuery(target).text("Add to cart");
+        jQuery(target).text("Choose options");
         swal({ title: "Error", text: 'We cannot Load the options for this item, please refresh the page or contact us',   type: "error",   confirmButtonText: "ok" });
     });
 
 }
 // Internal function used to build the html line for one category
-function moo_buildOneCategoryHtmlLine(cat_name,cat_id)
+function moo_buildOneCategoryHtmlLine(cat)
 {
     var html = '';
     html +='<div class="moo-panel moo-panel-default">';
-    html +='<div class="moo-panel-heading" id="moo_category_'+cat_id+'" onclick="moo_ClickOnCategory(\''+cat_id+'\')">';
-    html +='<div class="moo-row">';
-    html +='<div class="moo-panel-title moo-col-md-9 moo-col-sm-9 moo-col-xs-8">'+cat_name+'</div>';
-    html +='<div class="moo-col-md-3 moo-col-sm-3 moo-col-xs-4 moo-text-right">';
-    html +='<i class="fas fa-minus"></i><i class="fas fa-plus"></i></div></div></div>';
-    html +='<div class="moo-panel-body moo-collapse" id="moo_items_for_'+cat_id+'">';
-    html +='Loading Items';
-    html +='</div></div>';
-    return html;
+    if(cat.available === false ){
+        html +='<div class="moo-panel-heading" id="moo_category_'+cat.uuid+'">';
+        html +='<div class="moo-row">';
+        html +='<div class="moo-panel-title moo-col-md-9 moo-col-sm-9 moo-col-xs-8">'+cat.name+'  (Not Available Yet)</div>';
+        html +='<div class="moo-col-md-3 moo-col-sm-3 moo-col-xs-4 moo-text-right">';
+        html +='</div></div></div>';
+        html +='</div>';
+        return html;
+
+    } else {
+        html +='<div class="moo-panel-heading" id="moo_category_'+cat.uuid+'" onclick="moo_ClickOnCategory(\''+cat.uuid+'\')">';
+        html +='<div class="moo-row">';
+        html +='<div class="moo-panel-title moo-col-md-9 moo-col-sm-9 moo-col-xs-8">'+cat.name+'</div>';
+        html +='<div class="moo-col-md-3 moo-col-sm-3 moo-col-xs-4 moo-text-right">';
+        html +='<i class="fas fa-minus"></i><i class="fas fa-plus"></i></div></div></div>';
+        html +='<div class="moo-panel-body moo-collapse" id="moo_items_for_'+cat.uuid+'">';
+        html +='Loading Items';
+        html +='</div></div>';
+        return html;
+    }
 }
 // Internal function used to build the html line for one item
 function moo_buildOneItemHtmlLine(item)
@@ -295,7 +319,7 @@ function moo_buildOneItemHtmlLine(item)
 
         html +='</div></div></div>';
         html +='<div class="moo-panel-body moo-collapse" id="moo_itemDetails_for_'+item.uuid+'">';
-        if(item.image!=null && item.description !="")
+        if(item.image!=null && item.description != "")
             html += mooBuildItemLine(item);
         else
         if(item.image!=null && item.description =="")
@@ -334,11 +358,14 @@ function mooBuildItemLine(item)
         html += mooBuildItemQty(item.stockCount,item.uuid);
 
         if(item.has_modifiers)
-            html +='<a href="#" class="moo-btn moo-btn-default moo-btn-block moo-btn-block-margin" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\')" data-loading-text="Loading options...">Add to cart</a>';
+            html +='<a href="#" class="moo-btn moo-btn-default moo-btn-block moo-btn-block-margin" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\')" data-loading-text="Loading options...">Choose options</a>';
         else
             html +='<a href="#" class="moo-btn moo-btn-default moo-btn-block moo-btn-block-margin" onclick="moo_clickOnOrderBtn(event,\''+item.uuid+'\')" data-loading-text="Adding...">Add to cart</a>';
     }
     html +='      </div><!-- /.col-lg-2 col-md-2 col-sm-3 col-xs-4 -->';
+    if(item.has_modifiers)
+        html += '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12" id="moo-modifiersContainer-for-'+item.uuid+'"></div>';
+
     html +='   </div><!-- /.mooItemContent -->';
     return html;
 
@@ -359,11 +386,14 @@ function mooBuildItemLineWithoutImage(item)
     {
         html += mooBuildItemQty(item.stockCount,item.uuid);
         if(item.has_modifiers)
-            html +='<a href="#" class="moo-btn moo-btn-default moo-btn-block moo-btn-block-margin" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\')" data-loading-text="Loading options...">Add to cart</a>';
+            html +='<a href="#" class="moo-btn moo-btn-default moo-btn-block moo-btn-block-margin" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\')" data-loading-text="Loading options...">Choose options</a>';
         else
             html +='<a href="#" class="moo-btn moo-btn-default moo-btn-block moo-btn-block-margin" onclick="moo_clickOnOrderBtn(event,\''+item.uuid+'\')" data-loading-text="Adding...">Add to cart</a>';
     }
     html +='      </div><!-- /.col-lg-2 col-md-2 col-sm-3 moo-col-xs-4 -->';
+    if(item.has_modifiers)
+        html += '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12" id="moo-modifiersContainer-for-'+item.uuid+'"></div>';
+
     html +='   </div><!-- /.mooItemContent -->';
     return html;
 }
@@ -387,12 +417,16 @@ function mooBuildItemLineWithoutDescription(item)
     else
     {
         if(item.has_modifiers)
-            html +='<a href="#" class="moo-btn moo-btn-default moo-btn-block moo-marginTop-mobile" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\')" data-loading-text="Loading options...">Add to cart</a>';
+            html +='<a href="#" class="moo-btn moo-btn-default moo-btn-block moo-marginTop-mobile" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\')" data-loading-text="Loading options...">Choose options</a>';
         else
             html +='<a href="#" class="moo-btn moo-btn-default moo-btn-block moo-marginTop-mobile" onclick="moo_clickOnOrderBtn(event,\''+item.uuid+'\')" data-loading-text="Adding...">Add to cart</a>';
     }
 
     html +='      </div><!-- /.col-lg-2 col-md-2 col-sm-3 col-xs-4 -->';
+
+    if(item.has_modifiers)
+        html += '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12" id="moo-modifiersContainer-for-'+item.uuid+'"></div>';
+
     html +='   </div><!-- /.mooItemContent -->';
     return html;
 }
@@ -413,13 +447,16 @@ function mooBuildItemLineWithoutImageAndDescription(item)
     else
     {
         if(item.has_modifiers)
-            html +='<a href="#" class="moo-btn moo-btn-default moo-btn-block moo-marginTop-mobile" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\')" data-loading-text="Loading options...">Add to cart</a>';
+            html +='<a href="#" class="moo-btn moo-btn-default moo-btn-block moo-marginTop-mobile" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\')" data-loading-text="Loading options...">Choose options</a>';
         else
             html +='<a href="#" class="moo-btn moo-btn-default moo-btn-block moo-marginTop-mobile" onclick="moo_clickOnOrderBtn(event,\''+item.uuid+'\')" data-loading-text="Adding...">Add to cart</a>';
     }
     html +='            </div><!-- /.col-lg-8 col-md-8 col-sm-8 col-xs-12 -->'+
-           '        </div><!-- /.col-lg-10 col-md-10 col-sm-12 col-xs-12 -->'+
-           '   </div><!-- /.mooItemContent -->';
+           '        </div><!-- /.col-lg-10 col-md-10 col-sm-12 col-xs-12 -->';
+    if(item.has_modifiers)
+        html += '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12" id="moo-modifiersContainer-for-'+item.uuid+'"></div>';
+
+    html  +='   </div><!-- /.mooItemContent -->';
     return html;
 }
 // Build the Quantity Html DIV
@@ -621,7 +658,6 @@ function mooUpdateSpecialInsinCart(line_id,current_special_ins)
         confirmButtonText: 'Add',
         showLoaderOnConfirm: true,
         preConfirm: function (special_ins) {
-            console.log(special_ins);
             return new Promise(function (resolve, reject) {
                 if(special_ins.length>255)
                 {
@@ -651,18 +687,85 @@ function mooUpdateSpecialInsinCart(line_id,current_special_ins)
         },
         allowOutsideClick: false
     }).then(function (data) {
-        if(data)
+        if(data.result) {
             swal({
                 type: 'success',
                 title: 'Done',
                 html: 'Special instructions submitted'
             })
-        else
+        }
+    });
+
+}
+function mooUpdateSpecialInstructions(line_id)
+{
+    swal({
+        title: 'Add special Instructions',
+        input: 'textarea',
+        inputPlaceholder: (window.moo_theme_setings.style2_messageforspecialinstruction!==undefined)?window.moo_theme_setings.style2_messageforspecialinstruction:"",
+        showCancelButton: true,
+        confirmButtonText: 'Add',
+        showLoaderOnConfirm: true,
+        preConfirm: function (special_ins) {
+            return new Promise(function (resolve, reject) {
+                if(special_ins.length>255) {
+                    reject('Text too long, You cannot add more than 250 char')
+                } else {
+                    var body = {
+                        line_id:line_id,
+                        special_ins : special_ins
+                    };
+
+                    jQuery.post(moo_RestUrl+"moo-clover/v1/cart/update", body,function (data) {
+                        if(data != null && data.status == 'success')
+                        {
+                            resolve(true);
+                        }
+                        else
+                        {
+                            resolve(false);
+                        }
+                    }).fail(function ( data ) {
+                        resolve(false);
+                    });
+                }
+            })
+        },
+        allowOutsideClick: false
+    }).then(function (data) {
+        if(!data)
+        {
             swal({
                 type: 'error',
                 title: 'Not added',
                 html: 'Special instructions not submitted try again'
             })
+        }
     });
 
+}
+function mooShowAddingItemResult(data) {
+    if(window.moo_theme_setings.style2_askforspecialinstruction === "on"){
+        swal({
+            title:data.name,
+            text:"Added to cart",
+            type:"success",
+            showCancelButton: true,
+            confirmButtonText: 'Add Special Instructions',
+            cancelButtonText: 'No Thanks',
+            cancelButtonClass:'moo-green-background'
+            //footer: '<a onclick="mooUpdateSpecialInsinCart(\''+data.line_id+'\',\'\')">Add special instruction</a>'
+        }).then(function (result) {
+            if(result.value) {
+                mooUpdateSpecialInstructions(data.line_id);
+            }
+        });
+    } else {
+        swal({
+            title:data.name,
+            text:"Added to cart",
+            timer:3000,
+            type:"success"
+        });
+    }
 }

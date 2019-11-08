@@ -27,20 +27,23 @@ jQuery(document).ready(function() {
 
 });
 
-function mooClickonSearchButton() {
-    mooShowLoadingForSearch();
+function mooClickonSearchButton(e) {
+    e.preventDefault();
     var keyword = jQuery(".moo-search-field").val();
-    console.log(keyword);
-    jQuery.get(moo_RestUrl+"moo-clover/v1/search/"+keyword, function (data) {
-        if(data.items !== null) {
-            mooRenderItemsForSearch(data.items);
-        } else {
-            jQuery(".moo-search-result").html("Sorry, we don't find any item");
-        }
+    if(keyword.length>0){
+        mooShowLoadingForSearch();
+        jQuery.get(moo_RestUrl+"moo-clover/v1/search/"+keyword, function (data) {
+            if(data.items !== null) {
+                mooRenderItemsForSearch(data.items);
+            } else {
+                jQuery(".moo-search-result").html("Sorry, we don't find any item");
+            }
 
-    }).fail(function () {
-        jQuery(".moo-search-result").html("Sorry, we don't find any item");
-    });
+        }).fail(function () {
+            jQuery(".moo-search-result").html("Sorry, we don't find any item");
+        });
+    }
+
 }
 
 function  mooShowSearchResultContainer() {

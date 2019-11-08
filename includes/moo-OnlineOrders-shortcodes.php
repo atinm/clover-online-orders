@@ -11,237 +11,10 @@
 class Moo_OnlineOrders_Shortcodes {
 
     /**
-     * This ShortCode display the store using the second style
-     *
-     * @since    1.0.0
-     */
-    public static function AllItems($atts, $content)
-    {
-        require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-Model.php";
-        $model = new moo_OnlineOrders_Model();
-        wp_enqueue_script( 'custom-script-items' );
-        wp_enqueue_style ( 'custom-style-items' );
-
-       ob_start();
-        if(isset($_GET['category'])){
-            $category = esc_sql($_GET['category']);
-            ?>
-<div class="row  moo_items" id="Moo_FileterContainer" xmlns="http://www.w3.org/1999/html">
-                <div class="col-md-3 col-sm-3 col-xs-5 ">
-                    <!-- <label for="ListCats">Categories :</label> -->
-
-                    <select id="ListCats" class="form-control" onchange="Moo_CategoryChanged(this)">
-                        <?php
-                        foreach ( $model->getCategories() as $cat ){
-                            if(strlen($cat->items)<1 || $cat->show_by_default == 0 ) continue;
-                            if($cat->uuid == $category)
-                                echo '<option value="'.$cat->uuid.'" selected>'.$cat->name.'</option>';
-                            else
-                                echo '<option value="'.$cat->uuid.'">'.$cat->name.'</option>';
-                        }
-                        ?>
-                    </select>
-                </div>
-                <div class="col-md-6 col-sm-6 col-xs-7 ">
-                    <!-- <label for="MooSearch">Search :</label> -->
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search for..." id="MooSearchFor" onkeypress="Moo_ClickOnGo(event)">
-                              <span class="input-group-btn">
-                                <button id = "MooSearchButton" class="btn btn-default" type="button" onclick="Moo_Search(event)">Go!</button>
-                              </span>
-                    </div><!-- /input-group -->
-
-                </div>
-                <div class="col-md-3 hidden-xs col-sm-3">
-                    <!-- <label for="ListCats">Sort by :</label> -->
-                    <ul class="nav navbar-nav">
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Sort by<span class="caret"></span></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="#" onclick="Moo_SortBy(event,'name','asc')">Name - A to Z</a></li>
-                                <li><a href="#" onclick="Moo_SortBy(event,'name','desc')">Name - Z to A</a></li>
-                                <li role="separator" class="divider"></li>
-                                <li><a href="#" onclick="Moo_SortBy(event,'price','asc')">Price - Low to high</a></li>
-                                <li><a href="#" onclick="Moo_SortBy(event,'price','desc')">Price - High to low</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-
-            </div>
-            <?php
-            echo '<div class="row moo_items" id="Moo_ItemContainer">';
-
-            echo self::getItemsHtml($category,'name','asc',null);
-
-
-            echo '</div>';
-            echo '<div class="row moo_items" align="center"><button class="moo-btn moo-btn-primary" onclick="javascript:window.history.back();">Back to Main menu</button></div>';
-        }
-        else
-            if(isset($_GET['item'])){
-                $item_uuid = esc_sql($_GET['item']);
-                $modifiersgroup = $model->getModifiersGroup($item_uuid);
-                ?>
-                <div id="moo_modifiers">
-
-                    <!-- Nav tabs -->
-                    <ul class="nav nav-tabs" role="tablist" style="margin: 0px;border-bottom-left-radius: 4px;border-bottom-right-radius: 4px;">
-                        <?php
-                        $flag=true;
-                        foreach ($modifiersgroup as $mg) {
-                            if($flag)
-                                echo '<li role="presentation" class="active"><a href="#tab_'.$mg->uuid.'" aria-controls="home" role="tab" data-toggle="tab">'.$mg->name.'</a></li>';
-                            else
-                                echo '<li role="presentation"><a href="#tab_'.$mg->uuid.'" aria-controls="home" role="tab" data-toggle="tab">'.$mg->name.'</a></li>';
-                            $flag = false;
-                        }
-                        ?>
-                    </ul>
-                    <div class="panel panel-default" style="border-top: 0px">
-                        <div class="panel-body">
-                            <!-- Tab panes -->
-                            <form id="moo_form_modifiers" method="post">
-                                <div class="tab-content">
-                                    <?php
-                                    $flag=true;
-                                    foreach ($modifiersgroup as $mg) {
-                                        if($flag)
-                                            echo '<div role="tabpanel" class="tab-pane active" id="tab_'.$mg->uuid.'">';
-                                        else
-                                            echo '<div role="tabpanel" class="tab-pane" id="tab_'.$mg->uuid.'">';
-                                        $flag = false;
-                                        ?>
-
-                                        <div  class="table-responsive">
-                                            <table class="table table-striped">
-                                                <thead>
-                                                <tr>
-                                                    <th style="width: 50px;text-align: center;">Select</th>
-                                                    <th>Name</th>
-                                                    <th>Price</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                <?php
-                                                foreach ($model->getModifiers($mg->uuid) as $modifier) {
-                                                    echo '<tr>';
-                                                    echo '<td style="width: 50px;text-align: center;"><input type="checkbox" name="moo_modifiers[\''.$item_uuid.'\',\''.$mg->uuid.'\',\''.$modifier->uuid.'\']" style="width: 25px;height: 25px;"/></td>';
-                                                    echo '<td>'.$modifier->name.'</td>';
-                                                    echo '<td>$'.($modifier->price/100).'</td>';
-                                                    echo '</tr>';
-                                                }
-                                                ?>
-                                                </tbody>
-                                            </table>
-
-                                        </div>
-
-                                        <?php
-                                        echo '</div>';
-                                    }
-                                    ?>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="btn btn-primary btn-lg" onclick="moo_addModifiers()">ADD TO YOUR CART</div>
-                </div>
-
-            <?php
-            }
-            else
-            {
-                ?>
-                <div class="row moo_categories">
-                    <?php
-                    $colors = self::GetColors();
-                    $categories = $model->getCategories();
-                    $items = $model->getItems();
-                    if(count($categories)==0 && count($items)==0 )
-                        echo "<h1>You don't have any Items, please import your inventory from Clover</h1>";
-                    else
-                    {
-                        if(get_option("moo-show-allItems") == 'true')
-                        {
-                            array_push($categories,(object)array("name"=>'All Items',"uuid"=>'NoCategory'));
-                        }
-                   if(count($categories)>0)
-                        foreach ( $categories as $category ){
-                            if($category->uuid=='NoCategory')
-                            {
-                                $category_name='All Items';
-                            }
-                            else
-                            {
-                                if(strlen($category->items)<1 || $category->show_by_default == 0 ) continue;
-                                if(strlen ($category->name)> 14)$category_name = substr($category->name, 0, 14)."...";
-                                else  $category_name = $category->name;
-                            }
-                          
-
-                            echo '<div class="col-md-4 col-sm-6 col-xs-12 moo_category_flip" >';
-                            echo "<a href='".(esc_url( add_query_arg( 'category', $category->uuid) ))."'><div class='moo_category_flip_container'>";
-                            echo "<div class='moo_category_flip_title'>".ucfirst(strtolower($category_name))."</div>";
-                            echo "<div class='moo_category_flip_content' style='background-color: ".current($colors)."'></div>";
-                            echo '</div></a>';
-                            echo '</div>';
-                            if(!next($colors)) reset($colors);
-                        }
-                    else
-                    {
-                        ?>
-                        <div class="row  moo_items" id="Moo_FileterContainer">
-                            <div class="col-md-9 col-sm-9 col-xs-7 ">
-                                <!-- <label for="MooSearch">Search :</label> -->
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="Search for..." id="MooSearchFor" onkeypress="Moo_ClickOnGo(event)">
-                              <span class="input-group-btn">
-                                <button id = "MooSearchButton" class="btn btn-default" type="button" onclick="Moo_Search(event)">Go!</button>
-                              </span>
-                                </div><!-- /input-group -->
-
-                            </div>
-                            <div class="col-md-3 col-xs-5 col-sm-3">
-                                <!-- <label for="ListCats">Sort by :</label> -->
-                                <ul class="nav navbar-nav">
-                                    <li class="dropdown">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Sort by<span class="caret"></span></a>
-                                        <ul class="dropdown-menu">
-                                            <li><a href="#" onclick="Moo_SortBy(event,'name','asc')">Name - A to Z</a></li>
-                                            <li><a href="#" onclick="Moo_SortBy(event,'name','desc')">Name - Z to A</a></li>
-                                            <li role="separator" class="divider"></li>
-                                            <li><a href="#" onclick="Moo_SortBy(event,'price','asc')">Price - Low to high</a></li>
-                                            <li><a href="#" onclick="Moo_SortBy(event,'price','desc')">Price - High to low</a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </div>
-
-                        </div>
-                        <?php
-
-                        echo '<div class="row moo_items" id="Moo_ItemContainer">';
-                        echo self::getItemsHtml('NoCategory','name','asc',null);
-                        echo '</div>';
-                    }
-
-
-            }
-                    ?>
-                </div>
-            <?php
-
-            }
-        return ob_get_clean();
-
-    }
-    /**
      * This ShortCode display the store using the first style
      * @since    1.0.0
      */
-    public static function AllItemsAcordion($atts, $content,$custom_css)
-    {
+    public static function AllItemsAcordion($atts, $content,$custom_css) {
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-Model.php";
         require_once plugin_dir_path( dirname(__FILE__))."models/moo-OnlineOrders-CallAPI.php";
 
@@ -387,7 +160,7 @@ class Moo_OnlineOrders_Shortcodes {
                                                 echo '</div>';
                                                 echo '</a>';
                                                 if(isset($item->description) && $item->description!="")
-                                                    echo "<p style='width: 85%;'>".stripslashes ($item->description)."</p>";
+                                                    echo "<p style='width: 85%;'>".stripslashes($item->description)."</p>";
                                                 echo '</li>';
                                             }
                                             else
@@ -842,18 +615,23 @@ class Moo_OnlineOrders_Shortcodes {
             $show_only_categories = explode(",",strtoupper($atts["categories"]));
         }
 
+        wp_enqueue_style ( 'moo-bootstrap-css' );
+
+
         wp_enqueue_script( 'custom-script-items' );
         wp_enqueue_script( 'jquery-accordion','jquery' );
 
         wp_enqueue_script( 'moo-magnific-modal',  'jquery'  );
         wp_enqueue_style ( 'moo-magnific-popup' );
 
+
+        wp_enqueue_style ( 'custom-style-accordion' );
         wp_enqueue_style ( 'custom-style-accordion' );
         wp_enqueue_style ( 'custom-style-items' );
         wp_add_inline_style( "custom-style-items", $custom_css );
 
 
-        $MooOptions = (array)get_option( 'moo_settings' );
+        $MooOptions    = (array)get_option( 'moo_settings' );
         $cart_page_id  = $MooOptions['cart_page'];
         $store_page_id = $MooOptions['store_page'];
 
@@ -896,11 +674,13 @@ class Moo_OnlineOrders_Shortcodes {
                 if(isset($cat))
                 {
                     if (!isset($cat->alternate_name) || $cat->alternate_name == null || $cat->alternate_name =='') {
-                        echo '<div class="moo_category_page_title" id="moo_category_page_content">'.$cat->name.'</div>';
+                        echo '<div class="moo_category_page_title" id="moo_category_page_content">'.stripslashes($cat->name).'</div>';
                     }
                     else {
-                        echo '<div class="moo_category_page_title" id="moo_category_page_content">'.$cat->alternate_name.'</div>';
+                        echo '<div class="moo_category_page_title" id="moo_category_page_content">'.stripslashes($cat->alternate_name).'</div>';
                     }
+                    echo '<div class="moo_category_page_description" >'.stripslashes($cat->description).'</div>';
+
                 }
                 foreach($items_tab as $item)
                 {
@@ -1248,7 +1028,7 @@ class Moo_OnlineOrders_Shortcodes {
                                         $category_name = 'All Items';
                                     } else {
                                         if(strlen($category->items) < 1 || $category->show_by_default == 0 ) continue;
-                                        $category_name = $category->name;
+                                        $category_name = stripslashes($category->name);
                                     }
                                     if(count($show_only_categories)>0){
                                         if(!in_array(strtoupper($category->uuid),$show_only_categories))
@@ -1288,7 +1068,7 @@ class Moo_OnlineOrders_Shortcodes {
                                     else
                                     {
                                         if(strlen($category->items) < 1 || $category->show_by_default == 0 ) continue;
-                                        $category_name = $category->name;
+                                        $category_name = stripslashes($category->name);
                                     }
 
                                     if(count($show_only_categories)>0){
@@ -1303,7 +1083,7 @@ class Moo_OnlineOrders_Shortcodes {
                                     }
                                     else
                                     {
-                                        echo "<div class='moo_category_flip_title'>".ucfirst(strtolower($category->alternate_name))."</div>";
+                                        echo "<div class='moo_category_flip_title'>".ucfirst(strtolower(stripslashes($category->alternate_name)))."</div>";
                                     }
 
 
@@ -1341,7 +1121,17 @@ class Moo_OnlineOrders_Shortcodes {
         $oppening_status = json_decode($api->getOpeningStatus(4,30));
         $oppening_msg = "";
 
-        if($MooOptions['hours'] != 'all' && $oppening_status->status == 'close')
+        if(isset($MooOptions['accept_orders']) && $MooOptions['accept_orders'] === "disabled"){
+            if(isset($MooOptions["closing_msg"]) && $MooOptions["closing_msg"] !== '') {
+                $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$MooOptions["closing_msg"].'</div>';
+            } else  {
+                $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">We are currently closed and will open again soon</div>';
+
+            }
+            return '<div id="moo_OnlineStoreContainer" >'.$oppening_msg.'</div>';
+        }
+
+        if($MooOptions['hours'] != 'all' && isset($oppening_status->status ) && $oppening_status->status == 'close')
         {
             if(isset($MooOptions["closing_msg"]) && $MooOptions["closing_msg"] !== '') {
                 $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$MooOptions["closing_msg"].'</div>';
@@ -1362,10 +1152,13 @@ class Moo_OnlineOrders_Shortcodes {
         $custom_css = $MooOptions["custom_css"];
         $custom_js  = $MooOptions["custom_js"];
         $website_width = intval($MooOptions[$theme_id."_width"]);
-        if($website_width === 0)
-            $website_width = 1024;
 
-        $custom_css .= '@media only screen and (min-width: 768px) {#moo_OnlineStoreContainer,.moo-shopping-cart-container,.Moo_Copyright {min-width: '.$website_width.'px;}}';
+        if($website_width === 0) {
+            $website_width = "100%";
+        } else {
+            $website_width.="px;";
+        }
+        $custom_css .= '@media only screen and (min-width: 768px) {#moo_OnlineStoreContainer,.moo-shopping-cart-container,.Moo_Copyright {width: '.$website_width.'}}';
         $custom_css .= self::moo_render_customised_css_for_themes($theme_id);
 
         $html_code .=  $oppening_msg;
@@ -1423,12 +1216,22 @@ class Moo_OnlineOrders_Shortcodes {
         $checkout_page_url =  get_page_link($checkout_page_id);
 
         ob_start();
-
         $MooOptions = (array)get_option('moo_settings');
         $custom_css = $MooOptions["custom_css"];
         $custom_js  = $MooOptions["custom_js"];
         //Include custom css
         wp_add_inline_style( "custom-style-cart3", $custom_css );
+
+        //check teh store availibilty
+        if(isset($MooOptions['accept_orders']) && $MooOptions['accept_orders'] === "disabled"){
+            if(isset($MooOptions["closing_msg"]) && $MooOptions["closing_msg"] !== '') {
+                $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$MooOptions["closing_msg"].'</div>';
+            } else  {
+                $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">We are currently closed and will open again soon</div>';
+
+            }
+            return '<div id="moo_OnlineStoreContainer" >'.$oppening_msg.'</div>';
+        }
 
         $total =   Moo_OnlineOrders_Public::moo_cart_getTotal(true);
 
@@ -1850,8 +1653,11 @@ class Moo_OnlineOrders_Shortcodes {
         ?>
         <div class="" id="moo-search-bar-container">
             <div class="moo-search-bar moo-row">
-                <input class="moo-col-md-10 moo-search-field" type="text" placeholder="Search" />
-                <button class="moo-col-md-2 osh-btn action" onclick="mooClickonSearchButton()">Search</button>
+                <form onsubmit="mooClickonSearchButton(event)">
+                    <input class="moo-col-md-10 moo-search-field" type="text" placeholder="Search" />
+                    <button class="moo-col-md-2 osh-btn action" onclick="mooClickonSearchButton(event)">Search</button>
+                </form>
+
             </div>
             <div class="moo-search-result moo-row"></div>
         </div>
@@ -1866,7 +1672,13 @@ class Moo_OnlineOrders_Shortcodes {
         }
 
         $MooOptions = (array)get_option( 'moo_settings' );
+
         $theme_id = $MooOptions["default_style"];
+
+        if(isset($atts["force_theme"]) && !empty($atts["force_theme"])){
+            $theme_id = $atts["force_theme"];
+        }
+
         $files = scandir(plugin_dir_path(dirname(__FILE__))."public/themes/".$theme_id);
         $jsFileName = '';
         foreach ($files as $file) {

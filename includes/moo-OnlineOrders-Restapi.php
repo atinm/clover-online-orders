@@ -2,11 +2,12 @@
 /**
  * This Class will handle our first version of the rest api
  * Created by Mohammed EL BANYAOUI.
- * User: Smart MerchantApps
  */
 
 // Require classes
 require_once plugin_dir_path( dirname( __FILE__ ) ) . "includes/restapi/SyncRoutes.php";
+require_once plugin_dir_path( dirname( __FILE__ ) ) . "includes/restapi/DashboardRoutes.php";
+
 //require model and api only if they no exist
 if ( ! class_exists( 'moo_OnlineOrders_Model' ) ) {
     /**
@@ -66,6 +67,13 @@ class Moo_OnlineOrders_Restapi
      * @var SyncRoutes
      */
     private $syncRoutes;
+    /**
+     * The class that will handle all sync routes
+     * @since    1.3.3
+     * @access   private
+     * @var DashboardRoutes
+     */
+    private $dashRoutes;
 
     // Here initialize our namespace and resource name.
     public function __construct() {
@@ -74,6 +82,7 @@ class Moo_OnlineOrders_Restapi
         $this->api      =     new moo_OnlineOrders_CallAPI();
         $this->session  =     MOO_SESSION::instance();
         $this->syncRoutes = new SyncRoutes($this->model, $this->api);
+        $this->dashRoutes = new DashboardRoutes($this->model, $this->api);
         if($this->isProduction)
             error_reporting(0);
     }
@@ -83,6 +92,7 @@ class Moo_OnlineOrders_Restapi
         //register v2 routes
 
         $this->syncRoutes->register_routes();
+        $this->dashRoutes->register_routes();
 
         //get categories route
         register_rest_route( $this->namespace, '/categories', array(
@@ -339,25 +349,58 @@ class Moo_OnlineOrders_Restapi
     }
     public function getCategories( $request )
     {
+        $useAlternateNames = true;
         $params = $request->get_params();
         $response = array();
         $cats = $this->model->getCategories();
-        if($cats)
-        {
+
+        // Get categories times
+        $counter = $this->model->getCategoriesWithCustomHours();
+        if(isset($counter->nb) && $counter->nb > 0 ) {
+            $HoursResponse = $this->api->getMerchantCustomHoursStatus("categories");
+            if( $HoursResponse ){
+                $merchantCustomHoursStatus = json_decode($HoursResponse,true);
+                $merchantCustomHours = array_keys($merchantCustomHoursStatus);
+            } else {
+                $merchantCustomHoursStatus = array();
+                $merchantCustomHours = array();
+            }
+        } else {
+                $merchantCustomHoursStatus = array();
+                $merchantCustomHours = array();
+        }
+
+        if($cats) {
             foreach ($cats as $cat) {
 
                 if($cat->show_by_default == "1")
                 {
                     $c = array(
                         "uuid"=>$cat->uuid,
-                        "name"=>( $cat->alternate_name == "" )?stripslashes($cat->name):stripslashes($cat->alternate_name),
+                        "name"=>( $cat->alternate_name == "" || !$useAlternateNames )?stripslashes($cat->name):stripslashes($cat->alternate_name),
+                        "alternate_name" => stripslashes($cat->alternate_name),
+                        "description"   => (isset($cat->description))?stripslashes($cat->description):"",
+                        "custoum_hours"   => (isset($cat->custoum_hours))?stripslashes($cat->custoum_hours):"",
                         "image_url"=>$cat->image_url
                     );
+                    if(count($merchantCustomHours) && isset($cat->time_availability) && $cat->time_availability === "custom") {
+                        $catAvailable = true;
+                        if(isset($cat->custom_hours) && !empty($cat->custom_hours)) {
+                            if(in_array($cat->custom_hours, $merchantCustomHours)){
+                                $catAvailable = $merchantCustomHoursStatus[$cat->custom_hours] === "open";
+                            }
+                        }
+                    } else {
+                        $catAvailable = true;
+                    }
+                   // var_dump($catAvailable );
+
+                    $c["available"] = $catAvailable;
                     if(isset($params["expand"]))
                     {
                         if($params["expand"] == 'five_items') {
                             $c['items'] = array();
-                            if($cat->items !="") {
+                            if($cat->items != "") {
                                 $items_uuids = explode(",",$cat->items);
                                 $track_stock = $this->api->getTrackingStockStatus();
                                 if($track_stock == true)
@@ -397,14 +440,14 @@ class Moo_OnlineOrders_Restapi
                                             $final_item['stockCount'] = ($track_stock)?"tracking_stock":"not_tracking_stock";
                                     }
                                     $final_item["uuid"]=$item->uuid;
-                                    $final_item["name"]=$item->name;
-                                    $final_item["description"]  =   stripslashes ($item->description);
-                                    $final_item["price"]        =   $item->price;
-                                    $final_item["price_type"]   =   $item->price_type;
-                                    $final_item["unit_name"]    =   $item->unit_name;
-                                    $final_item["unit_name"]    =   $item->unit_name;
-                                    $final_item["sort_order"]   =   intval($item->sort_order);
-                                    $final_item["has_modifiers"]=   ($this->model->itemHasModifiers($item->uuid)->total>0)?true:false;
+                                    $final_item["name"]           =   stripslashes($item->name);
+                                    $final_item["alternate_name"] =   stripslashes($item->alternate_name);
+                                    $final_item["description"]    =   stripslashes($item->description);
+                                    $final_item["price"]          =   $item->price;
+                                    $final_item["price_type"]     =   $item->price_type;
+                                    $final_item["unit_name"]      =   $item->unit_name;
+                                    $final_item["sort_order"]     =   intval($item->sort_order);
+                                    $final_item["has_modifiers"]  =   ($this->model->itemHasModifiers($item->uuid)->total>0)?true:false;
                                     $final_item["image"]= $this->model->getDefaultItemImage($item->uuid);
 
                                     array_push($c['items'],$final_item);
@@ -450,11 +493,11 @@ class Moo_OnlineOrders_Restapi
                                                 $final_item['stockCount'] = ($track_stock)?"tracking_stock":"not_tracking_stock";
                                         }
                                         $final_item["uuid"]=$item->uuid;
-                                        $final_item["name"]=$item->name;
+                                        $final_item["name"]=stripslashes($item->name);
+                                        $final_item["alternate_name"]=  stripslashes($item->alternate_name);
                                         $final_item["description"]  =   stripslashes ($item->description);
                                         $final_item["price"]        =   $item->price;
                                         $final_item["price_type"]   =   $item->price_type;
-                                        $final_item["unit_name"]    =   $item->unit_name;
                                         $final_item["unit_name"]    =   $item->unit_name;
                                         $final_item["sort_order"]   =   intval($item->sort_order);
                                         $final_item["has_modifiers"]=   ($this->model->itemHasModifiers($item->uuid)->total>0)?true:false;
@@ -484,11 +527,36 @@ class Moo_OnlineOrders_Restapi
         $category = $this->model->getCategory($request["cat_id"]);
         if($category === null || $category->show_by_default != "1")
             return new WP_Error( 'category_not_found', 'Category not found', array( 'status' => 404 ) );
-        $response["uuid"] = $category->uuid;
-        $response["name"] = $category->name;
-        $response["image_url"] = $category->image_url;
 
+        $response["uuid"]           = $category->uuid;
+        $response["name"]           = stripslashes($category->name);
+        $response["alternate_name"] = stripslashes($category->alternate_name);
+        $response["description"]    = stripslashes($category->description);
+        $response["image_url"]      = $category->image_url;
         $response["items"]= array();
+
+        // Get categories times
+        if(isset($category->time_availability) && $category->time_availability === "custom") {
+            $HoursResponse = $this->api->getMerchantCustomHoursStatus("categories");
+            if( $HoursResponse ){
+                $merchantCustomHoursStatus = json_decode($HoursResponse,true);
+                $merchantCustomHours = array_keys($merchantCustomHoursStatus);
+
+                if(isset($category->custom_hours) && !empty($category->custom_hours)) {
+                    if(in_array($category->custom_hours, $merchantCustomHours)){
+                        $response["available"] = $merchantCustomHoursStatus[$category->custom_hours] === "open";
+                    } else {
+                        $response["available"] = true;
+                    }
+                }
+            } else {
+                $response["available"] = true;
+
+            }
+        } else {
+            $response["available"] = true;
+        }
+
 
         if($category->items !="") {
             $items_uuids = explode(",",$category->items);
@@ -526,21 +594,22 @@ class Moo_OnlineOrders_Restapi
                     else
                         $final_item['stockCount'] = ($track_stock)?"tracking_stock":"not_tracking_stock";
                 }
-                $final_item["uuid"]=$item->uuid;
-                $final_item["name"]=$item->name;
-                $final_item["description"]  =   stripslashes ($item->description);
-                $final_item["price"]        =   $item->price;
-                $final_item["price_type"]   =   $item->price_type;
-                $final_item["unit_name"]    =   $item->unit_name;
-                $final_item["unit_name"]    =   $item->unit_name;
-                $final_item["sort_order"]   =   intval($item->sort_order);
-                $final_item["has_modifiers"]=   ($this->model->itemHasModifiers($item->uuid)->total>0)?true:false;
-                $final_item["image"]= $this->model->getDefaultItemImage($item->uuid);
+                $final_item["uuid"]             =   $item->uuid;
+                $final_item["name"]             =   stripslashes($item->name);
+                $final_item["alternate_name"]   =   stripslashes($item->alternate_name);
+                $final_item["description"]      =   stripslashes($item->description);
+                $final_item["price"]            =   $item->price;
+                $final_item["price_type"]       =   $item->price_type;
+                $final_item["unit_name"]        =   $item->unit_name;
+                $final_item["sort_order"]       =   intval($item->sort_order);
+                $final_item["has_modifiers"]    =   ($this->model->itemHasModifiers($item->uuid)->total>0)?true:false;
+                $final_item["image"]            =   $this->model->getDefaultItemImage($item->uuid);
 
                 array_push($response['items'],$final_item);
             }
+            usort($response["items"], array('Moo_OnlineOrders_Restapi','moo_sort_items'));
+
         }
-        usort($response["items"], array('Moo_OnlineOrders_Restapi','moo_sort_items'));
         // Return all of our post response data.
         return $response;
     }
@@ -587,11 +656,11 @@ class Moo_OnlineOrders_Restapi
                     $final_item['stockCount'] = ($track_stock)?"tracking_stock":"not_tracking_stock";
             }
             $final_item["uuid"]=$item->uuid;
-            $final_item["name"]=$item->name;
-            $final_item["description"]  =   stripslashes ($item->description);
+            $final_item["name"]             =   stripslashes($item->name);
+            $final_item["alternate_name"]   =   stripslashes($item->alternate_name);
+            $final_item["description"]      =   stripslashes($item->description);
             $final_item["price"]        =   $item->price;
             $final_item["price_type"]   =   $item->price_type;
-            $final_item["unit_name"]    =   $item->unit_name;
             $final_item["unit_name"]    =   $item->unit_name;
             $final_item["sort_order"]   =   intval($item->sort_order);
             $final_item["has_modifiers"]=   ($this->model->itemHasModifiers($item->uuid)->total>0)?true:false;
@@ -645,12 +714,11 @@ class Moo_OnlineOrders_Restapi
 
 
         $response["uuid"] = $item->uuid;
-        $response["name"] = $item->name;
-        $response["uuid"] = $item->uuid;
-        $response["description"]  =   stripslashes ($item->description);
+        $response["name"]             =   stripslashes($item->name);
+        $response["alternate_name"]   =   stripslashes($item->alternate_name);
+        $response["description"]      =   stripslashes($item->description);
         $response["price"]        =   $item->price;
         $response["price_type"]   =   $item->price_type;
-        $response["unit_name"]    =   $item->unit_name;
         $response["unit_name"]    =   $item->unit_name;
         $response["modifier_groups"] = array();
         $response["images"] = array();
@@ -735,11 +803,11 @@ class Moo_OnlineOrders_Restapi
                     $final_item['stockCount'] = ($track_stock)?"tracking_stock":"not_tracking_stock";
             }
             $final_item["uuid"]=$item->uuid;
-            $final_item["name"]=$item->name;
-            $final_item["description"]  =   stripslashes ($item->description);
+            $final_item["name"]             =   stripslashes($item->name);
+            $final_item["alternate_name"]   =   stripslashes($item->alternate_name);
+            $final_item["description"]      =   stripslashes($item->description);
             $final_item["price"]        =   $item->price;
             $final_item["price_type"]   =   $item->price_type;
-            $final_item["unit_name"]    =   $item->unit_name;
             $final_item["unit_name"]    =   $item->unit_name;
             $final_item["sort_order"]   =   intval($item->sort_order);
             $final_item["has_modifiers"]=   ($this->model->itemHasModifiers($item->uuid)->total>0)?true:false;
@@ -874,6 +942,7 @@ class Moo_OnlineOrders_Restapi
             $this->session->set($cartLine,"items",$cart_line_id);
             $response = array(
                 'status'	=> 'success',
+                'line_id'	=> $cart_line_id,
                 'name'      => $item->name,
                 'nb_items'  =>$this->moo_get_nbItems_in_cart()
             );
@@ -922,7 +991,8 @@ class Moo_OnlineOrders_Restapi
     public function updateSpecialInstructionforItem( $request )
     {
         $request_body   = $request->get_body_params();
-        $line_id     = sanitize_text_field($request_body['line_id']);
+
+        $line_id        = sanitize_text_field($request_body['line_id']);
         $special_ins    = sanitize_text_field($request_body['special_ins']);
 
         if($line_id != "")
@@ -1045,7 +1115,7 @@ class Moo_OnlineOrders_Restapi
         foreach ($items as $item) {
             if($item->uuid != ""){
                 $res = $this->api->getItemWithoutSaving($item->uuid);
-                if(isset($res["id"]) && $res->id == $item["uuid"])
+                if(isset($res->id) && $res->id == $item->uuid)
                 {
                     $count++;
                     continue;
@@ -1591,7 +1661,8 @@ class Moo_OnlineOrders_Restapi
                             $data_modifier = explode( ',', $string);
                             foreach ($data_modifier as $modifier){
                                 $getModifier = $this->model->getModifier($modifier);
-                                array_push($order_item->list_modifiers,$getModifier);
+                                if($getModifier !== null)
+                                    array_push($order_item->list_modifiers,$getModifier);
                             }
                         }
                     }

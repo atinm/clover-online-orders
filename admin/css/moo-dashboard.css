@@ -40,11 +40,12 @@
     line-height: 52px!important;
     margin: 0 5px 0 0;
     padding: 5px 16px;
-    width: 30px;
+    width: 60px;
     text-align: center;
     font-size: 30px!important;
     color: #FFF;
     border-radius: 3px 0 0 3px;
+
 }
 
 .moo_dashboard_wrapper{
@@ -109,7 +110,7 @@
     margin: 0 10px 10px 0;
     float: left;
     min-height: 100px;
-    border: 10px solid #F1F1F1;
+    border: 2px solid #F1F1F1;
 }
 .moo_dashboard_addon_box_thumb {
     overflow: hidden;
@@ -197,7 +198,7 @@
     margin-bottom: 0;
     margin-top: 10px;
     display: block;
-    padding: 10px 0;
+   /* padding: 10px 0; */
     text-align: center;
     text-decoration: none;
 }
@@ -229,6 +230,15 @@
     padding: 0 .5em;
     width: 99%;
     border-radius: 3px;
+}
+.moo_dashboard_textaerea {
+    font-size: 18px!important;
+   /* line-height: 69px!important; */
+    height: 100px!important;
+    padding: 0 .5em;
+    width: 99%;
+    border-radius: 3px;
+    margin-top: 8px;
 }
 .moo_dashboard_input.small {
     width: 55px!important;

@@ -1,6 +1,9 @@
 /*
 Loader icon
  */
+#moo-search-bar-container{
+    margin-bottom: 10px;
+}
 @keyframes MooLoading {
     to {transform: rotate(360deg);}
 }
@@ -168,7 +171,7 @@ Search bar
     height: 40px;
     font-size: 14px !important;
 }
-.moo-search-bar>.action {
+.moo-search-bar .action {
     font-size: 14px;
     font-weight: 700;
     padding: 0 20px;
@@ -195,7 +198,6 @@ Search bar
 .moo-search-result
 {
     display: none;
-    width: 100%;
     border: 1px solid #e5e5e5;
     border-top: 0px;
     padding: 10px;

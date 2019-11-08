@@ -33,8 +33,7 @@ class checkoutPage
     /**
      * checkoutPage constructor.
      */
-    public function __construct()
-    {
+    public function __construct() {
         $MooOptions = (array)get_option('moo_settings');
         $this->pluginSettings = $MooOptions;
         $this->model = new moo_OnlineOrders_Model();
@@ -53,7 +52,59 @@ class checkoutPage
 
         ob_start();
         $session = MOO_SESSION::instance();
+        //check store availibilty
+
+        if(isset($this->pluginSettings['accept_orders']) && $this->pluginSettings['accept_orders'] === "disabled"){
+            if(isset($this->pluginSettings["closing_msg"]) && $this->pluginSettings["closing_msg"] !== '') {
+                $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$this->pluginSettings["closing_msg"].'</div>';
+            } else  {
+                $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">We are currently closed and will open again soon</div>';
+
+            }
+            return '<div id="moo_OnlineStoreContainer" >'.$oppening_msg.'</div>';
+        }
+
         $orderTypes = $this->model->getVisibleOrderTypes();
+        // Get ordertypes times
+        $counter = $this->model->getOrderTypesWithCustomHours();
+        if(isset($counter->nb) && $counter->nb > 0 ) {
+            $HoursResponse = $this->api->getMerchantCustomHoursStatus("ordertypes");
+            if( $HoursResponse ){
+                $merchantCustomHoursStatus = json_decode($HoursResponse,true);
+                $merchantCustomHours = array_keys($merchantCustomHoursStatus);
+            } else {
+                $merchantCustomHoursStatus = array();
+                $merchantCustomHours = array();
+            }
+        } else {
+            $merchantCustomHoursStatus = array();
+            $merchantCustomHours = array();
+        }
+
+        $nbOfOrderTypes = count($orderTypes);
+        $nbOfUnvailableOrderTypes = null;
+        if(@count($merchantCustomHours) > 0 && $nbOfOrderTypes > 0){
+            $nbOfUnvailableOrderTypes = 0;
+            for($i=0;$i<$nbOfOrderTypes;$i++) {
+                $orderType  = $orderTypes[$i];
+                $orderTypes[$i]->available = true;
+                if(isset($orderType->custom_hours) && !empty($orderType->custom_hours)) {
+                    if(in_array($orderType->custom_hours, $merchantCustomHours)){
+                        $isNotAvailable = $merchantCustomHoursStatus[$orderType->custom_hours] === "close";
+                        if ($isNotAvailable){
+                            //unset($orderTypes[$i]);
+                            $orderTypes[$i]->available = false;
+                            $nbOfUnvailableOrderTypes++;
+                        }
+                    }
+                }
+            }
+        }
+
+        if($nbOfOrderTypes === $nbOfUnvailableOrderTypes ){
+            echo '<div id="moo_checkout_msg">This store cannot accept orders right now, please come back later</div>';
+            return ob_get_clean();
+        }
 
         if($this->pluginSettings['scp'] == "on") {
             $cloverKey = array();
@@ -92,53 +143,37 @@ class checkoutPage
         };
 
         if($this->pluginSettings["order_later"] == "on") {
-            $inserted_nb_days = intval($this->pluginSettings["order_later_days"]);
-            $inserted_nb_mins = intval($this->pluginSettings["order_later_minutes"]);
+            $inserted_nb_days = $this->pluginSettings["order_later_days"];
+            $inserted_nb_mins = $this->pluginSettings["order_later_minutes"];
 
-            $inserted_nb_days_d = intval($this->pluginSettings["order_later_days_delivery"]);
-            $inserted_nb_mins_d = intval($this->pluginSettings["order_later_minutes_delivery"]);
+            $inserted_nb_days_d = $this->pluginSettings["order_later_days_delivery"];
+            $inserted_nb_mins_d = $this->pluginSettings["order_later_minutes_delivery"];
 
-            if($this->pluginSettings["order_later_days"] === "")
-            {
+            if($inserted_nb_days === "") {
                 $nb_days = 4;
-            }
-            else
-            {
-                if($inserted_nb_days === 0)
-                    $nb_days = 1;
-                else
-                    $nb_days = ($inserted_nb_days>0)?$inserted_nb_days:4;
+            } else {
+                $nb_days = intval($inserted_nb_days);
             }
 
-            if($inserted_nb_mins != "")
-            {
-                $nb_minutes = ($inserted_nb_mins>0)?$inserted_nb_mins:20;
-            }
-            else
+            if($inserted_nb_mins === "") {
                 $nb_minutes = 20;
+            } else {
+                $nb_minutes = intval($inserted_nb_mins);
+            }
 
-            if($this->pluginSettings["order_later_days_delivery"] === "")
-            {
+            if( $inserted_nb_days_d === "") {
                 $nb_days_d = 4;
-            }
-            else
-            {
-                if($inserted_nb_days_d == 0)
-                    $nb_days_d = 1;
-                else
-                    $nb_days_d = ($inserted_nb_days_d>0)?$inserted_nb_days_d:4;
+            } else {
+                $nb_days_d = intval($inserted_nb_days_d);
             }
 
-            if($inserted_nb_mins_d != "")
-            {
-                $nb_minutes_d = ($inserted_nb_mins_d>0)?$inserted_nb_mins_d:60;
-            }
-            else
+            if($inserted_nb_mins_d === "") {
                 $nb_minutes_d = 60;
+            } else {
+                $nb_minutes_d = intval($inserted_nb_mins_d);
+            }
 
-        }
-        else
-        {
+        } else {
             $nb_days = 0;
             $nb_minutes = 0;
             $nb_days_d = 0;
@@ -147,7 +182,6 @@ class checkoutPage
 
 
         $oppening_status = json_decode($this->api->getOpeningStatus($nb_days,$nb_minutes));
-
         if($nb_days != $nb_days_d || $nb_minutes != $nb_minutes_d)
             $oppening_status_d = json_decode($this->api->getOpeningStatus($nb_days_d,$nb_minutes_d));
         else
@@ -165,10 +199,6 @@ class checkoutPage
                     $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Online Ordering Currently Closed'.(($this->pluginSettings['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: green'>Order in Advance Available</p>":"").'</div>';
             }
         }
-
-
-
-
 
         //Adding asap to pickup time
         if(isset($oppening_status->pickup_time))
@@ -258,7 +288,7 @@ class checkoutPage
         ?>
 
         <div id="moo_OnlineStoreContainer">
-            <?php echo $oppening_msg?>
+            <?php echo $oppening_msg; ?>
             <div id="moo_merchantmap">
             </div>
             <div class="moo-row" id="moo-checkout">
@@ -301,7 +331,7 @@ class checkoutPage
                                             <span class="span-or">or</span>
                                         </div>
                                         <a  class="moo-btn moo-btn-danger" onclick="moo_loginAsguest(event)">
-                                            Login As Guest
+                                            Continue As Guest
                                         </a>
                                     </div>
                                 </div>
@@ -313,7 +343,7 @@ class checkoutPage
                                 </p>
                                 <div class="moo-row">
                                     <div class="moo-col-xs-8 moo-col-sm-6 moo-col-md-6 moo-col-md-offset-3 moo-col-sm-offset-3 moo-col-xs-offset-2">
-                                        <a href="#" class="moo-btn moo-btn-lg moo-btn-primary moo-btn-block" onclick="moo_loginAsguest(event)" style="margin-top: 12px;"> Login As Guest</a>
+                                        <a href="#" class="moo-btn moo-btn-lg moo-btn-primary moo-btn-block" onclick="moo_loginAsguest(event)" style="margin-top: 12px;"> Continue As Guest</a>
                                     </div>
                                     <div class="moo-col-xs-12 moo-col-sm-6 moo-col-md-8 moo-col-md-offset-2">
                                         <div class="login-or">
@@ -408,7 +438,7 @@ class checkoutPage
                         <a class="MooSimplButon" href="#" onclick="moo_show_form_adding_address()">Add Another Address</a>
                         <a class="MooSimplButon" href="#" onclick="moo_pickup_the_order(event)">Click here if this Order is for Pick Up</a>
                     </div>
-                    <a href="?logout=true">Logout</a>
+                    <a class="moologoutlabel" href="?logout=true">Logout</a>
                 </div>
                 <!--            Add new address      -->
                 <div id="moo-addaddress-form" class="moo-col-md-12">
@@ -497,10 +527,17 @@ class checkoutPage
                                 <div class="moo-checkout-bloc-content">
                                     <?php
                                     foreach ($orderTypes as $ot) {
-                                        echo '<div class="moo-checkout-form-ordertypes-option">';
-                                        echo '<input class="moo-checkout-form-ordertypes-input" type="radio" name="ordertype" value="'.$ot->ot_uuid.'" id="moo-checkout-form-ordertypes-'.$ot->ot_uuid.'">';
-                                        echo '<label for="moo-checkout-form-ordertypes-'.$ot->ot_uuid.'" style="display: inline;margin-left:15px">'.$ot->label.'</label></div>';
-                                    }
+                                        if(isset($ot->available) && $ot->available === false){
+                                            echo '<div class="moo-checkout-form-ordertypes-option">';
+                                            echo '<input class="moo-checkout-form-ordertypes-input" type="radio" name="ordertype" value="'.$ot->ot_uuid.'" id="moo-checkout-form-ordertypes-'.$ot->ot_uuid.'" disabled>';
+                                            echo '<label for="moo-checkout-form-ordertypes-'.$ot->ot_uuid.'" style="display: inline;margin-left:15px">'.stripslashes($ot->label).' ( '.stripslashes($ot->custom_message).' )</label></div>';
+
+                                        } else {
+                                            echo '<div class="moo-checkout-form-ordertypes-option">';
+                                            echo '<input class="moo-checkout-form-ordertypes-input" type="radio" name="ordertype" value="'.$ot->ot_uuid.'" id="moo-checkout-form-ordertypes-'.$ot->ot_uuid.'">';
+                                            echo '<label for="moo-checkout-form-ordertypes-'.$ot->ot_uuid.'" style="display: inline;margin-left:15px">'.stripslashes($ot->label).'</label></div>';
+                                        }
+                                      }
                                     ?>
                                 </div>
                                 <div class="moo-checkout-bloc-message" id="moo-checkout-form-ordertypes-message">
@@ -688,7 +725,7 @@ class checkoutPage
                                         Special instructions
                                     </div>
                                     <div class="moo-checkout-bloc-content">
-                                        <textarea cols="100%" rows="5" id="Mooinstructions"></textarea>
+                                        <textarea class="moo-form-control" cols="100%" rows="5" id="Mooinstructions"></textarea>
                                         <?php
                                         if(isset($this->pluginSettings['text_under_special_instructions']) && $this->pluginSettings['text_under_special_instructions']!=='') {
                                             echo $this->pluginSettings['text_under_special_instructions'];
@@ -937,6 +974,7 @@ class checkoutPage
 
         return ob_get_clean();
     }
+
     private function enqueueStyles(){
 
         wp_enqueue_style( 'moo-font-awesome' );

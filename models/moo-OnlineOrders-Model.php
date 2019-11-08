@@ -186,6 +186,11 @@ class Moo_OnlineOrders_Model {
     {
         return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_modifier_group WHERE uuid in (SELECT group_id from {$this->db->prefix}moo_modifier) ORDER BY `sort_order`,name ASC");
     }
+    function getAllModifiersGroupByItem($uuid)
+    {
+        $item_uuid = esc_sql($uuid);
+        return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_modifier_group WHERE uuid in (SELECT group_id from {$this->db->prefix}moo_item_modifier_group where item_id = '{$item_uuid}') ORDER BY `sort_order`,name ASC");
+    }
     function getAllModifiers($uuid_group)
     {
         $uuid_group = esc_sql($uuid_group);
@@ -214,8 +219,7 @@ class Moo_OnlineOrders_Model {
                                     WHERE mg.uuid = '{$uuid}'
                                     ");
     }
-    function getItemModifiersGroupsRequired($uuid)
-    {
+    function getItemModifiersGroupsRequired($uuid) {
         $uuid = esc_sql($uuid);
 
         return $this->db->get_results("SELECT mg.uuid
@@ -227,8 +231,7 @@ class Moo_OnlineOrders_Model {
 				                    AND mg.show_by_default = 1
                                     ");
     }
-    function getModifier($uuid)
-    {
+    function getModifier($uuid) {
         $uuid = esc_sql($uuid);
 
         return $this->db->get_row("SELECT *
@@ -236,39 +239,33 @@ class Moo_OnlineOrders_Model {
                                         WHERE m.uuid = '{$uuid}'
                                         ");
     }
-function getItemsWithVariablePrice()
-{
-    return $this->db->get_results("SELECT *
-                                    FROM `{$this->db->prefix}moo_item` 
-                                    WHERE price_type = 'VARIABLE'
-                                    ");
-}
+    function getItemsWithVariablePrice() {
+        return $this->db->get_results("SELECT *
+                                        FROM `{$this->db->prefix}moo_item` 
+                                        WHERE price_type = 'VARIABLE'
+                                        ");
+    }
     function getOrderTypes()
     {
         return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_order_types order by sort_order,status,label");
     }
-    function getOneOrderTypes($uuid)
-    {
+    function getOneOrderTypes($uuid) {
         $uuid = esc_sql($uuid);
         return $this->db->get_row("SELECT * FROM {$this->db->prefix}moo_order_types where ot_uuid='{$uuid}'");
     }
-    function getOneOrder($orderId)
-    {
+    function getOneOrder($orderId) {
         $orderId = esc_sql($orderId);
         return $this->db->get_row("SELECT * FROM {$this->db->prefix}moo_order where uuid='".$orderId."'");
     }
-    function getItemsOrder($uuid)
-    {
+    function getItemsOrder($uuid) {
         $uuid = esc_sql($uuid);
         return $this->db->get_results("SELECT IO.* ,I.* FROM {$this->db->prefix}moo_item_order IO ,{$this->db->prefix}moo_item I WHERE I.uuid = IO.item_uuid and IO.order_uuid = '$uuid' ORDER BY IO.`_id` DESC");
     }
-    function getVisibleOrderTypes()
-    {
+    function getVisibleOrderTypes() {
         return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_order_types where status=1 order by sort_order,label");
     }
 
-    function updateOrderTypes($uuid,$status)
-    {
+    function updateOrderTypes($uuid,$status) {
         $uuid = esc_sql($uuid);
         $st = ($status == "true")? 1:0;
 
@@ -304,22 +301,30 @@ function getItemsWithVariablePrice()
             return false;
         }
     }
-    function updateOrderType($uuid,$name,$enable,$taxable,$type,$minAmount)
+    function updateOrderType($uuid,$name,$enable,$taxable,$type,$minAmount,$availabilityTime,$availabilityCustomTime,$useCoupons,$customMessage)
     {
         $uuid = esc_sql($uuid);
-        $label = esc_sql($name);
+       // $label = esc_sql($name);
         $taxable = esc_sql($taxable);
         $status = esc_sql($enable);
         $type = esc_sql($type);
         $minAmount = esc_sql($minAmount);
+        $availabilityTime = esc_sql($availabilityTime);
+        $availabilityCustomTime = esc_sql($availabilityCustomTime);
+        $useCoupons = esc_sql($useCoupons);
+       // $customMessage = esc_sql($customMessage);
 
         return $this->db->update("{$this->db->prefix}moo_order_types",
             array(
-                'label' => $label,
+                'label' => $name,
                 'taxable' => $taxable,
                 'status' => $status,
                 'minAmount' => $minAmount,
                 'show_sa' => $type,
+                'time_availability' => $availabilityTime,
+                'custom_hours' => $availabilityCustomTime,
+                'use_coupons' => $useCoupons,
+                'custom_message' => $customMessage,
             ),
             array( 'ot_uuid' => $uuid )
         );
@@ -401,8 +406,8 @@ function getItemsWithVariablePrice()
         if ($res > 0) return true;
         return false;
     }
-    function ChangeCategoryName($cat_uuid,$name)
-    {
+
+    function ChangeCategoryName($cat_uuid,$name) {
         $uuid = esc_sql($cat_uuid);
         $name = esc_sql($name);
         return $this->db->update("{$this->db->prefix}moo_category",
@@ -413,8 +418,7 @@ function getItemsWithVariablePrice()
         );
 
     }
-    function UpdateCategoryStatus($cat_uuid,$status)
-    {
+    function UpdateCategoryStatus($cat_uuid,$status) {
         $uuid = esc_sql($cat_uuid);
         $st = ($status == "true")? 1:0;
 
@@ -426,15 +430,13 @@ function getItemsWithVariablePrice()
         );
 
     }
-    function moo_DeleteOrderType($uuid)
-    {
+    function moo_DeleteOrderType($uuid) {
         $uuid = esc_sql($uuid);
         return $this->db->delete("{$this->db->prefix}moo_order_types",
                                 array( 'ot_uuid' => $uuid )
         );
     }
-    function deleteCategory($uuid)
-    {
+    function deleteCategory($uuid) {
         $uuid = esc_sql($uuid);
         return $this->db->delete("{$this->db->prefix}moo_category",
                                 array( 'uuid' => $uuid )
@@ -710,14 +712,13 @@ function getItemsWithVariablePrice()
            return false;
        }
     }
-    function saveItemDescription($uuid,$description)
-    {
+    function saveItemDescription($uuid,$description) {
         $uuid = esc_sql($uuid);
         $this->db->update("{$this->db->prefix}moo_item", array('description' => $description), array( 'uuid' => $uuid ));
         return true;
     }
 
-    function reOrderItems($tab){
+    function reOrderItems($tab) {
         $compteur = 0;
         foreach ($tab as $key => $value) {
             $this->db->update("{$this->db->prefix}moo_item",
@@ -730,7 +731,7 @@ function getItemsWithVariablePrice()
         return $compteur;
     }
 
-    function saveImageCategory($uuid,$image){
+    function saveImageCategory($uuid,$image) {
         $uuid = esc_sql($uuid);
         $image = esc_sql($image);
 
@@ -741,8 +742,7 @@ function getItemsWithVariablePrice()
             array( 'uuid' => $uuid )
         );
     }
-    function saveNewCategoriesorder($tab)
-    {
+    function saveNewCategoriesorder($tab) {
         $compteur = 0;
         //Get the number of categories to compare it with the categories that are changed
 
@@ -772,8 +772,7 @@ function getItemsWithVariablePrice()
 
     }
 
-    function moo_DeleteImgCategorie($uuid)
-    {
+    function moo_DeleteImgCategorie($uuid) {
         $uuid = esc_sql($uuid);
         return $this->db->update("{$this->db->prefix}moo_category",
             array(
@@ -784,8 +783,7 @@ function getItemsWithVariablePrice()
 
     }
 
-    function moo_UpdateNameCategorie($uuid,$newName)
-    {
+    function moo_UpdateNameCategorie($uuid,$newName) {
         $uuid = esc_sql($uuid);
         return $this->db->update("{$this->db->prefix}moo_category",
             array(
@@ -795,8 +793,52 @@ function getItemsWithVariablePrice()
         );
 
     }
+    function updateCategoryNameAndDescription($uuid,$newName,$newDescription) {
+        $uuid           = esc_sql($uuid);
+        $newName        = esc_sql($newName);
+        $newDescription = esc_sql($newDescription);
+        $data = array();
+        if(!empty($newName)){
+            $data['alternate_name'] = $newName;
+        }
+        if(!empty($newDescription)){
+            $data['description'] = $newDescription;
+        }
 
-    function saveNewOrderGroupModifier($tab){
+        return $this->db->update("{$this->db->prefix}moo_category",
+            $data,
+            array( 'uuid' => $uuid )
+        );
+
+    }
+    function updateCategoryTime($uuid,$status,$hour) {
+        $uuid           = esc_sql($uuid);
+        $status        = esc_sql($status);
+        $hour = esc_sql($hour);
+        $data = array();
+        if(!empty($status)){
+            $data['time_availability'] = $status;
+        }
+        if(isset($hour) && !empty($hour) ){
+            $data['custom_hours'] = $hour;
+        }
+
+        return $this->db->update("{$this->db->prefix}moo_category",
+            $data,
+            array( 'uuid' => $uuid )
+        );
+
+    }
+    function getCategoriesWithCustomHours()
+    {
+        return $this->db->get_row("SELECT count(*) as nb FROM {$this->db->prefix}moo_category where  time_availability = 'custom' and custom_hours != '' ");
+    }
+    function getOrderTypesWithCustomHours()
+    {
+        return $this->db->get_row("SELECT count(*) as nb FROM {$this->db->prefix}moo_order_types where  time_availability = '1' and custom_hours != '' ");
+    }
+
+    function saveNewOrderGroupModifier($tab) {
         $compteur = 0;
         //Get the number of categories to compare it with the categories that are changed
         $group_number = $this->NbGroupModifier();

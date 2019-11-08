@@ -131,12 +131,13 @@ if(!MooPhoneVerificationActivated) {
 
 function moo_OrderTypeChanged(OrderTypeID)
 {
-    if(!(typeof moo_OrderTypes === 'undefined'))
+    if(!(typeof moo_OrderTypes === 'undefined')) {
         for(i in moo_OrderTypes)
         {
             if(OrderTypeID == moo_OrderTypes[i].ot_uuid)
             {
                 var selectedOrderType = moo_OrderTypes[i];
+
                 if(selectedOrderType.show_sa == "1") //The order type is delivery type
                 {
                     MooIsDeliveryOrder = true;
@@ -214,23 +215,44 @@ function moo_OrderTypeChanged(OrderTypeID)
                     }
                 }
 
-                if(selectedOrderType.taxable == "1")
+                if(selectedOrderType.taxable == "1") {
                     MooOrderTypeIsTaxable = true;
-                else
+                } else {
                     MooOrderTypeIsTaxable = false;
+                }
 
-                if(selectedOrderType.minAmount != "0")
+                if(selectedOrderType.minAmount != "0") {
                     MooOrderTypeMinAmount = selectedOrderType.minAmount;
-                else
+                } else {
                     MooOrderTypeMinAmount = 0;
+                }
+                if(selectedOrderType.use_coupons == "0") {
+                    // MooOrderTypeMinAmount = selectedOrderType.minAmount;
+                    jQuery("#moo-checkout-form-coupon").hide();
+                    jQuery
+                        .post(moo_params.ajaxurl,{'action':'moo_coupon_remove'}, function (data) {
+                            if(data.status=="success")
+                            {
+                                moo_Total = data.total;
+                                jQuery("#moo_remove_coupon_code").html("");
+                                jQuery('#moo_coupon').val('');
+                                jQuery("#moo_enter_coupon").show();
+                                jQuery("#moo_remove_coupon").hide();
+                                moo_update_totals();
+                            }
+                        })
+                } else {
+                    jQuery("#moo-checkout-form-coupon").show();
+                }
+
 
                 moo_update_totals();
             }
         }
+    }
 }
 
-function  moo_tips_select_changed()
-{
+function  moo_tips_select_changed() {
     var tips_select_percent = jQuery('#moo_tips_select').val();
     if(tips_select_percent != "cash" && tips_select_percent != 'other')
         jQuery('#moo_tips').val((moo_Total.sub_total*tips_select_percent/100).toFixed(2));
@@ -407,11 +429,13 @@ function moo_ChangeOrderDate(type)
 
     if(type == 'pickup' )
     {
+        if(!moo_pickup_time){
+            return;
+        }
         var first = true;
         for(var i in moo_pickup_time)
         {
-            if(first)
-            {
+            if(first) {
                 theDay = i;
                 first = false;
             }
@@ -419,9 +443,10 @@ function moo_ChangeOrderDate(type)
         }
         var times = moo_pickup_time[theDay];
 
-    }
-    else
-    {
+    } else {
+        if(!moo_pickup_time_for_delivery){
+            return;
+        }
         var first = true;
         for(var i in moo_pickup_time_for_delivery)
         {
@@ -450,10 +475,9 @@ function moo_ChangeOrderDate(type)
 
 function moo_order_approved(orderId)
 {
-    if(moo_thanks_page != '' && moo_thanks_page != null )
+    if(moo_thanks_page != '' && moo_thanks_page != null ) {
         window.location.href = moo_thanks_page+'?order_id='+orderId;
-    else
-    {
+    } else {
         if(orderId == '')
             html = '<div align="center" class="moo-alert moo-alert-success" role="alert" style="font-size: 20px;">Thank you for your order<br/>Your order is being prepared</div>';
         else
@@ -614,14 +638,13 @@ function moo_show_chooseaddressform(e)
 
                     if(cards!= null && cards.length > 0)
                         mooShowSavedCards(cards);
-                }
-                else
-                if(data.status = 'expired')
-                {
-                    MooCustomerAddress = null;
-                    MooCustomer = null;
-                    swal({ title: "Your session is expired", type: "error",timer:5000,   confirmButtonText: "Login again" });
-                    moo_show_loginform();
+                } else {
+                    if(data.status == 'expired') {
+                        MooCustomerAddress = null;
+                        MooCustomer = null;
+                        swal({ title: "Your session is expired", type: "error",timer:5000,   confirmButtonText: "Login again" });
+                        moo_show_loginform();
+                    }
                 }
             })
             .fail(function(data) {
@@ -901,20 +924,16 @@ function moo_addAddress(e)
         {
             jQuery
                 .post(moo_params.ajaxurl,{'action':'moo_customer_addAddress','address':address.address,'line2':address.line2,'city':address.city,'state':address.state,'zipcode':address.zipcode,"lat":address.lat,"lng":address.lng}, function (data) {
-                    if(data.status == 'failure' || data.status == 'expired')
-                    {
+                    if(data.status == 'failure' || data.status == 'expired') {
                         swal({ title: "Your session has been expired",text:"Please login again",   type: "error",   confirmButtonText: "Login again" });
                         moo_show_loginform();
                         jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
                     }
                     else
-                        if(data.status == 'success')
-                        {
+                        if(data.status == 'success') {
                             moo_show_chooseaddressform(e);
                             jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
-                        }
-                        else
-                        {
+                        } else {
                             swal({ title: "Address not added to your account",text:"Please try again or contact us",   type: "error",   confirmButtonText: "Try again" });
                             jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
                         }
@@ -1382,7 +1401,10 @@ function mooCouponApply(e)
 }
 function mooCouponRemove(e)
 {
-    e.preventDefault();
+    if(e){
+        e.preventDefault();
+    }
+
     swal({
         title:'Removing your coupon....',
         showConfirmButton:false

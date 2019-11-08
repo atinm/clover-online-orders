@@ -147,3 +147,10 @@ div.list_itemsOrder {
 	width: 80% !important;
 	float: inherit !important;
 }
+#MooPanel_main #MooPanel_tabContent6 .moo_ModifierGroupsFilter .modifierFilter{
+	width: 100%;
+	margin-top: 5px;
+}
+.label_Torder{
+	width: auto;
+}

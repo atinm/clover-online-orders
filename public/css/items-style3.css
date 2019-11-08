@@ -42,8 +42,17 @@
 .moo_category_flip  a
 {
    color: #000000;
+    text-decoration: none;
 
-}.moo_category_flip a:link
+}
+#moo_OnlineStoreContainer .moo_categories  a
+{
+   color: #000000;
+    text-decoration: none;
+
+}
+
+.moo_category_flip a:link
 {
     text-decoration: none;
 
@@ -226,7 +235,6 @@
 {
     color: #000000;
 }
-/* ---------- badr update ----------- */
 .moo_category_flip .moo_image{
     position: absolute;
     color: #ffffff;

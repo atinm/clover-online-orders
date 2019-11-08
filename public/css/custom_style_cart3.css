@@ -89,7 +89,7 @@
 }
 .moo-product .moo-product-details .moo-product-title {
     margin-right: 20px;
-    font-family: "HelveticaNeue-Medium", "Helvetica Neue Medium";
+    font-family: "HelveticaNeue-Medium", "Helvetica Neue Medium", sans-serif;
     font-size: 18px;
 
 }
@@ -102,12 +102,12 @@
     padding: 2px;
     background-color: #f5f5f5;
 }
-.moo-product .moo-remove-product {
+.moo-shopping-cart-container .moo-shopping-cart .moo-product .moo-remove-product {
     border: 0;
     padding: 4px 8px;
     background-color: #c66;
     color: #fff !important;
-    font-family: "HelveticaNeue-Medium", "Helvetica Neue Medium";
+    font-family: "HelveticaNeue-Medium", "Helvetica Neue Medium", sans-serif;
     font-size: 12px;
     border-radius: 3px;
     text-decoration: none;

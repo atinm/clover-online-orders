@@ -5,25 +5,30 @@ class Moo_OnlineOrders_CallAPI
 
     public $Token;
     public $url_api;
+    public $hours_url_api;
     private $debugMode = false;
     private $isSandbox = false;
     private $session;
 
-    function __construct()
-    {
-        $MooSettings = (array)get_option("moo_settings");
+    function __construct() {
+        $this->getApiKey();
+        if ($this->isSandbox) {
+            $this->url_api = "http://api-sandbox.smartonlineorders.com/";
+            //$this->url_api = "http://localhost/api/";
+        } else {
+            $this->url_api = "http://api.smartonlineorders.com/";
+        }
+        $this->hours_url_api = "https://smh.smartonlineorder.com/v1/api/";
+        $this->session = MOO_SESSION::instance();
 
+    }
+    function getApiKey() {
+        $MooSettings = (array)get_option("moo_settings");
         if (isset($MooSettings['api_key'])) {
             $this->Token = $MooSettings['api_key'];
         } else {
             $this->Token = '';
         }
-        if ($this->isSandbox) {
-            $this->url_api = "http://api-sandbox.smartonlineorders.com/";
-        } else {
-            $this->url_api = "http://api.smartonlineorders.com/";
-        }
-        $this->session = MOO_SESSION::instance();
 
     }
 
@@ -101,7 +106,7 @@ class Moo_OnlineOrders_CallAPI
 
     public function getModifiers()
     {
-        $res = $this->callApi("modifiers", $this->Token);
+        $res = json_decode($this->callApi("modifiers", $this->Token));
         if ($res) {
             $saved = $this->save_modifiers($res);
             return "$saved modifier saved in your DB";
@@ -297,10 +302,11 @@ class Moo_OnlineOrders_CallAPI
 
     }
 
-    public function getModifiersWithoutSavingPage2()
-    {
+    public function getModifiersWithoutSavingPage2(){
         return $this->callApi("modifiers_page2", $this->Token);
-
+    }
+    public function getModifiersWithoutSavingPage3(){
+        return $this->callApi("modifiers_page3", $this->Token);
     }
 
     public function updateOrderNote($orderId, $note)
@@ -423,7 +429,7 @@ class Moo_OnlineOrders_CallAPI
 
     public function moo_CustomerFbLogin($options)
     {
-        $urlOptions = $this->$this->stringify($options);
+        $urlOptions = $this->stringify($options);
         return $this->callApi_Post('customers/fblogin', $this->Token, $urlOptions);
     }
 
@@ -517,7 +523,8 @@ class Moo_OnlineOrders_CallAPI
 
     public function deleteCoupon($code)
     {
-        return $this->callApi_Post('/coupons/' . $code . '/remove', $this->Token);
+        $code = urlencode($code);
+        return $this->callApi_Post('/coupons/' . $code . '/remove', $this->Token,"");
     }
 
     public function enableCoupon($code, $status)
@@ -563,7 +570,7 @@ class Moo_OnlineOrders_CallAPI
     {
         if ($uuid == "")
             return false;
-        return json_decode($this->callApi("items/" . $uuid, $this->Token),true);
+        return json_decode($this->callApi("items/" . $uuid, $this->Token));
     }
 
     function getCategoryWithoutSaving($uuid)
@@ -607,7 +614,7 @@ class Moo_OnlineOrders_CallAPI
     public function delete_item($uuid) {
         if ($uuid == "") return;
         global $wpdb;
-        //$wpdb->show_errors();
+        $wpdb->hide_errors();
         $wpdb->query('START TRANSACTION');
 
         $wpdb->delete("{$wpdb->prefix}moo_item_tax_rate", array('item_uuid' => $uuid));
@@ -616,6 +623,7 @@ class Moo_OnlineOrders_CallAPI
         $wpdb->delete("{$wpdb->prefix}moo_images", array('item_uuid' => $uuid));
 
         //TODO : delete all attribute and options if it is the only item in the group_item
+
         $res = $wpdb->delete("{$wpdb->prefix}moo_item", array('uuid' => $uuid));
         if ($res) {
             $wpdb->query('COMMIT'); // if the item Inserted in the DB
@@ -830,6 +838,7 @@ class Moo_OnlineOrders_CallAPI
             if ($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_modifier_group where  uuid='{$modifier_group->id}'") == 0) {
                 $this->getOneModifierGroups($modifier_group->id);
             }
+
             if ($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_item_modifier_group where item_id = '{$item->id}' and group_id='{$modifier_group->id}'") == 0) {
                 $wpdb->insert("{$wpdb->prefix}moo_item_modifier_group", array(
                     'group_id' => $modifier_group->id,
@@ -876,8 +885,8 @@ class Moo_OnlineOrders_CallAPI
     public function update_item($item) {
         global $wpdb;
         $wpdb->query('START TRANSACTION');
+         //$wpdb->show_errors();
 
-        // $wpdb->show_errors();
         /*
          * I verify if the Item is already in Wordpress DB and if it's up to date
          */
@@ -904,7 +913,8 @@ class Moo_OnlineOrders_CallAPI
                 'modified_time' => $item->modifiedTime,
             ), array('uuid' => $item->id));
             //var_dump($res1);
-            if ($res1 >= 0) $res1 = true;
+            if ($res1 >= 0)
+                $res1 = true;
         } else {
             $item_To_Add = array(
                 'uuid' => $item->id,
@@ -926,10 +936,10 @@ class Moo_OnlineOrders_CallAPI
 
             $res1 = $wpdb->insert("{$wpdb->prefix}moo_item", $item_To_Add);
         }
-
         //save the taxes rates
         if(isset($item->taxRates) && isset($item->taxRates->elements) && count($item->taxRates->elements)>0) {
             foreach ($item->taxRates->elements as $tax_rate) {
+
                 if ($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_tax_rate where uuid='{$tax_rate->id}'") == 0) {
                     $table = array('elements' => array($tax_rate));
                     $this->save_tax_rates(json_encode($table));
@@ -946,7 +956,7 @@ class Moo_OnlineOrders_CallAPI
         //save modifierGroups
         if(isset($item->modifierGroups) && isset($item->modifierGroups->elements) && count($item->modifierGroups->elements)>0) {
             foreach ($item->modifierGroups->elements as $modifier_group) {
-                if ($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_modifier_group where  uuid='{$modifier_group->id}'") == 0) {
+                if ($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_modifier_group where uuid='{$modifier_group->id}'") == 0) {
                     $this->getOneModifierGroups($modifier_group->id);
                 }
                 $wpdb->insert("{$wpdb->prefix}moo_item_modifier_group", array(
@@ -1013,7 +1023,8 @@ class Moo_OnlineOrders_CallAPI
                 'items' => $items_ids
             ));
 
-        if ($res > 0) return true;
+        if ($res > 0)
+            return true;
         return false;
     }
 
@@ -1045,8 +1056,7 @@ class Moo_OnlineOrders_CallAPI
         return false;
     }
 
-    public function update_modifier($modifier)
-    {
+    public function update_modifier($modifier) {
         global $wpdb;
         $wpdb->hide_errors();
 
@@ -1071,8 +1081,7 @@ class Moo_OnlineOrders_CallAPI
         return false;
     }
 
-    public function update_taxRate($tax)
-    {
+    public function update_taxRate($tax) {
         global $wpdb;
         if ($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_tax_rate where uuid='{$tax->id}'") > 0)
             $res = $wpdb->update("{$wpdb->prefix}moo_tax_rate", array(
@@ -1092,8 +1101,7 @@ class Moo_OnlineOrders_CallAPI
         return false;
     }
 
-    public function update_orderType($orderType)
-    {
+    public function update_orderType($orderType) {
         global $wpdb;
         if ($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}moo_order_types where ot_uuid='{$orderType->id}'") > 0)
             $res = $wpdb->update("{$wpdb->prefix}moo_order_types", array(
@@ -1123,24 +1131,20 @@ class Moo_OnlineOrders_CallAPI
      * @param : the merchant email
      * @param : the customer email
      */
-    public function sendOrderEmails($order_id, $merchant_emails, $customer_email)
-    {
+    public function sendOrderEmails($order_id, $merchant_emails, $customer_email) {
         return $this->callApi_Post("send_order_emails", $this->Token, "order_id=" . $order_id . "&merchant_emails=" . urlencode($merchant_emails) . "&customer_email=" . urlencode($customer_email));
     }
 
-    public function checkToken()
-    {
+    public function checkToken() {
         $url = "checktoken";
         return $this->callApi($url, $this->Token);
     }
 
-    public function checkIpBlackListed()
-    {
+    public function checkIpBlackListed() {
         return $this->checkIP($this->Token);
     }
 
-    public function getOrderDetails($order)
-    {
+    public function getOrderDetails($order) {
         $result = array();
         $url = 'orders/' . $order->uuid;
         $orderFromServer = json_decode($this->callApi($url, $this->Token));
@@ -1489,14 +1493,14 @@ class Moo_OnlineOrders_CallAPI
         // $wpdb->show_errors();
         $wpdb->hide_errors();
         $count = 0;
-        foreach (json_decode($obj)->elements as $modifier) {
+       // var_dump($obj);
+        foreach ($obj->elements as $modifier) {
             $wpdb->insert("{$wpdb->prefix}moo_modifier", array(
                 'uuid' => $modifier->id,
                 'name' => $modifier->name,
-                'alternate_name' => $modifier->alternateName,
+                'alternate_name' => (isset($modifier->alternateName))?$modifier->alternateName:"",
                 'price' => $modifier->price,
                 'group_id' => $modifier->modifierGroup->id,
-
             ));
 
             if ($wpdb->insert_id != 0) $count++;
@@ -1672,6 +1676,21 @@ class Moo_OnlineOrders_CallAPI
         return $res;
     }
 
+    //Hours endpoints
+
+    //get hour
+    public function getMerchantCustomHours($type){
+        $url = $this->hours_url_api."hours?type=".$type;
+        $response = $this->apiGet($url);
+        return $response;
+    }
+    public function getMerchantCustomHoursStatus($type){
+        $url = $this->hours_url_api."hours/check?type=".$type;
+        $response = $this->apiGet($url);
+        return $response;
+    }
+
+
     public function goToReports()
     {
         $dashboard_url = admin_url('/admin.php?page=moo_index');
@@ -1689,7 +1708,6 @@ class Moo_OnlineOrders_CallAPI
 
     private function checkIP($accesstoken)
     {
-
         $headr = array();
         $headr[] = 'Accept: application/json';
         $headr[] = 'X-Authorization: ' . $accesstoken;
@@ -1781,4 +1799,59 @@ class Moo_OnlineOrders_CallAPI
     }
 
 
+    /**
+     * To send post requests to Smart Online Order api
+     * @param $url
+     * @param $data
+     * @return bool|mixed
+     */
+    private function apiPost($url, $data) {
+        $args = array(
+            "headers" => array(
+                "Accept"=>"application/json",
+                "X-Authorization"=>$this->Token,
+            ),
+            "body" => $data
+        );
+        $response = wp_remote_post($url,$args);
+
+        if(is_wp_error( $response )){
+            if($this->debugMode){
+                echo $response->get_error_message();
+            }
+            return false;
+        }
+
+        if ( is_array( $response ) ) {
+            if($response["response"]["code"] === 200)
+                return $response['body'];
+        }
+        return false;
+    }
+    /**
+     * To send get request to our Zaytech API
+     * @param $url
+     * @return bool|array
+     */
+    private function apiGet($url) {
+        $args = array(
+            "headers"=> array(
+                "Accept"=>"application/json",
+                "X-Authorization"=>$this->Token,
+            )
+        );
+        $response = wp_remote_get($url,$args);
+        if(is_wp_error( $response )){
+            if($this->debugMode){
+                echo $response->get_error_message();
+            }
+            return false;
+        }
+
+        if (is_array( $response ) ) {
+            if($response["response"]["code"] === 200)
+                return $response['body'];
+        }
+        return false;
+    }
 }

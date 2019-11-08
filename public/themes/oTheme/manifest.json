@@ -1,0 +1,295 @@
+{
+    "identifier":"oTheme",
+    "name":"Store interface 6",
+    "screenshots":"https://api.smartonlineorders.com/assets/images/interface-6.png",
+    "version":"1.0",
+    "description":"This is a fun and interactive store interface with the categories shown at the top",
+    "settings":[
+        {
+            "id":"width",
+            "label":"Page width",
+            "type":"input_text",
+            "info":"Default page width recommendation is 1024px. <br /> You can make changes here",
+            "default":"1024"
+        },
+        {
+            "id":"categoriesMenuTopMargin",
+            "label":"Categories Menu top margin for desktop display size",
+            "type":"input_text",
+            "info":"This will change the top margin for categories on desktop devices <br /> Recommend to change if you have a fixed header",
+            "default":"0"
+        },
+        {
+            "id":"categoriesMenuTopMarginMobile",
+            "label":"Categories Menu top margin for mobile display size",
+            "type":"input_text",
+            "info":"This will change the top margin for categories on mobile devices <br /> Recommend to change if you have a fixed header",
+            "default":"0"
+        },
+        {
+            "id":"show_more_button",
+            "label":"Display 'Show More'",
+            "type":"onoff",
+            "info":"Display “Show More” underneath each category. <br /> Recommended to display “Show More” if you have a lot of items for faster page loading time",
+            "default":"on"
+        },
+        {
+            "id":"showSearchSection",
+            "label":"Display search section",
+            "type":"onoff",
+            "info":"Display a section for searching items.",
+            "default":"off"
+        },
+        {
+            "id":"showTopPicksSection",
+            "label":"Display top selling items section",
+            "type":"onoff",
+            "info":"Display a section for top selling items.",
+            "default":"off"
+        },
+        {
+            "id":"color1",
+            "label":"Color 1",
+            "type":"color",
+            "info":"Used in : buttons background, icon cart background.",
+            "default":"#0097e6",
+            "css": [
+                {
+                    "cssSelector":".osnCategorieSeparator button",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":"#osnModifierPanelPaginateBtn.osnModifierPanelBtn button.osnModifierPanelBtnAddToCart",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":".osnPanelDisplay .osnCategorieNavigation ul.osnMenuListCat li.osnMenuListCatItem a.osnCatLink.active",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":"#osnCartHeader.cartHeader",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":".osnCardItem .osnContentItem .price-menu",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":".osnCardItem .osnContentItem .price-menu:hover",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":".btn-cart",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":"#osnCartTotal.cartTotal button.checkOutButton",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":"#osnItemModelModifier .osnModifierPanel .osnModifierPanelHeader",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":"#osnItemModelModifier .osnModifierPanel .osnModifierPanelHeader span",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":"#osnItemModelModifier .osnModifierPanel .osnModifierPanelContent .osnModifierContainer .osnItemModifierCard .modifier-quantity-controls .modifier-quantity",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":"#osnItemModelModifier .osnModifierPanel .osnModifierPanelFooter #osnModifierPanelPaginateBtn.osnModifierPanelBtn button.osnModifierPanelBtnAddToCart",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":"#osnModifierPanelPaginateBtn.osnModifierPanelBtn button.osnModifierPanelBtnNext",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":"#osnModal_special_ins #osnModal_special_ins_container .btnGroupAddCancel button.osnBtnSave_special_ins",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":"#osnModalChooseQtyItem #osnModalContainerChooseQtyItem .btnGroupAddCancel #osnBtnAddItemWithQuantity",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":"#osnItemModalModifier .osnModifierPanel .osnModifierPanelHeader",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":"#osnCartTotal.cartTotal a.checkOutButton",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":"#osnItemModalModifier .osnModifierPanel .osnModifierPanelFooter #osnModifierPanelPaginateBtn.osnModifierPanelBtn button.osnModifierPanelBtnAddToCart",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":"#osnItemModalModifier .osnModifierPanel .osnModifierPanelContent .osnModifierContainer .osnItemModifierCard.selected",
+                    "cssProperty":"border-color"
+                },
+                {
+                    "cssSelector":"#osnItemModalModifier .osnModifierPanel .osnModifierContent",
+                    "cssProperty":"border-color"
+                },
+                {
+                    "cssSelector":"#osnItemModalModifier .osnModifierPanel .osnModifierPanelContent .osnModifierContainer .osnItemModifierCard .modifier-quantity-controls .modifier-quantity, #osnChooseQuantity .modifier-quantity-controls .modifier-quantity",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":".panner",
+                    "cssProperty":"color" 
+                },
+                {
+                    "cssSelector":"#osnItemModalModifier .osnModifierPanel #osnModifierGroupMenu",
+                    "cssProperty":"border-color"
+                },
+                {
+                    "cssSelector":"#osnItemModalModifier .osnModifierPanel #osnModifierGroupMenu ul li button.active",
+                    "cssProperty":"background-color"
+                },
+                {
+                    "cssSelector":"#osnSlideIndicator.active",
+                    "cssProperty":"background-color"
+                }
+
+            ]
+        },
+        {
+            "id":"color2",
+            "label":"Color 2",
+            "type":"color",
+            "info":"Used in : text color for modals titles and on buttons and menus",
+            "default":"#fff",
+            "css": [
+                {
+                    "cssSelector":"#osnModifierPanelPaginateBtn.osnModifierPanelBtn button.osnModifierPanelBtnAddToCart",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":".osnCategorieSeparator button",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":"#osnItemModalModifier .osnModifierPanel .osnModifierPanelHeader h4",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":"#osnModifierPanelPaginateBtn.osnModifierPanelBtn button.osnModifierPanelBtnNext",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":"#osnItemModalModifier .osnModifierPanel #osnModifierGroupMenu ul li button.active",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":"#osnCartHeader.cartHeader span",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":"#osnCartTotal.cartTotal a.checkOutButton",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":"#osnModal_special_ins #osnModal_special_ins_container .btnGroupAddCancel button.osnBtnSave_special_ins",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":".osnPanelDisplay .osnCategorieNavigation ul.osnMenuListCat li.osnMenuListCatItem a.osnCatLink.active",
+                    "cssProperty":"color"
+                }
+            ]
+        },
+        {
+            "id":"color3",
+            "label":"Color 3",
+            "type":"color",
+            "info":"Used in : text color for Categorie names and description",
+            "default":"#000000",
+            "css": [
+                {
+                    "cssSelector":".osnPanelDisplay .osnCategorieNavigation ul.osnMenuListCat li.osnMenuListCatItem a.osnCatLink span",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":".osnCategorieTitle h2",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":".osnCatDescription p",
+                    "cssProperty":"color"
+                }
+            ]
+        },
+        {
+            "id":"color4",
+            "label":"Color 4",
+            "type":"color",
+            "info":"Used in : color icons",
+            "default":"#ffffff",
+            "css": [
+                {
+                    "cssSelector":"#osnItemModalModifier .osnModifierPanel .osnModifierPanelHeader span",
+                    "cssProperty":"color"
+                },
+                {
+                    "cssSelector":".btn-cart",
+                    "cssProperty":"color"
+                },
+                
+                
+                {
+                    "cssSelector":"#osnCartHeader.cartHeader div .osnCloseCart",
+                    "cssProperty":"color" 
+                }
+            ]  
+        }
+        ,{
+            "id":"color5",
+            "label":"Color 5",
+            "type":"color",
+            "info":"Used in : color for titles in modals",
+            "default":"#516278",
+            "css": [
+                {
+                    "cssSelector":"#osnCartItems.cartItems .itemInCart div",
+                    "cssProperty":"color" 
+                },
+                {
+                    "cssSelector":"#osnCartTotal.cartTotal h4",
+                    "cssProperty":"color" 
+                },
+                {
+                    "cssSelector":"#osnCartTotal.cartTotal span",
+                    "cssProperty":"color" 
+                },
+                {
+                    "cssSelector":"#osnCartHeader.cartHeader .cartModifierBtn",
+                    "cssProperty":"color" 
+                },
+                {
+                    "cssSelector":"#osnItemModalModifier .osnModifierPanel .osnModifierContent h3, #osnItemModalModifier .osnModifierPanel .osnModifierGroup h4",
+                    "cssProperty":"color" 
+                },
+                {
+                    "cssSelector":"#osnItemModalModifier .osnModifierPanel #osnModifierGroupMenu ul li button",
+                    "cssProperty":"color" 
+                },
+                {
+                    "cssSelector":"#osnItemModalModifier .osnModifierPanel .osnModifierPanelContent .osnModifierContainer .osnItemModifierCard h5",
+                    "cssProperty":"color" 
+                },
+                {
+                    "cssSelector":"#osnItemModalModifier .osnModifierPanel .osnModifierPanelFooter .osnModifierPanelPriceDetails h5, #osnChooseQuantity h5",
+                    "cssProperty":"color" 
+                },
+                {
+                    "cssSelector":"#osnItemModalModifier .osnModifierPanel #osnItemContent.osnItemContent .osnItemDescriptionPrice h5",
+                    "cssProperty":"color" 
+                }
+            ]  
+        }
+    ]
+}

@@ -150,94 +150,66 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
     } catch (e) {
         console.log("Parsing error: moo_delivery_areas");
     }
-
-    /*
-     The order of fees is :
-     1- Fixed amount of the delivery
-     2- Free Delivery after spending X
-     3- Zone fee or other zone fee
-     */
-    if(isNaN(delivery_fixed_amount))
-    {
-        if(isNaN(delivery_free_after) || delivery_free_after > order_total )
+    //first of all we will check :
+    // if the merchant offer fixed amount
+    // else we will check the zones
+    if(isNaN(delivery_fixed_amount)) {
+        if(customer_lat !== '' && customer_lng !== '')
         {
-            if(!isNaN(delivery_free_after))
+            //check the zones
+            var zones_contain_point = new Array();
+            for(i in moo_delivery_areas)
             {
-                var amountToAdd = delivery_free_after-order_total;
-                swal({
-                    title: 'Spend $'+delivery_free_after.toFixed(2)+" to get free delivery",
-                    text:'Add $'+(amountToAdd.toFixed(2))+' to your order to enjoy free delivery',
-                    type: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#DD6B55",
-                    confirmButtonText: "Continue shopping",
-                    cancelButtonText: "Checkout",
-                    closeOnConfirm: false
-                },function(){ window.history.back() }
-                );
-             }
-            //Customer coordinate
-            if(customer_lat != '' && customer_lng != '')
-            {
-                var zones_contain_point = new Array();
-                for(i in moo_delivery_areas)
-                {
-                    var el = moo_delivery_areas[i];
+                var el = moo_delivery_areas[i];
 
-                    // Verify if the selected address is at any zone
-                    if(el.type == 'polygon')
+                // Verify if the selected address is at any zone
+                if(el.type === 'polygon')
+                {
+                    if(google.maps.geometry.poly.containsLocation( new google.maps.LatLng(parseFloat(customer_lat),parseFloat(customer_lng)), new google.maps.Polygon({paths:el.path})))
                     {
-                       if(google.maps.geometry.poly.containsLocation( new google.maps.LatLng(parseFloat(customer_lat),parseFloat(customer_lng)), new google.maps.Polygon({paths:el.path})))
-                       {
-                           zones_contain_point.push({zone_id:el.id,zone_fee:el.fee,feeType:el.feeType});
-                       }
+                        zones_contain_point.push({zone_id:el.id,zone_fee:el.fee,feeType:el.feeType});
+                    }
+                } else {
+                    if(el.type === 'circle') {
+                        var point  = new google.maps.LatLng(parseFloat(customer_lat),parseFloat(customer_lng));
+                        var center = new google.maps.LatLng(parseFloat(el.center.lat),parseFloat(el.center.lng));
+                        if(google.maps.geometry.spherical.computeDistanceBetween(point, center) <= el.radius)
+                        {
+                            zones_contain_point.push({zone_id:el.id,zone_fee:el.fee,feeType:el.feeType});
+                        }
+                    }
+                }
+            }
+            // If the selected point on the map exists in at least one merchant's zone
+            // Then we we update the delivery amount by this zone fees
+            // else we verify if the merchant allow other zones
+            if(zones_contain_point.length >= 1 )
+            {
+                // Customer address exist in at least one merchant's zone
+                var delivery_final_amount = (zones_contain_point[0].feeType === "percent")?(zones_contain_point[0].zone_fee*order_total/100):zones_contain_point[0].zone_fee;
+                var delivery_zone_id      =  zones_contain_point[0].zone_id;
+
+                for (i in zones_contain_point)
+                {
+
+                    if(zones_contain_point[i].feeType === "percent")
+                    {
+                        var amount = (zones_contain_point[i].zone_fee * order_total )/100;
+                        if(parseFloat(delivery_final_amount) >= parseFloat(amount))
+                        {
+                            delivery_final_amount = parseFloat(amount).toFixed(2);
+                            delivery_zone_id = zones_contain_point[i].zone_id;
+                        }
                     }
                     else
-                        if(el.type == 'circle')
-                        {
-                            var point  = new google.maps.LatLng(parseFloat(customer_lat),parseFloat(customer_lng));
-                            var center = new google.maps.LatLng(parseFloat(el.center.lat),parseFloat(el.center.lng));
-                            if(google.maps.geometry.spherical.computeDistanceBetween(point, center) <= el.radius)
-                            {
-                                zones_contain_point.push({zone_id:el.id,zone_fee:el.fee,feeType:el.feeType});
-                            }
-                         }
+                    if(parseFloat(delivery_final_amount) >= parseFloat(zones_contain_point[i].zone_fee))
+                    {
+                        delivery_final_amount = zones_contain_point[i].zone_fee;
+                        delivery_zone_id = zones_contain_point[i].zone_id;
+                    }
                 }
-                // If the selected point on the map exists in at least one merchant's zone
-                // Then we we update the delivery amount by this zone fees
-                // else we verify if the merchant allow other zones
-                if(zones_contain_point.length >= 1 )
-                {
-                    var delivery_final_amount = (zones_contain_point[0].feeType === "percent")?(zones_contain_point[0].zone_fee*order_total/100):zones_contain_point[0].zone_fee;
-                    var delivery_zone_id      =  zones_contain_point[0].zone_id;
 
-                    for (i in zones_contain_point)
-                    {
-
-                        if(zones_contain_point[i].feeType === "percent")
-                        {
-                            var amount = (zones_contain_point[i].zone_fee * order_total )/100;
-                            if(parseFloat(delivery_final_amount) >= parseFloat(amount))
-                            {
-                                delivery_final_amount = parseFloat(amount).toFixed(2);
-                                delivery_zone_id = zones_contain_point[i].zone_id;
-                            }
-                        }
-                        else
-                            if(parseFloat(delivery_final_amount) >= parseFloat(zones_contain_point[i].zone_fee))
-                            {
-                                delivery_final_amount = zones_contain_point[i].zone_fee;
-                                delivery_zone_id = zones_contain_point[i].zone_id;
-                            }
-                    }
-
-                    if(!isNaN(delivery_free_after))
-                    {
-                        var amountToAdd = delivery_free_after-order_total;
-                        if(amountToAdd > 0 && amountToAdd < delivery_final_amount)
-                            delivery_final_amount = amountToAdd;
-                    }
-
+                if(isNaN(delivery_free_after)) {
                     //Verify the min amount
                     for(i in moo_delivery_areas)
                     {
@@ -262,56 +234,94 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
                             }
                         }
                     }
-                }
-                else
-                {
-                    if(isNaN(delivery_for_other_zone))
-                    {
+
+                } else {
+                    var amountToAdd = delivery_free_after-order_total;
+                    if(amountToAdd <= 0){
                         var res ={};
-                        res.type='zone_error';
-                        res.amount='';
+                        res.type='free';
+                        res.amount=0;
                         callback(res);
-                    }
-                    else
-                    {
-                        if(!isNaN(delivery_free_after))
+                    } else {
+                        swal({
+                                title: 'Spend $'+delivery_free_after.toFixed(2)+" to get free delivery",
+                                text:'Add $'+(amountToAdd.toFixed(2))+' to your order to enjoy free delivery',
+                                type: "warning",
+                                showCancelButton: true,
+                                confirmButtonColor: "#DD6B55",
+                                confirmButtonText: "Continue shopping",
+                                cancelButtonText: "Checkout",
+                                closeOnConfirm: false
+                            },function(){ window.history.back() }
+                        );
+
+                        if(amountToAdd > 0 && amountToAdd < delivery_final_amount)
+                            delivery_final_amount = amountToAdd;
+                        //Verify the min amount
+                        for(i in moo_delivery_areas)
                         {
-                            var amountToAdd = delivery_free_after-order_total;
-                            if(amountToAdd > 0 && amountToAdd < delivery_for_other_zone)
-                                delivery_for_other_zone = amountToAdd;
+                            var el = moo_delivery_areas[i];
+                            if(delivery_zone_id == el.id)
+                            {
+                                if(parseFloat(el.minAmount) > parseFloat(moo_Total.sub_total) )
+                                {
+                                    var res ={};
+                                    res.type='min_error';
+                                    res.amount='';
+                                    res.message="The minimum order total for this selected zone is $"+parseFloat(el.minAmount).toFixed(2);
+                                    callback(res);
+                                }
+                                else
+                                {
+                                    var res ={};
+                                    res.type='success';
+                                    res.amount=delivery_final_amount;
+                                    res.zoneName=el.name;
+                                    callback(res);
+                                }
+                            }
                         }
-                        var res ={};
-                        res.type='other_zone';
-                        res.amount=delivery_for_other_zone.toFixed(2);
-                        callback(res);
                     }
                 }
-             }
-             else
+
+            }
+            else
             {
-                console.log("Customer Address not found");
+                //Customer address not exist in any zone
+                /*
+                    we will check the support other zones
+                 */
+                if(isNaN(delivery_for_other_zone))
+                {
+                    var res ={};
+                    res.type='zone_error';
+                    res.amount='';
+                    callback(res);
+
+                } else {
+                    var res ={};
+                    res.type='other_zone';
+                    res.amount=delivery_for_other_zone.toFixed(2);
+                    callback(res);
+                }
+
             }
         }
         else
         {
-            //TODO : Check the Zone
-            if(delivery_free_after <= order_total )
-            {
-                var res ={};
-                res.type='free';
-                res.amount='0.00';
-                callback(res);
-            }
+            console.log("Customer Address not found");
+            var res ={};
+            res.type='zone_error';
+            res.amount='';
+            callback(res);
         }
-    }
-    else
-    {
-        //TODO : Check the Zone
+    } else {
         var res ={};
         res.type='fixed';
         res.amount=delivery_fixed_amount.toFixed(2);
         callback(res);
     }
+
 }
 
 function moo_update_delivery_amount(result)

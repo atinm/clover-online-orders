@@ -11,7 +11,7 @@
             "label":"Page width",
             "type":"input_text",
             "info":"Default page width recommendation is 1024px. <br /> You can make changes here",
-            "default":"1024"
+            "default":""
         },
         {
             "id":"show_more_button",
@@ -68,8 +68,12 @@
                     "cssProperty":"color"
                 },
                 {
-                    "cssSelector":"moo-new-icon__group",
+                    "cssSelector":".moo-new-icon__group",
                     "cssProperty":"fill"
+                },
+                {
+                    "cssSelector":"#moo-onlineStore-categories .moo-mobile-fixed .moo-choose-category",
+                    "cssProperty":"color"
                 }
             ]
         },
@@ -95,6 +99,10 @@
                 {
                     "cssSelector":".moo-new-icon",
                     "cssProperty":"border-color"
+                },
+                {
+                    "cssSelector":"#moo-onlineStore-categories .moo-mobile-fixed .moo-choose-category",
+                    "cssProperty":"background-color"
                 }
             ]
         },
@@ -160,12 +168,26 @@
             ]
         },
         {
+            "id":"askforspecialinstruction",
+            "label":"Show Special instructions Pop Up window after adding any item to cart",
+            "type":"onoff",
+            "info":"After item/modifier is added to cart, immediately show pop-up to allow customer to add special instructions to that item",
+            "default":"on"
+        },
+        {
+            "id":"messageforspecialinstruction",
+            "label":"Custom Text to appear in special instructions",
+            "type":"textaerea",
+            "info":" Custom Text to appear in special instructions after item is added to cart. This default message will appear to customers for special instructions -per line item, not the special instructions on the checkout page.",
+            "default":"Type your instructions here, additional charges may apply and not all changes are possible"
+        },
+        {
             "id":"qtyWindow",
             "label":"Show Quantity Pop Up window after adding any item to cart",
             "type":"onoff",
             "info":"This will show the Quantity selection window when selecting 'add to cart' button. The customer can still change the quantity later in the checkout process",
             "default":"on"
-        } ,
+        },
         {
             "id":"qtyWindowForModifiers",
             "label":"Show Quantity Pop Up window for items with modifiers",

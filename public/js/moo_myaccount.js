@@ -868,7 +868,7 @@ function mooRenderItemsForFavorits(items){
 }
 function mooRenderItemsForMostPurchase(items){
     window.moo_nbItemsPerLine = 3;
-    var html  = '<div class="moo_cp_content_header"><h1>Top orders for all customers</h1></div>';
+    var html  = '<div class="moo_cp_content_header"><h1>These are currently the most popular orders made by all customers</h1></div>';
     html += '<div class="moo_cp_content_body">';
     if(items.length > 0) {
         for(var i in items){

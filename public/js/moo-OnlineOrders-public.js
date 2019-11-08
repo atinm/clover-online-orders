@@ -21,6 +21,9 @@
             }
         }
     });
+    setTimeout(function () {
+        jQuery(".Moo_Copyright").show();
+    }, 3000);
 
 })(jQuery);
 
