@@ -471,7 +471,7 @@ class Moo_OnlineOrders_Activator {
         }
 
         // Save the version of the plugin in the Database
-         update_option('moo_onlineOrders_version', '133');
+         update_option('moo_onlineOrders_version', '137');
 
         $defaultOptions = self::applyDefaultOptions($defaultOptions);
 
@@ -495,7 +495,7 @@ class Moo_OnlineOrders_Activator {
             array("name"=>"custom_sa_content","value"=>""),
             array("name"=>"custom_sa_title","value"=>""),
             array("name"=>"custom_sa_onCheckoutPage","value"=>"off"),
-            array("name"=>"copyrights","value"=>'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.3.5">Smart Online Order</a>'),
+            array("name"=>"copyrights","value"=>'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.3.7">Smart Online Order</a>'),
             array("name"=>"default_style","value"=>"onePage"),
             array("name"=>"track_stock","value"=>""),
             array("name"=>"checkout_login","value"=>"enabled"),

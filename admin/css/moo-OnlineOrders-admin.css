@@ -1803,8 +1803,17 @@ table.main_table td {
     line-height: 36px;
     letter-spacing: 0.6px;
     color: #293553;
-    margin-bottom: 10px;
     padding-top: 8px;
+}
+.moo-categories-section .moo-category-row .moo-category-title .moo-category-title-cloverName{
+    height: 12px;
+    font-family: Eina03, sans-serif;
+    font-size: 12px;
+    line-height: 10px;
+    color: #293553;
+    margin: 10px;
+    padding: 0;
+    margin-bottom: 0px;
 }
 
 .moo-categories-section .moo-category-row .moo-category-uuid {
@@ -1854,6 +1863,7 @@ table.main_table td {
     letter-spacing: 1px;
     color: #4a4a4a;
     padding: 10px;
+    margin-top: 8px;
 }
 
 .moo-categories-section .moo-category-row .moo-category-quicklinks {
@@ -2040,9 +2050,25 @@ table.main_table td {
     color: #4a90e2;
 
 }
+.moo-categories-edit-section .moo-category-sync-row  .moo-category-sync-col1 .moo-category-sync-line3 {
+    width: 674px;
+    height: 16px;
+    font-family: Eina03;
+    font-size: 15px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #293553;
+    margin-top: 8px;
+
+    margin-bottom: 25px;
+
+}
 
 .moo-categories-edit-section .moo-category-sync-row  .moo-category-sync-col2 {
-    padding-top: 25px;
+    padding-top: 40px;
     padding-left: 0px;
 }
 

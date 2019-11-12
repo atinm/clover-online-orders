@@ -63,13 +63,13 @@ class SyncRoutes extends BaseRoute
                     // catgeory not found in Clover
                     if($category->message === 'Not Found') {
                         $this->model->hideCategory($category_id);
-                        return 'updated, thanks';
+                        return 'category updated';
                     } else {
-                        return 'Not updated';
+                        return 'category not updated';
                     }
             } else {
                 $this->model->update_category($category);
-                return 'Updated, thanks';
+                return 'Category Updated';
             }
         }
     }
@@ -84,17 +84,17 @@ class SyncRoutes extends BaseRoute
                 if(isset($currentItem)){
                    //Item exist and removed from Clover,hide from local database
                     $this->model->hideItem($item_id);
-                    return 'updated, thank you';
+                    return 'item updated';
                 } else {
-                    return 'Updated, thanks';
+                    return 'item not updated';
                 }
             } else {
                 if(isset($cloverItem->id)){
                     if(isset($currentItem) && isset($currentItem->modified_time) && $currentItem->modified_time === $cloverItem->modifiedTime){
-                        return 'Updated, thanks';
+                        return 'Item Updated';
                     } else {
                         $this->api->update_item($cloverItem);
-                        return 'updated, thanks';
+                        return 'Item Updated';
                     }
 
                 } else {

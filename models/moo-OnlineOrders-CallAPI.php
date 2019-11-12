@@ -886,7 +886,6 @@ class Moo_OnlineOrders_CallAPI
         global $wpdb;
         $wpdb->query('START TRANSACTION');
          //$wpdb->show_errors();
-
         /*
          * I verify if the Item is already in Wordpress DB and if it's up to date
          */

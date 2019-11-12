@@ -2424,7 +2424,7 @@ class moo_OnlineOrders_Admin {
                 <!-- Delivery areas -->
                 <div id="MooPanel_tabContent9">
                     <h2>Delivery areas</h2><hr>
-                    <form method="post" action="options.php" onsubmit="mooSaveChanges(event,this)">
+                    <form method="post" action="options.php" onsubmit="moo_save_changes()">
                         <?php
                         settings_fields('moo_settings');
                         //This form fields

@@ -27,8 +27,7 @@ class Products_List_Moo extends WP_List_Table_MOO {
     public static function get_items( $per_page = 20, $page_number = 1 ) {
         global $wpdb;
         $category_id="";
-        if(isset($_GET['category']) && !empty($_GET['category']))
-        {
+        if(isset($_GET['category']) && !empty($_GET['category'])) {
             $category_id = esc_sql($_GET['category']);
             $category = $wpdb->get_row("SELECT items from {$wpdb->prefix}moo_category WHERE uuid='{$category_id}'",'ARRAY_A');
             $category_items = explode(',',$category['items']);
@@ -469,7 +468,14 @@ class Products_List_Moo extends WP_List_Table_MOO {
                                 $selected = ' selected = "selected"';
                             }
                             ?>
-                                <option value="<?php echo $move_on_url . $cat['uuid']; ?>" <?php echo $selected; ?>><?php echo $cat['name']; ?></option>
+                                <option value="<?php echo $move_on_url . $cat['uuid']; ?>" <?php echo $selected; ?>><?php
+                                    if($cat["alternate_name"]=="" || $cat["alternate_name"]== null ){
+                                        echo stripslashes($cat['name']);
+                                    } else {
+                                        echo stripslashes($cat['alternate_name']);
+                                    }
+
+                                    ?></option>
                                 <?php
                         }
                         ?>

@@ -649,6 +649,7 @@ function Moo_ImportItemsV2(page) {
             jQuery('#MooPanelButtonImport').html('<a href="#" onclick="MooPanel_RefreshPage(event)" class="button button-secondary" style="margin-bottom: 35px;" >Refresh</a>');
             moo_Update_stats();
             Moo_GetOrderTypes();
+            Moo_SetupCategoriesSection();
         }
     });
 }
@@ -756,13 +757,16 @@ function Moo_GetOrderTypes(uuid = null){
                             '<optgroup label="Choose Order Type Hours">' ;
 
                         //Add the Custom Hours to the select
-                        Object.keys(moo_custom_hours_for_ot).forEach(function (key) {
-                            html +=  '<option value="'+key+'"' ;
-                            if($ot.custom_hours!== null && $ot.custom_hours === key) {
-                                html += 'selected' ;
-                            }
-                            html +=   '>'+moo_custom_hours_for_ot[key]+'</option>';
-                        });
+                        if(moo_custom_hours_for_ot){
+                            Object.keys(moo_custom_hours_for_ot).forEach(function (key) {
+                                html +=  '<option value="'+key+'"' ;
+                                if($ot.custom_hours!== null && $ot.custom_hours === key) {
+                                    html += 'selected' ;
+                                }
+                                html +=   '>'+moo_custom_hours_for_ot[key]+'</option>';
+                            });
+                        }
+
 
                         html +=  '</optgroup>';
                         html +=  '</select>' ;
@@ -926,10 +930,15 @@ function Moo_SetupCategoriesSection( uuid = null ){
                 }
                 swal.close();
             } else {
+                var html = "<div class='normal_text' >We cannot get your categories, Please verify your API Key</div>";
+                document.querySelector('#MooPanel_tabContent5 .moo-categories-section').innerHTML = html;
                 console.log('We cannot get your categories, Please verify your API Key');
+                swal.close();
             }
 
         }).fail(function () {
+            var html = "<div class='normal_text' >We cannot get your categories, Please verify your API Key and your wordpress settings, if you are using HTTPS and in your settings you have HTTP</div>";
+            document.querySelector('#MooPanel_tabContent5 .moo-categories-section').innerHTML = html;
             swal.close();
         });
     }
@@ -1128,8 +1137,9 @@ function Moo_SetupEditCategorySection(event, uuid) {
                 html += '<div class="moo-col-md-8 moo-category-info">';
                 //html += '<div class="moo-category-uuid">'+ category.uuid +'</div>';
 
-                if(category.alternate_name !== null && category.alternate_name !== ""){
-                    html += '<div class="moo-category-title"><input class="moo-category-title-input" type="text" value="'+ category.alternate_name.replace(/"/g, '&quot;') +'" /></div>';
+                if(category.alternate_name !== null && category.alternate_name !== "" && category.alternate_name !== category.name){
+                    html += '<div class="moo-category-title"><input class="moo-category-title-input" type="text" value="'+ category.alternate_name.replace(/"/g, '&quot;') +'" />';
+                    html += "<div class='moo-category-title-cloverName'> Name on Clover : "+ category.name.replace(/"/g, '&quot;') +'</div></div>';
                 } else {
                     html += '<div class="moo-category-title"><input class="moo-category-title-input" type="text" value="'+ category.name.replace(/"/g, '&quot;') +'" /></div>';
                 }
@@ -1184,13 +1194,16 @@ function Moo_SetupEditCategorySection(event, uuid) {
                     '<div class="moo-col-md-8"> <select name="" id="moo-category-availability-time-'+category.uuid+'" onchange="mooSelecetdTimeChanged(event,\'standard\',\''+category.uuid+'\')">' +
                     '<option value="">Select</option>';
                 //Add the Custom Hours to the select
-                Object.keys(moo_custom_hours).forEach(function (key) {
-                    html +=  '<option value="'+key+'"' ;
-                    if(category.custom_hours!== null && category.custom_hours === key) {
-                        html += 'selected' ;
-                    }
-                    html +=   '>'+moo_custom_hours[key]+'</option>';
-                });
+                if(moo_custom_hours){
+                    Object.keys(moo_custom_hours).forEach(function (key) {
+                        html +=  '<option value="'+key+'"' ;
+                        if(category.custom_hours!== null && category.custom_hours === key) {
+                            html += 'selected' ;
+                        }
+                        html +=   '>'+moo_custom_hours[key]+'</option>';
+                    });
+                }
+
 
                 html +=  '</select>' +
                     '</div>' +
@@ -1204,6 +1217,7 @@ function Moo_SetupEditCategorySection(event, uuid) {
                 html += '<div class="moo-col-md-9 moo-category-sync-col1">';
                 html += '   <div class="moo-category-sync-line1">You can rearrange items by dragging and dropping.</div>';
                 html += '   <div class="moo-category-sync-line2">If you don\'t see all items, click “Sync” to sync this category with your Clover Inventory</div>';
+                html += '   <div class="moo-category-sync-line3">To make changes to items. <a href="admin.php?page=moo_items&category='+category.uuid+'" >Select Items images / description</a></div>';
                 html += '</div>';
                 html += '<div class="moo-col-md-3 moo-category-sync-col2" onclick="mooImportOneCategory(\''+category.uuid+'\')"><div class="moo-category-sync-button-sync">Sync</div></div>';
                 html += '</div>';

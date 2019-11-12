@@ -1,11 +1,11 @@
-=== Smart Online Order for Clover ===
+﻿=== Smart Online Order for Clover ===
 Contributors: Zaytech
 Donate link: http://www.zaytechapps.com/
 Tags: clover,online orders for clover,zaytech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
 Requires at least: 4.7.1
 Tested up to: 5.2.4
 Requires PHP: 5.2.0
-Stable tag: 1.3.6
+Stable tag: 1.3.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -144,6 +144,10 @@ No, this plug-in is not by Clover. It is from Zaytech. Both this plug-in and Sma
 Please let us know so we can implement additional features.  925-234-5554 / support@zaytechapps.com
 
 == Changelog ==
+= 1.3.7 =
+
+* Fixed issue when saving delivery settings
+
 = 1.3.6 =
 
 * Added new Store Interface Six. This is a fun and interactive store interface with categories at the top
@@ -364,3 +368,7 @@ First Release
 = 1.3.6 =
 
 Added new Store Interface Six and the ability to have Custom Hours for Categories or Order Types with other improvements end enhancements
+
+= 1.3.7 =
+
+Fixed issue when saving delivery settings

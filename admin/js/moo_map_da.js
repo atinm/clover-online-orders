@@ -244,7 +244,6 @@ function moo_validate_selected_zone()
         alert('Please select the zone');
         return;
     };
-    console.log(selectedShape);
     var zone = {};
     zone.id =  new Date().getUTCMilliseconds();
 
@@ -432,6 +431,10 @@ function moo_da_delete_zone(event,ZoneId)
 }
 function moo_save_changes()
 {
+    swal({
+        title: 'Saving your changes, please wait ..',
+        showConfirmButton: false
+    });
     var zones =  new Array();
     for (i in moo_delivery_areas )
     {

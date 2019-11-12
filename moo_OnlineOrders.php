@@ -16,7 +16,7 @@
  * Plugin Name:       Smart Online Order for Clover
  * Plugin URI:        http://www.zaytechapps.com
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.3.6
+ * Version:           1.3.7
  * Author:            Zaytech
  * Author URI:        http://www.zaytechapps.com
  * License:           Clover app
@@ -193,7 +193,7 @@ function moo_deactivateAndClean() {
 }
 add_action( 'admin_init', 'moo_deactivateAndClean');
                  
-if(get_option('moo_onlineOrders_version') != '136') {
+if(get_option('moo_onlineOrders_version') != '137') {
     add_action('plugins_loaded', 'moo_onlineOrders_check_version');
 }
 
@@ -348,8 +348,8 @@ function moo_onlineOrders_check_version()
                 $defaultOptions['style2_messageforspecialinstruction'] = 'Type your instructions here, additional charges may apply and not all changes are possible';
             }
             update_option("moo_settings",$defaultOptions);
-            update_option('moo_onlineOrders_version','136');
         case '136':
+            update_option('moo_onlineOrders_version','137');
             break;
     }
 }
