@@ -1138,6 +1138,10 @@ class Moo_OnlineOrders_CallAPI
         $url = "checktoken";
         return $this->callApi($url, $this->Token);
     }
+    public function checkAnyToken($token) {
+        $url = "checktoken";
+        return $this->callApi($url, $token);
+    }
 
     public function checkIpBlackListed() {
         return $this->checkIP($this->Token);

@@ -3,9 +3,9 @@ Contributors: Zaytech
 Donate link: http://www.zaytechapps.com/
 Tags: clover,online orders for clover,zaytech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
 Requires at least: 4.7.1
-Tested up to: 5.2.4
+Tested up to: 5.3.0
 Requires PHP: 5.2.0
-Stable tag: 1.3.7
+Stable tag: 1.3.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -144,6 +144,12 @@ No, this plug-in is not by Clover. It is from Zaytech. Both this plug-in and Sma
 Please let us know so we can implement additional features.  925-234-5554 / support@zaytechapps.com
 
 == Changelog ==
+
+= 1.3.8 =
+
+* Fixed Avada theme compatibility
+* Fixed issue when disable order types
+
 = 1.3.7 =
 
 * Fixed issue when saving delivery settings
@@ -372,3 +378,6 @@ Added new Store Interface Six and the ability to have Custom Hours for Categorie
 = 1.3.7 =
 
 Fixed issue when saving delivery settings
+= 1.3.8 =
+
+Fixed issue when disable order types and fixed Avada theme compatibility issue

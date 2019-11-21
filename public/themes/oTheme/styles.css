@@ -845,7 +845,9 @@ background-color: #2672af;
     margin: 0 auto;
     width: 93%;
     display: flex;
+    display: -webkit-box;
     justify-content: space-between;
+    -webkit-box-pack:justify;
     color: #516278;
 }
 #osnCartModal.cartModal .osnCartTax h5,#osnCartModal.cartModal .osnCartSubTotal h5{

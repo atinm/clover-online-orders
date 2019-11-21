@@ -930,12 +930,9 @@ function Moo_SetupCategoriesSection( uuid = null ){
                 }
                 swal.close();
             } else {
-                var html = "<div class='normal_text' >We cannot get your categories, Please verify your API Key</div>";
-                document.querySelector('#MooPanel_tabContent5 .moo-categories-section').innerHTML = html;
-                console.log('We cannot get your categories, Please verify your API Key');
+                console.log('You do not have any categries');
                 swal.close();
             }
-
         }).fail(function () {
             var html = "<div class='normal_text' >We cannot get your categories, Please verify your API Key and your wordpress settings, if you are using HTTPS and in your settings you have HTTP</div>";
             document.querySelector('#MooPanel_tabContent5 .moo-categories-section').innerHTML = html;
@@ -2377,6 +2374,38 @@ function mooShowWaitMessage() {
 }
 function mooHideWaitMessage() {
     swal.close();
+}
+
+/**
+ * Change the api key
+ */
+function mooUpdateApiKey() {
+    mooShowWaitMessage();
+    var newApiKey = jQuery("#chang_api_key").val();
+    var endpoint = moo_RestUrl+'moo-clover/v2/dash/update_api_key?_wpnonce='+ moo_params.nonce;
+    var data = {
+      "api_key":newApiKey
+    };
+    jQuery.post(endpoint,data, function (response) {
+        if(response.status){
+            swal({
+                type:"success",
+                text:response.message
+            });
+        } else {
+            swal({
+                type:"error",
+                text:response.message
+            });
+        }
+
+    }).fail(function (response) {
+        swal({
+            title: 'An error has occurred, please refresh the page  and try again'
+        });
+        console.log(response);
+    });
+
 }
 /* Scroll into div functions */
 

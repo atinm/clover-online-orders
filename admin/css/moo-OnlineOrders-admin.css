@@ -218,7 +218,7 @@
     color: #ffffff;
     left: 0;
     z-index: 1;
-    width: 20%;
+    width: 22%;
     min-height: 0 !important;
    /* border-radius: 10px; */
     font-family: 'Questrial', sans-serif;
@@ -935,7 +935,7 @@ div#MooPanel textarea {
 div.faq_question {
     cursor: pointer;
     margin-top: 10px;
-    font-size: 1.5rem;
+    font-size: 18px;
     font-weight: 300;
     padding: 24px 72px 24px 24px;
     background-color: #fafafa;

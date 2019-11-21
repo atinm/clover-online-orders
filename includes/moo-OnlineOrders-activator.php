@@ -382,6 +382,10 @@ class Moo_OnlineOrders_Activator {
                           `status` INT(1),
                           `show_sa` INT(1),
                           `minAmount` VARCHAR(100) NULL DEFAULT '0',
+                          `custom_hours` VARCHAR(100) NULL,
+                          `time_availability` VARCHAR(100)  DEFAULT 1,
+                          `use_coupons` INT(1) NULL DEFAULT 1,
+                          `custom_message` VARCHAR(255) NULL DEFAULT 'Not available yet',
                           `sort_order` INT NULL,
                           `type` INT(1) NULL,
                           PRIMARY KEY (`ot_uuid`));");
@@ -471,7 +475,7 @@ class Moo_OnlineOrders_Activator {
         }
 
         // Save the version of the plugin in the Database
-         update_option('moo_onlineOrders_version', '137');
+         update_option('moo_onlineOrders_version', '138');
 
         $defaultOptions = self::applyDefaultOptions($defaultOptions);
 

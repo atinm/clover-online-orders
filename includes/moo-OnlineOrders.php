@@ -87,7 +87,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.3.7';
+		$this->version = '1.3.8';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -155,13 +155,10 @@ class moo_OnlineOrders {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/moo-OnlineOrders-public.php';
 
-
-
-		$this->loader = new Moo_OnlineOrders_Loader();
-		$this->api  = new Moo_OnlineOrders_CallAPI();
-		$this->model = new Moo_OnlineOrders_Model();
-		$this->session = MOO_SESSION::instance();
-
+        $this->loader = new Moo_OnlineOrders_Loader();
+        $this->api  = new Moo_OnlineOrders_CallAPI();
+        $this->model = new Moo_OnlineOrders_Model();
+        $this->session = MOO_SESSION::instance();
 	}
 
 	/**

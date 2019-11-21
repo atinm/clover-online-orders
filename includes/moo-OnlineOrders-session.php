@@ -53,7 +53,6 @@ class MOO_SESSION {
     public function __construct()
     {
         $this->type     = 'session';
-
         $this->blogId   = 'moo_'.get_current_blog_id();
         // if we will us ethe server session, check if not already started start it
         if($this->type === 'session') {
@@ -71,10 +70,10 @@ class MOO_SESSION {
     }
 
     /**
-     * @param string $blogId
      * @return MOO_SESSION|null
      */
     public static function instance() {
+
         if ( is_null( self::$_instance ) ) {
             self::$_instance = new self();
         }
@@ -196,7 +195,7 @@ class MOO_SESSION {
     }
     public function myStartSession() {
         if(!session_id()) {
-            session_start();
+            @session_start();
         }
     }
     function printDump(){

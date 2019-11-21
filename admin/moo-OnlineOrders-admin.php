@@ -1279,7 +1279,7 @@ class moo_OnlineOrders_Admin {
                         if(isset($_GET['moo_section']) && $_GET['moo_section']=='update_address') {
                             $this->moo_update_address();
                         } else {
-                            if(isset($_GET['moo_section']) && $_GET['moo_section']=='update_token') {
+                            if(isset($_GET['moo_section']) && $_GET['moo_section']=='update_apikey') {
                                 $this->moo_update_token();
                             } else {
                             ?>
@@ -1464,7 +1464,7 @@ class moo_OnlineOrders_Admin {
                     <div id="display_panel5_on_desktop">
                             <?php
                             if(count($all_categories) == 0){
-                                echo '<div class="normal_text" >It appears you don\'t have any categories; If you have just imported your inventory, <br/> please refresh this page </div>';
+                                echo '<div class="normal_text" >It appears you don\'t have any categories, If you have just imported your inventory, <br/> please refresh this page </div>';
                             }
                             ?>
                     </div>
@@ -2891,10 +2891,6 @@ class moo_OnlineOrders_Admin {
         wp_register_style( 'moo-introjs-css',plugin_dir_url(__FILE__)."css/introjs.min.css",array(), $this->version);
         wp_enqueue_style( 'moo-introjs-css' );
 
-
-        wp_register_style('moo-select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css');
-        wp_enqueue_style('moo-select2');
-
         wp_register_style('moo-jquery-ui', '//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css');
         wp_enqueue_style('moo-jquery-ui');
 
@@ -2937,8 +2933,6 @@ class moo_OnlineOrders_Admin {
         wp_enqueue_script( 'jquery-ui-sortable');
         wp_enqueue_media();
 
-        wp_register_script('moo-select2', 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js',array("jquery"));
-        wp_enqueue_script("moo-select2");
 
         // check if the merchant want use jQuery UI from an external link, some theme remove it
         if($this->external_ui) {
@@ -3067,28 +3061,22 @@ class moo_OnlineOrders_Admin {
                 <h2>Change your api key</h2><hr>
                 <div class="MooPanelItem">
                     <div class="Moo_option-item" style="padding-top: 0px;margin-top: -15px;">
-                        <div class="normal_text">It's prefirable to reinstall the plugin, to clean your database, but you can at anytime click teh utton clean inventory from import inventory section</div>
-                    </div>
-                    <form method="post" action="options.php" onsubmit="mooSaveChanges(event,this)">
-                         <?php  settings_fields('moo_settings'); //This form fields
-                         $fields = array('api_key');
-                         foreach ($MooOptions as $option_name=>$option_value)
-                             if(!in_array($option_name,$fields))
-                                 if($option_name=="custom_js" || $option_name =="custom_css" || $option_name == "copyrights"|| $option_name == "zones_json" || $option_name == "custom_sa_content" || $option_name == "closing_msg"
-                                 )
-                                     echo '<textarea name="moo_settings['.$option_name.']" id="" cols="10" rows="10" style="display:none">'.$option_value.'</textarea>';
-                                 else
-                                     echo '<input type="text"  name="moo_settings['.$option_name.']" value="'.$option_value.'" hidden/>';
-                         ?>
-                        <div class="Moo_option-item">
-                            <label for="api_key">Your New API KEY</label>
-                            <input id="api_key" type="text" size="60" name="moo_settings[api_key]" value="<?php echo $MooOptions['api_key']?>" />
-                            <div style="text-align: center;">
-                                <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
-                                <a href="<?php echo (esc_url((admin_url('admin.php?page=moo_index')))); ?>" class="button">Cancel</a>
-                            </div>
+                        <div style="color: red;font-size: 20px;line-height: 25px;margin: 10px;">
+                            This action is irreversible and you will lose all your items,categories,modifiers and modifier groups, items images, items descriptions, categories images & descriptions,
+                            This will be helpful if you want to keep only your settings. (refresh the page after changing the api key)
                         </div>
-                    </form>
+                    </div>
+                    <div class="Moo_option-item">
+                        <label for="api_key">Your New API KEY</label>
+                        <input id="chang_api_key" type="text" value="<?php echo $MooOptions['api_key']?>" style="width: 100%;margin-top: 5px"/>
+
+                    </div>
+                    <div class="Moo_option-item">
+                        <div style="text-align: center;">
+                            <input type="button" class="button button-primary" value="Save Changes" onclick="mooUpdateApiKey()">
+                            <a href="<?php echo (esc_url((admin_url('admin.php?page=moo_index')))); ?>" class="button">Cancel</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         <?php

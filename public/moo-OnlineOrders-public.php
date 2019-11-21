@@ -104,7 +104,7 @@ class Moo_OnlineOrders_Public {
      */
     public function myStartSession() {
         if(!session_id()) {
-            session_start();
+            @session_start();
         }
     }
     /**
@@ -1807,12 +1807,11 @@ class Moo_OnlineOrders_Public {
        $taxable = $_POST["taxable"];
        $type    = $_POST["type"];
        $minAmount = $_POST["minAmount"];
-       $availabilityCustomTime = $_POST["availabilityCustomTime"];
-       $availabilityTime = $_POST["availabilityTime"];
+       $customHours = $_POST["availabilityCustomTime"];
        $useCoupons = $_POST["useCoupons"];
        $customMessage = $_POST["customMessage"];
 
-       $res = $this->model->updateOrderType($uuid,$name,$enable,$taxable,$type,$minAmount,$availabilityTime,$availabilityCustomTime,$useCoupons,$customMessage);
+       $res = $this->model->updateOrderType($uuid,$name,$enable,$taxable,$type,$minAmount,$customHours,$useCoupons,$customMessage);
        //update in Clover
        $cloverResponse  = $this->api->updateOrderType($uuid,$name,$taxable);
        //var_dump($cloverResponse);

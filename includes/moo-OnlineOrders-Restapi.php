@@ -1392,28 +1392,22 @@ class Moo_OnlineOrders_Restapi
 
         $res = array();
         $settings = (array) get_option("moo_settings");
-        if(isset($settings["mg_settings_displayInline"]) && $settings["mg_settings_displayInline"] == "enabled")
-        {
+
+        if(isset($settings["mg_settings_displayInline"]) && $settings["mg_settings_displayInline"] == "enabled") {
             $res["inlineDisplay"] = true;
-        }
-        else
-        {
+        } else {
             $res["inlineDisplay"] = false;
         }
-        if(isset($settings["mg_settings_qty_for_all"]) && $settings["mg_settings_qty_for_all"] == "disabled")
-        {
+
+        if(isset($settings["mg_settings_qty_for_all"]) && $settings["mg_settings_qty_for_all"] == "disabled") {
             $res["qtyForAll"] = false;
-        }
-        else
-        {
+        } else {
             $res["qtyForAll"] = true;
         }
-        if(isset($settings["mg_settings_qty_for_zeroPrice"]) && $settings["mg_settings_qty_for_zeroPrice"] == "disabled")
-        {
+
+        if(isset($settings["mg_settings_qty_for_zeroPrice"]) && $settings["mg_settings_qty_for_zeroPrice"] == "disabled") {
             $res["qtyForZeroPrice"] = false;
-        }
-        else
-        {
+        } else {
             $res["qtyForZeroPrice"] = true;
         }
 

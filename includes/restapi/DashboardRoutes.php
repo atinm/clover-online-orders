@@ -98,6 +98,15 @@ class DashboardRoutes extends BaseRoute {
                 'permission_callback' => array( $this, 'permissionCheck' )
             )
         ));
+        // get all categories
+        register_rest_route($this->namespace, '/dash/update_api_key', array(
+            // Here we register the readable endpoint for collections.
+            array(
+                'methods' => 'POST',
+                'callback' => array($this, 'dashUpdateApiKey'),
+                'permission_callback' => array( $this, 'permissionCheck' )
+            )
+        ));
 
 
 
@@ -288,6 +297,74 @@ class DashboardRoutes extends BaseRoute {
              return array(
                  "status"=>"failed"
              );
+        }
+    }
+    function dashUpdateApiKey( $request ){
+
+        if ( !isset($request["api_key"]) || empty( $request["api_key"] ) ) {
+            return new WP_Error( 'api_key_required', 'New Api Key not found', array( 'status' => 400 ) );
+        }
+        $api_key = sanitize_text_field($request["api_key"]);
+        //check token
+        if($this->api->checkAnyToken($api_key)){
+            //clean inventory
+            global $wpdb;
+            $settings = (array) get_option("moo_settings");
+            if($settings["api_key"] === $api_key) {
+                return array(
+                    "status"=>false,
+                    "message"=>"The API KEY isn't changed"
+                );
+            }
+
+            //-- Table `item_option`--
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_item_option` ;");
+            //-- Table `item_tax_rate` --
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_item_tax_rate` ;");
+            // -- Table `modifier_group` --
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_item_order` ;");
+            //*-- Table `item_tag` --
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_item_tag` ;");
+            //-- Table `item_modifier_group` --
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_item_modifier_group` ;");
+            //-- Table `order_types --
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_images` ;");
+            //-- Table `item` --
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_item` ;");
+            //-- Table `orders` --
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_order` ;");
+            //-- Table `option`--
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_option` ;");
+            //-- Table `tag` --
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_tag` ;");
+            //-- Table `tax_rate` --
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_tax_rate` ;");
+            //-- Table `modifier` --
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_modifier` ;");
+            //-- Table `category` --
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_category` ;");
+            //-- Table `attribute` --
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_attribute` ;");
+            //-- Table `item_group` --
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_item_group` ;");
+            //-- Table `modifier_group` --
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_modifier_group` ;");
+            //-- Table `order_types --
+            $wpdb->query("DELETE FROM `{$wpdb->prefix}moo_order_types` ;");
+            //change it
+            $settings = (array) get_option("moo_settings");
+            $settings["api_key"] = $api_key;
+            update_option("moo_settings",$settings);
+            //return response
+            return array(
+                "status"=>true,
+                "message"=>"The API KEY changed successfully"
+            );
+        } else {
+            return array(
+                "status"=>false,
+                "message"=>"This API KEY isn't correct"
+            );
         }
     }
 }

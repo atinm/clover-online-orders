@@ -16,7 +16,7 @@
  * Plugin Name:       Smart Online Order for Clover
  * Plugin URI:        http://www.zaytechapps.com
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.3.7
+ * Version:           1.3.8
  * Author:            Zaytech
  * Author URI:        http://www.zaytechapps.com
  * License:           Clover app
@@ -193,7 +193,7 @@ function moo_deactivateAndClean() {
 }
 add_action( 'admin_init', 'moo_deactivateAndClean');
                  
-if(get_option('moo_onlineOrders_version') != '137') {
+if(get_option('moo_onlineOrders_version') != '138') {
     add_action('plugins_loaded', 'moo_onlineOrders_check_version');
 }
 
@@ -213,6 +213,10 @@ function moo_onlineOrders_check_version()
     $wpdb->hide_errors();
     $version = get_option('moo_onlineOrders_version');
     $defaultOptions = get_option( 'moo_settings' );
+    if(! isset($version) || empty($version)){
+        $version="120";
+    }
+   // $version="120";
     switch ($version)
     {
         case '120':
@@ -316,16 +320,6 @@ function moo_onlineOrders_check_version()
                 $defaultOptions['closing_msg']= "";
             }
         case '133':
-            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `description` TEXT NULL");
-            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `custom_hours` VARCHAR(100) NULL");
-            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `time_availability` VARCHAR(10) NULL");
-            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_item` CHANGE `description` `description` TEXT ");
-            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `minAmount` VARCHAR(100) NULL DEFAULT '0' ");
-            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `custom_hours` VARCHAR(100) NULL");
-            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `time_availability` VARCHAR(10) NULL");
-            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `use_coupons` INT(1) NULL DEFAULT 1");
-            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `custom_message` VARCHAR(255) NULL DEFAULT 'Not available yet'");
-
             if(!isset($defaultOptions['accept_orders'])) {
                 $defaultOptions['accept_orders']= "enabled";
             }
@@ -349,7 +343,17 @@ function moo_onlineOrders_check_version()
             }
             update_option("moo_settings",$defaultOptions);
         case '136':
-            update_option('moo_onlineOrders_version','137');
+        case '137':
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `description` TEXT NULL");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `custom_hours` VARCHAR(100) NULL");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `time_availability` VARCHAR(10) NULL");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_item` CHANGE `description` `description` TEXT ");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `minAmount` VARCHAR(100) NULL DEFAULT '0' ");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `custom_hours` VARCHAR(100) NULL");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `time_availability` VARCHAR(10) DEFAULT 1");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `use_coupons` INT(1) NULL DEFAULT 1");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `custom_message` VARCHAR(255) NULL DEFAULT 'Not available yet'");
+            update_option('moo_onlineOrders_version','138');
             break;
     }
 }

@@ -301,7 +301,7 @@ class Moo_OnlineOrders_Model {
             return false;
         }
     }
-    function updateOrderType($uuid,$name,$enable,$taxable,$type,$minAmount,$availabilityTime,$availabilityCustomTime,$useCoupons,$customMessage)
+    function updateOrderType($uuid,$name,$enable,$taxable,$type,$minAmount,$customHours,$useCoupons,$customMessage)
     {
         $uuid = esc_sql($uuid);
        // $label = esc_sql($name);
@@ -309,8 +309,7 @@ class Moo_OnlineOrders_Model {
         $status = esc_sql($enable);
         $type = esc_sql($type);
         $minAmount = esc_sql($minAmount);
-        $availabilityTime = esc_sql($availabilityTime);
-        $availabilityCustomTime = esc_sql($availabilityCustomTime);
+        $customHours = esc_sql($customHours);
         $useCoupons = esc_sql($useCoupons);
        // $customMessage = esc_sql($customMessage);
 
@@ -321,8 +320,7 @@ class Moo_OnlineOrders_Model {
                 'status' => $status,
                 'minAmount' => $minAmount,
                 'show_sa' => $type,
-                'time_availability' => $availabilityTime,
-                'custom_hours' => $availabilityCustomTime,
+                'custom_hours' => $customHours,
                 'use_coupons' => $useCoupons,
                 'custom_message' => $customMessage,
             ),
@@ -835,7 +833,7 @@ class Moo_OnlineOrders_Model {
     }
     function getOrderTypesWithCustomHours()
     {
-        return $this->db->get_row("SELECT count(*) as nb FROM {$this->db->prefix}moo_order_types where  time_availability = '1' and custom_hours != '' ");
+        return $this->db->get_row("SELECT count(*) as nb FROM {$this->db->prefix}moo_order_types where custom_hours != '' ");
     }
 
     function saveNewOrderGroupModifier($tab) {

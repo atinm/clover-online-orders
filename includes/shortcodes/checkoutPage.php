@@ -322,10 +322,10 @@ class checkoutPage
                                     <small>No posts on your behalf, promise!</small>
                                 </p>
                                 <div class="moo-row">
-                                    <div class="moo-col-xs-8 moo-col-sm-6 moo-col-md-6 moo-col-md-offset-3 moo-col-sm-offset-3 moo-col-xs-offset-2">
+                                    <div class="moo-col-xs-8 moo-col-sm-6 moo-col-md-7 moo-col-md-offset-3 moo-col-sm-offset-3 moo-col-xs-offset-2">
                                         <a href="#" class="moo-btn moo-btn-lg moo-btn-primary moo-btn-block" onclick="moo_loginViaFacebook(event)" style="margin-top: 12px;">Facebook</a>
                                     </div>
-                                    <div class="moo-col-xs-12 moo-col-sm-6 moo-col-md-6 moo-col-md-offset-3">
+                                    <div class="moo-col-xs-12 moo-col-sm-12 moo-col-md-7 moo-col-md-offset-3">
                                         <div class="login-or">
                                             <hr class="hr-or">
                                             <span class="span-or">or</span>
@@ -342,10 +342,10 @@ class checkoutPage
                                     <small>You can checkout without registering</small>
                                 </p>
                                 <div class="moo-row">
-                                    <div class="moo-col-xs-8 moo-col-sm-6 moo-col-md-6 moo-col-md-offset-3 moo-col-sm-offset-3 moo-col-xs-offset-2">
+                                    <div class="moo-col-xs-8 moo-col-sm-6 moo-col-md-7 moo-col-md-offset-3 moo-col-sm-offset-3 moo-col-xs-offset-2">
                                         <a href="#" class="moo-btn moo-btn-lg moo-btn-primary moo-btn-block" onclick="moo_loginAsguest(event)" style="margin-top: 12px;"> Continue As Guest</a>
                                     </div>
-                                    <div class="moo-col-xs-12 moo-col-sm-6 moo-col-md-8 moo-col-md-offset-2">
+                                    <div class="moo-col-xs-12 moo-col-sm-12 moo-col-md-9 moo-col-md-offset-2">
                                         <div class="login-or">
                                             <hr class="hr-or">
                                             <span class="span-or">or</span>

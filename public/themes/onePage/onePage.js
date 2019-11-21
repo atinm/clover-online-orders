@@ -248,21 +248,33 @@ function moo_renderItems(category,withButton)
                 {
                     if(item.has_modifiers)
                     {
-                        if(window.moo_theme_setings.onePage_qtyWindowForModifiers != null && window.moo_theme_setings.onePage_qtyWindowForModifiers == "on")
+                        if(window.moo_theme_setings.onePage_qtyWindowForModifiers != null && window.moo_theme_setings.onePage_qtyWindowForModifiers == "on") {
                             html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtnFIWM)">Choose Qty & Options</button>';
+                        }
                         else
-                            html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty</button>';
+                        {
+                            if(window.moo_mg_setings.qtyForAll)
+                                html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty</button>';
+                            else
+                                html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options</button>';
+                        }
                     }
                     else
+                    {
                         html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)">Add to cart</button>';
+                    }
 
                 }
                 else
                 {
-                    if(item.has_modifiers)
-                        html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty </button>';
-                    else
+                    if(item.has_modifiers) {
+                        if(window.moo_mg_setings.qtyForAll)
+                            html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty </button>';
+                        else
+                            html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options</button>';
+                    } else {
                         html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtn(event,\''+item.uuid+'\',1)">Add to cart</button>';
+                    }
 
                 }
             }
@@ -345,21 +357,24 @@ function mooClickOnLoadMoreItems(event,cat_id,cat_name)
                         '    <span class="moo-price">$'+item_price+'</span>';
                 }
 
-                if(item.stockCount == "out_of_stock")
-                {
+                if(item.stockCount == "out_of_stock") {
                     html += '<button class="moo-btn-sm moo-hvr-sweep-to-top">Out Of Stock</button>';
-                }
-                else
-                {
+                } else {
                     //Checking the Qty window show/hide and add add to cart button
                     if(window.moo_theme_setings.onePage_qtyWindow != null && window.moo_theme_setings.onePage_qtyWindow == "on")
                     {
                         if(item.has_modifiers)
                         {
                             if(window.moo_theme_setings.onePage_qtyWindowForModifiers != null && window.moo_theme_setings.onePage_qtyWindowForModifiers == "on")
+                            {
                                 html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtnFIWM)">Choose Qty & Options</button>';
-                            else
-                                html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty</button>';
+                            } else {
+                                if(window.moo_mg_setings.qtyForAll){
+                                    html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty</button>';
+                                } else {
+                                    html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options</button>';
+                                }
+                            }
                         }
                         else
                             html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)">Add to cart</button>';
@@ -367,10 +382,15 @@ function mooClickOnLoadMoreItems(event,cat_id,cat_name)
                     }
                     else
                     {
-                        if(item.has_modifiers)
-                            html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty </button>';
-                        else
+                        if(item.has_modifiers) {
+                            if(window.moo_mg_setings.qtyForAll){
+                                html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options & Qty </button>';
+                            } else {
+                                html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)">Choose Options</button>';
+                            }
+                        } else {
                             html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtn(event,\''+item.uuid+'\',1)">Add to cart</button>';
+                        }
 
                     }
 
