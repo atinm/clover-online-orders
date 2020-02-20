@@ -238,7 +238,7 @@
     text-align: center;
 }
 .moo-text-muted {
-    color: #a4a7a9 !important;
+    color: #363738;
 }
 .moo-text-sm {
     font-size: 0.95rem;
@@ -496,7 +496,7 @@ button.moo-btn-sm {
 
 .moo-show-more
 {
-    color: red;
+    color: black;
     text-decoration: none;
     font-size: 14px;
     font-family: "Open Sans", Arial, sans-serif;
@@ -504,7 +504,7 @@ button.moo-btn-sm {
 }
 .moo-show-more:hover
 {
-    color: red;
+    color: black;
 }
 .moo-price
 {

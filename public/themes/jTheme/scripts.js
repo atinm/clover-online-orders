@@ -467,7 +467,7 @@ function moo_clickOnOrderBtnFIWM(event,item_id,qty) {
                     if(Object.keys(window.moo_mg_setings).length > 0)
                     {
                         if(window.moo_mg_setings.inlineDisplay && window.moo_mg_setings.inlineDisplay == true ) {
-                            var h = '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12" id="moo-modifiersContainer-for-'+item_id+'"></div>';
+                            var h = '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12 moo-modifiersContainer-for-'+item_id+'"></div>';
                             jQuery("#moo-onlineStore-items").append(h);
                             jQuery("html, body").animate({
                                 scrollTop: jQuery("#moo-modifiersContainer-for-"+item_id).offset().top

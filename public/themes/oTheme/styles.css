@@ -1105,6 +1105,9 @@ background-color: #2672af;
     cursor: pointer;
     transition: all .5s;
     margin: 10px auto;
+    text-decoration: none;
+    height: 45px;
+
 }
 #osnCartTotal.cartTotal h4{
     margin-bottom: 0;
@@ -1175,28 +1178,28 @@ background-color: #2672af;
     font-family: "ITC Avant Garde Std Demi";
 }
 
-.container .btn{
-    background-color: #0097e6;
-    padding: 1em 2em;
-    display: inline-block;
-    position: absolute;
-    border-radius: 60px;
-    color: #fff;
-    margin-bottom: 10px;
-    -webkit-box-shadow: 0 0 35px 0 rgba(27,138,214,0.59);
-    -moz-box-shadow: 0 0 35px 0 rgba(27,138,214,0.59);
-    box-shadow: 0 0 35px 0 rgba(27,138,214,0.59);
-    text-transform: uppercase;
-    font-size: 14px;
-    -webkit-transition: all .5s;
-    -moz-transition: all .5s;
-    -ms-transition: all .5s;
-    transition: all .5s;
-    border: none;
-    top: 30%;
-    cursor: pointer;
-    right: 47%;
-}
+/*.container .btn{*/
+/*    background-color: #0097e6;*/
+/*    padding: 1em 2em;*/
+/*    display: inline-block;*/
+/*    position: absolute;*/
+/*    border-radius: 60px;*/
+/*    color: #fff;*/
+/*    margin-bottom: 10px;*/
+/*    -webkit-box-shadow: 0 0 35px 0 rgba(27,138,214,0.59);*/
+/*    -moz-box-shadow: 0 0 35px 0 rgba(27,138,214,0.59);*/
+/*    box-shadow: 0 0 35px 0 rgba(27,138,214,0.59);*/
+/*    text-transform: uppercase;*/
+/*    font-size: 14px;*/
+/*    -webkit-transition: all .5s;*/
+/*    -moz-transition: all .5s;*/
+/*    -ms-transition: all .5s;*/
+/*    transition: all .5s;*/
+/*    border: none;*/
+/*    top: 30%;*/
+/*    cursor: pointer;*/
+/*    right: 47%;*/
+/*}*/
 .fade {
     transition: opacity .15s linear;
 }
@@ -1420,7 +1423,7 @@ background-color: #2672af;
     margin: 0 auto;
     z-index: 2;
 }
-#osnItemModalModifier .osnModifierPanel .osnModifierPanelContent .osnModifierContainer .osnItemModifierCard .modifier-quantity-controls.hide,#osnChooseQuantity .modifier-quantity-controls.hide{
+#osnItemModalModifier .osnModifierPanel .osnModifierPanelContent .osnModifierContainer .osnItemModifierCard .modifier-quantity-controls.osnHide,#osnChooseQuantity .modifier-quantity-controls.osnHide{
     display: none;
 }
 
@@ -1498,9 +1501,9 @@ color: #516278;
     cursor: pointer;
    
 }
-#osnModifierPanelPaginateBtn.osnModifierPanelBtn button.osnModifierPanelBtnAddToCart.hide,
-#osnModifierPanelPaginateBtn.osnModifierPanelBtn button.osnModifierPanelBtnPrevious.hide,
-#osnModifierPanelPaginateBtn.osnModifierPanelBtn button.osnModifierPanelBtnNext.hide{
+#osnModifierPanelPaginateBtn.osnModifierPanelBtn button.osnModifierPanelBtnAddToCart.osnHide,
+#osnModifierPanelPaginateBtn.osnModifierPanelBtn button.osnModifierPanelBtnPrevious.osnHide,
+#osnModifierPanelPaginateBtn.osnModifierPanelBtn button.osnModifierPanelBtnNext.osnHide{
     display: none;
 }
 #osnModifierPanelPaginateBtn.osnModifierPanelBtn button.osnModifierPanelBtnNext{

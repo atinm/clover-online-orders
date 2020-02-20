@@ -272,28 +272,29 @@ function osnLoadCatItemDataSearch(keyword) {
     ).done(
         function() {
             jQuery('#osnItemsSearchResult').html(contentItems).promise().done(function(){});
-
         }
     );
 }
 function osnLoadCatItemData() { 
     osnUpdatePriceCart();
     contentItems = '<div id="osnGroupContainer" class="osnGroupContainer">';
-    if(window.showSearch){contentItems += '<div>';
-    contentItems += '<div class="osnCategorieTitle osnSearchSeparator">';
-    contentItems += '<div><h2>Search</h2></div>'+
-    '<div class="osnCategorieSeparator">'+
-    '<i></i>'+
-    '</div>';
-    
-    contentItems += '</div>';
-    contentItems += '<div id="" class="osnCategorieSeparator osnSearchSeparator">'+
-    '<input id="osnSearch" type="search" onkeyup="osnSearchCheck(event)" autocomplete="off">'+'<button onclick="osnSearchCheck(event)">search</button>'
-    '</div>';
-    contentItems += '</div>';
-    contentItems += '<div id="osnItemsSearchResult" class="osnItemsContainers">';
-    contentItems += '</div>';
-    contentItems += '</div>';}
+    if(window.showSearch){
+        contentItems += '<div>';
+        contentItems += '<div class="osnCategorieTitle osnSearchSeparator">';
+        contentItems += '<div><h2>Search</h2></div>'+
+        '<div class="osnCategorieSeparator">'+
+        '<i></i>'+
+        '</div>';
+
+        contentItems += '</div>';
+        contentItems += '<div id="" class="osnCategorieSeparator osnSearchSeparator">'+
+        '<input id="osnSearch" type="search" onkeyup="osnSearchCheck(event)" autocomplete="off">'+'<button onclick="osnSearchCheck(event)">search</button>'
+        '</div>';
+        contentItems += '</div>';
+        contentItems += '<div id="osnItemsSearchResult" class="osnItemsContainers">';
+        contentItems += '</div>';
+        contentItems += '</div>';
+    }
     
     content = '<div id="osnMenu" class="osnMenu">';
     content += '<ul class="osnMenuListCat">';
@@ -331,7 +332,7 @@ function osnLoadCatItemData() {
                     
                  }
             );
-    }else{
+    } else {
         osnRenderItems(contentItems,content);
     }
     
@@ -342,53 +343,54 @@ function osnRenderItems(contentItems,content){
     if(window.showMore) endPoint = moo_RestUrl+"moo-clover/v1/categories?expand=five_items";
     jQuery.get(endPoint,
         function (data) {
-            if(data)
-            data.forEach(function(element) {
-                var category = element;
-                if(typeof category !== 'object')
-                    return;
-                if(typeof attr_categories !== 'undefined' && attr_categories !== undefined && attr_categories !== null && typeof attr_categories === 'object') {
-                    if(attr_categories.indexOf(category.uuid.toUpperCase()) === -1){
+            if(data) {
+                data.forEach(function(element) {
+                    var category = element;
+                    if(typeof category !== 'object')
                         return;
+                    if(typeof attr_categories !== 'undefined' && attr_categories !== undefined && attr_categories !== null && typeof attr_categories === 'object') {
+                        if(attr_categories.indexOf(category.uuid.toUpperCase()) === -1){
+                            return;
+                        }
                     }
-                }
-                if(element.items.length > 0){
-                content += '<li class="osnMenuListCatItem"><a data-id="#cat-'+element.uuid+'" onclick="osnScrollToCat(this)" class="osnCatLink">'+((window.showCategoryIcon)?'<span><i class="icon-food"></i></span><span>':'<span style="margin:13px;">')+''+element.name+'</span></a></li>';
-                contentItems += '<div id="cat-'+element.uuid+'" class="scrollspy">';
-                    contentItems += '<div class="osnCategorieTitle">';
-                    contentItems += '<div><h2>'+element.name+'</h2></div>'+
-                    '<div class="osnCategorieSeparator">'+
-                    '<i></i>'+
-                    '</div>';
-                    contentItems += '</div>';
-                    
-                    if(element.description !== '' && element.description !== undefined) contentItems += '<div class="osnCatDescription"><p>' + element.description + '</p></div>';
-                    contentItems += '<div class="osnItemsContainers">';
-                    
-                    element.items.forEach(function (item){
-                        contentItems += '<div class="osnCardItem">'
-                        +'<div class="osnImgItem" ';
-                        if(element.available && (item.stockCount != "out_of_stock") ) contentItems += 'onclick="osnItemDescriptionModal(\''+item.uuid+'\')"';
-                        contentItems += ' style="'+((item.image)?'background-image:url('+item.image.url+')':'')+'">';
-                        contentItems +='</div>'
-                        +'<div class="osnContentItem">'
-                        +' <h4>'+item.name+'</h4>'
-                        +'<div class="price-product"><p>$'+parseFloat(item.price/100).toFixed(2)+'</p><div class="price-menu '+((!element.available || item.stockCount == "out_of_stock")?'unavailable':'')+'" '+((element.available && (item.stockCount != "out_of_stock") )?'onclick="osnItemDescriptionModal(\''+item.uuid+'\')':'title="This item is '+((!element.available)?'not available':'out of stock')+'"')+'"><i class="'+((item.has_modifiers)?'icon-cog':'icon-add_circle')+'"></i></div></div>'
-                        +'</div>'
-                        +'</div>';
-                    });
-                    if(window.showMore && element.items.length == 5) {
-                        contentItems += '<div id="osnMoreItems'+element.uuid+'" class="osnCardItem osnMoreItems" onclick="osnGetMoreItems(\''+element.uuid+'\')" >'
-                        +'<div><i class="icon-angle-right"></i></div>'   
-                        +'<div><h4>show more</h4></div>'
-                        +'</div>';
+                    if(element.items.length > 0){
+                        content += '<li class="osnMenuListCatItem"><a data-id="#cat-'+element.uuid+'" onclick="osnScrollToCat(this)" class="osnCatLink">'+((window.showCategoryIcon)?'<span><i class="icon-food"></i></span><span>':'<span style="margin:13px;">')+''+element.name+'</span></a></li>';
+                        contentItems += '<div id="cat-'+element.uuid+'" class="scrollspy">';
+                        contentItems += '<div class="osnCategorieTitle">';
+                        contentItems += '<div><h2>'+element.name+'</h2></div>'+
+                            '<div class="osnCategorieSeparator">'+
+                            '<i></i>'+
+                            '</div>';
+                        contentItems += '</div>';
+
+                        if(element.description !== '' && element.description !== undefined) contentItems += '<div class="osnCatDescription"><p>' + element.description + '</p></div>';
+                        contentItems += '<div class="osnItemsContainers">';
+
+                        element.items.forEach(function (item){
+                            contentItems += '<div class="osnCardItem">'
+                                +'<div class="osnImgItem" ';
+                            if(element.available && (item.stockCount != "out_of_stock") ) contentItems += 'onclick="osnItemDescriptionModal(\''+item.uuid+'\')"';
+                            contentItems += ' style="'+((item.image)?'background-image:url('+item.image.url+')':'')+'">';
+                            contentItems +='</div>'
+                                +'<div class="osnContentItem">'
+                                +' <h4>'+item.name+'</h4>'
+                                +'<div class="price-product"><p>$'+parseFloat(item.price/100).toFixed(2)+'</p><div class="price-menu '+((!element.available || item.stockCount == "out_of_stock")?'unavailable':'')+'" '+((element.available && (item.stockCount != "out_of_stock") )?'onclick="osnItemDescriptionModal(\''+item.uuid+'\')':'title="This item is '+((!element.available)?'not available':'out of stock')+'"')+'"><i class="'+((item.has_modifiers)?'icon-cog':'icon-add_circle')+'"></i></div></div>'
+                                +'</div>'
+                                +'</div>';
+                        });
+                        if(window.showMore && element.items.length == 5) {
+                            contentItems += '<div id="osnMoreItems'+element.uuid+'" class="osnCardItem osnMoreItems" onclick="osnGetMoreItems(\''+element.uuid+'\')" >'
+                                +'<div><i class="icon-angle-right"></i></div>'
+                                +'<div><h4>show more</h4></div>'
+                                +'</div>';
+                        }
+
+                        contentItems += '</div>';
+                        contentItems += '</div>';
+
                     }
-                    
-                    contentItems += '</div>';
-                contentItems += '</div>';
-               
+                });
             }
-        });
         },
         "json"
     ).done(
@@ -415,7 +417,6 @@ function osnRenderItems(contentItems,content){
                  var top = (jQuery(hash).offset() != null)?jQuery(hash).offset().top:""; //Getting Y of target element
                  window.scrollTo(0, top);
              }
-
         }
     );
 }
@@ -528,7 +529,7 @@ function osnShowHideCart() {
     } else {
         osnLaunchLoading();  
       html = '<div id="osnCartModal" class="cartModal">';
-      html += '<div id="osnCartModalContent" class="cartModalContent hide">';
+      html += '<div id="osnCartModalContent" class="cartModalContent osnHide">';
       html += '<div id="osnCartHeader" class="cartHeader">';
       html += '<span>your cart</span><div><button class="cartModifierBtn" onclick="osnClickEditBtnCart()">edit</button><div class="osnCloseCart icon-close" onclick="osnShowHideCart()"></div></div>';
       html += '</div>';
@@ -852,7 +853,7 @@ function osnItemModalModifier(item_uuid,index) {
         content += '</div>';
         if (osn_Item_Modifers.length > 1){
             content += '<div id="osnModifierPanelPaginateBtn" class="osnModifierPanelBtn">';
-            content += '<button class="osnModifierPanelBtnPrevious hide" data-op="previous" onclick="osnGetModifier(this)">Previous</button>';
+            content += '<button class="osnModifierPanelBtnPrevious osnHide" data-op="previous" onclick="osnGetModifier(this)">Previous</button>';
             content += '<button class="osnModifierPanelBtnNext" data-op="next" onclick="osnGetModifier(this)">Next</button>';
             content += '</div>';
         }
@@ -919,39 +920,39 @@ function osnGetModifier(page){
             if(group.qty >= group.min_required || group.min_required === null){
             osn_Item_Modifers_Pagination +=1;
             page = osn_Item_Modifers_Pagination;
-            jQuery('.osnModifierPanelBtnPrevious').removeClass('hide');
+            jQuery('.osnModifierPanelBtnPrevious').removeClass('osnHide');
             if(osn_Item_Modifers.length == osn_Item_Modifers_Pagination+1){
-                jQuery('.osnModifierPanelBtnNext').addClass('hide');
+                jQuery('.osnModifierPanelBtnNext').addClass('osnHide');
             }}else{
                 spanMessage = jQuery('.osnModifierGroup').find('span');
                 if(spanMessage.hasClass('error'))spanMessage.removeClass('error');else
                 spanMessage.addClass('error');
             }
         }else if(osn_Item_Modifers.length == osn_Item_Modifers_Pagination+1){
-            jQuery('.osnModifierPanelBtnNext').addClass('hide');
-            jQuery('.osnModifierPanelBtnPrevious').removeClass('hide');
+            jQuery('.osnModifierPanelBtnNext').addClass('osnHide');
+            jQuery('.osnModifierPanelBtnPrevious').removeClass('osnHide');
         }
      }else{
         if(osn_Item_Modifers.length >  1){
             osn_Item_Modifers_Pagination -=1;
             page = osn_Item_Modifers_Pagination;
             if(osn_Item_Modifers_Pagination == 0){
-                jQuery('.osnModifierPanelBtnPrevious').addClass('hide');
+                jQuery('.osnModifierPanelBtnPrevious').addClass('osnHide');
             }
-            jQuery('.osnModifierPanelBtnNext').removeClass('hide');
+            jQuery('.osnModifierPanelBtnNext').removeClass('osnHide');
         }else if(osn_Item_Modifers.length == 1){
-            jQuery('.osnModifierPanelBtnPrevious').addClass('hide');
+            jQuery('.osnModifierPanelBtnPrevious').addClass('osnHide');
         }
      }}
     if(page == 0){
-        jQuery('.osnModifierPanelBtnPrevious').addClass('hide');
-        jQuery('.osnModifierPanelBtnNext').removeClass('hide');
+        jQuery('.osnModifierPanelBtnPrevious').addClass('osnHide');
+        jQuery('.osnModifierPanelBtnNext').removeClass('osnHide');
     }else if(osn_Item_Modifers.length == page+1){
-        jQuery('.osnModifierPanelBtnNext').addClass('hide');
-        jQuery('.osnModifierPanelBtnPrevious').removeClass('hide');
+        jQuery('.osnModifierPanelBtnNext').addClass('osnHide');
+        jQuery('.osnModifierPanelBtnPrevious').removeClass('osnHide');
     }else if(osn_Item_Modifers.length > page && page > 0){
-        jQuery('.osnModifierPanelBtnPrevious').removeClass('hide');
-        jQuery('.osnModifierPanelBtnNext').removeClass('hide');
+        jQuery('.osnModifierPanelBtnPrevious').removeClass('osnHide');
+        jQuery('.osnModifierPanelBtnNext').removeClass('osnHide');
     }
     if(!isNaN(page)){
         jQuery('#osnModifierGroupMenu').find('button').removeClass('active');
@@ -966,14 +967,14 @@ function osnGetModifier(page){
             if(window.modifiers_settings.qtyForAll){
             if(osn_Item_Modifers[page].max_allowd == 1 && osn_Item_Modifers[page].min_required == 1){
 
-            }else if(modifier.price != 0) {content+= '<div class="modifier-quantity-controls '+((modifier.selected)?'':'hide')+'">';
+            }else if(modifier.price != 0) {content+= '<div class="modifier-quantity-controls '+((modifier.selected)?'':'osnHide')+'">';
             content+='<a data-op="decrement" onclick="osnQuantitySelectedModifier(this)" data-uuid-group-modifier="'+osn_Item_Modifers[page].uuid+'" data-uuid-modifier="'+modifier.uuid+'" class="modifier-quantity"><i class="icon-minus"></i></a>';
             content+='<span class="product-quantity-wrapper"><span class="product-quantity-times">x</span>'+((modifier.qty)?modifier.qty:'1')+'</span>';
             content+='<a onclick="osnQuantitySelectedModifier(this)" data-uuid-modifier="'+modifier.uuid+'" data-uuid-group-modifier="'+osn_Item_Modifers[page].uuid+'" data-op="increment" class="modifier-quantity"><i class="icon-plus"></i></a>';
             content+= '</div>';
         }else{
             if(window.modifiers_settings.qtyForZeroPrice){
-                content+= '<div class="modifier-quantity-controls '+((modifier.selected)?'':'hide')+'">';
+                content+= '<div class="modifier-quantity-controls '+((modifier.selected)?'':'osnHide')+'">';
                 content+='<a data-op="decrement" onclick="osnQuantitySelectedModifier(this)" data-uuid-group-modifier="'+osn_Item_Modifers[page].uuid+'" data-uuid-modifier="'+modifier.uuid+'" class="modifier-quantity"><i class="icon-minus"></i></a>';
                 content+='<span id="osnModifierQuantity" class="product-quantity-wrapper"><span class="product-quantity-times">x</span>'+((modifier.qty)?modifier.qty:'1')+'</span>';
                 content+='<a onclick="osnQuantitySelectedModifier(this)" data-uuid-modifier="'+modifier.uuid+'" data-uuid-group-modifier="'+osn_Item_Modifers[page].uuid+'" data-op="increment" class="modifier-quantity"><i class="icon-plus"></i></a>';
@@ -1055,7 +1056,7 @@ function OsnSelectModifier(Guuid,uuid){
     if(modifier["selected"] == true && modifier_div.hasClass("selected")){
         modifier["selected"] = false;
         jQuery("#"+uuid).find(".product-quantity-wrapper").html('<span class="product-quantity-times">x</span>'+1);
-        jQuery("#"+uuid).find(".modifier-quantity-controls").addClass('hide');
+        jQuery("#"+uuid).find(".modifier-quantity-controls").addClass('osnHide');
         finalPrice -= (parseFloat(modifier["price"])*modifier["qty"]);
         jQuery('.osnModifierPanelPriceDetails').find("p").html("$ "+parseFloat((finalPrice/100)*osnItemQty).toFixed(2));
         group["qty"] -= modifier["qty"];
@@ -1071,7 +1072,7 @@ function OsnSelectModifier(Guuid,uuid){
         modifier["qty"] = 1;
         jQuery("#"+uuid).find(".product-quantity-wrapper").html('<span class="product-quantity-times">x</span>'+1);
         finalPrice += (parseFloat(modifier["price"]));
-        if((group.max_allowd != 1 && group.min_required != 1 ) || (group.min_required != null && group.min_required == 1 && (group.max_allowd > 1 || group.max_allowd == null)  ) ){jQuery("#"+uuid).find(".modifier-quantity-controls").removeClass('hide');}
+        if((group.max_allowd != 1 && group.min_required != 1 ) || (group.min_required != null && group.min_required == 1 && (group.max_allowd > 1 || group.max_allowd == null)  ) ){jQuery("#"+uuid).find(".modifier-quantity-controls").removeClass('osnHide');}
         jQuery('.osnModifierPanelPriceDetails').find("p").html("$ "+parseFloat((finalPrice/100)*osnItemQty).toFixed(2));
         modifier_div.addClass("selected");
     }else if(group.max_allowd == 1 && group.min_required == 1){
@@ -1079,7 +1080,7 @@ function OsnSelectModifier(Guuid,uuid){
             if(jQuery('#'+modif.uuid).hasClass("selected")){
                 modif["selected"] = false;
                 jQuery("#"+modif.uuid).find(".product-quantity-wrapper").html('<span class="product-quantity-times">x</span>'+1);
-                jQuery("#"+modif.uuid).find(".modifier-quantity-controls").addClass('hide');
+                jQuery("#"+modif.uuid).find(".modifier-quantity-controls").addClass('osnHide');
                 finalPrice -= (parseFloat(modif["price"])*modif["qty"]);
                 jQuery('.osnModifierPanelPriceDetails').find("p").html("$ "+parseFloat((finalPrice/100)*osnItemQty).toFixed(2));
                 group["qty"]-=modif["qty"];

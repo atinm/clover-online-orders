@@ -751,7 +751,7 @@ class moo_OnlineOrders_Admin {
                                     echo '<div class="moo_dashboard_text_error">Store interface not customizable</div>';
                                     echo '<div class="moo_dashboard_buttons_actions"><a href="?page=moo_themes" class="moo_dashboard_button moo_dashboard_medium  pull-left moo_dashboard_button_go_back" style="background: black;">Go back to store interfaces</a></div>';
                                 } else {
-                                    //get the theme settings
+                                    //get the theme settingsx
                                     $themes_current_settings = array();
                                     $settings = (array) get_option("moo_settings");
 
@@ -1072,8 +1072,7 @@ class moo_OnlineOrders_Admin {
         add_screen_option( $option, $args );
     }
 
-    public function panel_settings()
-    {
+    public function panel_settings() {
         $api   = $this->api;
         $model = $this->model;
         wp_enqueue_script('moo-grid');
@@ -1167,6 +1166,15 @@ class moo_OnlineOrders_Admin {
         } else {
             $merchant_address = urlencode($merchant_address);
         }
+        if($merchant_address == "" || !$merchant_address) {
+            $merchant_address = null;
+        }
+        if($MooOptions['lat'] == "") {
+            $MooOptions['lat'] = null;
+        }
+        if($MooOptions['lng'] == "") {
+            $MooOptions['lng'] = null;
+        }
         wp_localize_script("moo-map-da", "moo_merchantAddress",$merchant_address);
         wp_localize_script("moo-map-da", "moo_merchantLat",$MooOptions['lat']);
         wp_localize_script("moo-map-da", "moo_merchantLng",$MooOptions['lng']);
@@ -1200,6 +1208,7 @@ class moo_OnlineOrders_Admin {
                     <a href="#help"><li id="MooPanel_tab10" onclick="tab_clicked(10)">Feedback / Help</li></a>
                     <a href="#faq"><li id="MooPanel_tab11" onclick="tab_clicked(11)">FAQ</li></a>
                     <a href="https://www.youtube.com/channel/UCvG2UY0xjcLVTOccDqaGBow" target="_blank"><li>Video Tutorials <i class="fas fa-external-link-square-alt"></i></li></a>
+                    <a href="https://docs.smartonlineorder.com" target="_blank"><li>Helpful Articles <i class="fas fa-external-link-square-alt"></i></li></a>
                 </ul>
             </div>
             <div id="MooPanel_main">
@@ -1226,6 +1235,7 @@ class moo_OnlineOrders_Admin {
                         <a href="#help"><li id="MooPanel_tab10" onclick="tab_clicked(10)">Feedback / Help</li></a>
                         <a href="#faq"><li id="MooPanel_tab11" onclick="tab_clicked(11)">FAQ</li></a>
                         <a href="https://www.youtube.com/channel/UCvG2UY0xjcLVTOccDqaGBow" target="_blank"><li>Video Tutorials <i class="fas fa-external-link-square-alt"></i></li></a>
+                        <a href="https://docs.smartonlineorder.com" target="_blank"><li>Helpful Articles <i class="fas fa-external-link-square-alt"></i></li></a>
 
                     </ul>
                 </div>
@@ -1249,7 +1259,7 @@ class moo_OnlineOrders_Admin {
                                 <h3>API key</h3>
                                 <div class="Moo_option-item">
                                     <p>
-                                        The API Key or Activation license is a secret and unique key used to link your website with your Clover device. You can get the Api Key by going to Clover.com from a computer, then login. Then select more tools, and install Smart Online Order. Please watch <a href="https://www.youtube.com/watch?v=7p3FCf8iFlM" target="_blank">this video</a> to learn how to install the app or search “Smart Online Order” on Youtube. You can also visit smartonlineorder.com to learn more.
+                                        The API Key or Activation license is a secret and unique key used to link your website with your Clover device. You can get the Api Key by going to Clover.com from a computer, then login. Then select more tools, and install Smart Online Order. Please watch <a href="https://www.youtube.com/watch?v=GGGm22D-f0M" target="_blank">this video</a> to learn how to install the app or search “Smart Online Order” on Youtube. You can also visit smartonlineorder.com to learn more.
                                         If you already have installed Smart Online Order enter the Api Key here:
                                     </p>
                                 </div>
@@ -1259,7 +1269,7 @@ class moo_OnlineOrders_Admin {
                                     <?php echo $errorToken;?>
                                 </div>
                                 <div style="padding: 20px">
-                                    <a href="http://api.smartonlineorders.com/oauth" target="_blank">You can also get your Api Key from this link:</a>
+                                    <a href="http://api.smartonlineorders.com/oauth" target="_blank">You can also get your Api Key from this link</a>
                                 </div>
                                 <div style="text-align: center; margin-bottom: 20px;">
                                     <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
@@ -2544,7 +2554,7 @@ class moo_OnlineOrders_Admin {
                             </div>
                             <div class="Moo_option-item" >
                                 <div class="normal_text">
-                                    <strong>Fixed Delivery amount</strong> :  This fee will be applied towards any delivered order (order types with shipping address must be enabled) Keep empty if you don"t want to charge a fixed delivery fee. This will override any delivery fees you added when drawing the map
+                                    <strong>Fixed Delivery amount</strong> :  This fee will be applied towards any delivered order (order types with shipping address must be enabled) Keep empty if you don"t want to charge a fixed delivery fee.<b style="color: red">This will override any delivery fees you added when drawing the map. </b> Recommended to leave blank
                                 </div>
                                 <div class="iwl_holder">
                                     <div class="iwl_label_holder"><label for="fixeddeliveryamount">Fixed Delivery amount</label></div>
@@ -2861,8 +2871,7 @@ class moo_OnlineOrders_Admin {
      *
      * @since    1.0.0
      */
-    public function register_mysettings()
-    {
+    public function register_mysettings() {
         register_setting('moo_settings', 'moo_settings');
     }
     /**
@@ -2981,7 +2990,9 @@ class moo_OnlineOrders_Admin {
         wp_localize_script("moo-publicAdmin-js", "moo_params",$params);
         wp_localize_script("moo-publicAdmin-js", "moo_custom_hours",$merchantCustomHours);
         wp_localize_script("moo-publicAdmin-js", "moo_custom_hours_for_ot",$merchantCustomHoursForOT);
-        wp_localize_script("moo-publicAdmin-js", "moo_api_key",$MooOptions["api_key"]);
+        if($MooOptions["api_key"]) {
+            wp_localize_script("moo-publicAdmin-js", "moo_api_key",$MooOptions["api_key"]);
+        }
         wp_localize_script("moo-publicAdmin-js", "moo_RestUrl",get_rest_url());
 
     }

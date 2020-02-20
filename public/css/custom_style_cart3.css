@@ -105,7 +105,7 @@
 .moo-shopping-cart-container .moo-shopping-cart .moo-product .moo-remove-product {
     border: 0;
     padding: 4px 8px;
-    background-color: #c66;
+    background-color: #e31c3d;
     color: #fff !important;
     font-family: "HelveticaNeue-Medium", "Helvetica Neue Medium", sans-serif;
     font-size: 12px;
@@ -140,7 +140,7 @@
     border: 0;
     margin-top: 20px;
     padding: 6px 25px;
-    background-color: #6b6;
+    background-color: #2e8540;
     color: #fff;
     font-size: 25px;
     border-radius: 3px;
@@ -151,7 +151,7 @@
      border: 0;
      /* margin-top: 20px; */
      padding: 6px 25px;
-     background-color: #6675bb;
+     background-color: #205493;
      color: #fff;
      font-size: 16px;
      border-radius: 3px;

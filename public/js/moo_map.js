@@ -324,7 +324,7 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
 
 }
 
-function moo_update_delivery_amount(result)
+            function moo_update_delivery_amount(result)
 {
     var html='<strong>Delivery amount :</strong><br/>';
     switch(result.type) {

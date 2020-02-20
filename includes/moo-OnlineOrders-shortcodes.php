@@ -406,7 +406,7 @@ class Moo_OnlineOrders_Shortcodes {
                     </div>
                     <div class="moo-col-md-6 moo-col-md-offset-3">
                         <div class="moo-row login-section">
-                            <form action="post" onsubmit="moo_login(event)">
+                            <form action="post" onsubmit="moo_loginAccountPage(event)">
                                 <div class="form-group">
                                     <label for="inputEmail">Email</label>
                                     <input type="text" id="inputEmail" class="moo-form-control" autocomplete="username">
@@ -417,7 +417,7 @@ class Moo_OnlineOrders_Shortcodes {
                                     <input type="password"  id="inputPassword" class="moo-form-control" autocomplete="current-password">
                                     <a class="pull-right" href="#" onclick="moo_show_forgotpasswordform(event)">Forgot password?</a>
                                 </div>
-                                <button id="mooButonLogin" class="moo-btn" onclick="moo_login(event)">
+                                <button id="mooButonLogin" class="moo-btn" onclick="moo_loginAccountPage(event)">
                                     Log In
                                 </button>
                                 <p style="padding: 10px;"> Don't have an account<a  href="#" onclick="moo_show_sigupform(event)"> Sign-up</a> </p>
@@ -430,7 +430,7 @@ class Moo_OnlineOrders_Shortcodes {
 
                                     <div class="moo-row">
                                         <div class="moo-col-md-12">
-                                            <a href="#" class="moo-btn-facebook" onclick="moo_loginViaFacebook(event)" style="margin-top: 12px;">LOGIN WITH FACEBOOK</a>
+                                            <a href="#" class="moo-btn-facebook" onclick="moo_loginViaFacebookAccountPage(event)" style="margin-top: 12px;">LOGIN WITH FACEBOOK</a>
                                         </div>
                                     </div>
                             </div>
@@ -495,16 +495,16 @@ class Moo_OnlineOrders_Shortcodes {
                     <div id="moo-customerPanelContent" class="moo-row">
                            <div class="moo_cp_wrap moo-row">
                                <div></div>
-                               <nav class="moo_cp_nav moo-col-md-3" id="moo_cp_nav">
+                               <nav class="moo_cp_nav moo-col-md-3" id="moo_cp_nav" tabindex="0">
                                    <ul>
                                        <li id="moo_nav_favorits" class="moo-col-xs-4 moo-col-md-12 moo_right_border_forNav moo_nav_cpanel" onclick="moo_my_account_myfavorits(event)">
-                                           <a href="#" >
+                                           <a href="#">
                                                <i class="far fa-heart"></i>
                                                <span>Most Purchased</span>
                                            </a>
                                        </li>
                                        <li id="moo_nav_trending" class="moo-col-xs-4 moo-col-md-12 moo_right_border_forNav moo_nav_cpanel" onclick="moo_my_account_trending(event)">
-                                           <a href="#" >
+                                           <a href="#">
                                                <i class="fas fa-fire"></i>
                                                <span>Trending</span>
                                            </a>
@@ -515,7 +515,7 @@ class Moo_OnlineOrders_Shortcodes {
                                                <span>Previous Orders</span>
                                            </a>
                                        </li>
-                                       <li id="moo_nav_profil" class="moo-col-xs-4 moo-col-md-12 moo_right_border_forNav moo_nav_cpanel" onclick="moo_my_account_profil(event)">
+                                       <li  id="moo_nav_profil" class="moo-col-xs-4 moo-col-md-12 moo_right_border_forNav moo_nav_cpanel" onclick="moo_my_account_profil(event)">
                                            <a href="#">
                                                <i class="far fa-user"></i>
                                                <span>My profile</span>
@@ -550,39 +550,43 @@ class Moo_OnlineOrders_Shortcodes {
                 <div id="moo-addaddress-form" class="moo-col-md-12">
                     <h1>Add new Address to your account</h1>
                     <div class="moo-col-md-8 moo-col-md-offset-2">
-                        <div class="moo-form-group">
-                            <label for="inputMooAddress">Address</label>
-                            <input type="text" class="moo-form-control" id="inputMooAddress">
+                        <div class="mooFormAddingAddress">
+                            <div class="moo-form-group">
+                                <label for="inputMooAddress">Address</label>
+                                <input type="text" class="moo-form-control" id="inputMooAddress">
+                            </div>
+                            <div class="moo-form-group">
+                                <label for="inputMooAddress">Suite / Apt #</label>
+                                <input type="text" class="moo-form-control" id="inputMooAddress2">
+                            </div>
+                            <div class="moo-form-group">
+                                <label for="inputMooCity">City</label>
+                                <input type="text" class="moo-form-control" id="inputMooCity">
+                            </div>
+                            <div class="moo-form-group">
+                                <label for="inputMooState">State</label>
+                                <input type="text" class="moo-form-control" id="inputMooState">
+                            </div>
+                            <div class="moo-form-group">
+                                <label for="inputMooZipcode">Zip code</label>
+                                <input type="text" class="moo-form-control" id="inputMooZipcode">
+                            </div>
+                            <p class="moo-centred">
+                                <a href="#" class="moo-btn moo-btn-warning" onclick="moo_ConfirmAddressOnMap(event)">Next</a>
+                            </p>
                         </div>
-                        <div class="moo-form-group">
-                            <label for="inputMooAddress">Suite / Apt #</label>
-                            <input type="text" class="moo-form-control" id="inputMooAddress2">
+                        <div class="mooFormConfirmingAddress">
+                            <div id="MooMapAddingAddress">
+                                <p style="margin-top: 150px;">Loading the MAP...</p>
+                            </div>
+                            <input type="hidden" class="moo-form-control" id="inputMooLat">
+                            <input type="hidden" class="moo-form-control" id="inputMooLng">
+                            <div class="form-group">
+                                <a id="mooButonAddAddress" onclick="moo_addAddress(event)">  Confirm and add address </a>
+                                <a id="mooButonChangeAddress" onclick="moo_changeAddress(event)" aria-label="Change address">Change address </a>
+                            </div>
                         </div>
-                        <div class="moo-form-group">
-                            <label for="inputMooCity">City</label>
-                            <input type="text" class="moo-form-control" id="inputMooCity">
-                        </div>
-                        <div class="moo-form-group">
-                            <label for="inputMooState">State</label>
-                            <input type="text" class="moo-form-control" id="inputMooState">
-                        </div>
-                        <div class="moo-form-group">
-                            <label for="inputMooZipcode">Zip code</label>
-                            <input type="text" class="moo-form-control" id="inputMooZipcode">
-                        </div>
-                        <p class="moo-centred">
-                            <a href="#" class="moo-btn moo-btn-warning" onclick="moo_ConfirmAddressOnMap(event)">Next</a>
-                        </p>
-                        <div id="MooMapAddingAddress">
-                            <p style="margin-top: 150px;">Loading the MAP...</p>
-                        </div>
-                        <input type="hidden" class="moo-form-control" id="inputMooLat">
-                        <input type="hidden" class="moo-form-control" id="inputMooLng">
-                        <div class="form-group">
-                             <a id="mooButonAddAddress" onclick="moo_addAddress(event)">
-                            Confirm and add address
-                        </a>
-                        </div>
+
 
                         <p style="padding: 10px;">If you want to skip this step and add your address later <a  href="#" onclick="moo_pickup_the_order(event)" style="color:blue"> Click here</a> </p>
                     </div>
@@ -1137,9 +1141,9 @@ class Moo_OnlineOrders_Shortcodes {
                 $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$MooOptions["closing_msg"].'</div>';
             } else  {
                 if($oppening_status->store_time == '')
-                    $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on' && $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: green'>Order in Advance Available</p>":"").'</div>';
+                    $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on' && $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: #006b00'>Order in Advance Available</p>":"").'</div>';
                 else
-                    $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on'&& $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: green'>Order in Advance Available</p>":"").'</div>';
+                    $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on'&& $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: #006b00'>Order in Advance Available</p>":"").'</div>';
             }
 
         }
@@ -1283,11 +1287,11 @@ class Moo_OnlineOrders_Shortcodes {
             <div class="moo-product">
                 <?php if($MooOptions['default_style'] == 'style3'){?>
                 <div class="moo-product-image">
-                    <img src="<?php echo $default_image ?>">
+                    <img alt="Item image" src="<?php echo $default_image ?>" tabindex="0">
                 </div>
                 <?php }?>
                 <div class="moo-product-details"  <?php if($MooOptions['default_style']!='style3'){echo 'style="width:57%"';}?>>
-                    <div class="moo-product-title"><?php echo $line['item']->name?></div>
+                    <div class="moo-product-title" tabindex="0"><?php echo $line['item']->name?></div>
                     <p class="moo-product-description">
                         <?php
                         foreach($line['modifiers'] as $modifier)
@@ -1295,50 +1299,50 @@ class Moo_OnlineOrders_Shortcodes {
 
                             if(isset($modifier['qty']) && intval($modifier['qty'])>0)
                             {
-                                echo ''.$modifier['qty'].'x ';
+                                echo '<span tabindex="0">'.$modifier['qty'].'x ';
                                 $modifiers_price += $modifier['price']*$modifier['qty'];
                             }
                             else
                             {
-                                echo '1x ';
+                                echo '<span tabindex="0"> 1x ';
                                 $modifiers_price += $modifier['price'];
                             }
 
                             if($modifier['price']>0)
-                                echo ''.$modifier['name'].'- $'.number_format(($modifier['price']/100),2)."<br/>";
+                                echo ''.$modifier['name'].'- $'.number_format(($modifier['price']/100),2)."</span><br/>";
                             else
-                                echo ''.$modifier['name']."</small><br/>";
+                                echo ''.$modifier['name']."</span><br/>";
 
                         }
                         if($line['special_ins'] != "")
-                            echo '<span style="color:red">SI: '.$line['special_ins']."</span>";
+                            echo '<span tabindex="0">SI: '.$line['special_ins']."</span>";
                         ?>
 
                     </p>
                 </div>
-                <div class="moo-product-price"><?php $line_price = $line['item']->price+$modifiers_price; echo number_format(($line_price/100),2)?></div>
+                <div class="moo-product-price" tabindex="0"><?php $line_price = $line['item']->price+$modifiers_price; echo number_format(($line_price/100),2)?></div>
 
                 <div class="moo-product-quantity">
-                    <input type="number" value="<?php echo $line['quantity']?>" min="1" max="<?php if($itemStock) echo $itemStock->stockCount; else echo '';?>" onchange="moo_updateQuantity(this,'<?php echo $key?>')">
+                    <input aria-label="item qty" type="number" value="<?php echo $line['quantity']?>" min="1" max="<?php if($itemStock) echo $itemStock->stockCount; else echo '';?>" onchange="moo_updateQuantity(this,'<?php echo $key?>')">
                 </div>
                 <div class="moo-product-removal">
-                    <a class="moo-remove-product" onclick="moo_removeItem(this,'<?php echo $key?>')">
+                    <a role="button" class="moo-remove-product" onclick="moo_removeItem(this,'<?php echo $key?>')" tabindex="0">
                         Remove
                     </a>
                 </div>
-                <div class="moo-product-line-price"><?php echo '$'.number_format(($line_price*$line['quantity']/100),2)?></div>
+                <div tabindex="0" class="moo-product-line-price"><?php echo '$'.number_format(($line_price*$line['quantity']/100),2)?></div>
             </div>
         <?php } ?>
 
             <div class="moo-totals">
-                <a href="#" style="color: #337ab7;" onclick="moo_emptyCart(event)">Empty the cart</a>
+                <a role="button" href="#" style="color: #337ab7;" onclick="moo_emptyCart(event)">Empty the cart</a>
                 <div class="moo-totals-item">
-                    <label>Subtotal</label>
-                    <div class="moo-totals-value" id="moo-cart-subtotal">$<?php echo  number_format($total['sub_total'],2); ?></div>
+                    <label tabindex="0">Subtotal</label>
+                    <div class="moo-totals-value" id="moo-cart-subtotal" tabindex="0">$<?php echo  number_format($total['sub_total'],2); ?></div>
                 </div>
                 <div class="moo-totals-item">
-                    <label>Tax</label>
-                    <div class="moo-totals-value" id="moo-cart-tax">
+                    <label tabindex="0">Tax</label>
+                    <div class="moo-totals-value" id="moo-cart-tax" tabindex="0">
 
                         <?php
                         if($coupon == null)
@@ -1350,8 +1354,8 @@ class Moo_OnlineOrders_Shortcodes {
                 </div>
                 <?php if($MooOptions['use_coupons']=="enabled"){//check if coupons are enabled ?>
                     <div class="moo-totals-item" id="MooCouponInTotalsSection" style="<?php if($coupon == null) echo 'display:none;';?>">
-                        <label id="mooCouponName"><?php echo $coupon['name'];?></label>
-                        <div class="moo-totals-value" id="mooCouponValue">
+                        <label id="mooCouponName" tabindex="0"><?php echo $coupon['name'];?></label>
+                        <div class="moo-totals-value" id="mooCouponValue" tabindex="0">
                             <?php
                             if($coupon['type']=='amount')
                                 echo '- $'.number_format($coupon['value'],2);
@@ -1365,10 +1369,10 @@ class Moo_OnlineOrders_Shortcodes {
                     </div>
                 <?php }
                 ?>
-                <?php if($total['serviceCharges']>0){//check if coupons are enabled ?>
+                <?php if($total['serviceCharges']>0){ ?>
                     <div class="moo-totals-item" id="MooServiceChargesInTotalsSection">
-                        <label id="MooServiceChargesName"><?php echo $MooOptions['service_fees_name'];?></label>
-                        <div class="moo-totals-value" id="MooServiceChargesValue">
+                        <label id="MooServiceChargesName" tabindex="0"><?php echo $MooOptions['service_fees_name'];?></label>
+                        <div class="moo-totals-value" id="MooServiceChargesValue" tabindex="0">
                             <?php
                                 echo '$'.number_format($total['serviceCharges'],2);;
                             ?>
@@ -1380,8 +1384,8 @@ class Moo_OnlineOrders_Shortcodes {
 <!--                    <div class="moo-totals-value" id="moo-cart-shipping">15.00</div>-->
 <!--                </div>-->
                 <div class="moo-totals-item moo-totals-item-total">
-                    <label>Grand Total</label>
-                    <div class="moo-totals-value" id="moo-cart-total">$<?php echo  number_format($total['total'],2); ?></div>
+                    <label tabindex="0">Grand Total</label>
+                    <div class="moo-totals-value" id="moo-cart-total" tabindex="0">$<?php echo  number_format($total['total'],2); ?></div>
                 </div>
             </div>
             <a href="<?php echo $checkout_page_url?>" ><button class="moo-checkout">Checkout</button></a>
@@ -1621,7 +1625,7 @@ class Moo_OnlineOrders_Shortcodes {
 
                                     $html .= '</div>';
                                     if($item['has_modifiers'])
-                                        $html .= '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12" id="moo-modifiersContainer-for-'.$item['uuid'].'"></div>';
+                                        $html .= '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12 moo-modifiersContainer-for-'.$item['uuid'].'"></div>';
                                     $html .= '</div></div>';
 
                            }

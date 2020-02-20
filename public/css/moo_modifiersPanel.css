@@ -33,6 +33,10 @@ html.mfp-helper  body {
     font-family: "Open Sans", Arial, sans-serif;
     cursor: pointer;
     color: #751c1c;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background-color: transparent;
 }
 .mooModifierGroup .mooModifiers-title>span:first-child
 {

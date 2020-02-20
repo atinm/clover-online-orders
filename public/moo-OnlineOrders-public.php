@@ -146,8 +146,9 @@ class Moo_OnlineOrders_Public {
 
 
 
-        wp_register_style( 'moo-modifiersPanel',plugins_url( '/css/moo-modifiersPanel.min.css', __FILE__ ),array('moo-grid-css','moo-magnific-popup'), $this->version);
-        //wp_register_style( 'moo-modifiersPanel',"//api.smartonlineorders.com/assets/css/moo_ModifiersPanel.min.css",array('moo-grid-css','moo-magnific-popup'), $this->version);
+        //wp_register_style( 'moo-modifiersPanel',plugins_url( '/css/moo-modifiersPanel.min.css', __FILE__ ),array('moo-grid-css','moo-magnific-popup'), $this->version);
+        wp_register_style( 'moo-modifiersPanel',plugins_url( '/css/moo_modifiersPanel.css', __FILE__ ),array('moo-grid-css','moo-magnific-popup'), $this->version);
+        // wp_register_style( 'moo-modifiersPanel',"//api.smartonlineorders.com/assets/css/moo_ModifiersPanel.min.css",array('moo-grid-css','moo-magnific-popup'), $this->version);
         wp_enqueue_style( 'moo-modifiersPanel' );
 
         wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/moo-OnlineOrders-public.css', array(), $this->version, 'all' );
@@ -253,8 +254,8 @@ class Moo_OnlineOrders_Public {
             wp_register_script('moo-magnific-modal', plugins_url( '/js/magnific.min.js', __FILE__ ),array(), $this->version);
             wp_enqueue_script( 'moo-magnific-modal', array( 'jquery' ) );
 
-            wp_register_script('moo-modifiersPanel-js', plugins_url( '/js/moo-modifiersPanel.min.js', __FILE__ ),array(), $this->version);
-            //wp_register_script('moo-modifiersPanel-js', plugins_url( '/js/moo_modifiersPanel.js', __FILE__ ),array(), $this->version);
+            //wp_register_script('moo-modifiersPanel-js', plugins_url( '/js/moo-modifiersPanel.min.js', __FILE__ ),array(), $this->version);
+            wp_register_script('moo-modifiersPanel-js', plugins_url( '/js/moo_modifiersPanel.js', __FILE__ ),array(), $this->version);
             wp_enqueue_script('moo-modifiersPanel-js',array('jquery','moo-magnific-modal'));
 
             if($this->style == "style1"){
@@ -888,6 +889,7 @@ class Moo_OnlineOrders_Public {
                 if(isset($MooOptions['service_fees_type']) && $MooOptions['service_fees_type'] == "percent")
                 {
                     $service_charges = floatval($MooOptions['service_fees'])*$FinalSubTotal/100;
+                    $service_charges = round($service_charges,2);
                 }
                 else
                     $service_charges = floatval($MooOptions['service_fees']);
@@ -1076,7 +1078,7 @@ class Moo_OnlineOrders_Public {
                 if(isset($MooOptions['service_fees_name']) && $MooOptions['service_fees_name']!="")
                     $serviceFeeName = $MooOptions['service_fees_name'];
 
-                if(isset($MooOptions['delivery_fees_name']) && $MooOptions['delivery_fees_name']!="")
+                if(isset($MooOptions['delivery_fees_name']) && $MooOptions['delivery_fees_name'] != "")
                     $deliveryfeeName = $MooOptions['delivery_fees_name'];
 
                 //Check the stock
@@ -1172,7 +1174,8 @@ class Moo_OnlineOrders_Public {
                         'item'=>(object)array(
                             "uuid"=>"service_fees",
                             "name"=>$serviceFeeName,
-                            "price"=>($serviceFee*100)),
+                            "price"=>($serviceFee*100)
+                        ),
                         'quantity'=>1,
                         'special_ins'=>'',
                         'tax_rate'=>array(),

@@ -773,7 +773,7 @@ function Moo_GetOrderTypes(uuid = null){
                         html +='</div>';
                         //Custom message
                         html +='<div class="champ_order IsEnabled_order">Custom message to display when ordering method is not available (maximum 200 characters)';
-                        html +='<div><textarea cols="100" rows="5" id="moo_ot_customMessage_'+$ot.ot_uuid+'">'+$ot.custom_message+'</textarea></div>';
+                        html +='<div><textarea style="width: 100%;" cols="100" rows="5" id="moo_ot_customMessage_'+$ot.ot_uuid+'">'+$ot.custom_message+'</textarea></div>';
                         html += '</div>';
                         //Buttons
                         html +='<div class="bt_update_order" style="float: right;">';
@@ -821,7 +821,11 @@ function Moo_RefreshOrderTypesSection(){
     {
         document.querySelector('#MooOrderTypesContent').innerHTML  ="<div style='text-align: center'>Loading your ordertypes, please wait...</div>";
     }
-    var endpoint = moo_RestUrl+'moo-clover/v2/dash/ordertypes_hours/?_wpnonce='+ moo_params.nonce;
+    if(moo_RestUrl.includes("?rest_route")){
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/ordertypes_hours/&_wpnonce='+ moo_params.nonce;
+    } else {
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/ordertypes_hours/?_wpnonce='+ moo_params.nonce;
+    }
     jQuery.get(endpoint, function (data) {
         if(data.status === "success"){
             moo_custom_hours_for_ot= data.data;
@@ -842,7 +846,12 @@ function Moo_SetupCategoriesSection( uuid = null ){
         jQuery("#moo-categories-edit-section").hide().html('');
         jQuery("#moo-btn-backtocategories").hide();
         jQuery("#moo-btn-reordercategories").show();
-        var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories?_wpnonce='+ moo_params.nonce;
+        if(moo_RestUrl.includes("?rest_route")){
+            var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories&_wpnonce='+ moo_params.nonce;
+        } else {
+            var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories?_wpnonce='+ moo_params.nonce;
+
+        }
         jQuery.get(endpoint, function (response) {
             if(response.status === 'success') {
                 var categories = response.data;
@@ -948,7 +957,13 @@ function Moo_SetupReorderCategoriesSection(event){
         jQuery(".moo-categories-section").hide();
         jQuery("#moo-categories-edit-section").show().html('');
         document.querySelector('#MooPanel_tabContent5 #moo-categories-edit-section').innerHTML = "Loading your categories...";
-        var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories?_wpnonce='+ moo_params.nonce;
+
+        if(moo_RestUrl.includes("?rest_route")){
+            var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories&_wpnonce='+ moo_params.nonce;
+        } else {
+            var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories?_wpnonce='+ moo_params.nonce;
+        }
+
         jQuery.get(endpoint, function (response) {
             if(response.status === 'success') {
                 var categories = response.data;
@@ -1002,7 +1017,11 @@ function Moo_SetupReorderCategoriesSection(event){
     }
 }
 function Moo_RefeshEditCategorySection(event,uuid) {
-    var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories_hours/?_wpnonce='+ moo_params.nonce;
+    if(moo_RestUrl.includes("?rest_route")){
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories_hours/&_wpnonce='+ moo_params.nonce;
+    } else {
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories_hours/?_wpnonce='+ moo_params.nonce;
+    }
     jQuery.get(endpoint, function (data) {
         if(data.status === "success"){
             moo_custom_hours = data.data;
@@ -1024,7 +1043,12 @@ function Moo_CustomHoursForCategories() {
         jQuery("#moo-btn-reordercategories").show();
         document.querySelector('#MooPanel_tabContent5 .moo-categories-section').innerHTML = "Loading your categories please wait";
     }
-    var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories_hours/?_wpnonce='+ moo_params.nonce;
+    if(moo_RestUrl.includes("?rest_route")){
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories_hours/&_wpnonce='+ moo_params.nonce;
+    } else {
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories_hours/?_wpnonce='+ moo_params.nonce;
+    }
+
     jQuery.get(endpoint, function (data) {
         if(data.status === "success"){
             moo_custom_hours = data.data;
@@ -1039,7 +1063,11 @@ function Moo_CustomHoursForCategories() {
 }
 
 function moo_click_on_limitTime( uuid ) {
-    var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'/time?_wpnonce='+ moo_params.nonce;
+    if(moo_RestUrl.includes("?rest_route")){
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'/time&_wpnonce='+ moo_params.nonce;
+    } else {
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'/time?_wpnonce='+ moo_params.nonce;
+    }
 
     var check = jQuery("#myonoffswitch_limit_time_"+uuid).is(":checked")? true : false;
     if(check){
@@ -1066,7 +1094,12 @@ function moo_EditCategoryTimeAvailability(event, uuid) {
         });
         return;
     }
-    var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'/time?_wpnonce='+ moo_params.nonce;
+    if(moo_RestUrl.includes("?rest_route")){
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'/time&_wpnonce='+ moo_params.nonce;
+    } else {
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'/time?_wpnonce='+ moo_params.nonce;
+    }
+
     mooShowWaitMessage();
     jQuery.post(endpoint,{"status":cat_time_status,"hour":cat_time}, function (response) {
 
@@ -1099,7 +1132,12 @@ function Moo_SetupEditCategorySection(event, uuid) {
     if( document.querySelector('.moo-categories-section') !== null ) {
         jQuery(".moo-categories-section").hide();
         jQuery("#moo-categories-edit-section").show().html('');
-        var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'?_wpnonce='+ moo_params.nonce;
+        if(moo_RestUrl.includes("?rest_route")){
+            var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'&_wpnonce='+ moo_params.nonce;
+        } else {
+            var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'?_wpnonce='+ moo_params.nonce;
+        }
+
         jQuery.get(endpoint, function (data) {
             if(data.uuid !== undefined ) {
                 var category = data;
@@ -1277,7 +1315,11 @@ function Moo_EditCategory(event,uuid) {
     if(cat_newName === ""){
         return;
     }
-    var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'?_wpnonce='+ moo_params.nonce;
+    if(moo_RestUrl.includes("?rest_route")){
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'&_wpnonce='+ moo_params.nonce;
+    } else {
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'?_wpnonce='+ moo_params.nonce;
+    }
     mooShowWaitMessage();
     jQuery.post(endpoint,{"cat_name":cat_newName,"cat_description":cat_newDescription}, function (response) {
 
@@ -2382,7 +2424,11 @@ function mooHideWaitMessage() {
 function mooUpdateApiKey() {
     mooShowWaitMessage();
     var newApiKey = jQuery("#chang_api_key").val();
-    var endpoint = moo_RestUrl+'moo-clover/v2/dash/update_api_key?_wpnonce='+ moo_params.nonce;
+    if(moo_RestUrl.includes("?rest_route")){
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/update_api_key&_wpnonce='+ moo_params.nonce;
+    } else {
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/update_api_key?_wpnonce='+ moo_params.nonce;
+    }
     var data = {
       "api_key":newApiKey
     };

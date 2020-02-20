@@ -13,10 +13,9 @@ class Moo_OnlineOrders_CallAPI
     function __construct() {
         $this->getApiKey();
         if ($this->isSandbox) {
-            $this->url_api = "http://api-sandbox.smartonlineorders.com/";
-            //$this->url_api = "http://localhost/api/";
+            $this->url_api = "https://api-sandbox.smartonlineorders.com/";
         } else {
-            $this->url_api = "http://api.smartonlineorders.com/";
+            $this->url_api = "https://api.smartonlineorders.com/";
         }
         $this->hours_url_api = "https://smh.smartonlineorder.com/v1/api/";
         $this->session = MOO_SESSION::instance();
@@ -1746,6 +1745,7 @@ class Moo_OnlineOrders_CallAPI
         curl_setopt($crl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($crl, CURLOPT_HTTPGET, true);
         curl_setopt($crl, CURLOPT_SSL_VERIFYPEER, false);
+        //curl_setopt($crl, CURLOPT_TIMEOUT, 1);
         $reply = curl_exec($crl);
 
         //error handling for cURL

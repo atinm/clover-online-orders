@@ -23,13 +23,10 @@ function mooBuildModifiersPanel(data,item_id,qty,settings)
     var required_modifiers = "";
     if(nb_modifiers>1)
     {
-        if(typeof settings.inlineDisplay !== "undefined" && settings.inlineDisplay === true)
-        {
-            var html = '<div class="white-popup moo-modifiersPanel" style="background-color: #ffffff">';
-        }
-        else
-        {
-            var html = '<div class="white-popup moo-modifiersPanel" >';
+        if(typeof settings.inlineDisplay !== "undefined" && settings.inlineDisplay === true) {
+            var html = '<div tabindex="-1" aria-label="Choose options dialog" aria-modal="true" role="dialog" class="white-popup moo-modifiersPanel" style="background-color: #ffffff">';
+        } else {
+            var html = '<div tabindex="-1" aria-label="Choose options dialog" aria-modal="true" role="dialog" class="white-popup moo-modifiersPanel" >';
         }
         html += '<form action="" id="moo-modifiers-for-'+item_id+'">'+
             '<div class="moo-row" style="margin-bottom: 15px;">';
@@ -43,12 +40,12 @@ function mooBuildModifiersPanel(data,item_id,qty,settings)
                 required_modifiers += modifier_group.uuid+"-"+modifier_group.min_required+";";
 
             html += '<div class="mooModifierGroup">'+
-                '<div class="mooModifiers-title" onclick="MooClickOnModifiersCollaps(this,\''+modifierG_uuid+'\')"><span>-</span>'+modifier_group.name;
-            html +='<span class="mooModifiers-title-span">';
+                '<button type="button" class="mooModifiers-title" role="button" tabindex="0" aria-controls="mooModifiers-wrapper-for-'+modifierG_uuid+'" aria-expanded="true" onclick="MooClickOnModifiersCollaps(this,\''+modifierG_uuid+'\')"><span>-</span>'+modifier_group.name;
+            html +='<span class="mooModifiers-title-span" tabindex="0">';
             html +=mooBuildNbModifierSpan(modifier_group.min_required,modifier_group.max_allowd);
             html +='</span>';
-            html +='</div>';
-            html += '<div class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'">';
+            html +='</button>';
+            html += '<div id="mooModifiers-wrapper-for-'+modifierG_uuid+'" class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'">';
 
             for(var j=0;j<modifier_group.modifiers.length;j++)
                 html += mooBuildOneModifierLineHtml(modifier_group.modifiers[j],modifierG_uuid,modifier_group.min_required,modifier_group.max_allowd,settings);
@@ -70,12 +67,12 @@ function mooBuildModifiersPanel(data,item_id,qty,settings)
                 required_modifiers += modifier_group.uuid+"-"+modifier_group.min_required+";";
 
             html += '<div class="mooModifierGroup">'+
-                '<div class="mooModifiers-title" onclick="MooClickOnModifiersCollaps(this,\''+modifierG_uuid+'\')"><span>-</span>'+modifier_group.name;
-            html +='<span class="mooModifiers-title-span">';
+                '<button type="button" class="mooModifiers-title" aria-controls="mooModifiers-wrapper-for-'+modifierG_uuid+'" aria-expanded="true" onclick="MooClickOnModifiersCollaps(this,\''+modifierG_uuid+'\')"><span>-</span>'+modifier_group.name;
+            html +='<span class="mooModifiers-title-span" tabindex="0" >';
             html +=mooBuildNbModifierSpan(modifier_group.min_required,modifier_group.max_allowd);
             html +='</span>';
-            html +='</div>';
-            html += '<div class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'">';
+            html +='</button>';
+            html += '<div id="mooModifiers-wrapper-for-'+modifierG_uuid+'"  class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'">';
 
             for(var j=0;j<modifier_group.modifiers.length;j++)
                 html += mooBuildOneModifierLineHtml(modifier_group.modifiers[j],modifierG_uuid,modifier_group.min_required,modifier_group.max_allowd,settings);
@@ -99,8 +96,7 @@ function mooBuildModifiersPanel(data,item_id,qty,settings)
             '<div class="moo-row" style="margin-bottom: 15px;">'+
             '<div class="moo-col-md-12 moo-col-lg-12 moo-col-sm-12 moo-col-xs-12">';
 
-        for(var i=0;i<nb_modifiers;i++)
-        {
+        for(var i=0;i<nb_modifiers;i++) {
             var modifier_group = data[i];
             var modifierG_uuid = modifier_group.uuid;
 
@@ -108,12 +104,12 @@ function mooBuildModifiersPanel(data,item_id,qty,settings)
                 required_modifiers += modifier_group.uuid+"-"+modifier_group.min_required+";";
 
             html += '<div class="mooModifierGroup">'+
-                '<div class="mooModifiers-title" onclick="MooClickOnModifiersCollaps(this,\''+modifierG_uuid+'\')"><span>-</span>'+modifier_group.name;
-            html +='<span class="mooModifiers-title-span">';
+                '<button type="button" class="mooModifiers-title" aria-controls="mooModifiers-wrapper-for-'+modifierG_uuid+'" aria-expanded="true" onclick="MooClickOnModifiersCollaps(this,\''+modifierG_uuid+'\')"><span>-</span>'+modifier_group.name;
+            html +='<span class="mooModifiers-title-span" tabindex="0">';
             html +=mooBuildNbModifierSpan(modifier_group.min_required,modifier_group.max_allowd);
             html +='</span>';
-            html +='</div>';
-            html += '<div class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'">';
+            html +='</button>';
+            html += '<div id="mooModifiers-wrapper-for-'+modifierG_uuid+'" class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'">';
 
             for(var j=0;j<modifier_group.modifiers.length;j++)
                 html += mooBuildOneModifierLineHtml(modifier_group.modifiers[j],modifierG_uuid,modifier_group.min_required,modifier_group.max_allowd,settings);
@@ -143,6 +139,7 @@ if(typeof settings.inlineDisplay === "undefined" || settings.inlineDisplay === f
         midClick: true,
         fixedContentPos: true,
         fixedBgPos: true,
+        autoFocusLast: true,
         overflowY: 'scroll',
         callbacks : function() {
             var startWindowScroll = 0;
@@ -161,7 +158,7 @@ if(typeof settings.inlineDisplay === "undefined" || settings.inlineDisplay === f
         }
     });
 } else {
-    jQuery("#moo-modifiersContainer-for-"+item_id).html(html)
+    jQuery(".moo-modifiersContainer-for-"+item_id).html(html)
 }
 }
 function mooBuildOneModifierLineHtml(modifier,modifierG_uuid,min,max,settings)
@@ -171,27 +168,23 @@ function mooBuildOneModifierLineHtml(modifier,modifierG_uuid,min,max,settings)
     modifier_price = modifier_price/100;
     var uuid =  modifier.uuid;
     var html='';
-    if( modifier_price > 0 )
-    {
+    if( modifier_price > 0 ) {
         html += '<div class="moo-row">'+
             '<div class="moo-col-lg-1 moo-col-md-1 moo-col-sm-1 moo-col-xs-1">'+
-            '<input name="'+modifierG_uuid+'" value="'+uuid+'" class="mooModifierCheckbox" type="checkbox" onchange="mooChangeModifierLine(event,\''+uuid+'\',\''+min+'\',\''+max+'\')">'+
+            '<input role="checkbox" name="'+modifierG_uuid+'" value="'+uuid+'" class="mooModifierCheckbox" type="checkbox" onchange="mooChangeModifierLine(event,\''+uuid+'\',\''+min+'\',\''+max+'\')">'+
             '</div>'+
-            '<div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-5 moo-col-xs-5 mooModifier-name" onclick="mooClickOnModifierLine(event,\''+uuid+'\',\''+min+'\',\''+max+'\')">'+modifier.name+'</span></div>'+
-            '<div class="moo-col-lg-3 moo-col-md-3 moo-col-sm-2 moo-col-xs-2 mooModifier-price">'+((modifier_price>0)?'$'+modifier_price.toFixed(2):'')+'</div>'+
+            '<div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-5 moo-col-xs-5 mooModifier-name" onclick="mooClickOnModifierLine(event,\''+uuid+'\',\''+min+'\',\''+max+'\')" tabindex="0">'+modifier.name+'</div>'+
+            '<div class="moo-col-lg-3 moo-col-md-3 moo-col-sm-2 moo-col-xs-2 mooModifier-price" tabindex="0">'+((modifier_price>0)?'$'+modifier_price.toFixed(2):'')+'</div>'+
             '<div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-5 moo-col-xs-5">';
-            if(typeof settings.qtyForAll !== "undefined" && settings.qtyForAll === false )
-            {
+            if(typeof settings.qtyForAll !== "undefined" && settings.qtyForAll === false ) {
                 /* Qty for modifiers is disabled */
                 html +='';
-            }
-            else
-            {
+            } else {
                  html += '<div class="moo-input-group mooModifierLine-QtyContainer">'+
                         '<span class="moo-input-group-btn">'+
                         '<a class="moo-btn moo-btn-primary mooOpBtn" onclick="ClickOnMooOpBtnMinus(\''+modifierG_uuid+'\',\''+uuid+'\',\''+max+'\')">-</a>'+
                         '</span>'+
-                        '<input class="mooInputQty moo-form-control" value="1" id="mooModifierInputQty-for-'+uuid+'">'+
+                        '<input tabindex="0" aria-label="The option quantity" class="mooInputQty moo-form-control" value="1" id="mooModifierInputQty-for-'+uuid+'">'+
                         '<span class="input-group-btn">'+
                         '<a class="moo-btn moo-btn-primary mooOpBtn" onclick="ClickOnMooOpBtnPlus(\''+modifierG_uuid+'\',\''+uuid+'\',\''+max+'\')">+</a>'+
                         '</span>'+
@@ -201,23 +194,18 @@ function mooBuildOneModifierLineHtml(modifier,modifierG_uuid,min,max,settings)
 
         html += '</div>'+
                 '</div>';
-    }
-    else
-    {
+    } else {
         html += '<div class="moo-row">'+
             '<div class="moo-col-lg-1 moo-col-md-1 moo-col-sm-1 moo-col-xs-1">'+
-            '<input name="'+modifierG_uuid+'" value="'+uuid+'" class="mooModifierCheckbox" type="checkbox" onchange="mooChangeModifierLine(event,\''+uuid+'\',\''+min+'\',\''+max+'\')">'+
+            '<input role="checkbox" name="'+modifierG_uuid+'" value="'+uuid+'" class="mooModifierCheckbox" type="checkbox" onchange="mooChangeModifierLine(event,\''+uuid+'\',\''+min+'\',\''+max+'\')">'+
             '</div>'+
-            '<div class="moo-col-lg-7 moo-col-md-7 moo-col-sm-7 moo-col-xs-7 mooModifier-name" onclick="mooClickOnModifierLine(event,\''+uuid+'\',\''+min+'\',\''+max+'\')">'+modifier.name+'</span></div>'+
+            '<div class="moo-col-lg-7 moo-col-md-7 moo-col-sm-7 moo-col-xs-7 mooModifier-name" onclick="mooClickOnModifierLine(event,\''+uuid+'\',\''+min+'\',\''+max+'\')" tabindex="0">'+modifier.name+'</div>'+
             '<div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-5 moo-col-xs-5">';
 
-        if(typeof settings.qtyForAll !== "undefined" && settings.qtyForAll === false )
-        {
+        if(typeof settings.qtyForAll !== "undefined" && settings.qtyForAll === false ) {
             /* Qty for modifiers is disabled */
             html +='';
-        }
-        else
-        {
+        } else {
             if(typeof settings.qtyForZeroPrice !== "undefined" && settings.qtyForZeroPrice === false )
             {
                 /* Qty for modifiers when price is zero is disabled */
@@ -229,7 +217,7 @@ function mooBuildOneModifierLineHtml(modifier,modifierG_uuid,min,max,settings)
                     '<span class="moo-input-group-btn">'+
                     '<a class="moo-btn moo-btn-primary mooOpBtn" onclick="ClickOnMooOpBtnMinus(\''+modifierG_uuid+'\',\''+uuid+'\',\''+max+'\')">-</a>'+
                     '</span>'+
-                    '<input class="mooInputQty moo-form-control" value="1" id="mooModifierInputQty-for-'+uuid+'">'+
+                    '<input tabindex="0" aria-label="The option quantity" class="mooInputQty moo-form-control" value="1" id="mooModifierInputQty-for-'+uuid+'">'+
                     '<span class="input-group-btn">'+
                     '<a class="moo-btn moo-btn-primary mooOpBtn" onclick="ClickOnMooOpBtnPlus(\''+modifierG_uuid+'\',\''+uuid+'\',\''+max+'\')">+</a>'+
                     '</span>'+
@@ -244,24 +232,15 @@ function mooBuildOneModifierLineHtml(modifier,modifierG_uuid,min,max,settings)
 function mooBuildNbModifierSpan(min_required,max_allowd)
 {
     var html ='';
-    if(min_required != null && max_allowd != null && min_required == 1  && max_allowd == 1)
-    {
+    if(min_required != null && max_allowd != null && min_required == 1  && max_allowd == 1) {
         html +=' (required)';
-    }
-    else
-    {
-        if(min_required != null && max_allowd != null && max_allowd == min_required )
-        {
+    } else {
+        if(min_required != null && max_allowd != null && max_allowd == min_required ) {
             html +=' (Must choose '+min_required +' options)';
-        }
-        else
-        {
-            if(min_required != null && max_allowd != null && min_required >= 1 &&  max_allowd > 1)
-            {
+        } else {
+            if(min_required != null && max_allowd != null && min_required >= 1 &&  max_allowd > 1) {
                 html +=' (Must choose between '+min_required +' & '+max_allowd+' options)';
-            }
-            else
-            {
+            } else {
                 if(min_required != null && min_required == 1)
                     html +=' (Must choose at least 1 option)';
                 if(min_required != null && min_required > 1)
@@ -280,7 +259,6 @@ function mooClickOnModifierLine(event,modifier_uuid,min,max)
 {
     event.preventDefault();
     min = parseInt(min);
-
     max = parseInt(max);
     var checkboxContainer = jQuery(event.target).prev();
     var checkbox = jQuery(".mooModifierCheckbox",checkboxContainer);
@@ -288,10 +266,8 @@ function mooClickOnModifierLine(event,modifier_uuid,min,max)
 
     jQuery(".mooInputQty",checkbox.parent().parent()).val(1);
 
-    if(max == 1)
-    {
-        if(!checkbox.prop("checked"))
-        {
+    if(max == 1) {
+        if(!checkbox.prop("checked")) {
             jQuery(group).prop("checked", false);
             jQuery(group).each(function (index,value) {
                 element = jQuery(value);
@@ -306,9 +282,7 @@ function mooClickOnModifierLine(event,modifier_uuid,min,max)
             jQuery(event.target).parent().addClass("mooModifier-checked");
             //Show the qty field
             //jQuery(".moo-input-group",jQuery(event.target).parent()).show();
-        }
-        else
-        {
+        } else {
             checkbox.prop("checked",false);
             //remove the backgroud
             jQuery(event.target).parent().removeClass("mooModifier-checked");
@@ -316,16 +290,12 @@ function mooClickOnModifierLine(event,modifier_uuid,min,max)
             jQuery(".moo-input-group",jQuery(event.target).parent()).hide();
 
         }
-    }
-    else
-    {
-        if(max>1)
-        {
+    } else {
+        if(max>1) {
             var group = "input:checkbox[name=\"" + checkbox.attr("name") + "\"]:checked";
             var group_not_checked = "input:checkbox[name=\"" + checkbox.attr("name") + "\"]:not(:checked)";
 
-            if(!checkbox.prop("checked"))
-            {
+            if(!checkbox.prop("checked")) {
                 checkbox.prop("checked",true);
 
                 //add a background
@@ -333,15 +303,12 @@ function mooClickOnModifierLine(event,modifier_uuid,min,max)
                 //Show the qty field
                 jQuery(".moo-input-group",jQuery(event.target).parent()).show();
 
-            }
-            else
-            {
+            } else {
                 checkbox.prop("checked",false);
                 //remove the backgroud
                 jQuery(event.target).parent().removeClass("mooModifier-checked");
                 //Hide the qty filed
                 jQuery(".moo-input-group",jQuery(event.target).parent()).hide();
-
             }
 
            // var nb_checked_boxes = jQuery(group).length;
@@ -380,9 +347,7 @@ function mooClickOnModifierLine(event,modifier_uuid,min,max)
                 jQuery(event.target).parent().addClass("mooModifier-checked");
                 //Show the qty field
                 jQuery(".moo-input-group",jQuery(event.target).parent()).show();
-            }
-            else
-            {
+            } else {
                 checkbox.prop("checked",false);
                 //remove the backgroud
                 jQuery(event.target).parent().removeClass("mooModifier-checked");
@@ -418,39 +383,28 @@ function mooChangeModifierLine(event,modifier_uuid,min,max)
             checkbox.parent().parent().addClass("mooModifier-checked");
             //Show the qty field
             // jQuery(".moo-input-group",checkbox.parent().parent()).show();
-        }
-        else
-        {
+        } else {
             //remove the backgroud
             checkbox.parent().parent().removeClass("mooModifier-checked");
             //Hide the qty filed
             jQuery(".moo-input-group",checkbox.parent().parent()).hide();
         }
-    }
-    else
-    {
-        if(max > 1)
-        {
+    } else {
+        if(max > 1) {
             MooModifiersMax(checkbox.attr("name"),max,checkbox, jQuery(checkbox).parent().parent());
-        }
-        else
-        {
-            if(checkbox.prop("checked"))
-            {
+        } else {
+            if(checkbox.prop("checked")) {
                 //add a background
                 jQuery(event.target).parent().parent().addClass("mooModifier-checked");
                 //Show the qty field
                 jQuery(".moo-input-group",jQuery(event.target).parent().parent()).show();
-            }
-            else
-            {
+            } else {
                 //remove the backgroud
                 jQuery(event.target).parent().parent().removeClass("mooModifier-checked");
                 //Hide the qty filed
                 jQuery(".moo-input-group",jQuery(event.target).parent().parent()).hide();
             }
         }
-
     }
 
 
@@ -616,7 +570,8 @@ function ClickOnAddToCartBtnFIWM(event,requierd_modifiers,item_uuid,qty)
                 //hide all modifers then display the midiifer group that must be selected
                 var element = jQuery(".mooModifiers-wrapper-for-"+modifierGroup.uuid).parent();
                 jQuery(".mooModifiers-title",element).css("color","red");
-
+                // add attribue for all modifers
+                jQuery(".mooModifiers-title").attr("aria-expanded","false");
                 var wrappers = jQuery("div[class*='mooModifiers-wrapper-for-']");
                 wrappers.each(function (i,wrapper) {
                         jQuery(wrapper).slideUp();
@@ -625,6 +580,7 @@ function ClickOnAddToCartBtnFIWM(event,requierd_modifiers,item_uuid,qty)
                 var wrapper = jQuery(".mooModifiers-wrapper-for-"+modifierGroup.uuid);
                 wrapper.slideDown();
                 jQuery(".mooModifiers-title>span:first-child",wrapper.parent()).text('-');
+                jQuery(".mooModifiers-title",element).attr("aria-expanded","false");
                 return false;
             }
             if (!--count) addToCartAnItemWithModifiers(selected_modifiers,item_uuid,item_qty);
@@ -666,23 +622,21 @@ function addToCartAnItemWithModifiers(selected_modifiers,item_uuid,item_qty)
                 };
                 /* Add to cart the item */
                 jQuery.post(moo_RestUrl+"moo-clover/v1/cart", body,function (data) {
-                    if(data != null)
-                    {
-                        if(data.status == "error")
-                        {
+                    if(data != null) {
+                        if(data.status == "error") {
                             swal({
                                 title:data.message,
                                 type:"error"
                             });
-                        }
-                        else
-                        {
+                        } else {
                             if (typeof mooUpdateCart === "function") {
                                 mooUpdateCart();
                             }
 
                             if (typeof mooShowAddingItemResult === "function") {
-                                mooShowAddingItemResult(data);
+                                setTimeout(function () {
+                                    mooShowAddingItemResult(data);
+                                },2000)
                             } else {
                                 swal({
                                     title:(data.name!=null)?data.name:'Items',
@@ -696,9 +650,7 @@ function addToCartAnItemWithModifiers(selected_modifiers,item_uuid,item_qty)
                             }
                         }
 
-                    }
-                    else
-                    {
+                    } else {
                         swal({
                             title:"Items not added",
                             type:"error"
@@ -733,7 +685,9 @@ function addToCartAnItemWithModifiers(selected_modifiers,item_uuid,item_qty)
                 }
 
                 if (typeof mooShowAddingItemResult === "function") {
-                    mooShowAddingItemResult(data);
+                    setTimeout(function () {
+                        mooShowAddingItemResult(data);
+                    },2000)
                 } else {
                     swal({
                         title:(data.name!=null)?data.name:'Items',
@@ -770,11 +724,12 @@ function addToCartAnItemWithModifiers(selected_modifiers,item_uuid,item_qty)
 function removeModifiersList(e,item_id)
 {
     e.preventDefault();
+    e.stopPropagation();
     if(jQuery.magnificPopup.instance) {
         jQuery.magnificPopup.close();
     }
 
-    if(typeof jQuery("#moo-modifiersContainer-for-"+item_id) === "undefined")
+    if(typeof jQuery(".moo-modifiersContainer-for-"+item_id) === "undefined")
         return false;
-    jQuery("#moo-modifiersContainer-for-"+item_id).html('')
+    jQuery(".moo-modifiersContainer-for-"+item_id).html('')
 }

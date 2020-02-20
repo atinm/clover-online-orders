@@ -109,7 +109,7 @@
     text-align: center;
     font-size: 20px;
     padding: 20px;
-    color:red;
+    color:black;
 }
 
 .moo_credit_cards
@@ -357,7 +357,7 @@ select
 .login-or {
     position: relative;
     font-size: 18px;
-    color: #aaa;
+    color: #4e4545;
     margin-top: 10px;
     margin-bottom: 10px;
     padding-top: 10px;
@@ -435,6 +435,10 @@ select
     background-color: #fff;
     height: 100px;
 }
+#moo-checkout #moo-login-form .login-social-section .moo-btn
+{
+    color: #fff;
+}
 .moo-checkout-form-leftside
 {
     background-color: #fff;
@@ -445,7 +449,7 @@ select
     height: 34px;
     border: 1px solid #d2d2d2;
 }
-#moo-signing-form,#moo-forgotpassword-form,#moo-chooseaddress-form,#moo-addaddress-form,#mooButonAddAddress,#moo-checkout-form,.moo-checkout-bloc-message,#moo-customerPanel
+#moo-signing-form,#moo-forgotpassword-form,#moo-chooseaddress-form,#moo-addaddress-form,#mooButonAddAddress,#mooButonChangeAddress,#moo-checkout-form,.moo-checkout-bloc-message,#moo-customerPanel
 {
     display: none;
 }
@@ -493,6 +497,7 @@ select
     font-size: 12px;
     display: inline-block;
     margin-bottom: 2px;
+    text-decoration: none;
 }
 .MooUseAddressButton
 {
@@ -518,14 +523,25 @@ select
 }
 #mooButonLogin,#mooButonAddAddress,#mooButonResetPasswrod,#mooButonLoginAsGuest,#mooButonConfirmAddress
 {
-    background: #4B99AD;
+    background: #4773aa;
     padding: 8px 15px 8px 15px;
     border: none;
     color: #fff;
     border-radius: 0;
-    text-decoration: none
+    text-decoration: none;
 }
-#mooButonLogin:hover,#mooButonAddAddress:hover,#mooButonResetPasswrod:hover,#mooButonLoginAsGuest:hover,#mooButonConfirmAddress:hover {
+#mooButonChangeAddress
+{
+    background: #2ca3aa;
+    padding: 8px 15px 8px 15px;
+    border: none;
+    color: #fff;
+    border-radius: 0;
+    text-decoration: none;
+    margin-left: 10px;
+
+}
+#mooButonLogin:hover,#mooButonAddAddress:hover,#mooButonChangeAddress:hover,#mooButonResetPasswrod:hover,#mooButonLoginAsGuest:hover,#mooButonConfirmAddress:hover {
      background: #4691A4;
      box-shadow:none;
      -moz-box-shadow:none;
@@ -571,7 +587,7 @@ select
 .MooCartInCheckout .moo-column-labels-checkout {
      background-color: #f0f0f0;
      border: 1px solid #ccc;
-     color: #999;
+     color: #000;
      font-size: 14px;
      font-weight: 700;
      padding: 15px;
@@ -590,7 +606,7 @@ select
 {
      font-size: 12px !important;
 }
-.moo-checkout-bloc-title
+.moo-checkout-bloc-title,.moo-checkout-bloc-title>label
 {
     text-transform: uppercase;
     color: #000000;
@@ -1086,8 +1102,8 @@ fieldset[disabled] .moo-btn-warning.focus {
 }
 .moo-btn-danger {
     color: #ffffff;
-    background-color: #d9534f;
-    border-color: #d43f3a;
+    background-color: #e31c3d;
+    border-color: #e31c3d;
 }
 .moo-btn-danger:focus,
 .moo-btn-danger.focus {

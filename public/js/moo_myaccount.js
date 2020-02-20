@@ -90,15 +90,19 @@ function moo_show_form_adding_address()
     jQuery('#inputMooLng').val('');
     jQuery('#MooMapAddingAddress').hide();
     jQuery('#mooButonAddAddress').hide();
+    jQuery('#mooButonChangeAddress').hide();
 
     jQuery('#moo-login-form').hide();
     jQuery('#moo-signing-form').hide();
     jQuery('#moo-forgotpassword-form').hide();
     jQuery('#moo-customerPanel').hide();
     jQuery('#moo-addaddress-form').show();
+
+    jQuery(".mooFormAddingAddress").show();
+
 }
 
-function moo_login(e) {
+function moo_loginAccountPage(e) {
     e.preventDefault();
     jQuery(e.target).html('<i class="fas fa-circle-notch fa-spin"></i>').attr('onclick','eventPrevent(event)');
 
@@ -135,7 +139,7 @@ function moo_login(e) {
 
 }
 
-function moo_loginViaFacebook(e) {
+function moo_loginViaFacebookAccountPage(e) {
     e.preventDefault();
     FB.login(function(response) {
 
@@ -190,11 +194,11 @@ function moo_signin(e) {
         return;
     }
 
-    if(password=='') {
+    if(password == '') {
         swal("Please enter your password");
         return;
     }
-    if(phone=='') {
+    if(phone ==  '') {
         swal("Please enter your phone");
         return;
     }
@@ -301,6 +305,9 @@ function moo_ConfirmAddressOnMap(e)
             moo_initMapAddress();
             jQuery('#MooMapAddingAddress').show();
             jQuery('#mooButonAddAddress').show();
+            jQuery('#mooButonChangeAddress').show();
+            jQuery(".mooFormAddingAddress").hide();
+            jQuery(".mooFormConfirmingAddress").show();
         }
         else
         {
@@ -308,6 +315,12 @@ function moo_ConfirmAddressOnMap(e)
         }
     });
 
+}
+function moo_changeAddress(e)
+{
+    e.preventDefault();
+    jQuery(".mooFormAddingAddress").show();
+    jQuery(".mooFormConfirmingAddress").hide();
 }
 
 function moo_getAddressFromForm()
@@ -342,13 +355,11 @@ function moo_addAddress(e)
 
         jQuery
             .post(moo_params.ajaxurl,{'action':'moo_customer_addAddress','address':address.address,'city':address.city,'state':address.state,'zipcode':address.zipcode,"lat":address.lat,"lng":address.lng}, function (data) {
-                if(data.status === 'failure' || data.status === 'expired')
-                {
+                if(data.status === 'failure' || data.status === 'expired') {
                     swal({ title: "Your session has been expired",text:"Please login again",   type: "error",   confirmButtonText: "Login again" });
                     moo_show_loginform();
                     jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
-                }
-                else
+                } else {
                     if(data.status === 'success')
                     {
                         swal({ title: "Address added",text:"Loading your addresses",   type: "success",   confirmButtonText: "ok" });
@@ -360,6 +371,7 @@ function moo_addAddress(e)
                         swal({ title: "Address not added to your account",text:"Please try again or contact us",   type: "error",   confirmButtonText: "Try again" });
                         jQuery(e.target).html('Confirm and add address').attr('onclick','moo_addAddress(event)');
                     }
+                }
             })
             .fail(function(data) {
                 console.log(data.responseText);
@@ -692,7 +704,7 @@ function  moo_my_account_myorders_perPage(page) {
                 }
             } else {
                 swal({ title: "Error",text:"your session has expired",   type: "error",timer:5000 });
-                moo_refresh_page();
+               // moo_refresh_page();
             }
         })
                                     .fail(function(data) {
@@ -775,7 +787,7 @@ function moo_reOrder(order_uuid) {
     });
 
 }
-function mooRenderItemsForFavorits(items){
+function mooRenderItemsForFavorits(items) {
     window.moo_nbItemsPerLine = 3;
     var html  = '<div class="moo_cp_content_header"><h1>Your Top Purchases</h1></div>';
     html += '<div class="moo_cp_content_body">';
@@ -809,11 +821,11 @@ function mooRenderItemsForFavorits(items){
             }
 
             html +=   '<h2 class="title"><span class="brand "></span>'+
-                '<span class="name">'+item.name+'</span>'+
+                '<span class="name" tabindex="0">'+item.name+'</span>'+
                 '</h2>'+
                 '<div class="price-container clearfix">'+
                 '<div class="price-box">'+
-                '<span class="price">';
+                '<span class="price" tabindex="0">';
             // '<span>799</span>'+
             if(parseFloat(item.price) === 0) {
                 html += '<span></span>';
@@ -841,9 +853,7 @@ function mooRenderItemsForFavorits(items){
                     else
                         html += '<button class="osh-btn" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)"><span class="label">Add to cart</span></button>';
 
-                }
-                else
-                {
+                } else {
                     if(item.has_modifiers)
                         html += '<button class="osh-btn" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)"><span class="label"> Choose Options & Qty </span></button>';
                     else
@@ -863,10 +873,10 @@ function mooRenderItemsForFavorits(items){
 
     // Then add theme to dom and do some changes after finsihed the rendriign
     jQuery("#moo_cp_content").html(html).promise().done(function() {
-        console.log("Favorits items loaded")
+        jQuery(".moo_cp_content_header").focus();
     });
 }
-function mooRenderItemsForMostPurchase(items){
+function mooRenderItemsForMostPurchase(items) {
     window.moo_nbItemsPerLine = 3;
     var html  = '<div class="moo_cp_content_header"><h1>These are currently the most popular orders made by all customers</h1></div>';
     html += '<div class="moo_cp_content_body">';
@@ -919,22 +929,18 @@ function mooRenderItemsForMostPurchase(items){
                 html += '<button class="osh-btn"><span class="label">OUT OF STOCK</span></button>';
             } else {
                 //Checking the Qty window show/hide and add add to cart button
-                if(true)
-                {
-                    if(item.has_modifiers)
-                    {
+                if(true) {
+                    if(item.has_modifiers) {
                         //check qty window for modifiers
                         if(true)
                             html += '<button class="osh-btn" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtnFIWM)"><span class="label">Choose Qty & Options</span></button>';
                         else
                             html += '<button class="osh-btn" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)"><span class="label">Choose Options & Qty</span></button>';
+                    } else {
+                           html += '<button class="osh-btn" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)"><span class="label">Add to cart</span></button>';
                     }
-                    else
-                        html += '<button class="osh-btn" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)"><span class="label">Add to cart</span></button>';
 
-                }
-                else
-                {
+                } else {
                     if(item.has_modifiers)
                         html += '<button class="osh-btn" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)"><span class="label"> Choose Options & Qty </span></button>';
                     else
@@ -954,8 +960,8 @@ function mooRenderItemsForMostPurchase(items){
     jQuery("#moo_cp_content").html(html);
 
 }
-function mooRenderAddresses(addresses){
-    var html  = '<div class="moo_cp_content_header"><h1>My Addresses</h1><span><a class="osh-btn moo_pull_right" href="#" onclick="moo_add_new_address()">ADD NEW</a></span></div>';
+function mooRenderAddresses(addresses) {
+    var html  = '<div class="moo_cp_content_header"><h1>My Addresses</h1><span><a role="button" aria-label="add new address" class="osh-btn moo_pull_right" href="#" onclick="moo_add_new_address()">ADD NEW</a></span></div>';
     html += '<div class="moo_cp_content_body">';
     if(addresses.length > 0) {
         for(i in addresses){
@@ -966,12 +972,12 @@ function mooRenderAddresses(addresses){
             html += '<div class="moo-row moo_cp_content_oneAddressLigne">'; // start principal div
 
             html +='<div class="moo-col-md-12 moo_border moo_cp_content_oneOrder">'; // start address line
-            html +='<div class="moo-col-md-6 moo_right_border moo_cp_content_oneOrderCol moo_cp_content_oneOrderItems">';
+            html +='<div class="moo-col-md-6 moo_right_border moo_cp_content_oneOrderCol moo_cp_content_oneOrderItems" tabindex="0">';
             html += '<span class="moo_cp_orders_ordernumber">'+address.address+', '+address.line2+'</span>';
             html += '<span class="moo_cp_orders_orderdate">'+address.city+', '+address.zipcode+'</span>';
             html +='</div>';
-            html +='<div class="moo-col-md-3 moo_right_border moo_cp_content_oneOrderCol moo_cp_content_oneOrderTotal">'+address.state+'</div>';
-            html +='<div class="moo-col-md-3 moo_cp_content_oneOrderCol moo_center_text  moo_cp_content_oneOrderButton"><a class="osh-btn" href="#" onclick="moo_delete_address(event,\''+address.id+'\')">REMOVE</a></div>';
+            html +='<div class="moo-col-md-3 moo_right_border moo_cp_content_oneOrderCol moo_cp_content_oneOrderTotal" tabindex="0">'+address.state+'</div>';
+            html +='<div class="moo-col-md-3 moo_cp_content_oneOrderCol moo_center_text  moo_cp_content_oneOrderButton"><a role="button" aria-label="remove this address" class="osh-btn" href="#" onclick="moo_delete_address(event,\''+address.id+'\')">REMOVE</a></div>';
             html +='</div>'; // fin address line
             html +='</div>'; // Fin principal div
         }
@@ -985,11 +991,12 @@ function mooRenderAddresses(addresses){
       //  console.log("Address loaded")
     });
 }
-function moo_add_new_address(){
+function moo_add_new_address() {
     var html  ='<div class="moo_cp_content_header"><h1>Add new addresss</h1></div>';
         html +='<div class="moo_cp_content_body">';
         html +='<div class="moo-row">'; // start principal div
         html +='<div class="moo-col-md-8 moo-col-md-offset-2">';
+        html +='<div class="mooFormAddingAddress">';
         html +='<div class="moo-form-group">';
         html +='<label for="inputMooAddress">Address</label>';
         html +='<input type="text" class="moo-form-control" id="cp_MooAddress">';
@@ -1013,6 +1020,8 @@ function moo_add_new_address(){
         html +='<p class="moo-centred">';
         html +='<a href="#" class="moo-btn moo-btn-warning" onclick="moo_ConfirmAddressOnMap(event)">Next</a> <a href="#" class="moo-btn" onclick="moo_my_account_addresses(event)">Back to addresses</a>';
         html +='</p>';
+        html +='</div>';
+        html +='<div class="mooFormConfirmingAddress">' ;
         html +='<div id="MooMapAddingAddress">';
         html +='<p style="margin-top: 150px;">Loading the MAP...</p>';
         html +='</div>';
@@ -1020,6 +1029,8 @@ function moo_add_new_address(){
         html +='<input type="hidden" class="moo-form-control" id="cp_MooLng">';
         html +='<div class="form-group">';
         html +='<a id="mooButonAddAddress" onclick="moo_addAddress(event)">Confirm and add address</a>';
+        html +='<a id="mooButonChangeAddress" onclick="moo_changeAddress(event)" aria-label="Change address">Change address </a>';
+        html +='</div>';
         html +='</div>';
         html +='</div>'; // Fin principal div
         html += "</div>";
@@ -1037,15 +1048,15 @@ function mooRenderProfil(user){
         html +='<div class="moo-col-md-8 moo-col-md-offset-2">';
         html +='<form onsubmit="moo_updateProfil(event)" method="post">';
         html +='<div class="moo-form-group">';
-        html +='<label for="inputMooAddress">Full Name</label>';
+        html +='<label for="cp_MooName">Full Name</label>';
         html +='<input type="text" class="moo-form-control" id="cp_MooName" value="'+user.fullname+'">';
         html +='</div>';
         html +='<div class="moo-form-group">';
-        html +='<label for="inputMooAddress">Email</label>';
+        html +='<label for="cp_MooEmail">Email</label>';
         html +='<input type="text" class="moo-form-control" id="cp_MooEmail" value="'+user.email+'">';
         html +='</div>';
         html +='<div class="moo-form-group">';
-        html +='<label for="inputMooCity">Phone</label>';
+        html +='<label for="cp_MooPhone">Phone</label>';
         html +='<input type="text" class="moo-form-control" id="cp_MooPhone" value="'+user.phone+'">';
         html +='</div>';
         html +='<p class="moo-centred">';
@@ -1059,15 +1070,15 @@ function mooRenderProfil(user){
         html +='<div class="moo-col-md-8 moo-col-md-offset-2">';
         html +='<form onsubmit="moo_changePassword(event)" method="post">';
         html +='<div class="moo-form-group">';
-        html +='<label for="inputMooAddress">Current password</label>';
+        html +='<label for="cp_MooCurrentPassword">Current password</label>';
         html +='<input type="password" class="moo-form-control" id="cp_MooCurrentPassword" autocomplete="current-password">';
         html +='</div>';
         html +='<div class="moo-form-group">';
-        html +='<label for="inputMooAddress">New Password</label>';
+        html +='<label for="cp_MooNewPassword">New Password</label>';
         html +='<input type="password" class="moo-form-control" id="cp_MooNewPassword" autocomplete="new-passwrod">';
         html +='</div>';
         html +='<div class="moo-form-group">';
-        html +='<label for="inputMooCity">Repeat Password</label>';
+        html +='<label for="cp_MooRepeatNewPassword">Repeat Password</label>';
         html +='<input type="password" class="moo-form-control" id="cp_MooRepeatNewPassword" autocomplete="new-password">';
         html +='</div>';
         html +='<p class="moo-centred">';
@@ -1165,17 +1176,13 @@ function moo_clickOnOrderBtn(event,item_id,qty) {
     };
     /* Add to cart the item */
     jQuery.post(moo_RestUrl+"moo-clover/v1/cart", body,function (data) {
-        if(data != null)
-        {
-            if(data.status == "error")
-            {
+        if(data != null) {
+            if(data.status == "error") {
                 swal({
                     title:data.message,
                     type:"error"
                 });
-            }
-            else
-            {
+            } else {
                 swal({
                     title:data.name,
                     text:"Added to cart",

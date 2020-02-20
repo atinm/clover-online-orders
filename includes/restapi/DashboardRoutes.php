@@ -305,8 +305,9 @@ class DashboardRoutes extends BaseRoute {
             return new WP_Error( 'api_key_required', 'New Api Key not found', array( 'status' => 400 ) );
         }
         $api_key = sanitize_text_field($request["api_key"]);
+        $checkResult = json_decode($this->api->checkAnyToken($api_key));
         //check token
-        if($this->api->checkAnyToken($api_key)){
+        if(isset($checkResult["status"]) && $checkResult["status"] == "success"){
             //clean inventory
             global $wpdb;
             $settings = (array) get_option("moo_settings");

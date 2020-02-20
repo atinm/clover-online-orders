@@ -146,7 +146,7 @@
             "label":"Button Show More Color",
             "type":"color",
             "info":"This will change the color of the button show more",
-            "default":"red",
+            "default":"black",
             "css" :[
                 {
                     "cssSelector":".moo-show-more",

@@ -364,7 +364,7 @@ function mooBuildItemLine(item)
     }
     html +='      </div><!-- /.col-lg-2 col-md-2 col-sm-3 col-xs-4 -->';
     if(item.has_modifiers)
-        html += '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12" id="moo-modifiersContainer-for-'+item.uuid+'"></div>';
+        html += '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12 moo-modifiersContainer-for-'+item.uuid+'"></div>';
 
     html +='   </div><!-- /.mooItemContent -->';
     return html;
@@ -392,7 +392,7 @@ function mooBuildItemLineWithoutImage(item)
     }
     html +='      </div><!-- /.col-lg-2 col-md-2 col-sm-3 moo-col-xs-4 -->';
     if(item.has_modifiers)
-        html += '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12" id="moo-modifiersContainer-for-'+item.uuid+'"></div>';
+        html += '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12 moo-modifiersContainer-for-'+item.uuid+'"></div>';
 
     html +='   </div><!-- /.mooItemContent -->';
     return html;
@@ -425,7 +425,7 @@ function mooBuildItemLineWithoutDescription(item)
     html +='      </div><!-- /.col-lg-2 col-md-2 col-sm-3 col-xs-4 -->';
 
     if(item.has_modifiers)
-        html += '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12" id="moo-modifiersContainer-for-'+item.uuid+'"></div>';
+        html += '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12 moo-modifiersContainer-for-'+item.uuid+'"></div>';
 
     html +='   </div><!-- /.mooItemContent -->';
     return html;
@@ -454,7 +454,7 @@ function mooBuildItemLineWithoutImageAndDescription(item)
     html +='            </div><!-- /.col-lg-8 col-md-8 col-sm-8 col-xs-12 -->'+
            '        </div><!-- /.col-lg-10 col-md-10 col-sm-12 col-xs-12 -->';
     if(item.has_modifiers)
-        html += '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12" id="moo-modifiersContainer-for-'+item.uuid+'"></div>';
+        html += '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12 moo-modifiersContainer-for-'+item.uuid+'"></div>';
 
     html  +='   </div><!-- /.mooItemContent -->';
     return html;
