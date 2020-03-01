@@ -84,6 +84,27 @@ class Moo_OnlineOrders_Shortcodes {
                                 if(strtoupper($category->uuid) != strtoupper($_GET['category']) ) continue;
                             }
                         }
+                        if(isset($atts['includes']) && $atts['includes']!="") {
+                            $includes = explode(":", $atts['includes']);
+                            if(!in_array(strtoupper($category->uuid), $includes)) continue;
+                        } else{
+                            if(isset($_GET['includes']) && $_GET['includes']!="")
+                            {
+                                $includes = explode(":", $_GET['includes']);
+                                if(!in_array(strtoupper($category->uuid), $includes)) continue;
+                            }
+                        }
+
+                        if(isset($atts['excludes']) && $atts['excludes']!="") {
+                            $excludes = explode(":", $atts['excludes']);
+                            if(in_array(strtoupper($category->uuid), $excludes)) continue;
+                        } else{
+                            if(isset($_GET['excludes']) && $_GET['excludes']!="")
+                            {
+                                $excludes = explode(":", $_GET['excludes']);
+                                if(in_array(strtoupper($category->uuid), $excludes)) continue;
+                            }
+                        }
 
                         if(count($show_only_categories)>0){
                             if(!in_array(strtoupper($category->uuid),$show_only_categories))
@@ -1184,7 +1205,11 @@ class Moo_OnlineOrders_Shortcodes {
                     if( $theme_id == "style3" ) {
                         $html_code .= self::ItemsWithImages($atts, $content,$custom_css);
                     } else {
+                        if( $theme_id == "style4" ) {
+                            $html_code .= self::moo_store_style4($atts, $content);
+                        } else {
                             $html_code .= self::moo_store_use_theme($atts, $content,$custom_css);
+                        }
                     }
                 }
             }
@@ -1552,6 +1577,30 @@ class Moo_OnlineOrders_Shortcodes {
                        <ul class="moo-nav moo-nav-menu moo-bg-dark moo-dark">
                        <?php
                        foreach ($categories as $category) {
+                        echo '<h1>includes attrs='.$attrs['includes'].', _GET='.$_GET['includes'].'</h1>';
+                        if(isset($atts['includes']) && $atts['includes']!="") {
+                                $includes = explode(":", $atts['includes']);
+                                if(!in_array(strtoupper($category['uuid']), $includes)) continue;
+                            } else{
+                                if(isset($_GET['includes']) && $_GET['includes']!="")
+                                {
+                                    $includes = explode(":", $_GET['includes']);
+                                    if(!in_array(strtoupper($category['uuid']), $includes)) continue;
+                                }
+                            }
+
+                            echo '<h1>excludes attrs='.$attrs['excludes'].', _GET='.$_GET['excludes'].'</h1>';
+                            if(isset($atts['excludes']) && $atts['excludes']!="") {
+                                $excludes = explode(":", $atts['excludes']);
+                                if(in_array(strtoupper($category['uuid']), $excludes)) continue;
+                            } else{
+                                if(isset($_GET['excludes']) && $_GET['excludes']!="")
+                                {
+                                    $excludes = explode(":", $_GET['excludes']);
+                                    if(in_array(strtoupper($category['uuid']), $excludes)) continue;
+                                }
+                            }
+
                            if(count($category["five_items"])>0) {
                                echo '<li><a href="#cat-'.strtolower($category['uuid']).'" onclick="MooCLickOnCategory(event,this)">'.$category['name'].'</a></li>';
                            }
@@ -1564,6 +1613,27 @@ class Moo_OnlineOrders_Shortcodes {
                     <?php
                     $html='';
                     foreach ($categories as $category) {
+                        if(isset($atts['includes']) && $atts['includes']!="") {
+                            $includes = explode(":", $atts['includes']);
+                            if(!in_array(strtoupper($category['uuid']), $includes)) continue;
+                        } else{
+                            if(isset($_GET['includes']) && $_GET['includes']!="")
+                            {
+                                $includes = explode(":", $_GET['includes']);
+                                if(!in_array(strtoupper($category['uuid']), $includes)) continue;
+                            }
+                        }
+
+                        if(isset($atts['excludes']) && $atts['excludes']!="") {
+                            $excludes = explode(":", $atts['excludes']);
+                            if(in_array(strtoupper($category['uuid']), $excludes)) continue;
+                        } else{
+                            if(isset($_GET['excludes']) && $_GET['excludes']!="")
+                            {
+                                $excludes = explode(":", $_GET['excludes']);
+                                if(in_array(strtoupper($category['uuid']), $excludes)) continue;
+                            }
+                        }
                         if(count($category["five_items"])>0) {
                             $html    .=   '<div id="cat-'.strtolower($category['uuid']).'" class="moo-menu-category">';
                             $html    .=  '<div class="moo-menu-category-title">';
@@ -1674,6 +1744,12 @@ class Moo_OnlineOrders_Shortcodes {
         if(isset($atts["categories"]) && !empty($atts["categories"])){
             $categories = explode(",",strtoupper($atts["categories"]));
         }
+        if(isset($atts['includes']) && $atts['includes']!="") {
+            $includes = explode(":", $atts['includes']);
+        }
+        if(isset($atts['excludes']) && $atts['excludes']!="") {
+            $excludes = explode(":", $atts['excludes']);
+        }
 
         $MooOptions = (array)get_option( 'moo_settings' );
 
@@ -1706,6 +1782,12 @@ class Moo_OnlineOrders_Shortcodes {
         }
         if ($jsFileName !== '' && count($categories) > 0) {
             wp_localize_script($jsFileName,"attr_categories",$categories);
+        }
+        if ($jsFileName !== '' && count($includes) > 0) {
+            wp_localize_script($jsFileName,"attr_includes",$includes);
+        }
+        if ($jsFileName !== '' && count($excludes) > 0) {
+            wp_localize_script($jsFileName,"attr_excludes",$excludes);
         }
 
         ob_start();

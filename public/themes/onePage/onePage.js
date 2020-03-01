@@ -164,6 +164,16 @@ function moo_renderCategories($cats,withButton)
                 continue;
             }
         }
+        if(typeof attr_includes !== 'undefined' && attr_includes !== undefined && attr_includes !== null && typeof attr_includes === 'object') {
+            if(attr_includes.indexOf(category.uuid.toUpperCase()) === -1){
+                continue;
+            }
+        }
+        if(typeof attr_excludes !== 'undefined' && attr_excludes !== undefined && attr_excludes !== null && typeof attr_excludes === 'object') {
+            if(attr_excludes.indexOf(category.uuid.toUpperCase()) !== -1){
+                continue;
+            }
+        }
         if(category.items.length > 0 ) {
             html +='<li role="listitem"><a role="menuitem" href="#cat-'+category.uuid.toLowerCase()+'" onclick="MooCLickOnCategory(event,this)">'+category.name+'</a></li>';
             moo_renderItems(category,withButton);

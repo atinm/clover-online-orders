@@ -160,8 +160,8 @@ html.mfp-helper  body {
 {
     display: block !important;
     width: 100% !important;
-    border-color: #25282a !important;
-    background-color: #05ad2f;
+    border-color: hsl(var(--theme-button--bg)) !important;
+    background-color: hsl(var(--theme-button--bg));
     color: #fff;
     font-size: 14px !important;
     cursor: pointer;
@@ -173,7 +173,7 @@ html.mfp-helper  body {
 {
     display: inline-block;
     width: 48% !important;
-    color: #fff;
+    color: hsl(var(--theme-button--color));
     font-size: 14px !important;
     cursor: pointer;
     text-align: center;
@@ -182,8 +182,8 @@ html.mfp-helper  body {
 }
 .mooModifier-addToCartBtn2
 {
-    border-color: #25282a !important;
-    background-color: #05ad2f;
+    border-color: hsl(var(--theme-button--bg)) !important;
+    background-color: hsl(var(--theme-button--bg));
 }
 .mooModifier-closeBtn
 {
@@ -193,11 +193,11 @@ html.mfp-helper  body {
 .mooModifier-addToCartBtn>a,.mooModifier-addToCartBtn>a:hover,.mooModifier-addToCartBtn2>a,.mooModifier-addToCartBtn2>a:hover,.mooModifier-closeBtn>a,.mooModifier-closeBtn>a:hover
 {
     text-decoration: none;
-    color: #fff !important;
+    color: hsl(var(--color-white)) !important;
 }
 .mooModifier-addToCartBtn:hover,.mooModifier-addToCartBtn2:hover,.mooModifier-closeBtn:hover
 {
-    background-color: #ff9200;
+    background-color: hsl(var(--theme-button--bg-interactive));
 }
 .mooModifier-closeBtn:hover
 {

@@ -353,6 +353,16 @@ function osnRenderItems(contentItems,content){
                             return;
                         }
                     }
+                    if(typeof attr_includes !== 'undefined' && attr_includes !== undefined && attr_includes !== null && typeof attr_includes === 'object') {
+                        if(attr_includes.indexOf(category.uuid.toUpperCase()) === -1){
+                            continue;
+                        }
+                    }
+                    if(typeof attr_excludes !== 'undefined' && attr_excludes !== undefined && attr_excludes !== null && typeof attr_excludes === 'object') {
+                        if(attr_excludes.indexOf(category.uuid.toUpperCase()) !== -1){
+                            continue;
+                        }
+                    }
                     if(element.items.length > 0){
                         content += '<li class="osnMenuListCatItem"><a data-id="#cat-'+element.uuid+'" onclick="osnScrollToCat(this)" class="osnCatLink">'+((window.showCategoryIcon)?'<span><i class="icon-food"></i></span><span>':'<span style="margin:13px;">')+''+element.name+'</span></a></li>';
                         contentItems += '<div id="cat-'+element.uuid+'" class="scrollspy">';

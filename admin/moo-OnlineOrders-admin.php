@@ -72,7 +72,7 @@ class moo_OnlineOrders_Admin {
     public function add_admin_menu()
     {
         $icon_url =  plugin_dir_url(dirname(__FILE__))."public/img/launcher.png";
-        add_menu_page('Settings page', 'Clover Orders', 'manage_options', 'moo_index', array($this, 'panel_settings'),$icon_url);
+        add_menu_page('Settings page', 'My Clover Orders', 'manage_options', 'moo_index', array($this, 'panel_settings'),$icon_url);
         add_submenu_page('moo_index', 'Settings', 'Settings', 'manage_options', 'moo_index', array($this, 'panel_settings'));
         add_submenu_page('moo_index', 'Themes', 'Store Interfaces', 'manage_options', 'moo_themes', array($this, 'page_themes'));
         add_submenu_page('moo_index', 'Items/Images', 'Items / Images / Description', 'manage_options', 'moo_items', array($this, 'page_products'));

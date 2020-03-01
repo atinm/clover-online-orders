@@ -131,6 +131,16 @@ function  moo_renderCategories($cats) {
                     continue;
                 }
             }
+            if(typeof attr_includes !== 'undefined' && attr_includes !== undefined && attr_includes !== null && typeof attr_includes === 'object') {
+                if(attr_includes.indexOf(category.uuid.toUpperCase()) === -1){
+                    continue;
+                }
+            }
+            if(typeof attr_excludes !== 'undefined' && attr_excludes !== undefined && attr_excludes !== null && typeof attr_excludes === 'object') {
+                if(attr_excludes.indexOf(category.uuid.toUpperCase()) !== -1){
+                    continue;
+                }
+            }
             compteur++;
             lastCat = category;
             var imageCatUrl = moo_params['plugin_img']+'/noImg3.png';
