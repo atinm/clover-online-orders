@@ -67,7 +67,7 @@ function mooLoadAllThemes() {
                });
                jQuery('#mooDashbboardTabContent2').html(html);
            } else {
-               jQuery('#mooDashbboardTabContent2').html("<div class='moo_dashboard_text_error' style='margin-top: 80px;'>There are no new Store Interfaces at this time, please check back later<p>Are you a developer and would like to make a Store Interface for Smart Online Order? click <a href='https://docs.smartonlineorder.com/docs'>Here</a> for Documentation</p></div>");
+               jQuery('#mooDashbboardTabContent2').html("<div class='moo_dashboard_text_error' style='margin-top: 80px;'>There are no new Store Interfaces at this time, please check back later<p>Are you a developer and would like to make a Store Interface for Smart Online Order? click <a href='https://docs.zaytech.com'>Here</a> for Documentation</p></div>");
            }
            swal.close();
         } else {

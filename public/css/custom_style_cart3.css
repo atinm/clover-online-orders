@@ -250,7 +250,7 @@
     }
 
     .moo-product .moo-product-line-price:before {
-        content: 'Item Total: $';
+        content: 'Item Total: ';
     }
 
     .moo-totals .moo-totals-item label {
@@ -283,7 +283,7 @@
 }
 
 .moo-product .moo-product-line-price-checkout:before {
-    content: 'Item Total: $';
+    content: 'Item Total: ';
 }
 
 .moo-totals .moo-totals-item-checkout label {

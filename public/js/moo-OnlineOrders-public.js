@@ -88,7 +88,7 @@ function moo_btn_addToCart(event,item_uuid,qty)
             swal({
                 title:"Item not added, try again",
                 type:"error"
-            });
+            });KHOURIBGA
         }
     }).fail(function ( data ) {
         swal({

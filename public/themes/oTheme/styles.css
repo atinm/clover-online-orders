@@ -186,6 +186,9 @@
     width: max-content;
     width: -moz-max-content;
     width: -webkit-max-content;
+    max-width: max-content;
+    max-width: -moz-max-content;
+    max-width: -webkit-max-content;
     padding: 0;
     margin: 0;
 }

@@ -21,7 +21,9 @@ function moo_cartv3_addtocart(uuid,name)
 {
     var qte = jQuery('#moo_popup_quantity').val();
     var special_instruction = jQuery('#moo_popup_si').val();
-    jQuery.magnificPopup.close();
+    setTimeout(function () {
+        jQuery.magnificPopup.close();
+    },1000);
     //toastr.success(name+ ' added to cart');
     swal({ title: name, text: 'Added to cart',   type: "success",   confirmButtonText: "OK" });
 

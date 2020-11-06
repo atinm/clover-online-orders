@@ -160,8 +160,8 @@ html.mfp-helper  body {
 {
     display: block !important;
     width: 100% !important;
-    border-color: hsl(var(--theme-button--bg)) !important;
-    background-color: hsl(var(--theme-button--bg));
+    border-color: #25282a !important;
+    background-color: #05ad2f;
     color: #fff;
     font-size: 14px !important;
     cursor: pointer;
@@ -173,7 +173,7 @@ html.mfp-helper  body {
 {
     display: inline-block;
     width: 48% !important;
-    color: hsl(var(--theme-button--color));
+    color: #fff;
     font-size: 14px !important;
     cursor: pointer;
     text-align: center;
@@ -182,8 +182,8 @@ html.mfp-helper  body {
 }
 .mooModifier-addToCartBtn2
 {
-    border-color: hsl(var(--theme-button--bg)) !important;
-    background-color: hsl(var(--theme-button--bg));
+    border-color: #25282a !important;
+    background-color: #05ad2f;
 }
 .mooModifier-closeBtn
 {
@@ -193,11 +193,15 @@ html.mfp-helper  body {
 .mooModifier-addToCartBtn>a,.mooModifier-addToCartBtn>a:hover,.mooModifier-addToCartBtn2>a,.mooModifier-addToCartBtn2>a:hover,.mooModifier-closeBtn>a,.mooModifier-closeBtn>a:hover
 {
     text-decoration: none;
-    color: hsl(var(--color-white)) !important;
+    color: #fff !important;
 }
-.mooModifier-addToCartBtn:hover,.mooModifier-addToCartBtn2:hover,.mooModifier-closeBtn:hover
-{
-    background-color: hsl(var(--theme-button--bg-interactive));
+.mooModifier-addToCartBtn:hover,.mooModifier-addToCartBtn2:hover,.mooModifier-closeBtn:hover {
+    background-color: #ff9200;
+}
+.mfp-wrap .mfp-container .moo-modifiersPanel form .mooModifier-addToCartBtn:hover,
+.mfp-wrap .mfp-container .moo-modifiersPanel form .mooModifier-addToCartBtn2:hover,
+.mfp-wrap .mfp-container .moo-modifiersPanel form .mooModifier-closeBtn:hover {
+    background-color: #ff9200 !important;
 }
 .mooModifier-closeBtn:hover
 {

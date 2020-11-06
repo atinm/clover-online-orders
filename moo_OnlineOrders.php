@@ -16,7 +16,7 @@
  * Plugin Name:       Smart Online Order for Clover
  * Plugin URI:        http://www.zaytechapps.com
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.3.9
+ * Version:           1.4.4
  * Author:            Zaytech
  * Author URI:        http://www.zaytechapps.com
  * License:           Clover app
@@ -158,7 +158,7 @@ add_filter( 'plugin_action_links_' . plugin_basename(__FILE__), 'moo_add_action_
 function moo_add_action_links( $links ) {
     $plugin_links_1 = array(
         '<a href="admin.php?page=moo_index">Settings</a>',
-        '<a href="http://docs.smartonlineorder.com/">Docs</a>',
+        '<a href="https://docs.zaytech.com/">Docs</a>',
         '<a href="https://smartonlineorder.com/contact-us/">Support</a>',
     );
 
@@ -193,7 +193,7 @@ function moo_deactivateAndClean() {
 }
 add_action( 'admin_init', 'moo_deactivateAndClean');
                  
-if(get_option('moo_onlineOrders_version') != '139') {
+if(get_option('moo_onlineOrders_version') != '144') {
     add_action('plugins_loaded', 'moo_onlineOrders_check_version');
 }
 
@@ -216,7 +216,6 @@ function moo_onlineOrders_check_version()
     if(! isset($version) || empty($version)){
         $version="120";
     }
-   // $version="120";
     switch ($version)
     {
         case '120':
@@ -341,7 +340,7 @@ function moo_onlineOrders_check_version()
             if(!isset($defaultOptions['style2_messageforspecialinstruction'])) {
                 $defaultOptions['style2_messageforspecialinstruction'] = 'Type your instructions here, additional charges may apply and not all changes are possible';
             }
-            update_option("moo_settings",$defaultOptions);
+
         case '136':
         case '137':
             @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_category` ADD `description` TEXT NULL");
@@ -354,8 +353,32 @@ function moo_onlineOrders_check_version()
             @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `use_coupons` INT(1) NULL DEFAULT 1");
             @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `custom_message` VARCHAR(255) NULL DEFAULT 'Not available yet'");
         case '138':
-            update_option('moo_onlineOrders_version','139');
-        case '138':
+        case '139':
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `allow_sc_order` INT(1) NULL DEFAULT 1 ");
+            @$wpdb->query("ALTER TABLE `{$wpdb->prefix}moo_order_types` ADD `maxAmount` VARCHAR(100) NULL DEFAULT '' ");
+            if(isset($defaultOptions["payment_creditcard"]) &&  $defaultOptions["payment_creditcard"] === "on"){
+                $defaultOptions["payment_creditcard"] = "off";
+                $defaultOptions["clover_payment_form"] = "on";
+            }
+            $defaultOptions["mg_settings_minimized"] = "off";
+            $defaultOptions["scp"] = "off";
+            $defaultOptions["tips_selection"] = "10,15,20,25";
+            $defaultOptions["tips_default"] = "";
+            $defaultOptions["rollout_order_number"] = "on";
+            $defaultOptions["rollout_order_number_max"] = "999";
+            $defaultOptions["thanks_page_wp"] = "";
+        case '140':
+        case '141':
+        case '142':
+        case '143':
+            //temporary go back to standard checkout
+            if(isset($defaultOptions["clover_payment_form"]) &&  $defaultOptions["clover_payment_form"] === "on"){
+                $defaultOptions["payment_creditcard"] = "on";
+                $defaultOptions["clover_payment_form"] = "off";
+            }
+            update_option("moo_settings",$defaultOptions);
+            update_option('moo_onlineOrders_version','144');
+        case '144':
             break;
     }
 }

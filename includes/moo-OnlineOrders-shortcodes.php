@@ -34,6 +34,12 @@ class Moo_OnlineOrders_Shortcodes {
 
         $MooOptions = (array)get_option('moo_settings');
 
+        if(isset($MooOptions["useAlternateNames"])){
+            $useAlternateNames = ($MooOptions["useAlternateNames"] !== "disabled");
+        } else {
+            $useAlternateNames = true;
+        }
+
         ob_start();
     ?>
         <a href="#ViewShoppingCart">
@@ -84,27 +90,6 @@ class Moo_OnlineOrders_Shortcodes {
                                 if(strtoupper($category->uuid) != strtoupper($_GET['category']) ) continue;
                             }
                         }
-                        if(isset($atts['includes']) && $atts['includes']!="") {
-                            $includes = explode(":", $atts['includes']);
-                            if(!in_array(strtoupper($category->uuid), $includes)) continue;
-                        } else{
-                            if(isset($_GET['includes']) && $_GET['includes']!="")
-                            {
-                                $includes = explode(":", $_GET['includes']);
-                                if(!in_array(strtoupper($category->uuid), $includes)) continue;
-                            }
-                        }
-
-                        if(isset($atts['excludes']) && $atts['excludes']!="") {
-                            $excludes = explode(":", $atts['excludes']);
-                            if(in_array(strtoupper($category->uuid), $excludes)) continue;
-                        } else{
-                            if(isset($_GET['excludes']) && $_GET['excludes']!="")
-                            {
-                                $excludes = explode(":", $_GET['excludes']);
-                                if(in_array(strtoupper($category->uuid), $excludes)) continue;
-                            }
-                        }
 
                         if(count($show_only_categories)>0){
                             if(!in_array(strtoupper($category->uuid),$show_only_categories))
@@ -114,12 +99,23 @@ class Moo_OnlineOrders_Shortcodes {
                         if($category->uuid == 'NoCategory')
                         {
                             $category_name = $category->name;
-                        }
-                        else
-                        {
-                            $category_name = $category->name;
-                            if(isset($category->alternate_name) && $category->alternate_name != "")
-                                $category_name = $category->alternate_name;
+                        } else {
+
+                            if(isset($MooOptions["useAlternateNames"])){
+                                if($MooOptions["useAlternateNames"] && $category->alternate_name !== ""){
+                                    $category_name =  $category->alternate_name;
+                                } else {
+                                    $category_name = $category->name;
+                                }
+                            } else {
+                                $category_name = $category->name;
+                            }
+                            $category_name = "";
+                            if($useAlternateNames && isset($category->alternate_name) && $category->alternate_name!==""){
+                                $category_name=stripslashes($category->alternate_name);
+                            } else {
+                                $category_name=stripslashes($category->name);
+                            }
 
                             if(strlen ($category->items)< 1 || $category->show_by_default == 0) continue;
                         }
@@ -167,12 +163,19 @@ class Moo_OnlineOrders_Shortcodes {
                                             else
                                                 $itemStock = false;
 
+                                            $item_name = "";
+                                            if($useAlternateNames && isset($litem->alternate_name) && $item->alternate_name!==""){
+                                                $item_name=stripslashes($item->alternate_name);
+                                            } else {
+                                                $item_name=stripslashes($item->name);
+                                            }
 
-                                            if($item->outofstock== 1 || ($track_stock==true && $itemStock!=false && isset($itemStock->stockCount)  && $itemStock->stockCount<1))
+                                            if($item->outofstock == 1 || ($track_stock==true && $itemStock!=false && isset($itemStock->stockCount)  && $itemStock->stockCount<1))
                                             {
+
                                                 echo '<li>';
                                                 echo '<a href="#" onclick="event.preventDefault()">';
-                                                echo '  <div class="moo_detail">'.$item->name.' (Out of stock) </div>';
+                                                echo '  <div class="moo_detail">'.$item_name.' (Out of stock) </div>';
                                                 echo '  <div class="moo_price">'.(($item->price>0)?'$'.(number_format(($item->price/100),2,'.','')):'');
                                                 if($item->price_type == "PER_UNIT")
                                                 {
@@ -183,16 +186,14 @@ class Moo_OnlineOrders_Shortcodes {
                                                 if(isset($item->description) && $item->description!="")
                                                     echo "<p style='width: 85%;'>".stripslashes($item->description)."</p>";
                                                 echo '</li>';
-                                            }
-                                            else
-                                            {
+                                            } else {
                                                 echo '<li>';
                                                 if(($model->itemHasModifiers($item->uuid)->total) != "0")
                                                     echo '<a class="popup-text" href="#Modifiers_for_'.$item->uuid.'" >';
                                                 else
-                                                    echo '<a href="#" onclick="moo_addToCart(event,\''.$item->uuid.'\',\''.esc_sql($item->name).'\',\''.$item->price.'\')">';
+                                                    echo '<a href="#" onclick="moo_addToCart(event,\''.$item->uuid.'\',\''.$item_name.'\',\''.$item->price.'\')">';
 
-                                                echo '  <div class="moo_detail">'.$item->name;
+                                                echo '  <div class="moo_detail">'.$item_name;
                                                 echo '</div>';
                                                 echo '  <div class="moo_price">'.(($item->price>0)?'$'.(number_format(($item->price/100),2,'.','')):'');
 
@@ -663,6 +664,12 @@ class Moo_OnlineOrders_Shortcodes {
         $cart_page_url  =  get_page_link($cart_page_id);
         $store_page_url =  get_page_link($store_page_id);
 
+        if(isset($MooOptions["useAlternateNames"])){
+            $useAlternateNames = ($MooOptions["useAlternateNames"] !== "disabled");
+        } else {
+            $useAlternateNames = true;
+        }
+
         ob_start();
         if(isset($_GET['category']) || isset($atts['category'])){
             $nb_items = 0;
@@ -683,9 +690,9 @@ class Moo_OnlineOrders_Shortcodes {
                 }
             }
 
-            if(@count($items_tab)<=0)  echo '<div class="moo-col-md-12">"No items available.</div>';
-            else
-            {
+            if(@count($items_tab)<=0)  {
+                echo '<div class="moo-col-md-12">"No items available.</div>';
+            } else {
                 $track_stock = $api->getTrackingStockStatus();
 
                 if($track_stock)
@@ -698,12 +705,13 @@ class Moo_OnlineOrders_Shortcodes {
 
                 if(isset($cat))
                 {
-                    if (!isset($cat->alternate_name) || $cat->alternate_name == null || $cat->alternate_name =='') {
-                        echo '<div class="moo_category_page_title" id="moo_category_page_content">'.stripslashes($cat->name).'</div>';
+                    $category_name = "";
+                    if($useAlternateNames && isset($cat->alternate_name) && $cat->alternate_name!==""){
+                        $category_name=stripslashes($cat->alternate_name);
+                    } else {
+                        $category_name=stripslashes($cat->name);
                     }
-                    else {
-                        echo '<div class="moo_category_page_title" id="moo_category_page_content">'.stripslashes($cat->alternate_name).'</div>';
-                    }
+                    echo '<div class="moo_category_page_title" id="moo_category_page_content">'.$category_name.'</div>';
                     echo '<div class="moo_category_page_description" >'.stripslashes($cat->description).'</div>';
 
                 }
@@ -725,6 +733,11 @@ class Moo_OnlineOrders_Shortcodes {
 
                     $item_name = $item->name;
                     //$item_name = ucfirst(strtolower($item->name));
+                    if($useAlternateNames && isset($item->alternate_name) && $item->alternate_name!==""){
+                        $item_name=stripslashes($item->alternate_name);
+                    } else {
+                        $item_name=stripslashes($item->name);
+                    }
 
 
                     $img_array = array();
@@ -894,7 +907,7 @@ class Moo_OnlineOrders_Shortcodes {
                                 </div>
                                 <div class="moo-col-md-5 moo_popup_leftSide" id="moo_popup_leftSide">
                                     <div class="moo_popup_title">
-                                        <?php echo $item->name ?>
+                                        <?php echo $item_name ?>
                                     </div>
                                     <div class="moo_popup_description">
                                         <?php echo stripslashes ($item->description) ?>
@@ -981,7 +994,7 @@ class Moo_OnlineOrders_Shortcodes {
                             } ?>
                             <div class="moo-col-md-6 moo_popup_leftSide" id="moo_popup_leftSide">
                                 <div class="moo_popup_title">
-                                    <?php echo $item->name ?>
+                                    <?php echo $item_name ?>
                                 </div>
                                 <div class="moo_popup_description">
                                     <?php echo stripslashes ($item->description) ?>
@@ -1143,47 +1156,65 @@ class Moo_OnlineOrders_Shortcodes {
     {
         $api   = new moo_OnlineOrders_CallAPI();
         $MooOptions = (array)get_option('moo_settings');
-        $oppening_status = json_decode($api->getOpeningStatus(4,30));
         $oppening_msg = "";
+
+        //Get blackout status
+        $blackoutStatusResponse = $api->getBlackoutStatus();
+        if(isset($blackoutStatusResponse->status) && $blackoutStatusResponse->status === "close"){
+
+            if(isset($blackoutStatusResponse->custom_message) && !empty($blackoutStatusResponse->custom_message)){
+                $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$blackoutStatusResponse->custom_message.'</div>';
+            } else {
+                $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">We are currently closed and will open again soon</div>';
+
+            }
+
+            if(isset($blackoutStatusResponse->hide_menu) && $blackoutStatusResponse->hide_menu){
+                return $oppening_msg;
+            }
+        }
+
+        $oppening_status = json_decode($api->getOpeningStatus(4,30));
+
 
         if(isset($MooOptions['accept_orders']) && $MooOptions['accept_orders'] === "disabled"){
             if(isset($MooOptions["closing_msg"]) && $MooOptions["closing_msg"] !== '') {
-                $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$MooOptions["closing_msg"].'</div>';
+                $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$MooOptions["closing_msg"].'</div>';
             } else  {
-                $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">We are currently closed and will open again soon</div>';
+                $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">We are currently closed and will open again soon</div>';
 
             }
             return '<div id="moo_OnlineStoreContainer" >'.$oppening_msg.'</div>';
         }
 
-        if($MooOptions['hours'] != 'all' && isset($oppening_status->status ) && $oppening_status->status == 'close')
+        if(isset($MooOptions['hours']) && $MooOptions['hours'] != 'all' && isset($oppening_status->status ) && $oppening_status->status == 'close')
         {
             if(isset($MooOptions["closing_msg"]) && $MooOptions["closing_msg"] !== '') {
-                $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$MooOptions["closing_msg"].'</div>';
+                $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$MooOptions["closing_msg"].'</div>';
             } else  {
                 if($oppening_status->store_time == '')
-                    $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on' && $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: #006b00'>Order in Advance Available</p>":"").'</div>';
+                    $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on' && $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: #006b00'>Order in Advance Available</p>":"").'</div>';
                 else
-                    $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on'&& $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: #006b00'>Order in Advance Available</p>":"").'</div>';
+                    $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on'&& $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: #006b00'>Order in Advance Available</p>":"").'</div>';
             }
 
         }
-        if($MooOptions['hours'] != 'all' && $MooOptions['hide_menu'] == 'on' && $oppening_status->status == 'close') {
+        if(isset($MooOptions['hours']) && $MooOptions['hours'] != 'all' && $MooOptions['hide_menu'] == 'on' && $oppening_status->status == 'close') {
             return '<div id="moo_OnlineStoreContainer" >'.$oppening_msg.'</div>';
         }
 
         $html_code  = '';
-        $theme_id = $MooOptions["default_style"];
-        $custom_css = $MooOptions["custom_css"];
-        $custom_js  = $MooOptions["custom_js"];
-        $website_width = intval($MooOptions[$theme_id."_width"]);
+        $theme_id = (isset($MooOptions["default_style"]))?$MooOptions["default_style"]:"onePage";
+        $custom_css = (isset($MooOptions["custom_css"]))?$MooOptions["custom_css"]:"";
+        $custom_js  = (isset($MooOptions["custom_js"]))?$MooOptions["custom_js"]:"";
+        $website_width = (isset($MooOptions[$theme_id."_width"]))?intval($MooOptions[$theme_id."_width"]):0;
 
-        if($website_width === 0) {
+        if($website_width === 0 || trim($website_width) == "") {
             $website_width = "100%";
         } else {
-            $website_width.="px;";
+            $website_width=trim($website_width)."px;";
         }
-        $custom_css .= '@media only screen and (min-width: 768px) {#moo_OnlineStoreContainer,.moo-shopping-cart-container,.Moo_Copyright {width: '.$website_width.'}}';
+        $custom_css .= '@media only screen and (min-width: 1024px) {#moo_OnlineStoreContainer,.moo-shopping-cart-container,.Moo_Copyright {width: '.$website_width.'}}';
         $custom_css .= self::moo_render_customised_css_for_themes($theme_id);
 
         $html_code .=  $oppening_msg;
@@ -1205,17 +1236,14 @@ class Moo_OnlineOrders_Shortcodes {
                     if( $theme_id == "style3" ) {
                         $html_code .= self::ItemsWithImages($atts, $content,$custom_css);
                     } else {
-                        if( $theme_id == "style4" ) {
-                            $html_code .= self::moo_store_style4($atts, $content);
-                        } else {
                             $html_code .= self::moo_store_use_theme($atts, $content,$custom_css);
-                        }
                     }
                 }
             }
         }
-
-        $html_code .=  '</div><div class="row Moo_Copyright">'.$MooOptions["copyrights"].'</div>';
+        if(isset($MooOptions["copyrights"]) && !empty($MooOptions["copyrights"])){
+            $html_code .=  '</div><div class="row Moo_Copyright">'.$MooOptions["copyrights"].'</div>';
+        }
 
         //Include custom js
         if($custom_js != null)
@@ -1283,6 +1311,12 @@ class Moo_OnlineOrders_Shortcodes {
         else
             $coupon = null;
 
+        if(isset($MooOptions["useAlternateNames"])){
+            $useAlternateNames = ($MooOptions["useAlternateNames"] !== "disabled");
+        } else {
+            $useAlternateNames = true;
+        }
+
     ?>
         <div class="moo-shopping-cart-container">
         <div class="moo-shopping-cart">
@@ -1304,6 +1338,12 @@ class Moo_OnlineOrders_Shortcodes {
                 $no_image_url =  plugin_dir_url(dirname(__FILE__))."public/img/no-image.png";
                 $default_image = ($item_image == null)?$no_image_url:$item_image->url;
 
+                $item_name = "";
+                if($useAlternateNames && isset($line['item']->alternate_name) && $line['item']->alternate_name!==""){
+                    $item_name=stripslashes($line['item']->alternate_name);
+                } else {
+                    $item_name=stripslashes($line['item']->name);
+                }
                 if($track_stock)
                     $itemStock = self::getItemStock($itemStocks,$line['item']->uuid);
                 else
@@ -1316,7 +1356,7 @@ class Moo_OnlineOrders_Shortcodes {
                 </div>
                 <?php }?>
                 <div class="moo-product-details"  <?php if($MooOptions['default_style']!='style3'){echo 'style="width:57%"';}?>>
-                    <div class="moo-product-title" tabindex="0"><?php echo $line['item']->name?></div>
+                    <div class="moo-product-title" tabindex="0"><?php echo $item_name; ?></div>
                     <p class="moo-product-description">
                         <?php
                         foreach($line['modifiers'] as $modifier)
@@ -1333,10 +1373,17 @@ class Moo_OnlineOrders_Shortcodes {
                                 $modifiers_price += $modifier['price'];
                             }
 
+                            $modifier_name = "";
+                            if($useAlternateNames && isset($modifier["alternate_name"]) && $modifier["alternate_name"]!==""){
+                                $modifier_name =stripslashes($modifier["alternate_name"]);
+                            } else {
+                                $modifier_name =stripslashes($modifier["name"]);
+                            }
+
                             if($modifier['price']>0)
-                                echo ''.$modifier['name'].'- $'.number_format(($modifier['price']/100),2)."</span><br/>";
+                                echo ''.$modifier_name.'- $'.number_format(($modifier['price']/100),2)."</span><br/>";
                             else
-                                echo ''.$modifier['name']."</span><br/>";
+                                echo ''.$modifier_name."</span><br/>";
 
                         }
                         if($line['special_ins'] != "")
@@ -1577,30 +1624,6 @@ class Moo_OnlineOrders_Shortcodes {
                        <ul class="moo-nav moo-nav-menu moo-bg-dark moo-dark">
                        <?php
                        foreach ($categories as $category) {
-                        echo '<h1>includes attrs='.$attrs['includes'].', _GET='.$_GET['includes'].'</h1>';
-                        if(isset($atts['includes']) && $atts['includes']!="") {
-                                $includes = explode(":", $atts['includes']);
-                                if(!in_array(strtoupper($category['uuid']), $includes)) continue;
-                            } else{
-                                if(isset($_GET['includes']) && $_GET['includes']!="")
-                                {
-                                    $includes = explode(":", $_GET['includes']);
-                                    if(!in_array(strtoupper($category['uuid']), $includes)) continue;
-                                }
-                            }
-
-                            echo '<h1>excludes attrs='.$attrs['excludes'].', _GET='.$_GET['excludes'].'</h1>';
-                            if(isset($atts['excludes']) && $atts['excludes']!="") {
-                                $excludes = explode(":", $atts['excludes']);
-                                if(in_array(strtoupper($category['uuid']), $excludes)) continue;
-                            } else{
-                                if(isset($_GET['excludes']) && $_GET['excludes']!="")
-                                {
-                                    $excludes = explode(":", $_GET['excludes']);
-                                    if(in_array(strtoupper($category['uuid']), $excludes)) continue;
-                                }
-                            }
-
                            if(count($category["five_items"])>0) {
                                echo '<li><a href="#cat-'.strtolower($category['uuid']).'" onclick="MooCLickOnCategory(event,this)">'.$category['name'].'</a></li>';
                            }
@@ -1613,27 +1636,6 @@ class Moo_OnlineOrders_Shortcodes {
                     <?php
                     $html='';
                     foreach ($categories as $category) {
-                        if(isset($atts['includes']) && $atts['includes']!="") {
-                            $includes = explode(":", $atts['includes']);
-                            if(!in_array(strtoupper($category['uuid']), $includes)) continue;
-                        } else{
-                            if(isset($_GET['includes']) && $_GET['includes']!="")
-                            {
-                                $includes = explode(":", $_GET['includes']);
-                                if(!in_array(strtoupper($category['uuid']), $includes)) continue;
-                            }
-                        }
-
-                        if(isset($atts['excludes']) && $atts['excludes']!="") {
-                            $excludes = explode(":", $atts['excludes']);
-                            if(in_array(strtoupper($category['uuid']), $excludes)) continue;
-                        } else{
-                            if(isset($_GET['excludes']) && $_GET['excludes']!="")
-                            {
-                                $excludes = explode(":", $_GET['excludes']);
-                                if(in_array(strtoupper($category['uuid']), $excludes)) continue;
-                            }
-                        }
                         if(count($category["five_items"])>0) {
                             $html    .=   '<div id="cat-'.strtolower($category['uuid']).'" class="moo-menu-category">';
                             $html    .=  '<div class="moo-menu-category-title">';
@@ -1744,16 +1746,10 @@ class Moo_OnlineOrders_Shortcodes {
         if(isset($atts["categories"]) && !empty($atts["categories"])){
             $categories = explode(",",strtoupper($atts["categories"]));
         }
-        if(isset($atts['includes']) && $atts['includes']!="") {
-            $includes = explode(":", $atts['includes']);
-        }
-        if(isset($atts['excludes']) && $atts['excludes']!="") {
-            $excludes = explode(":", $atts['excludes']);
-        }
 
         $MooOptions = (array)get_option( 'moo_settings' );
 
-        $theme_id = $MooOptions["default_style"];
+        $theme_id = (isset($MooOptions["default_style"]))?$MooOptions["default_style"]:"onePage";
 
         if(isset($atts["force_theme"]) && !empty($atts["force_theme"])){
             $theme_id = $atts["force_theme"];
@@ -1782,12 +1778,6 @@ class Moo_OnlineOrders_Shortcodes {
         }
         if ($jsFileName !== '' && count($categories) > 0) {
             wp_localize_script($jsFileName,"attr_categories",$categories);
-        }
-        if ($jsFileName !== '' && count($includes) > 0) {
-            wp_localize_script($jsFileName,"attr_includes",$includes);
-        }
-        if ($jsFileName !== '' && count($excludes) > 0) {
-            wp_localize_script($jsFileName,"attr_excludes",$excludes);
         }
 
         ob_start();

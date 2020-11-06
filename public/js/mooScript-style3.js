@@ -58,17 +58,7 @@ function moo_renderCategories($cats)
                 continue;
             }
         }
-        if(typeof attr_includes !== 'undefined' && attr_includes !== undefined && attr_includes !== null && typeof attr_includes === 'object') {
-            if(attr_includes.indexOf(category.uuid.toUpperCase()) === -1){
-                continue;
-            }
-        }
-        if(typeof attr_excludes !== 'undefined' && attr_excludes !== undefined && attr_excludes !== null && typeof attr_excludes === 'object') {
-            if(attr_excludes.indexOf(category.uuid.toUpperCase()) !== -1){
-                continue;
-            }
-        }
-    html += moo_buildOneCategoryHtmlLine(category);
+        html += moo_buildOneCategoryHtmlLine(category);
     }
     html    += "</div>";
     jQuery(element).html(html);
@@ -477,7 +467,7 @@ function mooBuildItemQty(stockCount,item_uuid)
     {
         var QtyMax = 10;
     } else {
-        var QtyMax = parseInt(stockCount);
+        var QtyMax = (parseInt(stockCount)>10)?10:parseInt(stockCount);
     }
     if(isNaN(QtyMax))
         return '';
@@ -542,11 +532,22 @@ function mooUpdateCart()
                   cart_html+='</div>';
                   cart_html+='<div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-2 moo-col-xs-2  moo-cart-line-itemQty">'+line.qty+'</div>';
                   cart_html+= '<div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-4 moo-col-xs-4  moo-cart-line-itemPrice">$'+line_price.toFixed(2)+'</div>';
+/*
                   cart_html+=  '<div class="moo-cart-line-EditPanel"><div><i class="fas fa-pen" aria-hidden="true" onclick="mooUpdateSpecialInsinCart(\''+line_id+'\',\''+line.special_ins+'\')"></i></div>'+
                       '<div><i class="fas fa-trash" aria-hidden="true" onclick="mooRemoveLineFromCart(\''+line_id+'\')"></i></div></div></div>';
+*/
+                  cart_html += '<div class="moo-cart-line-EditPanel">';
+                  if( ! window.moo_theme_setings
+                      || ! window.moo_theme_setings.style2_allowspecialinstructionforitems
+                      ||  window.moo_theme_setings.style2_allowspecialinstructionforitems === "on"
+                  ){
+                      cart_html+=  '<div class="moo-si"><i class="fas fa-pen" aria-hidden="true" onclick="mooUpdateSpecialInsinCart(\''+line_id+'\',\''+line.special_ins+'\')"></i></div>';
+                  }
+                 cart_html += '<div class="moo-delete"><i class="fas fa-trash" aria-hidden="true" onclick="mooRemoveLineFromCart(\''+line_id+'\')"></i></div>';
+                 cart_html += "</div></div>";
               });
               cart_html += '</div>';
-              //Set teh cart total
+              //Set the cart total
               if(data.total != null && data.total != false)
                   cart_html +=' <div class="moo-row moo-cart-totals">'+
                       '<div class="moo-row moo-cart-total moo-cart-total-subtotal">'+
