@@ -1,53 +1,73 @@
 /**
  * Created by Mohammed EL BANYAOUI on 9/11/2017.
  */
-jQuery(document).ready(function()
-{
+jQuery(document).ready(function(){
     window.moo_theme_setings = [];
     window.moo_mg_setings = {};
     window.nb_items_in_cart = 0;
     window.header_height = (typeof window.header_height != 'undefined' && window.header_height != null)?window.header_height:0;
-    var container_top = jQuery('#moo_OnlineStoreContainer').offset().top;
+    window.categoriesTopMargin = window.header_height;
+    window.phoneCategoriesTopMargin = window.header_height;
 
+    var container_top = jQuery('#moo_OnlineStoreContainer').offset().top;
     /* Load the them settings then draw tha layout an get the categories with the first five items */
     jQuery.get(moo_RestUrl+"moo-clover/v1/theme_settings/onePage", function (data) {
-        if(data != null && data.settings != null)
-        {
+        if(data != null && data.settings != null) {
             window.moo_theme_setings = data.settings;
             window.nb_items_in_cart  = data.nb_items;
             //Change the categories font-family
-            if(window.moo_theme_setings.onePage_categoriesTopMargin != null)
-            {
-                window.header_height = window.moo_theme_setings.onePage_categoriesTopMargin;
+            if(window.moo_theme_setings.onePage_categoriesTopMargin != null) {
+                window.categoriesTopMargin = parseInt(window.moo_theme_setings.onePage_categoriesTopMargin);
             }
-            window.height = (jQuery(window).width()>768)?(container_top>0)?(window.header_height):'':'';
+            if(window.moo_theme_setings.onePage_phoneCategoriesTopMargin != null) {
+                window.phoneCategoriesTopMargin = parseInt(window.moo_theme_setings.onePage_phoneCategoriesTopMargin);
+            }
+            if(jQuery(window).width()< 992){
+                window.categoriesTopMargin = window.phoneCategoriesTopMargin;
+            }
             window.width  = 267;
         }
     }).done(function () {
         MooLoadBaseStructure('#moo_OnlineStoreContainer',mooGetCategories);
         MooSetLoading();
     });
+
     /* Load the modifiers settings and save them on a window's variable */
     jQuery.get(moo_RestUrl+"moo-clover/v1/mg_settings", function (data) {
-        if(data != null && data.settings != null)
-        {
+        if(data != null && data.settings != null) {
             window.moo_mg_setings = data.settings;
         }
     });
 
     /* a listener when scrolling to fix the tha category section */
     jQuery(window).scroll(function(){
-        var container_top = jQuery('#moo_OnlineStoreContainer').offset().top;
-        if (jQuery(window).scrollTop() > (container_top-header_height))
-        {
-            //console.log(navigator.userAgent);
-            if( jQuery(window).width() <= 1024 ) {
-                if(!jQuery(".moo-stick-to-content").hasClass('moo-mobile-fixed')){
+        if(!jQuery('#moo-onlineStore-items').offset()){
+            return;
+        }
+        var container_top    = jQuery('#moo_OnlineStoreContainer').offset().top;
+        var menu_height      = jQuery('#moo-menu-navigation').height();
+        var firstCategoryPos = jQuery('#moo-onlineStore-items').offset().top;
+       if(jQuery('#moo-onlineStore-items .moo-menu-category').last().offset()){
+           var lastCategoryPos  = jQuery('#moo-onlineStore-items .moo-menu-category').last().offset().top + jQuery('#moo-onlineStore-items .moo-menu-category').last().height();
 
-                    jQuery(".moo-stick-to-content").addClass('moo-mobile-fixed').width('100%').css("top",window.height+'px');
+        } else {
+           var lastCategoryPos  = jQuery('#moo-onlineStore-items .moo-menu-category').last().height();
+
+        }
+        var scrollTop = jQuery(window).scrollTop();
+        if(jQuery('footer').offset()){
+            var footerPos  = jQuery('footer').offset().top;
+        } else {
+            var footerPos  = 0;
+        }
+        if( jQuery(window).width() < 992 ) {
+            if (scrollTop > firstCategoryPos ) {
+                if(!jQuery(".moo-stick-to-content").hasClass('moo-mobile-fixed')){
+                    jQuery(".moo-stick-to-content").addClass('moo-mobile-fixed').width('100%').css("top",window.categoriesTopMargin+'px');
                     mooExpColCatMenu();
                     jQuery(".moo-stick-to-content").attr('onclick', 'mooExpColCatMenu();');
-
+                    jQuery(window).scrollTop(scrollTop-menu_height);
+                    window.mooScrollAdded = true;
                 }
                 links = jQuery('ul.moo-nav li a');
                 links.each(
@@ -61,16 +81,50 @@ jQuery(document).ready(function()
                     }
                 );
             } else {
-                jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",window.height+'px');
+                jQuery(".moo-stick-to-content").removeClass('moo-fixed');
+                jQuery(".moo-stick-to-content").removeClass('moo-mobile-fixed');
+                jQuery(".moo-stick-to-content").removeAttr('onclick');
+                jQuery('.moo-choose-category').html('Choose a Category<i class="fas fa-chevron-down" aria-hidden="true"></i>');
+                if(jQuery('.moo-nav').css('display') === 'none') {
+                    mooExpColCatMenu();
+                }
+                if(window.mooScrollAdded) {
+                    jQuery(window).scrollTop(container_top + jQuery('#moo-menu-navigation').height()+30);
+                    window.mooScrollAdded = false;
+                }
             }
-        }
-        else
-        {
-            jQuery(".moo-stick-to-content").removeClass('moo-fixed');
-            jQuery(".moo-stick-to-content").removeClass('moo-mobile-fixed');
-            jQuery(".moo-stick-to-content").removeAttr('onclick');
-            jQuery('.moo-choose-category').html('Choose a Category<i class="fas fa-chevron-down" aria-hidden="true"></i>');
-            if(jQuery('.moo-nav').css('display') === 'none') mooExpColCatMenu();
+
+        } else {
+            // console.log(scrollTop);
+            // console.log(lastCategoryPos);
+            //if (scrollTop > (container_top-header_height) && scrollTop < lastCategoryPos) {
+            if(footerPos>0){
+                if (scrollTop > (container_top-header_height) && (scrollTop+menu_height) < footerPos ) {
+                    jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",window.categoriesTopMargin+'px');
+                   // jQuery(".moo-stick-to-content").css('margin-top',0);
+                } else {
+                    jQuery(".moo-stick-to-content").removeClass('moo-fixed');
+                    jQuery(".moo-stick-to-content").removeClass('moo-mobile-fixed');
+                    jQuery(".moo-stick-to-content").removeAttr('onclick');
+                    jQuery('.moo-choose-category').html('Choose a Category<i class="fas fa-chevron-down" aria-hidden="true"></i>');
+                    if(jQuery('.moo-nav').css('display') === 'none') {
+                        mooExpColCatMenu();
+                    }
+                }
+            } else {
+                if (scrollTop > (container_top-header_height)) {
+                    jQuery(".moo-stick-to-content").addClass('moo-fixed').width(window.width).css("top",window.categoriesTopMargin+'px');
+                } else {
+                    jQuery(".moo-stick-to-content").removeClass('moo-fixed');
+                    jQuery(".moo-stick-to-content").removeClass('moo-mobile-fixed');
+                    jQuery(".moo-stick-to-content").removeAttr('onclick');
+                    jQuery('.moo-choose-category').html('Choose a Category<i class="fas fa-chevron-down" aria-hidden="true"></i>');
+                    if(jQuery('.moo-nav').css('display') === 'none') {
+                        mooExpColCatMenu();
+                    }
+                }
+            }
+
         }
     });
 
@@ -110,35 +164,63 @@ function MooSetLoading() {
 
 function MooCLickOnCategory(event,elm)
 {
-    console.log("cat clicked");
     event.preventDefault();
-    var page = jQuery(elm).attr('href');
+    var category = jQuery(elm).attr('href');
+    var categoryTop= jQuery(category).offset().top;
     var speed = 750;
-    jQuery('html, body').animate( { scrollTop: jQuery(page).offset().top + 2 }, speed ); // Go
-    jQuery(page).focus();
-    return false;
+    if( jQuery(window).width() < 992 ) {
+        var menu_height   = jQuery('#moo-menu-navigation').height();
+        if(jQuery("#moo-menu-navigation").hasClass("moo-mobile-fixed")){
+            jQuery('html, body').animate( { scrollTop: categoryTop   + 5 }, speed ); // Go
+        } else {
+            var diff = categoryTop - menu_height;
+            if(diff < menu_height){
+                jQuery(window).scrollTop(categoryTop + 5);
+            } else {
+                jQuery('html, body').animate( { scrollTop: categoryTop - menu_height + 5 }, speed ); // Go
+            }
+        }
+        jQuery(category).focus();
+        return false;
+    }  else {
+        jQuery('html, body').animate( { scrollTop: categoryTop + 2 }, speed ); // Go
+        jQuery(category).focus();
+        return false;
+    }
+
 }
 
 //get all the categories of the store
 function mooGetCategories()
 {
     if(window.moo_theme_setings.onePage_show_more_button === 'off') {
-        jQuery.get(moo_RestUrl+"moo-clover/v1/categories?expand=all_items", function (data) {
+        if(moo_RestUrl.indexOf("?rest_route") !== -1 ){
+            var endpoint = moo_RestUrl+"moo-clover/v1/categories&expand=all_items";
+        } else {
+            var endpoint = moo_RestUrl+"moo-clover/v1/categories?expand=all_items";
+        }
+        jQuery.get(endpoint, function (data) {
             if(data!=null && data.length>0) {
                 moo_renderCategories(data,false);
             } else {
                 var element = document.getElementById("moo-onlineStore-items");
-                var html     = 'You don\'t have any category please import your inventory';
+                var html     = 'There is no category available right now please try again later';
                 jQuery(element).html(html);
+                jQuery('#MooLoadingSection').hide();
             }
         });
     } else {
-        jQuery.get(moo_RestUrl+"moo-clover/v1/categories?expand=five_items", function (data) {
+        if(moo_RestUrl.indexOf("?rest_route") !== -1){
+            var endpoint = moo_RestUrl+"moo-clover/v1/categories&expand=five_items";
+        } else {
+            var endpoint = moo_RestUrl+"moo-clover/v1/categories?expand=five_items";
+        }
+        jQuery.get(endpoint, function (data) {
             if(data!=null && data.length>0) {
                 moo_renderCategories(data,true);
             } else {
                 var element = document.getElementById("moo-onlineStore-items");
-                var html     = 'You don\'t have any category please import your inventory';
+                var html     = 'There is no category available right now please try again later';
                 jQuery(element).html(html);
                 jQuery('#MooLoadingSection').hide();
             }
@@ -161,16 +243,6 @@ function moo_renderCategories($cats,withButton)
             continue;
         if(typeof attr_categories !== 'undefined' && attr_categories !== undefined && attr_categories !== null && typeof attr_categories === 'object') {
             if(attr_categories.indexOf(category.uuid.toUpperCase()) === -1){
-                continue;
-            }
-        }
-        if(typeof attr_includes !== 'undefined' && attr_includes !== undefined && attr_includes !== null && typeof attr_includes === 'object') {
-            if(attr_includes.indexOf(category.uuid.toUpperCase()) === -1){
-                continue;
-            }
-        }
-        if(typeof attr_excludes !== 'undefined' && attr_excludes !== undefined && attr_excludes !== null && typeof attr_excludes === 'object') {
-            if(attr_excludes.indexOf(category.uuid.toUpperCase()) !== -1){
                 continue;
             }
         }
@@ -220,27 +292,31 @@ function moo_renderItems(category,withButton)
         var item_price = parseFloat(item.price);
             item_price = item_price/100;
             item_price = formatPrice(item_price.toFixed(2));
-
             if(item.price > 0 && item.price_type == "PER_UNIT")
                 item_price += '/'+item.unit_name;
 
         html += '<div class="moo-menu-item moo-menu-list-item">'+
                 ' <div class="moo-row">';
         if(item.image != null && item.image.url != null && item.image.url != "") {
-            html += '    <div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-12 moo-col-xs-12 moo-image-zoom" role="img" tabindex="0" aria-label="The image of the item" >'+
+            html += '    <div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-2 moo-col-xs-12 moo-image-zoom" role="img" tabindex="0" aria-label="The image of the item" >'+
                     '<a href="'+item.image.url+'" data-effect="mfp-zoom-in" tabindex="-1"><img alt="image of '+item.name+'" src="'+item.image.url+'" class="moo-img-responsive moo-image-zoom"></a>'+
                     '    </div>'+
-                    '    <div class="moo-col-lg-6 moo-col-md-6 moo-col-sm-12 moo-col-xs-12">'+
-                    '         <div class="moo-item-name" tabindex="0"><span>'+item.name+'</span></div>';
+                    '    <div class="moo-col-lg-6 moo-col-md-6 moo-col-sm-9 moo-col-xs-12">';
             if(item.description){
-                html +=  '         <span class="moo-text-muted moo-text-sm" tabindex="0" >'+item.description+'</span>';
+                html +=  '<div class="moo-item-name moo-item-name-bold" tabindex="0"><span>'+item.name+'</span></div>';
+                html +=  '         <span class="moo-item-description moo-text-muted moo-text-sm" tabindex="0" >'+item.description+'</span>';
+            } else {
+                html +=  '<div class="moo-item-name" tabindex="0"><span>'+item.name+'</span></div>';
+
             }
             html += '    </div>';
         } else {
             html += '    <div class="moo-col-lg-8 moo-col-md-8 moo-col-sm-12 moo-col-xs-12">';
-            html += '         <div class="moo-item-name" tabindex="0" ><span>'+item.name+'</span></div>';
             if(item.description){
-                html += '         <span class="moo-text-muted moo-text-sm" tabindex="0" >'+item.description+'</span>';
+                html += '         <div class="moo-item-name moo-item-name-bold" tabindex="0" ><span>'+item.name+'</span></div>';
+                html += '         <span class="moo-item-description moo-text-muted moo-text-sm" tabindex="0" >'+item.description+'</span>';
+            } else {
+                html += '         <div class="moo-item-name" tabindex="0" ><span>'+item.name+'</span></div>';
             }
             html += '    </div>';
         }
@@ -316,6 +392,7 @@ function moo_renderItems(category,withButton)
 function mooClickOnLoadMoreItems(event,cat_id,cat_name,cat_available)
 {
     event.preventDefault();
+    jQuery(event.target).html('Loading '+cat_name+'\'s items');
     var html = '';
     /*
     swal({
@@ -346,20 +423,26 @@ function mooClickOnLoadMoreItems(event,cat_id,cat_name,cat_available)
                     ' <div class="moo-row">';
 
                 if(item.image != null && item.image.url != null && item.image.url != "") {
-                    html += '    <div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-12 moo-col-xs-12 moo-image-zoom" role="img" tabindex="0" aria-label="The image of the item" >'+
+                    html += '    <div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-2 moo-col-xs-12 moo-image-zoom" role="img" tabindex="0" aria-label="The image of the item" >'+
                         '<a href="'+item.image.url+'" data-effect="mfp-zoom-in" tabindex="-1"><img alt="image of '+item.name+'" src="'+item.image.url+'" class="moo-img-responsive moo-image-zoom"></a>'+
                         '    </div>'+
-                        '    <div class="moo-col-lg-6 moo-col-md-6 moo-col-sm-12 moo-col-xs-12">'+
-                        '         <div class="moo-item-name" tabindex="0"><span>'+item.name+'</span></div>';
+                        '    <div class="moo-col-lg-6 moo-col-md-6 moo-col-sm-9 moo-col-xs-12">';
                     if(item.description){
-                        html +=  '         <span class="moo-text-muted moo-text-sm" tabindex="0" >'+item.description+'</span>';
+                        html +=  '<div class="moo-item-name moo-item-name-bold" tabindex="0"><span>'+item.name+'</span></div>';
+                        html +=  '         <span class="moo-item-description moo-text-muted moo-text-sm" tabindex="0" >'+item.description+'</span>';
+                    } else {
+                        html +=  '<div class="moo-item-name" tabindex="0"><span>'+item.name+'</span></div>';
+
                     }
                     html += '    </div>';
                 } else {
                     html += '    <div class="moo-col-lg-8 moo-col-md-8 moo-col-sm-12 moo-col-xs-12">';
-                    html += '         <div class="moo-item-name" tabindex="0" ><span>'+item.name+'</span></div>';
                     if(item.description){
-                        html += '         <span class="moo-text-muted moo-text-sm" tabindex="0" >'+item.description+'</span>';
+                        html += '         <div class="moo-item-name moo-item-name-bold" tabindex="0" ><span>'+item.name+'</span></div>';
+                        html += '         <span class="moo-item-description moo-text-muted moo-text-sm" tabindex="0" >'+item.description+'</span>';
+                    } else {
+                        html += '         <div class="moo-item-name" tabindex="0" ><span>'+item.name+'</span></div>';
+
                     }
                     html += '    </div>';
                 }
@@ -441,14 +524,11 @@ function mooOpenQtyWindow(event,item_id,stockCount,callback)
 {
     event.preventDefault();
     var inputOptions = new Promise(function (resolve) {
-        if(stockCount == "not_tracking_stock" ||  stockCount == "tracking_stock" )
-        {
+        if(stockCount == "not_tracking_stock" ||  stockCount == "tracking_stock" ) {
             resolve({
                 "1":"1","2":"2","3":"3","4":"4","5":"5","6":"6","7":"7","8":"8","9":"9","10":"10","custom":"Custom Quantity"
             })
-        }
-        else
-        {
+        } else {
             var options = {};
             var QtyMax = (parseInt(stockCount)>10)?10:parseInt(stockCount);
             var count = QtyMax;
@@ -648,8 +728,15 @@ function mooShowCart(event)
                     cart_html+='<div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-2 moo-col-xs-2  moo-cart-line-itemQty" aria-label="The quantity is '+line.qty+'" tabindex="0">'+line.qty+'</div>';
                     cart_html+= '<div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-3 moo-col-xs-3  moo-cart-line-itemPrice" tabindex="0">$'+formatPrice(line_price.toFixed(2))+'</div>';
                     cart_html+= '<div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-2 moo-col-xs-2  moo-cart-line-itemActions">';
-                    cart_html+=  '<i  tabindex="0" role="button" aria-label="add or edit special instruction" style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fas fa-pencil-square" aria-hidden="true" onclick="mooUpdateSpecialInsinCart(\''+line_id+'\',\''+line.special_ins+'\')"></i>'+
-                        '<i tabindex="0" role="button" aria-label="remove this item from your cart" style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fas fa-trash" aria-hidden="true" onclick="mooRemoveLineFromCart(\''+line_id+'\')"></i></div></div>';
+                    if( ! window.moo_theme_setings
+                        || ! window.moo_theme_setings.onePage_allowspecialinstructionforitems
+                        ||  window.moo_theme_setings.onePage_allowspecialinstructionforitems === "on"
+                    ){
+                        cart_html+=  '<i  tabindex="0" role="button" aria-label="add or edit special instruction" style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fas fa-pencil-square" aria-hidden="true" onclick="mooUpdateSpecialInsinCart(\''+line_id+'\',\''+line.special_ins+'\')"></i>';
+                    }
+
+                    cart_html+=  '<i tabindex="0" role="button" aria-label="remove this item from your cart" style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fas fa-trash" aria-hidden="true" onclick="mooRemoveLineFromCart(\''+line_id+'\')"></i>';
+                    cart_html+= '</div></div>';
                 });
                 cart_html += '</div>';
                 //Set teh cart total
@@ -767,18 +854,25 @@ function mooRemoveLineFromCart(line_id)
             })
         }
     }).then(function (data) {
-        if(data)
+        if(data.value) {
             swal({
                 title:"Deleted!",
                 type:'success'
 
             });
-        else
-            swal({
-                title:"Item not deleted, try again",
-                type:'error'
+            mooShowCart();
+        } else {
+            if(data.dismiss !== "cancel"){
+                swal({
+                    title:"Item not deleted, try again",
+                    type:'error'
 
-            });
+                });
+            } else {
+                mooShowCart();
+            }
+
+        }
 
     }, function (dismiss) {
         // dismiss can be 'cancel', 'overlay',
@@ -892,9 +986,15 @@ function mooUpdateSpecialInstructions(line_id)
 
 }
 function mooExpColCatMenu() {
-    jQuery(".moo-nav").animate({
-        height: 'toggle'
-    });
+
+    jQuery(".moo-nav").toggle();
+
+    if(jQuery(".moo-nav").css("display") === "block"){
+        jQuery("#moo-menu-navigation").css("height",'100%');
+    } else {
+        jQuery("#moo-menu-navigation").css("height","auto");
+    }
+
     if(jQuery('.moo-choose-category').find('i').hasClass('fa-chevron-down')){
         jQuery('.moo-choose-category').find('i').removeClass('fa-chevron-down');
         jQuery('.moo-choose-category').find('i').addClass('fa-times');

@@ -14,7 +14,8 @@ function mooBuildModifiersPanel(data,item_id,qty,settings)
     var defaultSettings = {
         "inlineDisplay" : false,
         "qtyForAll" : true,
-        "qtyForZeroPrice" : true
+        "qtyForZeroPrice" : true,
+        "minimized" : false
     };
     if (settings === undefined || settings === null) {
         settings = defaultSettings;
@@ -39,13 +40,25 @@ function mooBuildModifiersPanel(data,item_id,qty,settings)
             if(modifier_group.min_required != null && modifier_group.min_required > 0)
                 required_modifiers += modifier_group.uuid+"-"+modifier_group.min_required+";";
 
-            html += '<div class="mooModifierGroup">'+
-                '<button type="button" class="mooModifiers-title" role="button" tabindex="0" aria-controls="mooModifiers-wrapper-for-'+modifierG_uuid+'" aria-expanded="true" onclick="MooClickOnModifiersCollaps(this,\''+modifierG_uuid+'\')"><span>-</span>'+modifier_group.name;
-            html +='<span class="mooModifiers-title-span" tabindex="0">';
-            html +=mooBuildNbModifierSpan(modifier_group.min_required,modifier_group.max_allowd);
-            html +='</span>';
-            html +='</button>';
-            html += '<div id="mooModifiers-wrapper-for-'+modifierG_uuid+'" class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'">';
+            if(settings && settings.minimized){
+                html += '<div class="mooModifierGroup">'+
+                    '<button type="button" class="mooModifiers-title" role="button" tabindex="0" aria-controls="mooModifiers-wrapper-for-'+modifierG_uuid+'" aria-expanded="false" onclick="MooClickOnModifiersCollaps(this,\''+modifierG_uuid+'\')"><span>+</span>'+modifier_group.name;
+                html +='<span class="mooModifiers-title-span" tabindex="0">';
+                html +=mooBuildNbModifierSpan(modifier_group.min_required,modifier_group.max_allowd);
+                html +='</span>';
+                html +='</button>';
+                html += '<div id="mooModifiers-wrapper-for-'+modifierG_uuid+'" class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'" style="display: none">';
+            } else {
+                html += '<div class="mooModifierGroup">'+
+                    '<button type="button" class="mooModifiers-title" role="button" tabindex="0" aria-controls="mooModifiers-wrapper-for-'+modifierG_uuid+'" aria-expanded="true" onclick="MooClickOnModifiersCollaps(this,\''+modifierG_uuid+'\')"><span>-</span>'+modifier_group.name;
+                html +='<span class="mooModifiers-title-span" tabindex="0">';
+                html +=mooBuildNbModifierSpan(modifier_group.min_required,modifier_group.max_allowd);
+                html +='</span>';
+                html +='</button>';
+                html += '<div id="mooModifiers-wrapper-for-'+modifierG_uuid+'" class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'">';
+            }
+
+          //  html += '<div id="mooModifiers-wrapper-for-'+modifierG_uuid+'" class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'">';
 
             for(var j=0;j<modifier_group.modifiers.length;j++)
                 html += mooBuildOneModifierLineHtml(modifier_group.modifiers[j],modifierG_uuid,modifier_group.min_required,modifier_group.max_allowd,settings);
@@ -66,13 +79,24 @@ function mooBuildModifiersPanel(data,item_id,qty,settings)
             if(modifier_group.min_required != null && modifier_group.min_required > 0)
                 required_modifiers += modifier_group.uuid+"-"+modifier_group.min_required+";";
 
-            html += '<div class="mooModifierGroup">'+
-                '<button type="button" class="mooModifiers-title" aria-controls="mooModifiers-wrapper-for-'+modifierG_uuid+'" aria-expanded="true" onclick="MooClickOnModifiersCollaps(this,\''+modifierG_uuid+'\')"><span>-</span>'+modifier_group.name;
-            html +='<span class="mooModifiers-title-span" tabindex="0" >';
-            html +=mooBuildNbModifierSpan(modifier_group.min_required,modifier_group.max_allowd);
-            html +='</span>';
-            html +='</button>';
-            html += '<div id="mooModifiers-wrapper-for-'+modifierG_uuid+'"  class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'">';
+            if(settings && settings.minimized){
+                html += '<div class="mooModifierGroup">'+
+                    '<button type="button" class="mooModifiers-title" aria-controls="mooModifiers-wrapper-for-'+modifierG_uuid+'" aria-expanded="false" onclick="MooClickOnModifiersCollaps(this,\''+modifierG_uuid+'\')"><span>+</span>'+modifier_group.name;
+                html +='<span class="mooModifiers-title-span" tabindex="0" >';
+                html +=mooBuildNbModifierSpan(modifier_group.min_required,modifier_group.max_allowd);
+                html +='</span>';
+                html +='</button>';
+                html += '<div id="mooModifiers-wrapper-for-'+modifierG_uuid+'" class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'" style="display: none">';
+            } else {
+                html += '<div class="mooModifierGroup">'+
+                    '<button type="button" class="mooModifiers-title" aria-controls="mooModifiers-wrapper-for-'+modifierG_uuid+'" aria-expanded="true" onclick="MooClickOnModifiersCollaps(this,\''+modifierG_uuid+'\')"><span>-</span>'+modifier_group.name;
+                html +='<span class="mooModifiers-title-span" tabindex="0" >';
+                html +=mooBuildNbModifierSpan(modifier_group.min_required,modifier_group.max_allowd);
+                html +='</span>';
+                html +='</button>';
+                html += '<div id="mooModifiers-wrapper-for-'+modifierG_uuid+'" class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'">';
+            }
+          //  html += '<div id="mooModifiers-wrapper-for-'+modifierG_uuid+'"  class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'">';
 
             for(var j=0;j<modifier_group.modifiers.length;j++)
                 html += mooBuildOneModifierLineHtml(modifier_group.modifiers[j],modifierG_uuid,modifier_group.min_required,modifier_group.max_allowd,settings);
@@ -103,13 +127,23 @@ function mooBuildModifiersPanel(data,item_id,qty,settings)
             if(modifier_group.min_required != null && modifier_group.min_required > 0)
                 required_modifiers += modifier_group.uuid+"-"+modifier_group.min_required+";";
 
-            html += '<div class="mooModifierGroup">'+
-                '<button type="button" class="mooModifiers-title" aria-controls="mooModifiers-wrapper-for-'+modifierG_uuid+'" aria-expanded="true" onclick="MooClickOnModifiersCollaps(this,\''+modifierG_uuid+'\')"><span>-</span>'+modifier_group.name;
-            html +='<span class="mooModifiers-title-span" tabindex="0">';
-            html +=mooBuildNbModifierSpan(modifier_group.min_required,modifier_group.max_allowd);
-            html +='</span>';
-            html +='</button>';
-            html += '<div id="mooModifiers-wrapper-for-'+modifierG_uuid+'" class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'">';
+            if(settings && settings.minimized){
+                html += '<div class="mooModifierGroup">'+
+                    '<button type="button" class="mooModifiers-title" aria-controls="mooModifiers-wrapper-for-'+modifierG_uuid+'" aria-expanded="false" onclick="MooClickOnModifiersCollaps(this,\''+modifierG_uuid+'\')"><span>+</span>'+modifier_group.name;
+                html +='<span class="mooModifiers-title-span" tabindex="0">';
+                html +=mooBuildNbModifierSpan(modifier_group.min_required,modifier_group.max_allowd);
+                html +='</span>';
+                html +='</button>';
+                html += '<div id="mooModifiers-wrapper-for-'+modifierG_uuid+'" class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'" style="display: none">';
+            } else {
+                html += '<div class="mooModifierGroup">'+
+                    '<button type="button" class="mooModifiers-title" aria-controls="mooModifiers-wrapper-for-'+modifierG_uuid+'" aria-expanded="true" onclick="MooClickOnModifiersCollaps(this,\''+modifierG_uuid+'\')"><span>-</span>'+modifier_group.name;
+                html +='<span class="mooModifiers-title-span" tabindex="0">';
+                html +=mooBuildNbModifierSpan(modifier_group.min_required,modifier_group.max_allowd);
+                html +='</span>';
+                html +='</button>';
+                html += '<div id="mooModifiers-wrapper-for-'+modifierG_uuid+'" class="mooModifiers-wrapper mooModifiers-wrapper-for-'+modifierG_uuid+'" >';
+            }
 
             for(var j=0;j<modifier_group.modifiers.length;j++)
                 html += mooBuildOneModifierLineHtml(modifier_group.modifiers[j],modifierG_uuid,modifier_group.min_required,modifier_group.max_allowd,settings);
@@ -124,8 +158,8 @@ function mooBuildModifiersPanel(data,item_id,qty,settings)
 
     html+=   '</div>';
 
-    html+=   '<div class="mooModifier-addToCartBtn2" onclick="ClickOnAddToCartBtnFIWM(event,\''+required_modifiers+'\',\''+item_id+'\',\''+qty+'\')"><a  href="#">Add to Cart</a></div>';
-    html+=   '<div class="mooModifier-closeBtn" onclick="removeModifiersList(event,\''+item_id+'\')"><a  href="#">Close</a></div>';
+    html+=   '<button class="mooModifier-addToCartBtn2" onclick="ClickOnAddToCartBtnFIWM(event,\''+required_modifiers+'\',\''+item_id+'\',\''+qty+'\')">Add to Cart</button>';
+    html+=   '<button class="mooModifier-closeBtn" onclick="removeModifiersList(event,\''+item_id+'\')">Cancel</button>';
 
     html+=   '</form></div>';
 
@@ -602,7 +636,7 @@ function addToCartAnItemWithModifiers(selected_modifiers,item_uuid,item_qty)
         '<img src="'+ moo_params['plugin_img']+'/loading.gif" class="moo-imgPopup"/>',
         showConfirmButton: false
     });
-    console.log(window.moo_theme_setings);
+   // console.log(window.moo_theme_setings);
     var final_modifiers = [];
     if(count>0)
     {
@@ -636,12 +670,12 @@ function addToCartAnItemWithModifiers(selected_modifiers,item_uuid,item_qty)
                             if (typeof mooShowAddingItemResult === "function") {
                                 setTimeout(function () {
                                     mooShowAddingItemResult(data);
-                                },2000)
+                                },500)
                             } else {
                                 swal({
                                     title:(data.name!=null)?data.name:'Items',
                                     text:"Added to cart",
-                                    timer:3000,
+                                    timer:500,
                                     type:"success"
                                 });
                             }
@@ -721,8 +755,7 @@ function addToCartAnItemWithModifiers(selected_modifiers,item_uuid,item_qty)
     }
 }
 
-function removeModifiersList(e,item_id)
-{
+function removeModifiersList(e,item_id) {
     e.preventDefault();
     e.stopPropagation();
     if(jQuery.magnificPopup.instance) {

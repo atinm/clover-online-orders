@@ -47,7 +47,7 @@ class Moo_OnlineOrders_Activator {
                           `uuid` VARCHAR(100) NOT NULL,
                           `name` VARCHAR(100) NULL,
                           PRIMARY KEY (`_id`),
-                          UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC));");
+                          UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC)) DEFAULT CHARACTER SET $wpdb->charset;");
 
 
 /*
@@ -83,7 +83,7 @@ class Moo_OnlineOrders_Activator {
                         FOREIGN KEY (`item_group_uuid`)
                         REFERENCES `{$wpdb->prefix}moo_item_group` (`uuid`)
                         ON DELETE NO ACTION
-                        ON UPDATE NO ACTION);");
+                        ON UPDATE NO ACTION) DEFAULT CHARACTER SET $wpdb->charset;");
 /*
         -- -----------------------------------------------------
         -- Table `Order--
@@ -114,7 +114,7 @@ class Moo_OnlineOrders_Activator {
                       `p_lng` VARCHAR(255) NULL ,
                       `instructions` VARCHAR(250) NULL ,
                       PRIMARY KEY (`_id`),
-                      UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) );");
+                      UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC) ) DEFAULT CHARACTER SET $wpdb->charset;");
 
 /*
 -- -----------------------------------------------------
@@ -135,7 +135,7 @@ class Moo_OnlineOrders_Activator {
                       `time_availability` VARCHAR(10) NULL,
                       `custom_hours` VARCHAR(100) NULL,
                       PRIMARY KEY (`_id`)  ,
-                      UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC)  );");
+                      UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC)  ) DEFAULT CHARACTER SET $wpdb->charset;");
 
 /*
 -- -----------------------------------------------------
@@ -155,7 +155,7 @@ class Moo_OnlineOrders_Activator {
                         FOREIGN KEY (`item_group_uuid`)
                         REFERENCES `{$wpdb->prefix}moo_item_group` (`uuid`)
                         ON DELETE NO ACTION
-                        ON UPDATE NO ACTION);");
+                        ON UPDATE NO ACTION) DEFAULT CHARACTER SET $wpdb->charset;");
 
 
 /*
@@ -176,7 +176,7 @@ class Moo_OnlineOrders_Activator {
                         FOREIGN KEY (`attribute_uuid`)
                         REFERENCES `{$wpdb->prefix}moo_attribute` (`uuid`)
                         ON DELETE NO ACTION
-                        ON UPDATE NO ACTION);");
+                        ON UPDATE NO ACTION) DEFAULT CHARACTER SET $wpdb->charset;");
 
 /*
 -- -----------------------------------------------------
@@ -193,7 +193,7 @@ class Moo_OnlineOrders_Activator {
                       `max_allowd` INT NULL ,
                       `sort_order` INT NULL ,
                       PRIMARY KEY (`_id`),
-                      UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC));");
+                      UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC)) DEFAULT CHARACTER SET $wpdb->charset;");
 
 
 /*
@@ -218,7 +218,7 @@ class Moo_OnlineOrders_Activator {
                         FOREIGN KEY (`group_id`)
                         REFERENCES `{$wpdb->prefix}moo_modifier_group` (`uuid`)
                         ON DELETE NO ACTION
-                        ON UPDATE NO ACTION);");
+                        ON UPDATE NO ACTION) DEFAULT CHARACTER SET $wpdb->charset;");
 
 
 /*
@@ -233,7 +233,7 @@ class Moo_OnlineOrders_Activator {
                       `uuid` VARCHAR(100) NOT NULL ,
                       `name` VARCHAR(100) NULL ,
                       PRIMARY KEY (`_id`) ,
-                      UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC));");
+                      UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC)) DEFAULT CHARACTER SET $wpdb->charset;");
 
 
 /*
@@ -250,7 +250,7 @@ class Moo_OnlineOrders_Activator {
                       `rate` MEDIUMTEXT NULL ,
                       `is_default` INT NULL ,
                       PRIMARY KEY (`_id`) ,
-                      UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC));");
+                      UNIQUE INDEX `uuid_UNIQUE` (`uuid` ASC)) DEFAULT CHARACTER SET $wpdb->charset;");
 
 /*
 -- -----------------------------------------------------
@@ -275,7 +275,7 @@ class Moo_OnlineOrders_Activator {
                         REFERENCES `{$wpdb->prefix}moo_item` (`uuid`)
                         ON DELETE NO ACTION
                         ON UPDATE NO ACTION,
-                        UNIQUE( `tax_rate_uuid`, `item_uuid`));");
+                        UNIQUE( `tax_rate_uuid`, `item_uuid`)) DEFAULT CHARACTER SET $wpdb->charset;");
 
 
 /*
@@ -301,7 +301,7 @@ class Moo_OnlineOrders_Activator {
                         REFERENCES `{$wpdb->prefix}moo_item` (`uuid`)
                         ON DELETE NO ACTION
                         ON UPDATE NO ACTION,
-                        UNIQUE( `tag_uuid`, `item_uuid`));");
+                        UNIQUE( `tag_uuid`, `item_uuid`)) DEFAULT CHARACTER SET $wpdb->charset;");
 
         /*
         -- -----------------------------------------------------
@@ -326,7 +326,7 @@ class Moo_OnlineOrders_Activator {
                         REFERENCES `{$wpdb->prefix}moo_option` (`uuid`)
                         ON DELETE NO ACTION
                         ON UPDATE NO ACTION,
-                        UNIQUE( `option_uuid`, `item_uuid`));");
+                        UNIQUE( `option_uuid`, `item_uuid`)) DEFAULT CHARACTER SET $wpdb->charset;");
 
 /*
 -- -----------------------------------------------------
@@ -351,7 +351,7 @@ class Moo_OnlineOrders_Activator {
                             REFERENCES `{$wpdb->prefix}moo_modifier_group` (`uuid`)
                             ON DELETE NO ACTION
                             ON UPDATE NO ACTION,
-                            UNIQUE(`item_id`,`group_id`));");
+                            UNIQUE(`item_id`,`group_id`)) DEFAULT CHARACTER SET $wpdb->charset;");
 
 /*
 -- -----------------------------------------------------
@@ -368,7 +368,7 @@ class Moo_OnlineOrders_Activator {
                           `modifiers` TEXT NOT NULL,
                           `special_ins` VARCHAR(255) NOT NULL,
                           PRIMARY KEY (`_id`, `item_uuid`, `order_uuid`)
-                            );");
+                            ) DEFAULT CHARACTER SET $wpdb->charset;");
 
         /*
         -- -----------------------------------------------------
@@ -382,13 +382,15 @@ class Moo_OnlineOrders_Activator {
                           `status` INT(1),
                           `show_sa` INT(1),
                           `minAmount` VARCHAR(100) NULL DEFAULT '0',
+                          `maxAmount` VARCHAR(100) NULL DEFAULT '',
                           `custom_hours` VARCHAR(100) NULL,
                           `time_availability` VARCHAR(100)  DEFAULT 1,
                           `use_coupons` INT(1) NULL DEFAULT 1,
                           `custom_message` VARCHAR(255) NULL DEFAULT 'Not available yet',
                           `sort_order` INT NULL,
                           `type` INT(1) NULL,
-                          PRIMARY KEY (`ot_uuid`));");
+                          `allow_sc_order` INT(1) NULL DEFAULT 1 ,
+                          PRIMARY KEY (`ot_uuid`)) DEFAULT CHARACTER SET $wpdb->charset;");
 
          /*
         -- -----------------------------------------------------
@@ -406,7 +408,7 @@ class Moo_OnlineOrders_Activator {
                                 FOREIGN KEY (`item_uuid`)
                                 REFERENCES `{$wpdb->prefix}moo_item` (`uuid`)
                                 ON DELETE NO ACTION
-                                ON UPDATE NO ACTION);");
+                                ON UPDATE NO ACTION) DEFAULT CHARACTER SET $wpdb->charset;");
 
         // Add the page :
         $pages = array(
@@ -440,7 +442,7 @@ class Moo_OnlineOrders_Activator {
                 'post_type'      => 'page',
                 'post_content'   => '[moo_cart]'
             ),
-            'login_page'=>array(
+            'my_account_page'=>array(
                 'comment_status' => 'closed',
                 'ping_status'    =>  'closed' ,
                 'post_author'    => 1,
@@ -468,14 +470,14 @@ class Moo_OnlineOrders_Activator {
             $cart_page_id  =  wp_insert_post( $pages['cart'], false );
             $defaultOptions['cart_page'] = $cart_page_id ;
         }
-        if(!isset($defaultOptions['login_page']) || $defaultOptions['login_page'] == "")
+        if(!isset($defaultOptions['my_account_page']) || $defaultOptions['my_account_page'] == "")
         {
-            $login_page_id  =  wp_insert_post( $pages['login_page'], false );
+            $login_page_id  =  wp_insert_post( $pages['my_account_page'], false );
             $defaultOptions['my_account_page'] = $login_page_id ;
         }
 
         // Save the version of the plugin in the Database
-         update_option('moo_onlineOrders_version', '138');
+         update_option('moo_onlineOrders_version', '144');
 
         $defaultOptions = self::applyDefaultOptions($defaultOptions);
 
@@ -499,12 +501,14 @@ class Moo_OnlineOrders_Activator {
             array("name"=>"custom_sa_content","value"=>""),
             array("name"=>"custom_sa_title","value"=>""),
             array("name"=>"custom_sa_onCheckoutPage","value"=>"off"),
-            array("name"=>"copyrights","value"=>'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.3.9">Smart Online Order</a>'),
+            array("name"=>"copyrights","value"=>'Powered by <a href="https://wordpress.org/plugins/clover-online-orders/" target="_blank" title="Online Orders for Clover POS v 1.4.0">Smart Online Order</a>'),
             array("name"=>"default_style","value"=>"onePage"),
             array("name"=>"track_stock","value"=>""),
+            array("name"=>"track_stock_hide_items","value"=>"off"),
             array("name"=>"checkout_login","value"=>"enabled"),
             array("name"=>"tips","value"=>""),
             array("name"=>"payment_creditcard","value"=>"on"),
+            array("name"=>"clover_payment_form","value"=>"off"),
             array("name"=>"payment_cash","value"=>"on"),
             array("name"=>"payment_cash_delivery","value"=>"on"),
             array("name"=>"scp","value"=>"off"),
@@ -556,6 +560,15 @@ class Moo_OnlineOrders_Activator {
             array("name"=>"jTheme_messageforspecialinstruction","value"=>"Type your instructions here, additional charges may apply and not all changes are possible"),
             array("name"=>"style2_askforspecialinstruction","value"=>"off"),
             array("name"=>"style2_messageforspecialinstruction","value"=>"Type your instructions here, additional charges may apply and not all changes are possible"),
+            array("name"=>"useAlternateNames","value"=>"enabled"),
+            array("name"=>"hide_category_ifnotavailable","value"=>"off"),
+            array("name"=>"show_order_number","value"=>"off"),
+            array("name"=>"mg_settings_minimized","value"=>"off"),
+            array("name"=>"tips_selection","value"=>"10,15,20,25"),
+            array("name"=>"tips_default","value"=>""),
+            array("name"=>"rollout_order_number","value"=>"on"),
+            array("name"=>"rollout_order_number_max","value"=>"999"),
+            array("name"=>"thanks_page_wp","value"=>""),
         );
 
         foreach ($default_options as $default_option) {

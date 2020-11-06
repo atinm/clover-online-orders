@@ -283,13 +283,17 @@
 {
     color: red;
 }
-.moo-cart-line>.moo-cart-line-EditPanel
-{
+.moo-cart-line>.moo-cart-line-EditPanel {
     position: absolute;
     background-color: red;
-    width: 90px;
     right: 1px;
     display: none;
+}
+.moo-cart-line>.moo-cart-line-EditPanel .moo-si {
+   width: 45px;
+}
+.moo-cart-line>.moo-cart-line-EditPanel .moo-delete {
+   width: 45px;
 }
 .moo-cart-line>.moo-cart-line-EditPanel>div:first-child
 {

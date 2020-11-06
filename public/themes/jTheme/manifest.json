@@ -41,6 +41,13 @@
             "default":"off"
         },
         {
+            "id":"allowspecialinstructionforitems",
+            "label":"Special instructions for individual items",
+            "type":"onoff",
+            "info":"Allow customers to leave special instructions for individual items",
+            "default":"on"
+        },
+        {
             "id":"askforspecialinstruction",
             "label":"Show Special instructions Pop Up window after adding any item to cart",
             "type":"onoff",
@@ -74,12 +81,12 @@
                     "cssProperty":"border-color"
                 },
                 {
-                    "cssSelector":".link .btn-wrapper .osh-btn",
+                    "cssSelector":"#moo_OnlineStoreContainer .link .btn-wrapper .osh-btn, #moo_OnlineStoreContainer .moo-back-to-categories .osh-btn",
                     "cssProperty":"background"
                 },
                 {
-                    "cssSelector":".moo-back-to-categories .osh-btn",
-                    "cssProperty":"background"
+                    "cssSelector":"#moo_OnlineStoreContainer .link .btn-wrapper .osh-btn, #moo_OnlineStoreContainer .moo-back-to-categories .osh-btn",
+                    "cssProperty":"border-color"
                 }
             ]
         },
@@ -99,7 +106,7 @@
                     "cssProperty":"color"
                 },
                 {
-                    "cssSelector":".link .btn-wrapper .osh-btn, .moo-back-to-categories .osh-btn",
+                    "cssSelector":"#moo_OnlineStoreContainer .link .btn-wrapper .osh-btn, #moo_OnlineStoreContainer .moo-back-to-categories .osh-btn",
                     "cssProperty":"color"
                 }
             ]
@@ -112,7 +119,7 @@
             "default":"#d60002",
             "css": [
                 {
-                    "cssSelector":".link:hover",
+                    "cssSelector":"#moo_OnlineStoreContainer .link:hover",
                     "cssProperty":"color"
                 }
             ]

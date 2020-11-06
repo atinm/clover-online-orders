@@ -131,16 +131,6 @@ function  moo_renderCategories($cats) {
                     continue;
                 }
             }
-            if(typeof attr_includes !== 'undefined' && attr_includes !== undefined && attr_includes !== null && typeof attr_includes === 'object') {
-                if(attr_includes.indexOf(category.uuid.toUpperCase()) === -1){
-                    continue;
-                }
-            }
-            if(typeof attr_excludes !== 'undefined' && attr_excludes !== undefined && attr_excludes !== null && typeof attr_excludes === 'object') {
-                if(attr_excludes.indexOf(category.uuid.toUpperCase()) !== -1){
-                    continue;
-                }
-            }
             compteur++;
             lastCat = category;
             var imageCatUrl = moo_params['plugin_img']+'/noImg3.png';
@@ -149,9 +139,9 @@ function  moo_renderCategories($cats) {
                 imageCatUrl = category.image_url;
             }
             if( i % nbItemsPerRow === 0) {
-                html +='<div class="moo-col-md-'+nbItemsPerRowCssCol+'" style="clear: both">';
+                html +='<div class="moo-col-xs-12 moo-col-sm-6 moo-col-md-'+nbItemsPerRowCssCol+'" style="clear: both">';
             } else {
-                html +='<div class="moo-col-md-'+nbItemsPerRowCssCol+'">';
+                html +='<div class="moo-col-xs-12 moo-col-sm-6 moo-col-md-'+nbItemsPerRowCssCol+'">';
             }
             html +='<a class="link" href="#cat-'+ category.uuid.toLowerCase() +'" id="cat-'+category.uuid.toLowerCase()+'" data-cat-id="'+category.uuid.toLowerCase()+'" onclick="MooClickOnCategory(event,this)">';
             html += '<div class="image-wrapper" style="background: url('+imageCatUrl+') no-repeat center;background-size:100%;"></div>';
@@ -250,11 +240,11 @@ function moo_renderItems(data) {
             }
 
                 if( i % nbItemsPerRow === 0) {
-                    html +='<div class="moo-col-md-'+nbItemsPerRowCssCol+'" style="clear: both">';
+                    html +='<div class="moo-col-xs-12 moo-col-sm-6 moo-col-md-'+nbItemsPerRowCssCol+'" style="clear: both">';
                 } else {
-                    html +='<div class="moo-col-md-'+nbItemsPerRowCssCol+'">';
+                    html +='<div class="moo-col-xs-12 moo-col-sm-6 moo-col-md-'+nbItemsPerRowCssCol+'">';
                 }
-                html +='<a title="'+item.description+'" class="link" href="#item-'+item.uuid.toLowerCase()+'" data-item-id="'+item.uuid.toLowerCase()+'" onclick="MooClickOnItem(event,this)">';
+                html +='<a class="link" href="#item-'+item.uuid.toLowerCase()+'" data-item-id="'+item.uuid.toLowerCase()+'" onclick="MooClickOnItem(event,this)">';
                 html += '<div class="image-wrapper" style="background: url('+itemimgUrl+') no-repeat center;background-size:100%;"></div>';
 
 
@@ -332,6 +322,9 @@ function moo_renderItems(data) {
     jQuery(element).html(html).promise().done(function() {
         jQuery("#moo-onlineStore-items").show();
         MooHideLoading();
+        //scroll to top #moo-onlineStore-items
+        var top = (jQuery("#moo-onlineStore-items").offset() != null)?jQuery("#moo-onlineStore-items").offset().top:""; //Getting Y of target element
+        window.scrollTo(0, top);
     });
 }
 
@@ -480,7 +473,7 @@ function moo_clickOnOrderBtnFIWM(event,item_id,qty) {
                             var h = '<div class="moo-col-lg-12 moo-col-md-12 moo-col-sm-12 moo-col-xs-12 moo-modifiersContainer-for-'+item_id+'"></div>';
                             jQuery("#moo-onlineStore-items").append(h);
                             jQuery("html, body").animate({
-                                scrollTop: jQuery("#moo-modifiersContainer-for-"+item_id).offset().top
+                                scrollTop: jQuery(".moo-modifiersContainer-for-"+item_id).offset().top
                             }, 600);
                         }
                         mooBuildModifiersPanel(data.modifier_groups,item_id,qty,window.moo_mg_setings);
@@ -580,8 +573,15 @@ function mooShowCart(event) {
                     cart_html+='<div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-2 moo-col-xs-2  moo-cart-line-itemQty">'+line.qty+'</div>';
                     cart_html+= '<div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-3 moo-col-xs-3  moo-cart-line-itemPrice">$'+formatPrice(line_price.toFixed(2))+'</div>';
                     cart_html+= '<div class="moo-col-lg-2 moo-col-md-2 moo-col-sm-2 moo-col-xs-2  moo-cart-line-itemActions">';
-                    cart_html+=  '<i style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fas fa-pen-square" aria-hidden="true" onclick="mooUpdateSpecialInsinCart(\''+line_id+'\',\''+line.special_ins+'\')"></i>'+
-                        '<i style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fas fa-trash" aria-hidden="true" onclick="mooRemoveLineFromCart(\''+line_id+'\')"></i></div></div>';
+                    if( ! window.moo_theme_setings
+                        || ! window.moo_theme_setings.jTheme_allowspecialinstructionforitems
+                        ||  window.moo_theme_setings.jTheme_allowspecialinstructionforitems === "on"
+                    ){
+                        cart_html+=  '<i  tabindex="0" role="button" aria-label="add or edit special instruction" style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fas fa-pencil-square" aria-hidden="true" onclick="mooUpdateSpecialInsinCart(\''+line_id+'\',\''+line.special_ins+'\')"></i>';
+                    }
+
+                    cart_html+=  '<i tabindex="0" role="button" aria-label="remove this item from your cart" style="cursor: pointer;margin-right: 10px;margin-left: 10px" class="fas fa-trash" aria-hidden="true" onclick="mooRemoveLineFromCart(\''+line_id+'\')"></i>';
+                    cart_html+= '</div></div>';
                 });
                 cart_html += '</div>';
                 //Set teh cart total
@@ -601,11 +601,7 @@ function mooShowCart(event) {
                         '</div>'+
                         '</div>'+
                         '<div class="moo-row" style="font-size: 11px;text-align: center;">*Quantity can be updated during checkout*</div>';
-                //Set checkout btn
-                //cart_html +='<div class="moo-row moo-cart-btns">'+
-                // '<a href="'+moo_CheckoutPage+'" class="moo-btn moo-btn-danger BtnCheckout">CHECKOUT</a>'+
-                '</div></div>';
-                //element.html(cart_html);
+
                 swal({
                     html:cart_html,
                     width: 700,

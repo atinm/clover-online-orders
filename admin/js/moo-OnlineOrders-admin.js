@@ -155,7 +155,9 @@ jQuery(document).ready(function($){
     //Force removing loader after 10 seconds
     setTimeout(function(){ $('body').addClass('loaded') }, 10000);
 
-    $('.moo-color-field').wpColorPicker();
+    if($('.moo-color-field')) {
+        $('.moo-color-field').wpColorPicker();
+    }
 
     if ( window.location.hash != "" ) {
         switch (window.location.hash) {
@@ -719,6 +721,10 @@ function Moo_GetOrderTypes(uuid = null){
                         html +='<div class="champ_order Taxable_order"><span class="label_Torder">Minimum Amount </span>';
                         html +='<input type="text" id="minAmount_'+$ot.ot_uuid+'" value="'+$ot.minAmount+'" style="width: 160px;">';
                         html += '</div>';
+                        //Max amount
+                        html +='<div class="champ_order Taxable_order"><span class="label_Torder">Maximum Amount </span>';
+                        html +='<input type="text" id="maxAmount_'+$ot.ot_uuid+'" value="'+$ot.maxAmount+'" style="width: 160px;">';
+                        html += '</div>';
                         //show Taxable
                         html +='<div class="champ_order Taxable_order"><span class="label_Torder">Taxable </span>';
                         html +='<select style="width: 160px;" id="select_Tax_'+$ot.ot_uuid+'">';
@@ -726,6 +732,7 @@ function Moo_GetOrderTypes(uuid = null){
                         html +='<option value="0" '+(($ot.taxable==0)?"selected":"")+'>No</option>';
                         html +='</select>';
                         html += '</div>';
+
 
                         //Delivery Order
                         html +='<div class="champ_order type_order"><span class="label_Torder">Delivery Order </span>';
@@ -735,9 +742,11 @@ function Moo_GetOrderTypes(uuid = null){
                         html +='</select>';
                         html +='<br/><small>Selecting Yes Will require customers to provide their delivery address</small>';
                         html += '</div>';
+
+
                         //Use Coupons
                         html +='<div class="champ_order IsEnabled_order"><span class="label_Torder">Allow Coupons </span>';
-                        html +='<div class="moo-onoffswitch" title="Enable or disable this order type">';
+                        html +='<div class="moo-onoffswitch" title="Enable or disable this coupons">';
 
                         if ($ot.use_coupons==1){
                             html += '<input type="checkbox" name="onoffswitch[]" id="useCoupons_'+$ot.ot_uuid+'" class="moo-onoffswitch-checkbox" checked>';
@@ -750,6 +759,23 @@ function Moo_GetOrderTypes(uuid = null){
                         html +='</label>';
                         html +="</div>";
                         html += '</div>';
+
+                        //Allow Scheduled Orders
+                        html +='<div class="champ_order IsEnabled_order"><span class="label_Torder">Allow Scheduled Orders </span>';
+                        html +='<div class="moo-onoffswitch" title="Allow or not scheduled orders">';
+
+                        if ( $ot.allow_sc_order == 1 ){
+                            html += '<input type="checkbox" name="onoffswitch[]" id="allowScOrders_'+$ot.ot_uuid+'" class="moo-onoffswitch-checkbox" checked>';
+                        }
+                        else{
+                            html += '<input type="checkbox" name="onoffswitch[]" id="allowScOrders_'+$ot.ot_uuid+'" class="moo-onoffswitch-checkbox" >';
+                        }
+                        html +='<label class="moo-onoffswitch-label" for="allowScOrders_'+$ot.ot_uuid+'"><span class="moo-onoffswitch-inner"></span>';
+                        html +='<span class="moo-onoffswitch-switch"></span>';
+                        html +='</label>';
+                        html +="</div>";
+                        html += '</div>';
+
                         //Limit Availability time
                         html +='<div class="champ_order type_order"><span class="label_Torder">Ordering Hours</span>';
                         html +='<select name="" id="availabilityCustomTime_'+$ot.ot_uuid+'" onchange="mooSelecetdTimeChanged(event,\'ordertypes\',\''+$ot.ot_uuid+'\')">' +
@@ -821,7 +847,7 @@ function Moo_RefreshOrderTypesSection(){
     {
         document.querySelector('#MooOrderTypesContent').innerHTML  ="<div style='text-align: center'>Loading your ordertypes, please wait...</div>";
     }
-    if(moo_RestUrl.includes("?rest_route")){
+    if(moo_RestUrl.indexOf("?rest_route") !== -1 ){
         var endpoint = moo_RestUrl+'moo-clover/v2/dash/ordertypes_hours/&_wpnonce='+ moo_params.nonce;
     } else {
         var endpoint = moo_RestUrl+'moo-clover/v2/dash/ordertypes_hours/?_wpnonce='+ moo_params.nonce;
@@ -840,13 +866,14 @@ function Moo_RefreshOrderTypesSection(){
 
 }
 function Moo_SetupCategoriesSection( uuid = null ){
-    if( document.querySelector('.moo-categories-section') !== null )
-    {
+    if( document.querySelector('.moo-categories-section') !== null ) {
+        document.querySelector('#MooPanel_tabContent5 .moo-categories-section').innerHTML =  "Loading  your categories,  please wait..."
+
         jQuery(".moo-categories-section").show();
         jQuery("#moo-categories-edit-section").hide().html('');
         jQuery("#moo-btn-backtocategories").hide();
         jQuery("#moo-btn-reordercategories").show();
-        if(moo_RestUrl.includes("?rest_route")){
+        if(moo_RestUrl.indexOf("?rest_route") !== -1){
             var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories&_wpnonce='+ moo_params.nonce;
         } else {
             var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories?_wpnonce='+ moo_params.nonce;
@@ -958,7 +985,7 @@ function Moo_SetupReorderCategoriesSection(event){
         jQuery("#moo-categories-edit-section").show().html('');
         document.querySelector('#MooPanel_tabContent5 #moo-categories-edit-section').innerHTML = "Loading your categories...";
 
-        if(moo_RestUrl.includes("?rest_route")){
+        if(moo_RestUrl.indexOf("?rest_route") !== -1){
             var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories&_wpnonce='+ moo_params.nonce;
         } else {
             var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories?_wpnonce='+ moo_params.nonce;
@@ -1017,7 +1044,7 @@ function Moo_SetupReorderCategoriesSection(event){
     }
 }
 function Moo_RefeshEditCategorySection(event,uuid) {
-    if(moo_RestUrl.includes("?rest_route")){
+    if(moo_RestUrl.indexOf("?rest_route") !== -1 ){
         var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories_hours/&_wpnonce='+ moo_params.nonce;
     } else {
         var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories_hours/?_wpnonce='+ moo_params.nonce;
@@ -1043,7 +1070,7 @@ function Moo_CustomHoursForCategories() {
         jQuery("#moo-btn-reordercategories").show();
         document.querySelector('#MooPanel_tabContent5 .moo-categories-section').innerHTML = "Loading your categories please wait";
     }
-    if(moo_RestUrl.includes("?rest_route")){
+    if(moo_RestUrl.indexOf("?rest_route") !== -1){
         var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories_hours/&_wpnonce='+ moo_params.nonce;
     } else {
         var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories_hours/?_wpnonce='+ moo_params.nonce;
@@ -1063,7 +1090,7 @@ function Moo_CustomHoursForCategories() {
 }
 
 function moo_click_on_limitTime( uuid ) {
-    if(moo_RestUrl.includes("?rest_route")){
+    if(moo_RestUrl.indexOf("?rest_route") !== -1){
         var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'/time&_wpnonce='+ moo_params.nonce;
     } else {
         var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'/time?_wpnonce='+ moo_params.nonce;
@@ -1094,7 +1121,7 @@ function moo_EditCategoryTimeAvailability(event, uuid) {
         });
         return;
     }
-    if(moo_RestUrl.includes("?rest_route")){
+    if(moo_RestUrl.indexOf("?rest_route") !== -1){
         var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'/time&_wpnonce='+ moo_params.nonce;
     } else {
         var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'/time?_wpnonce='+ moo_params.nonce;
@@ -1109,11 +1136,7 @@ function moo_EditCategoryTimeAvailability(event, uuid) {
                 type:"success"
             });
         } else {
-            swal({
-                title:"No changes detected",
-                text:'Re-ordering items doesn’t require pressing “Save”',
-                type:"error"
-            });
+            console.log(response);
         }
     }).fail(function () {
         swal({
@@ -1132,7 +1155,7 @@ function Moo_SetupEditCategorySection(event, uuid) {
     if( document.querySelector('.moo-categories-section') !== null ) {
         jQuery(".moo-categories-section").hide();
         jQuery("#moo-categories-edit-section").show().html('');
-        if(moo_RestUrl.includes("?rest_route")){
+        if(moo_RestUrl.indexOf("?rest_route") !== -1){
             var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'&_wpnonce='+ moo_params.nonce;
         } else {
             var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'?_wpnonce='+ moo_params.nonce;
@@ -1145,7 +1168,7 @@ function Moo_SetupEditCategorySection(event, uuid) {
                     html += '<div class="moo-goback-icon" onclick="Moo_SetupCategoriesSection(\''+category.uuid+'\')"><img src="'+moo_params.plugin_url+'/public/img/back.png"/></div><div onclick="Moo_SetupCategoriesSection(\''+category.uuid+'\')" class="moo-goback-text">Back</div>';
                     html += '<div class="mooHelpRefreshLinks">' +
                             '<a href="#" onclick="Moo_RefeshEditCategorySection(event,\''+ category.uuid +'\')">Refresh</a>'+
-                            ' | <a href="https://docs.smartonlineorder.com" target="_blank">Help</a>'+
+                            ' | <a href="https://docs.zaytech.com" target="_blank">Help</a>'+
                             '</div>';
                     html += '</div>';
 
@@ -1261,9 +1284,16 @@ function Moo_SetupEditCategorySection(event, uuid) {
                 if(category.items !== undefined && category.items.length>0) {
                     for(var i=0;i<category.items.length;i++) {
                         var item = category.items[i];
-                        html += '<div class="moo-reorder-category-title" item_uuid="'+item.uuid+'">' +
-                            item.name +
-                            '</div>';
+                        if(item.visible === 0){
+                            html += '<div class="moo-reorder-category-title moo-reorder-category-hidden" item_uuid="'+item.uuid+'">' +
+                                item.name +
+                                '</div>';
+                        } else {
+                            html += '<div class="moo-reorder-category-title" item_uuid="'+item.uuid+'">' +
+                                item.name +
+                                '</div>';
+                        }
+
                     }
                 }
 
@@ -1312,10 +1342,8 @@ function Moo_EditCategory(event,uuid) {
     }
     var cat_newName = jQuery(".moo-category-title-input").val();
     var cat_newDescription = jQuery(".moo-category-description-input").val();
-    if(cat_newName === ""){
-        return;
-    }
-    if(moo_RestUrl.includes("?rest_route")){
+
+    if(moo_RestUrl.indexOf("?rest_route") !== -1){
         var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'&_wpnonce='+ moo_params.nonce;
     } else {
         var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'?_wpnonce='+ moo_params.nonce;
@@ -1426,6 +1454,7 @@ function moo_addordertype(e)
     var taxable = document.querySelector('#Moo_AddOT_taxable_oui').checked ;
     var show_sa = jQuery("#Moo_AddOT_delivery_oui").prop("checked");
     var minAmount = document.querySelector('#Moo_AddOT_minAmount').value;
+   // var maxAmount = document.querySelector('#Moo_AddOT_maxAmount').value;
     if(label === "")
         swal("Error","Please enter a label for your order Type","error");
     else
@@ -1513,28 +1542,36 @@ function MooSendFeedBack(e)
     var phone =  jQuery("#MoofeedBackPhone").val();
     var website =  jQuery("#MoofeedBackWebsiteName").val();
 
-    if(msg === '')
-    {
+    if(msg === '') {
         swal("Error","Please enter your message","error");
-    }
-    else
-    {
-        var data = {
-            'name':name,
-            'bname':bname,
-            'message':msg,
-            'email':email,
-            'phone':phone,
-            'website':website
-        };
-        jQuery("#MooSendFeedBackBtn").hide();
-        jQuery.post(moo_params.ajaxurl,{'action':'moo_send_feedback','data':data}, function (data) {
-            if(data.status === "Success"){
-                swal("Thank you","Your feedback has been sent. We will get back to you shortly","success");
-                jQuery("#Moofeedback").val("");
-                jQuery("#MooSendFeedBackBtn").show();
-            }
-        });
+    } else {
+        if(email === '') {
+            swal("Error","Please enter your email, so we can contact you again","error");
+        } else {
+            var data = {
+                'name':name,
+                'bname':bname,
+                'message':msg,
+                'email':email,
+                'phone':phone,
+                'website':website
+            };
+            jQuery("#MooSendFeedBackBtn").text("Sending...").attr("onclick","event.preventDefault()");
+            jQuery.post(moo_params.ajaxurl,{'action':'moo_send_feedback','data':data}, function (data) {
+                if(data.status === "success"){
+                    swal("Thank you","Your question has been sent. We will get back to you shortly","success");
+                    jQuery("#Moofeedback").val("");
+                    jQuery("#MooSendFeedBackBtn").text("Send").attr("onclick","MooSendFeedBack(event)")
+                } else {
+                    swal("Sorry","Your question hasn't been sent. Please try again or contact support@zaytech.com","error");
+                    jQuery("#MooSendFeedBackBtn").text("Send").attr("onclick","MooSendFeedBack(event)");
+                }
+            }).fail(function (data) {
+                swal("Sorry","Your question hasn't been sent. Please try again or contact support@zaytech.com","error");
+                jQuery("#MooSendFeedBackBtn").text("Send").attr("onclick","MooSendFeedBack(event)");
+            });
+        }
+
     }
 }
 /* Modifiers Panel */
@@ -1618,6 +1655,13 @@ function MooChangeOrderLater_Status()
         jQuery("#moo_orderLater_Details").slideDown();
     else
         jQuery("#moo_orderLater_Details").slideUp();
+}
+function mooShowMoreDetails(event,id) {
+    var status = jQuery(event.target).prop('checked');
+    if(status)
+        jQuery(id).slideDown();
+    else
+        jQuery(id).slideUp();
 }
 function MooChangeCategory_Status_Mo(uuid)
 {
@@ -1860,7 +1904,7 @@ function moo_save_item_images(uuid) {
                 history.back();
             }
             else
-                swal("Error","Description too longError when saving your changes, please try again","error");
+                swal("Error","Error when saving your changes, maybe your description is too long  please try again","error");
         } else
             swal("Error","Error when saving your changes, please try again","error");
     }
@@ -2001,12 +2045,18 @@ function moo_upadateItemsPerPage(page) {
     });
 }
 
-function moo_bussinessHours_Details(status)
-{
+function moo_bussinessHours_Details(status) {
      if(status)
          jQuery('#moo_bussinessHours_Details').removeClass('moo_hidden');
     else
          jQuery('#moo_bussinessHours_Details').addClass('moo_hidden');
+
+}
+function moo_trackStock_details(status) {
+     if(status)
+         jQuery('#moo_trackStock_details').removeClass('moo_hidden');
+    else
+         jQuery('#moo_trackStock_details').addClass('moo_hidden');
 
 }
 function moo_filtrer_by_category(e)
@@ -2057,10 +2107,12 @@ function moo_saveOrderType(e,uuid) {
     var name = jQuery('#label_'+ uuid).val();
     var isEnabled = jQuery('#select_En_' + uuid).prop('checked')?'1':'0';
     var useCoupons = jQuery('#useCoupons_' + uuid).prop('checked')?'1':'0';
+    var allowScOrders = jQuery('#allowScOrders_' + uuid).prop('checked')?'1':'0';
     //var availabilityTime = jQuery('#availabilityTime_' + uuid).prop('checked')?'1':'0';
     var taxable = jQuery('#select_Tax_'+ uuid).val();
     var type = jQuery('#select_type_'+ uuid).val();
     var minAmount = jQuery('#minAmount_'+ uuid).val();
+    var maxAmount = jQuery('#maxAmount_'+ uuid).val();
     var availabilityCustomTime = jQuery('#availabilityCustomTime_'+ uuid).val();
     var customMessage = jQuery('#moo_ot_customMessage_'+ uuid).val();
     if(customMessage.length>200){
@@ -2077,8 +2129,10 @@ function moo_saveOrderType(e,uuid) {
         "taxable":taxable,
         "type":type,"uuid":uuid,
         "minAmount":minAmount,
+        "maxAmount":maxAmount,
         "availabilityCustomTime":availabilityCustomTime,
         "useCoupons":useCoupons,
+        "allowScOrders":allowScOrders,
         "customMessage":customMessage,
     };
     jQuery.post(moo_params.ajaxurl,data, function (data) {
@@ -2170,8 +2224,7 @@ function moo_click_on_textUnderSI(status)
         jQuery(".moo_textUnderSI").hide();
     }
 }
-function moo_couponsStatusClicked(status)
-{
+function moo_couponsStatusClicked(status) {
     if(status === true) {
         jQuery("#moo_use_couponsapp").show();
     } else {
@@ -2185,6 +2238,28 @@ function moo_saveCardsClicked(status)
     } else {
         jQuery(".moo_saveCardsClicked").hide();
     }
+}
+function moo_createDefaultTipChooserSection() {
+    var tips = jQuery("#MooTipsSelections").val();
+    var defaultTips = jQuery("#MooTipsDefault").val();
+
+    if(tips === "") {
+        tips = [5,10,15,20];
+    } else {
+        tips = tips.split(",");
+    }
+    var html ="<option value =''>No Default Tip</option>";
+    for(i  in tips){
+        var tip = parseFloat(tips[i]);
+        if(tip>0){
+            if(tip === parseFloat(defaultTips)){
+                html+= "<option value ='"+tip+"'selected>"+tip+"%</option>";
+            } else {
+                html+= "<option value ='"+tip+"'>"+tip+"%</option>";
+            }
+        }
+    }
+    jQuery("#MooTipsDefault").html(html);
 }
 
 /*
@@ -2207,35 +2282,35 @@ function MooPanel_CleanInventory(e)
         {
             title: 'Clean Inventory',
             html: 'This may take several minutes depending on the size of your inventory. Only use this feature if you have made significant '+
-                   'changes on Clover and you find it a hassle to manually hide them from the website. <br /> Click "Next" if you wish to proceed'
+                   'changes on Clover and you find it a hassle to manually hide them from the website. <br /> Click "Next" once it says "cleaned" '
         },
         {
             title: 'Order Types',
-            html: '<p>Click "Start" to remove old order types that have been deleted from Clover yet still appears on the website.<br/> Click "Next" to move on to Tax Rates </p>'+
+            html: '<p>Click "Start" to remove old order types that have been deleted from Clover yet still appears on the website.<br/> Click "Next" to move on to Tax Rates after it says Cleaned </p>'+
                   '<div id="mooClean_order_types"></div>'+
                   '<a href="" class="button button-secondary" onclick="mooClean(event,\'order_types\')">Start</a>'
         },
         {
             title: 'Taxes Rates',
-            html: '<p>Click "Start" to remove old tax rates that have been deleted from Clover yet still appears on the website.<br/> Click "Next" to move on to Modifiers Groups</p>'+
+            html: '<p>Click "Start" to remove old tax rates that have been deleted from Clover yet still appears on the website.<br/> Click "Next" to move on to Modifiers Groups after it says Cleaned </p>'+
                   '<div id="mooClean_tax_rates"></div>'+
                   '<a href="" class="button button-secondary" onclick="mooClean(event,\'tax_rates\')">Start</a>'
         },
         {
             title: 'Modifier Groups',
-            html: '<p>Click "Start" to remove old Modifier Groups that have been deleted from Clover yet still appears on the website.<br/> Click "Next" to move on to Modifiers</p>'+
+            html: '<p>Click "Start" to remove old Modifier Groups that have been deleted from Clover yet still appears on the website.<br/> Click "Next" to move on to Modifiers after it says Cleaned </p>'+
                   '<div id="mooClean_modifier_groups"></div>'+
                   '<a href="" class="button button-secondary" onclick="mooClean(event,\'modifier_groups\')">Start</a>'
         },
         {
             title: 'Modifiers',
-            html: '<p>Click "Start" remove old Modifiers that have been deleted from Clover yet still appears on the website. This may take a few minutes.<br/> Click on "Next" to move on to Categories</p>'+
+            html: '<p>Click "Start" remove old Modifiers that have been deleted from Clover yet still appears on the website. This may take a few minutes.<br/> Click on "Next" to move on to Categories after it says Cleaned </p>'+
                   '<div id="mooClean_modifiers"></div>'+
                   '<a href="" class="button button-secondary" onclick="mooClean(event,\'modifiers\')">Start</a>'
         },
         {
             title: 'Categories',
-            html: '<p>Click "Start" to remove old Categories that have been deleted from Clover yet still appears on the website. <br/> Click on "Next" to move on to Items '+
+            html: '<p>Click "Start" to remove old Categories that have been deleted from Clover yet still appears on the website. <br/> Click on "Next" to move on to Items after it says Cleaned '+
                   '<div id="mooClean_categories"></div>'+
                   '<a href="" class="button button-secondary" onclick="mooClean(event,\'categories\')">Start</a>'
         },
@@ -2424,7 +2499,7 @@ function mooHideWaitMessage() {
 function mooUpdateApiKey() {
     mooShowWaitMessage();
     var newApiKey = jQuery("#chang_api_key").val();
-    if(moo_RestUrl.includes("?rest_route")){
+    if(moo_RestUrl.indexOf("?rest_route") !== -1){
         var endpoint = moo_RestUrl+'moo-clover/v2/dash/update_api_key&_wpnonce='+ moo_params.nonce;
     } else {
         var endpoint = moo_RestUrl+'moo-clover/v2/dash/update_api_key?_wpnonce='+ moo_params.nonce;
@@ -2504,7 +2579,7 @@ function  mooFilterModifiers(event) {
     if(word!==""){
         jQuery("li.list-group>.label_name>.getname").each(function (index, element) {
             var text = jQuery(element).text().toUpperCase();
-            if(text.includes(word.toUpperCase())) {
+            if(text.indexOf(word.toUpperCase()) !== -1) {
                 jQuery(element).parent().parent().show();
             }  else {
                 jQuery(element).parent().parent().hide();
