@@ -203,13 +203,14 @@ function mooBuildOneModifierLineHtml(modifier,modifierG_uuid,min,max,settings)
     var uuid =  modifier.uuid;
     var html='';
     if( modifier_price > 0 ) {
-        html += '<div class="moo-row">'+
+// UPGRADE IT START
+        html += '<div class="moo-row flex">'+
             '<div class="moo-col-lg-1 moo-col-md-1 moo-col-sm-1 moo-col-xs-1">'+
             '<input role="checkbox" name="'+modifierG_uuid+'" value="'+uuid+'" class="mooModifierCheckbox" type="checkbox" onchange="mooChangeModifierLine(event,\''+uuid+'\',\''+min+'\',\''+max+'\')">'+
             '</div>'+
-            '<div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-5 moo-col-xs-5 mooModifier-name" onclick="mooClickOnModifierLine(event,\''+uuid+'\',\''+min+'\',\''+max+'\')" tabindex="0">'+modifier.name+'</div>'+
+            '<div class="moo-col-lg-4 moo-col-md-4 left-expand moo-col-sm-5 moo-col-xs-5 mooModifier-name" onclick="mooClickOnModifierLine(event,\''+uuid+'\',\''+min+'\',\''+max+'\')" tabindex="0">'+modifier.name+'</div>'+
             '<div class="moo-col-lg-3 moo-col-md-3 moo-col-sm-2 moo-col-xs-2 mooModifier-price" tabindex="0">'+((modifier_price>0)?'$'+modifier_price.toFixed(2):'')+'</div>'+
-            '<div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-5 moo-col-xs-5">';
+            '<div class="moo-col-lg-4 width-auto moo-col-md-4 moo-col-sm-5 moo-col-xs-5">';
             if(typeof settings.qtyForAll !== "undefined" && settings.qtyForAll === false ) {
                 /* Qty for modifiers is disabled */
                 html +='';
@@ -229,13 +230,13 @@ function mooBuildOneModifierLineHtml(modifier,modifierG_uuid,min,max,settings)
         html += '</div>'+
                 '</div>';
     } else {
-        html += '<div class="moo-row">'+
+        html += '<div class="moo-row flex">'+
             '<div class="moo-col-lg-1 moo-col-md-1 moo-col-sm-1 moo-col-xs-1">'+
             '<input role="checkbox" name="'+modifierG_uuid+'" value="'+uuid+'" class="mooModifierCheckbox" type="checkbox" onchange="mooChangeModifierLine(event,\''+uuid+'\',\''+min+'\',\''+max+'\')">'+
             '</div>'+
-            '<div class="moo-col-lg-7 moo-col-md-7 moo-col-sm-7 moo-col-xs-7 mooModifier-name" onclick="mooClickOnModifierLine(event,\''+uuid+'\',\''+min+'\',\''+max+'\')" tabindex="0">'+modifier.name+'</div>'+
-            '<div class="moo-col-lg-4 moo-col-md-4 moo-col-sm-5 moo-col-xs-5">';
-
+            '<div class="moo-col-lg-7 left-expand moo-col-md-7 moo-col-sm-7 moo-col-xs-7 mooModifier-name" onclick="mooClickOnModifierLine(event,\''+uuid+'\',\''+min+'\',\''+max+'\')" tabindex="0">'+modifier.name+'</div>'+
+            '<div class="moo-col-lg-4 width-auto moo-col-md-4 moo-col-sm-5 moo-col-xs-5">';
+// UPGRADE IT END
         if(typeof settings.qtyForAll !== "undefined" && settings.qtyForAll === false ) {
             /* Qty for modifiers is disabled */
             html +='';
