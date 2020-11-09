@@ -20,8 +20,8 @@
  * Author:            Zaytech
  * Author URI:        http://www.zaytechapps.com
  * License:           Clover app
- * License URI:       http://www.clover.com
- * Text Domain:       moo_OnlineOrders
+ * License URI:       https://www.clover.com
+ * Text Domain:       cwp_OrderOnline
  * Domain Path:       /languages
  */
 
@@ -191,12 +191,13 @@ function moo_deactivateAndClean() {
         die();
     }
 }
-add_action( 'admin_init', 'moo_deactivateAndClean');
+// UPGRADE IT REMOVED
+// add_action( 'admin_init', 'moo_deactivateAndClean');
                  
-if(get_option('moo_onlineOrders_version') != '144') {
-    add_action('plugins_loaded', 'moo_onlineOrders_check_version');
-}
-
+// if(get_option('moo_onlineOrders_version') != '144') {
+//     add_action('plugins_loaded', 'moo_onlineOrders_check_version');
+// }
+// UPGRADE IT REMOVED END
 
 /*
  * This function for updating the database structure when the version changed and updated it automatically
