@@ -1052,7 +1052,6 @@ function Moo_RefeshEditCategorySection(event,uuid) {
     jQuery.get(endpoint, function (data) {
         if(data.status === "success"){
             moo_custom_hours = data.data;
-            console.log(data.data);
         } else {
             console.log(moo_custom_hours);
         }
