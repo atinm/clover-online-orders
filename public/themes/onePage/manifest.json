@@ -41,7 +41,14 @@
             "id":"categoriesTopMargin",
             "label":"Categories top margin",
             "type":"input_text",
-            "info":"This will change the top margin of categories section  <br /> Recommended if you have a fixed headed",
+            "info":"This will change the top margin of categories section  <br /> Recommended if you have a fixed header",
+            "default":"0"
+        },
+        {
+            "id":"phoneCategoriesTopMargin",
+            "label":"Categories top margin for mobile display size",
+            "type":"input_text",
+            "info":"This will change the top margin of categories section for mobile display size  <br /> Recommended if you have a fixed header",
             "default":"0"
         },
         {
@@ -146,7 +153,7 @@
             "label":"Button Show More Color",
             "type":"color",
             "info":"This will change the color of the button show more",
-            "default":"black",
+            "default":"#000000",
             "css" :[
                 {
                     "cssSelector":".moo-show-more",
@@ -158,7 +165,7 @@
             "id":"descriptiontextFontSize",
             "label":"Font size of descriptions",
             "type":"input_text",
-            "info":"This will change font size for descriptiions under items names <br/> default value is 15px",
+            "info":"This will change font size for descriptions under items names <br/> default value is 15px",
             "default":"15px",
             "css" :[
                 {
@@ -166,6 +173,52 @@
                     "cssProperty":"font-size"
                 }
             ]
+        },
+        {
+            "id":"descriptiontextFontColor",
+            "label":"Font color of descriptions",
+            "type":"color",
+            "info":"This will change font color for descriptions under items names <br/> default value is #363738",
+            "default":"#363738",
+            "css" :[
+                {
+                    "cssSelector":".moo-item-description",
+                    "cssProperty":"color"
+                }
+            ]
+        },
+        {
+            "id":"categoryDescriptionFontSize",
+            "label":"Font size of descriptions under categories",
+            "type":"input_text",
+            "info":"This will change font size for descriptions under categories names <br/> default value is 16px",
+            "default":"16px",
+            "css" :[
+                {
+                    "cssSelector":"#moo_OnlineStoreContainer #moo-onlineStore-items .moo-menu-category .moo-menu-category-title .moo-category-description",
+                    "cssProperty":"font-size"
+                }
+            ]
+        },
+        {
+            "id":"categoryDescriptionFontColor",
+            "label":"Font color of descriptions under categories",
+            "type":"color",
+            "info":"This will change font color for descriptions under categories names <br/> default value is #363738",
+            "default":"#ffffff",
+            "css" :[
+                {
+                    "cssSelector":".moo-category-description",
+                    "cssProperty":"color"
+                }
+            ]
+        },
+        {
+            "id":"allowspecialinstructionforitems",
+            "label":"Special instructions for individual items",
+            "type":"onoff",
+            "info":"Allow customers to leave special instructions for individual items",
+            "default":"on"
         },
         {
             "id":"askforspecialinstruction",

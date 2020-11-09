@@ -183,6 +183,11 @@ class Products_List_Moo extends WP_List_Table_MOO {
         $disable_ot_nonce       = wp_create_nonce( 'moo_disable_ot' );
 
         $title = '<strong>' . $item['name'] . '</strong>';
+        if(isset($item[ "alternate_name" ]) && $item[ "alternate_name" ]!=""){
+            $title = '<strong>' . $item['name'] ." (alternate name : ".$item[ "alternate_name" ].")". '</strong>';
+        } else {
+            $title = '<strong>' . $item['name'] . '</strong>';
+        }
         if($item['visible'])
             $actions = array(
                 'hide' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Hide from the Website</a>',
@@ -218,12 +223,13 @@ class Products_List_Moo extends WP_List_Table_MOO {
      */
     public function column_default( $item, $column_name ) {
         switch ( $column_name ) {
-            case 'name':
             case 'sku':
             case 'code':
             case 'price_type':
             case 'unit_name':
                 return $item[ $column_name ];
+            case 'outofstock':
+                return $item[ $column_name ]=="1"?"Yes":"No";
             case 'price':
                 return '$'.round(($item['price']/100),2);
             default:
@@ -255,7 +261,7 @@ class Products_List_Moo extends WP_List_Table_MOO {
             'price_type' => __( 'Price Type'),
             'unit_name' => __( 'Unit'),
             'sku' => __( 'SKU'),
-            'code' => __( 'Code')
+            'outofstock' => __( 'Out Of Stock'),
 
         );
 
@@ -269,7 +275,8 @@ class Products_List_Moo extends WP_List_Table_MOO {
     public function get_sortable_columns() {
         $sortable_columns = array(
             'name' => array( 'name', true ),
-            'price' => array( 'price', false )
+            'price' => array( 'price', false ),
+            'outofstock' => array( 'outofstock', false ),
         );
 
         return $sortable_columns;

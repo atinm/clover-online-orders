@@ -10,33 +10,44 @@ class Moo_OnlineOrders_Model {
         global $wpdb;
         $this->db = $wpdb;
     }
-    function getCategories()
-    {
+    function getCategories(){
         return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_category ORDER BY sort_order");
     }
-    function getCategories4wigdets()
-    {
+    function getCategories4wigdets(){
         return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_category where show_by_default ='1' ORDER BY 4");
     }
-    function getItems()
-    {
+    function getItems() {
         return $this->db->get_results("SELECT * FROM {$this->db->prefix}moo_item");
     }
-    function getCategory($uuid)
-    {
+    function getCategory($uuid) {
         $uuid = esc_sql($uuid);
         return $this->db->get_row("SELECT *
                                     FROM {$this->db->prefix}moo_category c
                                     WHERE c.uuid = '{$uuid}'
                                     ");
     }
-    function getItem($uuid)
-    {
+    function getItem($uuid) {
         $uuid = esc_sql($uuid);
         return $this->db->get_row("SELECT *
                                     FROM {$this->db->prefix}moo_item i
                                     WHERE i.uuid = '{$uuid}'
                                     ");
+    }
+    function getVisibleItemsByCategory($string,$limit)
+    {
+        //$string = esc_sql($string);
+        $sql = "SELECT *
+                FROM {$this->db->prefix}moo_item i
+                WHERE i.uuid in {$string}
+                AND i.visible = 1
+                AND i.hidden = 0
+                AND i.price_type != 'VARIABLE'
+                ORDER BY i.sort_order asc ";
+        if($limit){
+            $sql .= "LIMIT {$limit}";
+        }
+        $result  = $this->db->get_results($sql);
+        return $result;
     }
     function hideItem($uuid)
     {
@@ -301,7 +312,7 @@ class Moo_OnlineOrders_Model {
             return false;
         }
     }
-    function updateOrderType($uuid,$name,$enable,$taxable,$type,$minAmount,$customHours,$useCoupons,$customMessage)
+    function updateOrderType($uuid,$name,$enable,$taxable,$type,$minAmount,$maxAmount,$customHours,$useCoupons,$customMessage,$allowScOrders)
     {
         $uuid = esc_sql($uuid);
        // $label = esc_sql($name);
@@ -309,8 +320,10 @@ class Moo_OnlineOrders_Model {
         $status = esc_sql($enable);
         $type = esc_sql($type);
         $minAmount = esc_sql($minAmount);
+        $maxAmount = esc_sql($maxAmount);
         $customHours = esc_sql($customHours);
         $useCoupons = esc_sql($useCoupons);
+        $allowScOrders = esc_sql($allowScOrders);
        // $customMessage = esc_sql($customMessage);
 
         return $this->db->update("{$this->db->prefix}moo_order_types",
@@ -319,10 +332,12 @@ class Moo_OnlineOrders_Model {
                 'taxable' => $taxable,
                 'status' => $status,
                 'minAmount' => $minAmount,
+                'maxAmount' => $maxAmount,
                 'show_sa' => $type,
                 'custom_hours' => $customHours,
                 'use_coupons' => $useCoupons,
                 'custom_message' => $customMessage,
+                'allow_sc_order' => $allowScOrders,
             ),
             array( 'ot_uuid' => $uuid )
         );
@@ -581,8 +596,8 @@ class Moo_OnlineOrders_Model {
         return $this->db->update(
                         "{$this->db->prefix}moo_order",
                         array(
-                            'paid' => 1,    // string
-                            'refpayment' => $ref    // integer (number)
+                            'paid' => 1,
+                            'refpayment' => $ref
                         ),
                         array( 'uuid' => $uuid )
                     );
@@ -621,6 +636,14 @@ class Moo_OnlineOrders_Model {
     function NbOrderTypes()
     {
         return $this->db->get_results("SELECT count(*) as nb FROM {$this->db->prefix}moo_order_types");
+    }
+    function NbOfOrdersPerHour()
+    {
+        $date = date('Y-m-d H:%', time());
+        var_dump($date);
+        $res = $this->db->get_results("SELECT count(*) as nb FROM {$this->db->prefix}moo_order where date like '{$date}'");
+        echo $this->db->last_query;
+        return $res;
     }
     function getBestSellingProducts($limit)
     {
@@ -796,12 +819,9 @@ class Moo_OnlineOrders_Model {
         $newName        = esc_sql($newName);
         $newDescription = esc_sql($newDescription);
         $data = array();
-        if(!empty($newName)){
-            $data['alternate_name'] = $newName;
-        }
-        if(!empty($newDescription)){
-            $data['description'] = $newDescription;
-        }
+
+        $data['alternate_name'] = $newName;
+        $data['description'] = $newDescription;
 
         return $this->db->update("{$this->db->prefix}moo_category",
             $data,

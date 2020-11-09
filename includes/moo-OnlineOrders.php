@@ -87,7 +87,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.3.9';
+		$this->version = '1.4.4';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -234,8 +234,15 @@ class moo_OnlineOrders {
 
         //allow redirection, even if my plugin starts to send output to the browser
         $this->loader->add_action( 'init', $plugin_public, 'do_output_buffer');
+
+        //init cron jobs
+        $this->loader->add_action( 'init', $plugin_public, 'moo_register_daily_jwtTokenUpdate');
+        $this->loader->add_action( 'init', $plugin_public, 'moo_register_daily_inventoryImport');
+
         // Import inventory when hook fired
         $this->loader->add_action( 'smart_online_order_import_inventory', $plugin_public, 'moo_ImportInventory');
+        // Update  jwt token
+        $this->loader->add_action( 'smart_online_order_update_jwttoken', $plugin_public, 'moo_updateJwtToken');
 
         // Add Cart Button
         $this->loader->add_action( 'wp_footer', $plugin_public, 'addCartButton');

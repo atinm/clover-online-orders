@@ -69,9 +69,7 @@ function moo_updateCart()
 
                     //Fin line
 
-                }
-                else
-                {
+                } else {
                     var total = Math.round((subtotal)*100)/100;
 
                     html +="<tr id='moo_cart_line_"+item+"'>";
@@ -94,9 +92,6 @@ function moo_updateCart()
                     html +='<td><i class="fas fa-trash" style="cursor: pointer;" onclick="moo_cart_DeleteItem(\''+item+'\')"></i></td>'; //Controlles Btn
                     html +="</tr>";
                 }
-
-
-
             }
 
             html += "</tbody></table></div>"

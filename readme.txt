@@ -3,9 +3,9 @@ Contributors: Zaytech
 Donate link: http://www.zaytechapps.com/
 Tags: clover,online orders for clover,zaytech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
 Requires at least: 4.7.1
-Tested up to: 5.3.2
+Tested up to: 5.4.2
 Requires PHP: 5.2.0
-Stable tag: 1.3.9
+Stable tag: 1.4.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -46,15 +46,14 @@ Below are just a few websites currently using Smart Online Order with their Clov
 [Burger Restaurant](https://chicknchuck.com/)
 [Full Service Restaurant](https://www.theoriginalturkey.com)
 [Island Smoothie Cafe](https://www.islandsmoothiecafe.com)
-[Cafe at Airport](https://arrowheadtaphouse.com)
+[HarissaToGo](https://HarissaToGo.com)
 [Pizza shop Example 1](https://pomodoropizzafl.com)
 [Pizza shop Example 2](http://www.fastpizzaonline.com)
 [Pizza shop Example 3](https://www.zifaros.com)
 [Oasis Grill ](https://oasisgrill.com)
 [Cake Shop](https://nolandscakes.com)
-[Urban Pantry with Store interface 4](https://www.urbanpantrycatering.com/)
-[Sandwich Cafe](https://www.sandwichcafesfs.com)
-[Coffee Shop with Store interface 4](https://coyotecoffeecafe.com)
+[Multi locations example](http://oak2go.com/)
+[Breadologie bakery](https://breadologie.smartonlineorder.com/)
 [Pizza Shop Example 4](https://villaromarestaurant.net)
 [Pizza Shop Example 5](https://venuspizzeriafl.com)
 [Pizza Shop Example 6](https://www.tonyspizzaandgrinders.com)
@@ -133,7 +132,7 @@ While this Plug-in is free. Yes, there is a fee associated with the Online Order
 
 = If i have difficulty installing this plug-in or the app, is there support or help =
 
-Yes, Please call 925-234-5554 for any questions you may have. You may also e-mail us at: support@zaytechapps.com or visit docs.smartonlineorder.com or search Youtube for "Smart Online Order"
+Yes, Please call 925-234-5554 for any questions you may have. You may also e-mail us at: support@zaytech.com or visit https://docs.zaytech.com or search Youtube for "Smart Online Order"
 
 = Did Clover make this plug-in =
 
@@ -141,12 +140,46 @@ No, this plug-in is not by Clover. It is from Zaytech. Both this plug-in and Sma
 
 = I like this plug-in but I need some additional features =
 
-Please let us know so we can implement additional features.  925-234-5554 / support@zaytechapps.com
+Please let us know so we can implement additional features.support@zaytech.com
 
 == Changelog ==
 
-= 1.3.9 =
+= 1.4.4 =
+* Updated payment options
+* Minor improvements and updates
 
+= 1.4.2 =
+* Improved the new payment method (secured by Clover)
+* Other Improvements
+
+= 1.4.1 =
+* Improved the new payment method (secured by Clover)
+
+= 1.4.0 =
+* Added option to choose either to display regular names or alternate names
+* Improved re-ordering items* Improved css of store interface 4 for iPad
+* Improved descriptions for items to accept HTML
+* Improved search feature
+* Added new payment method (secured by Clover)
+* Added the ability to put a maximum order amount per Order Type
+* Added new feedback/ticket system based on email
+* Added customer text message notifications. Ability to text customers
+* Added option so out of stock items can become hidden when it reaches Zero count.
+* Added ability to hide category when it is not available when custom hours is used
+* Added option to include order number on the order receipts
+* Added ability to import and show more than 100 items per category
+* Added ability to offer different tip amounts and to choose a default amount
+* Added more options to store interface 4 customization
+* Added ability to show modifier display as a minimized version
+* Added ability to hide special instruction for store interfaces 3,4,5,6 on individual item basis
+* Added ability to choose ‘Thank You Page’ from local Wordpress Pages
+* Changed the documentation link to: https://docs.zaytech.com
+* Added chatbot feature to help answer questions using knowledge base
+* When an item is hidden, it is now shown in gray color under categories and items
+* Improved a feature so hidden items cannot be re-ordered
+* Other Improvements
+
+= 1.3.9 =
 * Fixed rounding float for percentage - for services fees
 * Improved ordering method with iPads and Apple Pencil
 * Improved the process of how an address is applied towards Delivery Orders
@@ -155,16 +188,13 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 * Clarified how fixed delivery fees work by highlighting the text in red
 
 = 1.3.8 =
-
 * Fixed Avada theme compatibility
 * Fixed issue when disable order types
 
 = 1.3.7 =
-
 * Fixed issue when saving delivery settings
 
 = 1.3.6 =
-
 * Added new Store Interface Six. This is a fun and interactive store interface with categories at the top
 * Added ability to have Custom Hours for Categories. For example, you can have specific hours that your lunch menu is available for Online Ordering
 * Added ability to have Custom Hours for Order Types. For example, you can have specific hours of when you would like to do delivery or pick-up order
@@ -208,11 +238,13 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 * Added the ability to disable sms verification when orders are not paid with credit card
 * Added the ability to disable online payment and accept only pay at location/pay upon delivery
 * Improved ability to update order types by improving sync functionality with the clover account
+
 = 1.3.1 =
 * Fixed printing issues
 * Fixed order note not changed
 * Added the receipt link to the text messages
 * Added 'PAID' to order title if the order was paid
+
 = 1.3.0 =
 * Added new Store Interface “Store Interface 5”
 * Added reports feature
@@ -222,6 +254,7 @@ Please let us know so we can implement additional features.  925-234-5554 / supp
 * Added additional FAQ
 * Added the following shortcode to be used with Store Interface 4 so it can load on iPhone Apps [moo_all_items js_loading='false' interface="si4"]
 * Other various fixes and improvements
+
 = 1.2.80 =
 * Added the clean inventory feature
 * Improved the store interface 4 to accept direct links to a specif category

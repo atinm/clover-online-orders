@@ -29,14 +29,28 @@ class DashboardRoutes extends BaseRoute {
      * @var Moo_OnlineOrders_CallAPI
      */
     private $HoursApilink;
+    /**
+     * @var array
+     */
+    private $pluginSettings;
+    /**
+     * @var bool
+     */
+    private $useAlternateNames;
 
     /**
      * SyncRoutes constructor.
      *
      */
     public function __construct($model, $api){
-        $this->model    =     $model;
-        $this->api      =     $api;
+        $this->model          = $model;
+        $this->api            = $api;
+        $this->pluginSettings = (array) get_option("moo_settings");
+        if(isset($this->pluginSettings["useAlternateNames"])){
+            $this->useAlternateNames = ($this->pluginSettings["useAlternateNames"] !== "disabled");
+        } else {
+            $this->useAlternateNames = true;
+        }
     }
 
 
@@ -80,7 +94,7 @@ class DashboardRoutes extends BaseRoute {
             )
         ));
 
-        // get all categories
+        // get categories hours
         register_rest_route($this->namespace, '/dash/categories_hours', array(
             // Here we register the readable endpoint for collections.
             array(
@@ -89,7 +103,7 @@ class DashboardRoutes extends BaseRoute {
                 'permission_callback' => array( $this, 'permissionCheck' )
             )
         ));
-        // get all categories
+        // get all ordertypes hours
         register_rest_route($this->namespace, '/dash/ordertypes_hours', array(
             // Here we register the readable endpoint for collections.
             array(
@@ -98,12 +112,67 @@ class DashboardRoutes extends BaseRoute {
                 'permission_callback' => array( $this, 'permissionCheck' )
             )
         ));
-        // get all categories
+        // update api key
         register_rest_route($this->namespace, '/dash/update_api_key', array(
             // Here we register the readable endpoint for collections.
             array(
                 'methods' => 'POST',
                 'callback' => array($this, 'dashUpdateApiKey'),
+                'permission_callback' => array( $this, 'permissionCheck' )
+            )
+        ));
+        // export settings
+        register_rest_route($this->namespace, '/dash/export/settings', array(
+            // Here we register the readable endpoint for collections.
+            array(
+                'methods' => 'GET',
+                'callback' => array($this, 'dashExportSettings'),
+                'permission_callback' => array( $this, 'permissionCheck' )
+            )
+        ));
+        // export items descriptions
+        register_rest_route($this->namespace, '/dash/export/descriptions', array(
+            // Here we register the readable endpoint for collections.
+            array(
+                'methods' => 'GET',
+                'callback' => array($this, 'dashExportDescriptions'),
+                'permission_callback' => array( $this, 'permissionCheck' )
+            )
+        ));
+        // export items descriptions
+        register_rest_route($this->namespace, '/dash/export/images', array(
+            // Here we register the readable endpoint for collections.
+            array(
+                'methods' => 'GET',
+                'callback' => array($this, 'dashExportImages'),
+                'permission_callback' => array( $this, 'permissionCheck' )
+            )
+        ));
+        //import images
+        register_rest_route($this->namespace, '/dash/import/images', array(
+            // Here we register the readable endpoint for collections.
+            array(
+                'methods' => 'POST',
+                'callback' => array($this, 'dashImportImages'),
+                'permission_callback' => array( $this, 'permissionCheck' )
+            )
+        ));
+
+        // import descriptions
+        register_rest_route($this->namespace, '/dash/import/descriptions', array(
+            // Here we register the readable endpoint for collections.
+            array(
+                'methods' => 'POST',
+                'callback' => array($this, 'dashImportItemsDescriptions'),
+                'permission_callback' => array( $this, 'permissionCheck' )
+            )
+        ));
+        // import settings
+        register_rest_route($this->namespace, '/dash/import/settings', array(
+            // Here we register the readable endpoint for collections.
+            array(
+                'methods' => 'POST',
+                'callback' => array($this, 'dashImportSettings'),
                 'permission_callback' => array( $this, 'permissionCheck' )
             )
         ));
@@ -126,6 +195,7 @@ class DashboardRoutes extends BaseRoute {
 
         if($category === null )
             return new WP_Error( 'category_not_found', 'Category not found', array( 'status' => 404 ) );
+
         $response["uuid"]           = $category->uuid;
         $response["name"]           = stripslashes($category->name);
         $response["alternate_name"] = stripslashes($category->alternate_name);
@@ -145,7 +215,6 @@ class DashboardRoutes extends BaseRoute {
                 $item = $this->model->getItem($items_uuid);
                 if(!$item)
                     continue;
-
                 $final_item = array();
 
                 $final_item["uuid"]         =   $item->uuid;
@@ -156,6 +225,13 @@ class DashboardRoutes extends BaseRoute {
                 $final_item["price_type"]   =   $item->price_type;
                 $final_item["unit_name"]    =   $item->unit_name;
                 $final_item["sort_order"]   =   intval($item->sort_order);
+                $final_item["visible"]   =   intval($item->visible);
+
+                if($this->useAlternateNames && isset($item->alternate_name) && trim($item->alternate_name)!== ""){
+                    $final_item["name"] = stripslashes($item->alternate_name);
+                } else {
+                    $final_item["name"] = stripslashes($item->name);
+                }
 
                 array_push($response['items'],$final_item);
             }
@@ -178,24 +254,17 @@ class DashboardRoutes extends BaseRoute {
 
         $category_name        = sanitize_text_field($request_body['cat_name']);
         $category_description = sanitize_text_field($request_body['cat_description']);
+        $result = $this->model->updateCategoryNameAndDescription($request["cat_id"], $category_name, $category_description);
 
-        if(!empty($category_name) || !empty($category_description)) {
-            $result = $this->model->updateCategoryNameAndDescription($request["cat_id"], $category_name, $category_description);
-
-            if($result) {
-                return array(
-                    "status"=>"success"
-                );
-            } else {
-                return array(
-                    "status"=>"failed"
-                );
-            }
-
+        if($result) {
+            return array(
+                "status"=>"success"
+            );
+        } else {
+            return array(
+                "status"=>"failed"
+            );
         }
-        return array(
-            "status"=>"success"
-        );
     }
     /**
      * @param $request
@@ -251,12 +320,19 @@ class DashboardRoutes extends BaseRoute {
                  $c = array(
                      "uuid"=>$cat->uuid,
                      "name"=>stripslashes($cat->name),
-                     "alternate_name" => stripslashes($cat->alternate_name),
+                     "alternate_name" => "",
                      "description"   => stripslashes($cat->description),
                      "image_url"=>$cat->image_url,
                      "sort_order"=>$cat->sort_order,
                      "show_by_default"=>$cat->show_by_default,
                  );
+
+                 if($this->useAlternateNames && isset($cat->alternate_name) && $cat->alternate_name!==""){
+                     $c["name"] = stripslashes($cat->alternate_name);
+                 } else {
+                     $c["name"] = stripslashes($cat->name);
+                 }
+
                  array_push($response,$c);
              }
              return array(
@@ -305,7 +381,7 @@ class DashboardRoutes extends BaseRoute {
             return new WP_Error( 'api_key_required', 'New Api Key not found', array( 'status' => 400 ) );
         }
         $api_key = sanitize_text_field($request["api_key"]);
-        $checkResult = json_decode($this->api->checkAnyToken($api_key));
+        $checkResult = json_decode($this->api->checkAnyToken($api_key),true);
         //check token
         if(isset($checkResult["status"]) && $checkResult["status"] == "success"){
             //clean inventory
@@ -355,6 +431,7 @@ class DashboardRoutes extends BaseRoute {
             //change it
             $settings = (array) get_option("moo_settings");
             $settings["api_key"] = $api_key;
+            $settings["jwt-token"] = "";
             update_option("moo_settings",$settings);
             //return response
             return array(
@@ -367,5 +444,336 @@ class DashboardRoutes extends BaseRoute {
                 "message"=>"This API KEY isn't correct"
             );
         }
+    }
+    function dashExportSettings( $request ){
+        $settings = (array) get_option("moo_settings");
+        header('Content-Type: application/json');
+        header('Content-Disposition: attachment; filename=settings.json');
+        header('Pragma: no-cache');
+        echo json_encode($settings);
+        exit();
+    }
+    function dashExportDescriptions( $request ){
+        global $wpdb;
+        //-- Table `item_option`--
+        $data = $wpdb->get_results("SELECT uuid,name,description FROM `{$wpdb->prefix}moo_item` where description is not null;");
+        if($data){
+            header('Content-Type: application/json');
+            header('Content-Disposition: attachment; filename=items_descriptions.json');
+            header('Pragma: no-cache');
+            echo json_encode($data);
+            exit();
+        } else {
+            return array(
+                "status"=>false,
+                "message"=>"An error has occurred please try again"
+            );
+        }
+    }
+    function dashExportImages( $request ){
+        global $wpdb;
+        $data = array(
+            "items"=>array(),
+            "categories"=>array()
+        );
+        //get items images
+
+        $data["items"] = $wpdb->get_results("SELECT items.uuid,items.name,images.url,images.is_default,images.is_enabled FROM `{$wpdb->prefix}moo_item` items,`{$wpdb->prefix}moo_images` images where images.item_uuid = items.uuid");
+
+        // get categories images
+
+        $data["categories"] = $wpdb->get_results("SELECT uuid,name,image_url,description FROM `{$wpdb->prefix}moo_category` where image_url is not null");
+
+        //export
+        if($data){
+            header('Content-Type: application/json');
+            header('Content-Disposition: attachment; filename=images.json');
+            header('Pragma: no-cache');
+            echo json_encode($data);
+            exit();
+        } else {
+            return array(
+                "status"=>false,
+                "message"=>"An error has occurred please try again"
+            );
+        }
+    }
+    function dashImportSettings( $request ){
+
+        $permittedExtension = 'json';
+        $permittedTypes = ['application/json', 'text/plain'];
+
+        $files = $request->get_file_params();
+        $headers = $request->get_headers();
+
+        if ( !isset( $files['file'] ) || empty( $files['file'] ) ) {
+            return new WP_Error( 'data_required', 'New Data not found', array( 'status' => 400 ) );
+        }
+
+
+        $file = $files['file'];
+        // confirm file uploaded via POST
+        if (! is_uploaded_file( $file ) && false ) {
+            return new WP_Error( 'File upload check failed ', array( 'status' => 400 ));
+        }
+
+        // confirm no file errors
+        if (! $file['error'] === UPLOAD_ERR_OK ) {
+            return new WP_Error( 'Upload error: ' . $file['error'], array( 'status' => 400 ) );
+        }
+        // confirm extension meets requirements
+        $ext = pathinfo( $file['name'], PATHINFO_EXTENSION );
+        if ( $ext !== $permittedExtension ) {
+            return new WP_Error( 'Invalid extension. ', array( 'status' => 400 ));
+        }
+        // check type
+        $mimeType = mime_content_type($file['tmp_name']);
+        if ( !in_array( $file['type'], $permittedTypes )
+            || !in_array( $mimeType, $permittedTypes ) ) {
+            return new WP_Error( 'Invalid mime type' , array( 'status' => 400 ));
+        }
+        $handle = fopen( $file['tmp_name'], 'r' );
+        $filecontent =  fread($handle,filesize($file['tmp_name']));
+
+        $data = json_decode($filecontent,true);
+        update_option("moo_settings",$data);
+        return array(
+            "status"=>true,
+            "message"=>"imported"
+        );
+
+    }
+    function dashImportItemsDescriptions( $request ){
+        global $wpdb;
+        $body = $request->get_file_params();
+
+        $permittedExtension = 'json';
+        $permittedTypes = ['application/json', 'text/plain'];
+
+        $files = $request->get_file_params();
+        $headers = $request->get_headers();
+
+        if ( !isset( $files['file'] ) || empty( $files['file'] ) ) {
+            return new WP_Error( 'data_required', 'New Data not found', array( 'status' => 400 ) );
+        }
+
+
+        $file = $files['file'];
+        // confirm file uploaded via POST
+        if (! is_uploaded_file( $file ) && false ) {
+            return new WP_Error( 'File upload check failed ', array( 'status' => 400 ));
+        }
+
+        // confirm no file errors
+        if (! $file['error'] === UPLOAD_ERR_OK ) {
+            return new WP_Error( 'Upload error: ' . $file['error'], array( 'status' => 400 ) );
+        }
+        // confirm extension meets requirements
+        $ext = pathinfo( $file['name'], PATHINFO_EXTENSION );
+        if ( $ext !== $permittedExtension ) {
+            return new WP_Error( 'Invalid extension. ', array( 'status' => 400 ));
+        }
+        // check type
+        $mimeType = mime_content_type($file['tmp_name']);
+        if ( !in_array( $file['type'], $permittedTypes )
+            || !in_array( $mimeType, $permittedTypes ) ) {
+            return new WP_Error( 'Invalid mime type' , array( 'status' => 400 ));
+        }
+        $handle = fopen( $file['tmp_name'], 'r' );
+        $filecontent =  fread($handle,filesize($file['tmp_name']));
+
+        $data = json_decode($filecontent,true);
+        $counter = 0;
+        foreach ($data as $item){
+            if(isset($item["description"])){
+                $desc = esc_sql($item["description"]);
+                $name = esc_sql($item["name"]);
+                $nameTab = explode("\u",$name);
+                $sql = "UPDATE `{$wpdb->prefix}moo_item` 
+                        SET description = '{$desc}' 
+                        WHERE uuid = '{$item["uuid"]}';";
+                $res = $wpdb->query($sql);
+                if($res === 0){
+                    $sql = "UPDATE `{$wpdb->prefix}moo_item` 
+                        SET description = '{$desc}' 
+                        WHERE name like '%{$nameTab[0]}%' ;";
+                    $res2 = $wpdb->query($sql);
+                    if($res2){
+                        $counter++;
+                    }
+                } else {
+                    $counter++;
+                }
+            }
+        }
+        return array(
+            "status"=>true,
+            "message"=>"imported"
+        );
+    }
+    function dashImportImages( $request ){
+        require_once( ABSPATH . 'wp-admin/includes/image.php' );
+        global $wpdb;
+        $cloneImages = true;
+        $body = $request->get_file_params();
+
+        $permittedExtension = 'json';
+        $permittedTypes = ['application/json', 'text/plain'];
+
+        $files = $request->get_file_params();
+        $headers = $request->get_headers();
+
+        if ( !isset( $files['file'] ) || empty( $files['file'] ) ) {
+            return new WP_Error( 'data_required', 'New Data not found', array( 'status' => 400 ) );
+        }
+
+
+        $file = $files['file'];
+        // confirm file uploaded via POST
+        if (! is_uploaded_file( $file ) && false ) {
+            return new WP_Error( 'File upload check failed ', array( 'status' => 400 ));
+        }
+
+        // confirm no file errors
+        if (! $file['error'] === UPLOAD_ERR_OK ) {
+            return new WP_Error( 'Upload error: ' . $file['error'], array( 'status' => 400 ) );
+        }
+        // confirm extension meets requirements
+        $ext = pathinfo( $file['name'], PATHINFO_EXTENSION );
+        if ( $ext !== $permittedExtension ) {
+            return new WP_Error( 'Invalid extension. ', array( 'status' => 400 ));
+        }
+        // check type
+        $mimeType = mime_content_type($file['tmp_name']);
+        if ( !in_array( $file['type'], $permittedTypes )
+            || !in_array( $mimeType, $permittedTypes ) ) {
+            return new WP_Error( 'Invalid mime type' , array( 'status' => 400 ));
+        }
+        $handle = fopen( $file['tmp_name'], 'r' );
+        $filecontent =  fread($handle,filesize($file['tmp_name']));
+
+        $data = json_decode($filecontent,true);
+        $upload_dir = wp_upload_dir();
+
+        if(isset($data["items"]) && is_array($data["items"])){
+            foreach ($data["items"] as $item) {
+                if(isset($item["url"])){
+                    if($cloneImages){
+                        $image_data = file_get_contents( $item["url"] );
+                        $filename = basename( $item["url"] );
+                        $filetype = wp_check_filetype( $filename, null );
+
+                        if ( wp_mkdir_p( $upload_dir['path'] ) ) {
+                            $file = $upload_dir['path'] . '/' . $filename;
+                        }
+                        else {
+                            $file = $upload_dir['basedir'] . '/' . $filename;
+                        }
+                        file_put_contents( $file, $image_data );
+
+                        $link_image = $upload_dir['url'] ."/". $filename;
+                    } else {
+                        $link_image = $item["url"];
+                    }
+
+                    //get item uuid based  on name and uuid
+
+                    $name = esc_sql($item["name"]);
+                    $sql = "SELECT * FROM `{$wpdb->prefix}moo_item` 
+                        WHERE name like '%{$name}%'
+                        OR uuid = '{$item["uuid"]}';";
+                    $oneItem = $wpdb->get_row($sql);
+                    if ($oneItem){
+                        if($cloneImages){
+                            //add uploaded image as an attachement
+                            $attachment = array(
+                                'guid'           => $file,
+                                'post_mime_type' => $filetype['type'],
+                                'post_title'     => sanitize_file_name( $filename ),
+                                'post_content'   => '',
+                                'post_status'    => 'inherit'
+                            );
+                            $attach_id = wp_insert_attachment( $attachment, $file );
+                            $attach_data = wp_generate_attachment_metadata( $attach_id, $file );
+                            wp_update_attachment_metadata( $attach_id, $attach_data );
+                        }
+
+                        //remove old images
+                        $wpdb->delete("{$wpdb->prefix}moo_images",array(
+                            "item_uuid"=>$oneItem->uuid
+                        ));
+                        //add new image
+                        $wpdb->insert("{$wpdb->prefix}moo_images",array(
+                            "item_uuid"=>$oneItem->uuid,
+                            "url"=>$link_image,
+                            "is_default"=>($item["is_default"])?$item["is_default"]:1,
+                            "is_enabled"=>($item["is_enabled"])?$item["is_enabled"]:1
+                        ));
+                    }
+                }
+            }
+        }
+        if(isset($data["categories"]) && is_array($data["categories"])){
+            foreach ($data["categories"] as $category) {
+                if(isset($category["image_url"]) && (isset($category["uuid"]) || isset($category["name"]))){
+                    if($cloneImages){
+                        $image_data = file_get_contents( $category["image_url"] );
+                        $filename = basename( $category["image_url"] );
+                        if ( wp_mkdir_p( $upload_dir['path'] ) ) {
+                            $file = $upload_dir['path'] . '/' . $filename;
+                        }
+                        else {
+                            $file = $upload_dir['basedir'] . '/' . $filename;
+                        }
+                        file_put_contents( $file, $image_data );
+
+                        $link_image = $upload_dir['url'] ."/". $filename;
+
+                        //add uploaded image as an attachement
+                        $attachment = array(
+                            'guid'           => $file,
+                            'post_mime_type' => $filetype['type'],
+                            'post_title'     => sanitize_file_name( $filename ),
+                            'post_content'   => '',
+                            'post_status'    => 'inherit'
+                        );
+                        $attach_id = wp_insert_attachment( $attachment, $file );
+                        $attach_data = wp_generate_attachment_metadata( $attach_id, $file );
+                        wp_update_attachment_metadata( $attach_id, $attach_data );
+
+                    } else {
+                        $link_image =  $category["image_url"];
+                    }
+
+
+                    if(isset($category["name"])){
+                        $name     = esc_sql($category["name"]);
+                    } else {
+                        $name = null;
+                    }
+                    if(isset($category["description"])){
+                        $cat_desc     = esc_sql($category["description"]);
+                    } else {
+                        $cat_desc = '';
+                    }
+                    $sql = "UPDATE `{$wpdb->prefix}moo_category` 
+                        SET image_url = '{$link_image}',
+                            description = '{$cat_desc}'
+                        WHERE uuid = '{$category["uuid"]}';";
+                   $res =  $wpdb->query($sql);
+                   if($res  === 0 && $name){
+                       $sql = "UPDATE `{$wpdb->prefix}moo_category` 
+                        SET image_url = '{$link_image}',
+                          description = '{$cat_desc}'
+                        WHERE name like '%{$name}%';";
+                        $wpdb->query($sql);
+                   }
+                }
+            }
+        }
+        return array(
+            "status"=>true,
+            "message"=>"imported"
+        );
     }
 }

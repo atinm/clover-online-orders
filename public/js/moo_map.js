@@ -11,8 +11,7 @@ google.maps.Circle.prototype.contains = function(latLng,circle) {
 
 function moo_getLatLong()
 {
-    if(moo_merchantLat != "" && moo_merchantLng != "")
-    {
+    if(moo_merchantLat != "" && moo_merchantLng != "") {
         var Merchantlocation = {};
         Merchantlocation.lng = parseFloat(moo_merchantLng);
         Merchantlocation.lat = parseFloat(moo_merchantLat);
@@ -102,8 +101,7 @@ function moo_draw_zones()
         var delivery_for_other_zone = parseFloat(moo_delivery_other_zone_fee) ; //Amount of delivery for other zones
 
 
-        if(isNaN(delivery_free_after) || delivery_free_after > order_total )
-        {
+        if(isNaN(delivery_free_after) || delivery_free_after > order_total ) {
             if(isNaN(delivery_fixed_amount) || delivery_fixed_amount < 0 )
             {
                 document.getElementById('moo_delivery_amount').value = '';
@@ -113,9 +111,7 @@ function moo_draw_zones()
                 document.getElementById('moo_delivery_amount').value = delivery_fixed_amount;
                 moo_update_totals();
             }
-        }
-        else
-        {
+        } else {
             //Free delivery after spending X
             if(delivery_free_after <= order_total )
             {
@@ -154,12 +150,10 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
     // if the merchant offer fixed amount
     // else we will check the zones
     if(isNaN(delivery_fixed_amount)) {
-        if(customer_lat !== '' && customer_lng !== '')
-        {
+        if(customer_lat !== '' && customer_lng !== '') {
             //check the zones
             var zones_contain_point = new Array();
-            for(i in moo_delivery_areas)
-            {
+            for(i in moo_delivery_areas)  {
                 var el = moo_delivery_areas[i];
 
                 // Verify if the selected address is at any zone
@@ -183,8 +177,7 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
             // If the selected point on the map exists in at least one merchant's zone
             // Then we we update the delivery amount by this zone fees
             // else we verify if the merchant allow other zones
-            if(zones_contain_point.length >= 1 )
-            {
+            if(zones_contain_point.length >= 1 ) {
                 // Customer address exist in at least one merchant's zone
                 var delivery_final_amount = (zones_contain_point[0].feeType === "percent")?(zones_contain_point[0].zone_fee*order_total/100):zones_contain_point[0].zone_fee;
                 var delivery_zone_id      =  zones_contain_point[0].zone_id;
@@ -284,15 +277,13 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
                     }
                 }
 
-            }
-            else
-            {
+            } else {
                 //Customer address not exist in any zone
+
                 /*
                     we will check the support other zones
                  */
-                if(isNaN(delivery_for_other_zone))
-                {
+                if(isNaN(delivery_for_other_zone)) {
                     var res ={};
                     res.type='zone_error';
                     res.amount='';
@@ -306,9 +297,7 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
                 }
 
             }
-        }
-        else
-        {
+        } else  {
             console.log("Customer Address not found");
             var res ={};
             res.type='zone_error';
@@ -372,33 +361,29 @@ function moo_update_totals()
     else
         var tips_amount = 0;
 
-    if(MooDeliveryfees == null || isNaN(MooDeliveryfees) || MooDeliveryfees < 0 || MooDeliveryfees === false )
-    {
+    if(MooDeliveryfees == null || isNaN(MooDeliveryfees) || MooDeliveryfees < 0 || MooDeliveryfees === false ) {
         MooDeliveryfees = 0;
-    }
-    else
-    {
+    } else {
         MooDeliveryfees = parseFloat(MooDeliveryfees);
     }
 
-    if(MooServicefees == null || isNaN(MooServicefees) || MooServicefees <= 0 || MooServicefees === false )
-    {
+    if(MooServicefees == null || isNaN(MooServicefees) || MooServicefees <= 0 || MooServicefees === false ) {
         MooServicefeesD =  parseFloat(moo_Total.serviceCharges);
-    }
-    else
-    {
+    } else {
         MooServicefeesD = parseFloat(MooServicefees) + parseFloat(moo_Total.serviceCharges);
     }
 
-    if(isNaN(tips_amount) || tips_amount < 0)
+    if(isNaN(tips_amount) || tips_amount < 0) {
         tips_amount = 0;
+    }
 
 
     //Calculate the new Total
-    if(MooOrderTypeIsTaxable)
+    if(MooOrderTypeIsTaxable) {
         var new_total = parseFloat(moo_Total.total) + tips_amount + MooDeliveryfees + MooServicefeesD;
-    else
+    } else {
         var new_total = parseFloat(moo_Total.sub_total) + tips_amount + MooDeliveryfees + MooServicefeesD;
+    }
 
     jQuery('.moo-totals-value').fadeOut(300, function() {
         jQuery('#moo-cart-subtotal').html(formatPrice(moo_Total.sub_total));
@@ -409,9 +394,9 @@ function moo_update_totals()
             else
                 jQuery('#moo-cart-tax').html(formatPrice(moo_Total.total_of_taxes));
 
-        }
-        else
+        } else {
             jQuery('#moo-cart-tax').html("0.00");
+        }
 
 
         if(moo_Total.coupon == null) {
@@ -432,12 +417,11 @@ function moo_update_totals()
             }
 
             //update the total when the order is not taxable
-            if(!MooOrderTypeIsTaxable)
-            {
+            if(!MooOrderTypeIsTaxable) {
                 if(moo_Total.coupon.type.toUpperCase() == 'AMOUNT')
-                    new_total =  parseFloat(moo_Total.total) + tips_amount + MooDeliveryfees + MooServicefeesD - moo_Total.coupon.value;
+                    new_total =  parseFloat(moo_Total.sub_total) + tips_amount + MooDeliveryfees + MooServicefeesD - moo_Total.coupon.value;
                 else
-                    new_total =  parseFloat(moo_Total.sub_total) + tips_amount + MooDeliveryfees + MooServicefeesD - new_total*moo_Total.coupon.value/100;
+                    new_total =  parseFloat(moo_Total.sub_total) + tips_amount + MooDeliveryfees + MooServicefeesD - moo_Total.sub_total*moo_Total.coupon.value/100;
             }
         }
 

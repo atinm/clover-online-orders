@@ -26,10 +26,7 @@ class Orders_List_Moo extends WP_List_Table_MOO {
      */
     public static function get_items( $per_page = 20, $page_number = 1 ) {
         global $wpdb;
-
-            $sql = "SELECT * FROM {$wpdb->prefix}moo_order";
-
-
+        $sql = "SELECT * FROM {$wpdb->prefix}moo_order";
 
         if ( ! empty( $_REQUEST['orderby'] ) ) {
             $sql .= ' ORDER BY ' . esc_sql( $_REQUEST['orderby'] );

@@ -40,10 +40,12 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
             $store_page_id  = $defaultOptions['store_page'];
             $cart_page_id   = $defaultOptions['cart_page'];
             $checkout_page_id = $defaultOptions['checkout_page'];
+            $my_account_page_id = $defaultOptions['my_account_page'];
 
             if($store_page_id) wp_delete_post($store_page_id,true);
             if($checkout_page_id) wp_delete_post($checkout_page_id,true);
             if($cart_page_id) wp_delete_post($cart_page_id,true);
+            if($my_account_page_id) wp_delete_post($my_account_page_id,true);
 
             /*-- Table `item_option`--*/
             $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_option` ;");

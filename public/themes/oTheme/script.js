@@ -7,7 +7,7 @@ window.showCategoryIcon;
 window.showSearch = false;
 window.showTopPicks = false;
 jQuery(document).ready(function () {
-    
+    window.moo_theme_setings = [];
     jQuery.get(moo_RestUrl+"moo-clover/v1/theme_settings/oTheme", function (data) {
 
         if(data.settings.oTheme_show_more_button === 'on') window.showMore = true; else window.showMore = false;
@@ -16,7 +16,11 @@ jQuery(document).ready(function () {
         if(data.settings.oTheme_showTopPicksSection === 'on') window.showTopPicks = true; else window.showTopPicks = false;
         if(data.settings.oTheme_categoriesMenuTopMargin)window.topPosition = parseInt(data.settings.oTheme_categoriesMenuTopMargin);
         if(data.settings.oTheme_categoriesMenuTopMarginMobile)window.topPositionMobile = parseInt(data.settings.oTheme_categoriesMenuTopMarginMobile);
-        
+
+        if(data && data != null && data.settings != null) {
+            window.moo_theme_setings = data.settings;
+        }
+
     }).done(function(){
         jQuery.get(moo_RestUrl+"moo-clover/v1/mg_settings", function (data) {
             if(data != null && data.settings != null)
@@ -250,7 +254,7 @@ function osnLoadCatItemDataSearch(keyword) {
         function (data) {
                 if(data.items.length != 0){
                     data.items.forEach(function (item){
-                        console.log(item);
+                        //console.log(item);
                         contentItems += '<div class="osnCardItem">'
                         +'<div class="osnImgItem" ';
                         if(data.available && (item.stockCount != "out_of_stock") )
@@ -339,9 +343,18 @@ function osnLoadCatItemData() {
 }
 
 function osnRenderItems(contentItems,content){
-    endPoint = moo_RestUrl+"moo-clover/v1/categories?expand=all_items";
-    if(window.showMore) endPoint = moo_RestUrl+"moo-clover/v1/categories?expand=five_items";
-    jQuery.get(endPoint,
+    if(moo_RestUrl.indexOf("?rest_route") !== -1){
+        if(window.showMore)
+            var endpoint = moo_RestUrl+"moo-clover/v1/categories&expand=all_items";
+        else
+            var endpoint = moo_RestUrl+"moo-clover/v1/categories&expand=five_items";
+    } else {
+        if(window.showMore)
+            var endpoint = moo_RestUrl+"moo-clover/v1/categories?expand=all_items";
+        else
+            var endpoint = moo_RestUrl+"moo-clover/v1/categories?expand=five_items";
+    }
+    jQuery.get(endpoint,
         function (data) {
             if(data) {
                 data.forEach(function(element) {
@@ -351,16 +364,6 @@ function osnRenderItems(contentItems,content){
                     if(typeof attr_categories !== 'undefined' && attr_categories !== undefined && attr_categories !== null && typeof attr_categories === 'object') {
                         if(attr_categories.indexOf(category.uuid.toUpperCase()) === -1){
                             return;
-                        }
-                    }
-                    if(typeof attr_includes !== 'undefined' && attr_includes !== undefined && attr_includes !== null && typeof attr_includes === 'object') {
-                        if(attr_includes.indexOf(category.uuid.toUpperCase()) === -1){
-                            continue;
-                        }
-                    }
-                    if(typeof attr_excludes !== 'undefined' && attr_excludes !== undefined && attr_excludes !== null && typeof attr_excludes === 'object') {
-                        if(attr_excludes.indexOf(category.uuid.toUpperCase()) !== -1){
-                            continue;
                         }
                     }
                     if(element.items.length > 0){
@@ -586,8 +589,15 @@ function GetItemsInCart(){
             html +='<span class="product-quantity-wrapper"><span class="product-quantity-times">x</span>'+item.qty+'</span>';
             html +='<a href="#" onclick="osnQuantityItemCart(this,event)" data-op="increment" data-qty="'+item.qty+'" data-item="'+index+'" class="product-quantity">+</a>';
             html += '</div>';
-            html += '<div class="osnCartEditButton osnCartEditBtn" onclick="osnUpdateSpecialInsinCart(\''+index+'\',\''+item.special_ins+'\')"><i class="icon-pencil"></i></div>';
-            if(item.modifiers.length > 0) html += '<div class="osnCartEditButton osnCartModifiersBtn" onclick="osnUpdateModifier(\''+index+'\')"><i class="icon-cog"></i></div>';
+
+            if(! window.moo_theme_setings
+                || ! window.moo_theme_setings.oTheme_allowspecialinstructionforitems
+                ||  window.moo_theme_setings.oTheme_allowspecialinstructionforitems === "on" ) {
+                html += '<div class="osnCartEditButton osnCartEditBtn" onclick="osnUpdateSpecialInsinCart(\''+index+'\',\''+item.special_ins+'\')"><i class="icon-pencil"></i></div>';
+            }
+            if(item.modifiers.length > 0) {
+                html += '<div class="osnCartEditButton osnCartModifiersBtn" onclick="osnUpdateModifier(\''+index+'\')"><i class="icon-cog"></i></div>';
+            }
             html += '<div class="osnCartEditButton osnCartDeleteBtn" data-item="'+index+'" onclick="osnOnDeletFromCart(this)"><i  class="icon-cancel"></i></div>';
             html += '</div>';
             priceItem = 0;
@@ -629,11 +639,12 @@ function osnClickEditBtnCart(){
     osnItemsInCartEditButtons =jQuery('#osnCartItems').find('.osnCartEditButton');
     osnItemsInCart = jQuery('#osnCartItems').find('.itemInCart');
     if(osnItemsInCartEditButtons.hasClass('bounce')){
-    osnItemsInCartEditButtons.removeClass('bounce');
-    osnItemsInCart.removeClass('addSpacing');}
-    else{
-    osnItemsInCartEditButtons.addClass('bounce');
-    osnItemsInCart.addClass('addSpacing');}
+        osnItemsInCartEditButtons.removeClass('bounce');
+        osnItemsInCart.removeClass('addSpacing');
+    } else {
+        osnItemsInCartEditButtons.addClass('bounce');
+        osnItemsInCart.addClass('addSpacing');
+    }
 }
 function osnOnDeletFromCart(el){
     //send delete query to server
@@ -819,9 +830,10 @@ function osnItemModalModifier(item_uuid,index) {
             osnItemQty = osnCart.items[index].qty;
             osn_Item_Modifers.forEach( group => {
                 group.modifiers.forEach( modifier => {
-                    if(uuids.includes(modifier.uuid)){
+                    if(uuids.indexOf(modifier.uuid)){
                         OsnSelectModifier(group.uuid,modifier.uuid);
                         let modifierQty = osnCart.items[index].modifiers.find(function  (value){ return value.uuid === modifier.uuid}).qty;
+                        //let modifierQty = osnCart.items[index].modifiers.find(function  (value){ return value.uuid === modifier.uuid}).qty;
                         if(modifierQty > 1) {
                             modifier['qty'] = modifierQty;
                             if(group['qty'])

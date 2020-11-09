@@ -60,6 +60,9 @@
     {
         height: 60px;
     }
+    #moo_OnlineStoreContainer #moo-checkout #moo-checkout-form .moo-checkout-cart {
+        padding: 0;
+    }
 }
 @media only screen and (min-width: 768px) {
     #moo_cart{
@@ -90,6 +93,9 @@
         padding-top: 15px;
         margin: 0 auto;
         padding-bottom: 10px;
+    }
+    #moo_OnlineStoreContainer #moo-checkout #moo-checkout-form .moo-checkout-cart {
+        padding-left: 10px;
     }
 
 }
@@ -285,7 +291,7 @@ select
     display: none;
     text-align: center;
 }
-#moo_cashPanel,#moo_creditCardPanel
+#moo_cashPanel,#moo_creditCardPanel,#moo-cloverCreditCardPanel
 {
     padding-top: 25px;
     display: none;
@@ -513,7 +519,7 @@ select
     padding: 10px;
 }
 .MooSimplButon:hover {
-     background: hsl(var(--theme-button--bg-interactive));
+     background: #f17e0a;
      color : #ffffff;
      box-shadow:none;
      -moz-box-shadow:none;
@@ -523,7 +529,7 @@ select
 }
 #mooButonLogin,#mooButonAddAddress,#mooButonResetPasswrod,#mooButonLoginAsGuest,#mooButonConfirmAddress
 {
-    background: hsl(var(--theme-button--bg));
+    background: #4773aa;
     padding: 8px 15px 8px 15px;
     border: none;
     color: #fff;
@@ -532,7 +538,7 @@ select
 }
 #mooButonChangeAddress
 {
-    background: hsl(var(--theme-button--bg));
+    background: #2ca3aa;
     padding: 8px 15px 8px 15px;
     border: none;
     color: #fff;
@@ -542,7 +548,7 @@ select
 
 }
 #mooButonLogin:hover,#mooButonAddAddress:hover,#mooButonChangeAddress:hover,#mooButonResetPasswrod:hover,#mooButonLoginAsGuest:hover,#mooButonConfirmAddress:hover {
-     background: hsl(var(--theme-button--bg));
+     background: #4691A4;
      box-shadow:none;
      -moz-box-shadow:none;
      -webkit-box-shadow:none;
@@ -639,6 +645,7 @@ select
     margin-bottom: 10px;
     background-color: rgba(238, 238, 238, 0.46);
     border: solid 1px #ccc;
+    color: black;
 }
 .moo_chekout_border_bottom
 {
@@ -868,32 +875,32 @@ fieldset[disabled] .moo-btn-default.focus {
     border-color: #cccccc;
 }
 .moo-btn-default .badge {
-    color: hsl(var(--color-white));
-    background-color: hsl(var(--theme-button--bg));
+    color: #ffffff;
+    background-color: #333333;
 }
-.moo-btn-primary {
-    color: hsl(var(--color-white));
-    background-color: hsl(var(--theme-button--bg));
-    border-color: hsl(var(--theme-button--bg));
+.moo_OnlineStoreContainer #moo_checkout_msg, .moo-btn-primary {
+    color: #ffffff;
+    background-color: #3b5998;
+    border-color: #2e6da4;
     text-decoration: none !important;
 }
 .moo-btn-primary:focus,
 .moo-btn-primary.focus {
-    color: hsl(var(--color-white));
-    background-color: hsl(var(--theme-button--bg));
-    border-color: hsl(var(--theme-button--bg)) ;
+    color: #ffffff;
+    background-color: #286090;
+    border-color: #122b40 ;
 }
 .moo-btn-primary:hover {
-    color: hsl(var(--color-white));
-    background-color: hsl(var(--theme-button--bg));
-    border-color: hsl(var(--theme-button--bg));
+    color: #ffffff;
+    background-color: #286090;
+    border-color: #204d74;
 }
 .moo-btn-primary:active,
 .moo-btn-primary.active,
 .open > .dropdown-toggle.moo-btn-primary {
-    color: hsl(var(--color-white));
-    background-color: hsl(var(--theme-button--bg));
-    border-color: hsl(var(--theme-button--bg));
+    color: #ffffff;
+    background-color: #286090;
+    border-color: #204d74;
 }
 .moo-btn-primary:active:hover,
 .moo-btn-primary.active:hover,
@@ -904,9 +911,9 @@ fieldset[disabled] .moo-btn-default.focus {
 .moo-btn-primary:active.focus,
 .moo-btn-primary.active.focus,
 .open > .dropdown-toggle.moo-btn-primary.focus {
-    color: hsl(var(--color-white));
-    background-color: hsl(var(--theme-button--bg));
-    border-color: hsl(var(--theme-button--bg));
+    color: #ffffff;
+    background-color: #204d74;
+    border-color: #122b40;
 }
 .moo-btn-primary:active,
 .moo-btn-primary.active,
@@ -922,33 +929,33 @@ fieldset[disabled] .moo-btn-primary:focus,
 .moo-btn-primary.disabled.focus,
 .moo-btn-primary[disabled].focus,
 fieldset[disabled] .moo-btn-primary.focus {
-    background-color: hsl(var(--theme-button--bg));
-    border-color: hsl(var(--theme-button--bg));
+    background-color: #337ab7;
+    border-color: #2e6da4;
 }
 .moo-btn-primary .badge {
-    color: hsl(var(--theme-button--bg));
-    background-color: hsl(var(--color-white));
+    color: #337ab7;
+    background-color: #ffffff;
 }
 .moo-btn-success {
-    color: hsl(var(--color-white));
+    color: #ffffff;
     background-color: #5cb85c;
     border-color: #4cae4c;
 }
 .moo-btn-success:focus,
 .moo-btn-success.focus {
-    color: hsl(var(--color-white));
+    color: #ffffff;
     background-color: #449d44;
     border-color: #255625;
 }
 .moo-btn-success:hover {
-    color: hsl(var(--color-white));
+    color: #ffffff;
     background-color: #449d44;
     border-color: #398439;
 }
 .moo-btn-success:active,
 .moo-btn-success.active,
 .open > .dropdown-toggle.moo-btn-success {
-    color: hsl(var(--color-white));
+    color: #ffffff;
     background-color: #449d44;
     border-color: #398439;
 }
@@ -961,7 +968,7 @@ fieldset[disabled] .moo-btn-primary.focus {
 .moo-btn-success:active.focus,
 .moo-btn-success.active.focus,
 .open > .dropdown-toggle.moo-btn-success.focus {
-    color: hsl(var(--color-white));
+    color: #ffffff;
     background-color: #398439;
     border-color: #255625;
 }
@@ -987,27 +994,27 @@ fieldset[disabled] .moo-btn-success.focus {
     background-color: #ffffff;
 }
 .moo-btn-info {
-    color: hsl(var(--color-white));
-    background-color: hsl(var(--theme-button--bg));
-    border-color: hsl(var(--theme-button--bg));
+    color: #ffffff;
+    background-color: #5bc0de;
+    border-color: #46b8da;
 }
 .moo-btn-info:focus,
 .moo-btn-info.focus {
-    color: hsl(var(--color-white));
-    background-color: hsl(var(--theme-button--bg));
-    border-color: hsl(var(--theme-button--bg));
+    color: #ffffff;
+    background-color: #31b0d5;
+    border-color: #1b6d85;
 }
 .moo-btn-info:hover {
-    color: hsl(var(--color-white));
-    background-color: hsl(var(--theme-button--bg));
-    border-color: hsl(var(--theme-button--bg));
+    color: #ffffff;
+    background-color: #31b0d5;
+    border-color: #269abc;
 }
 .moo-btn-info:active,
 .moo-btn-info.active,
 .open > .dropdown-toggle.moo-btn-info {
-    color: hsl(var(--color-white));
-    background-color: hsl(var(--theme-button--bg));
-    border-color: hsl(var(--theme-button--bg));
+    color: #ffffff;
+    background-color: #31b0d5;
+    border-color: #269abc;
 }
 .moo-btn-info:active:hover,
 .moo-btn-info.active:hover,
@@ -1018,9 +1025,9 @@ fieldset[disabled] .moo-btn-success.focus {
 .moo-btn-info:active.focus,
 .moo-btn-info.active.focus,
 .open > .dropdown-toggle.moo-btn-info.focus {
-    color: hsl(var(--color-white));
-    background-color: hsl(var(--theme-button--bg));
-    border-color: hsl(var(--theme-button--bg));
+    color: #ffffff;
+    background-color: #269abc;
+    border-color: #1b6d85;
 }
 .moo-btn-info:active,
 .moo-btn-info.active,
@@ -1036,33 +1043,33 @@ fieldset[disabled] .moo-btn-info:focus,
 .moo-btn-info.disabled.focus,
 .moo-btn-info[disabled].focus,
 fieldset[disabled] .moo-btn-info.focus {
-    background-color: hsl(var(--theme-button--bg));
-    border-color: hsl(var(--theme-button--bg));
+    background-color: #5bc0de;
+    border-color: #46b8da;
 }
 .moo-btn-info .badge {
-    color: hsl(var(--theme-button--bg));
+    color: #5bc0de;
     background-color: #ffffff;
 }
 .moo-btn-warning {
-    color: hsl(var(--color-white));
+    color: #ffffff;
     background-color: #f0ad4e;
     border-color: #eea236;
 }
 .moo-btn-warning:focus,
 .moo-btn-warning.focus {
-    color: hsl(var(--color-white));
+    color: #ffffff;
     background-color: #ec971f;
     border-color: #985f0d;
 }
 .moo-btn-warning:hover {
-    color: hsl(var(--color-white));
+    color: #ffffff;
     background-color: #ec971f;
     border-color: #d58512;
 }
 .moo-btn-warning:active,
 .moo-btn-warning.active,
 .open > .dropdown-toggle.moo-btn-warning {
-    color: hsl(var(--color-white));
+    color: #ffffff;
     background-color: #ec971f;
     border-color: #d58512;
 }
@@ -1075,7 +1082,7 @@ fieldset[disabled] .moo-btn-info.focus {
 .moo-btn-warning:active.focus,
 .moo-btn-warning.active.focus,
 .open > .dropdown-toggle.moo-btn-warning.focus {
-    color: hsl(var(--color-white));
+    color: #ffffff;
     background-color: #d58512;
     border-color: #985f0d;
 }
@@ -1101,25 +1108,25 @@ fieldset[disabled] .moo-btn-warning.focus {
     background-color: #ffffff;
 }
 .moo-btn-danger {
-    color: hsl(var(--color-white));
+    color: #ffffff;
     background-color: #e31c3d;
     border-color: #e31c3d;
 }
 .moo-btn-danger:focus,
 .moo-btn-danger.focus {
-    color: hsl(var(--color-white));
+    color: #ffffff;
     background-color: #c9302c;
     border-color: #761c19;
 }
 .moo-btn-danger:hover {
-    color: hsl(var(--color-white));
+    color: #ffffff;
     background-color: #c9302c;
     border-color: #ac2925;
 }
 .moo-btn-danger:active,
 .moo-btn-danger.active,
 .open > .dropdown-toggle.moo-btn-danger {
-    color: hsl(var(--color-white));
+    color: #ffffff;
     background-color: #c9302c;
     border-color: #ac2925;
 }
@@ -1132,7 +1139,7 @@ fieldset[disabled] .moo-btn-warning.focus {
 .moo-btn-danger:active.focus,
 .moo-btn-danger.active.focus,
 .open > .dropdown-toggle.moo-btn-danger.focus {
-    color: hsl(var(--color-white));
+    color: #ffffff;
     background-color: #ac2925;
     border-color: #761c19;
 }
@@ -1295,6 +1302,9 @@ input[type="button"].moo-btn-block {
 #moo-checkout .moo-form-control::-webkit-input-placeholder {
     color: #999999;
 }
+#moo-checkout .moo-form-control option {
+    padding: 6px 12px;
+}
 #moo-checkout .moo-form-group {
     margin-bottom: 15px;
 }
@@ -1423,4 +1433,27 @@ input[type="button"].moo-btn-block {
 }
 .swal2-popup .swal2-actions .moo-green-background {
     background-color: green;
+}
+#moo_OnlineStoreContainer #moo-checkout #moo-checkout-form {
+    padding: 0;
+}
+#moo_OnlineStoreContainer #moo-checkout #moo-checkout-form #moo-checkout-form-orderdate {
+    display: none;
+}
+/*
+Clover checkout payment form css
+ */
+#moo-checkout-form-payments #moo-cloverCreditCardPanel .card-number-error .clover-error,
+#moo-checkout-form-payments #moo-cloverCreditCardPanel .date-error .clover-error,
+#moo-checkout-form-payments #moo-cloverCreditCardPanel .cvv-error .clover-error,
+#moo-checkout-form-payments #moo-cloverCreditCardPanel .zip-error .clover-error{
+    color: red;
+    font-weight: bold;
+}
+
+#moo-checkout-form .moo-checkout-form-leftside #moo-checkout-form-payments #moo-cloverCreditCardPanel #moo_CloverCardZip,
+#moo-checkout-form .moo-checkout-form-leftside #moo-checkout-form-payments #moo-cloverCreditCardPanel #moo_CloverCardDate,
+#moo-checkout-form .moo-checkout-form-leftside #moo-checkout-form-payments #moo-cloverCreditCardPanel #moo_CloverCardCvv,
+#moo-checkout-form .moo-checkout-form-leftside #moo-checkout-form-payments #moo-cloverCreditCardPanel #moo_CloverCardNumber{
+    height: 45px;
 }
