@@ -1,4 +1,4 @@
-﻿=== Smart Online Order for Clover ===
+﻿# Smart Online Order for Clover
 Contributors: Zaytech
 Donate link: http://www.zaytechapps.com/
 Tags: clover,online orders for clover,zaytech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
@@ -11,7 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Smart Online Order for Clover allows you to receive orders from your Wordpress website and have it sent directly to your Clover POS.
 
-== Description ==
+## Description
 
 With **Smart Online Order for Clover** you can easily integrate and import your Clover inventory to show on your website in real-time. This will allow you to accept Online Orders from your website.
 
@@ -23,7 +23,7 @@ All orders can either automatically print or you can have the orders manually pr
 
 It’s also easy to do it yourself, if you get stuck, there are step by step instructions on You Tube – Search “Smart Online Order” on YouTube.
 
-= How it works =
+## How it works
 
 After installing the Smart Online Order for Clover plugin, add the pages "Order Online", "Checkout" and "My Orders" by going to Appearance then Menu from the Wordpress Dashboard. Then sync your website with your Clover POS using “Import inventory”.
 
@@ -44,39 +44,60 @@ If you don’t have any kind of website and don’t know where to start give us 
 Below are just a few websites currently using Smart Online Order with their Clover POS.
 
 [Burger Restaurant](https://chicknchuck.com/)
+
 [Full Service Restaurant](https://www.theoriginalturkey.com)
+
 [Island Smoothie Cafe](https://www.islandsmoothiecafe.com)
+
 [HarissaToGo](https://HarissaToGo.com)
+
 [Pizza shop Example 1](https://pomodoropizzafl.com)
+
 [Pizza shop Example 2](http://www.fastpizzaonline.com)
+
 [Pizza shop Example 3](https://www.zifaros.com)
+
 [Oasis Grill ](https://oasisgrill.com)
+
 [Cake Shop](https://nolandscakes.com)
+
 [Multi locations example](http://oak2go.com/)
+
 [Breadologie bakery](https://breadologie.smartonlineorder.com/)
+
 [Pizza Shop Example 4](https://villaromarestaurant.net)
+
 [Pizza Shop Example 5](https://venuspizzeriafl.com)
+
 [Pizza Shop Example 6](https://www.tonyspizzaandgrinders.com)
+
 [Coffee Shop Example 2](https://www.teabocoffee.com)
+
 [Another Cafe Example](https://misskellyscafe.com)
+
 [Poke Food Example](https://www.bigfinpoke.com)
+
 [Indian Food Example](https://www.himalayanfusiononline.com)
+
 [Cookie Store Example](https://rucookiemunchers.com/)
+
 [Oakwells](http://oakwells.com/)
+
 [Minami](https://minamisushi.com/)
+
 [Connections cafe & catering](https://connectionscafecatering.com/)
 
 Some websites we built, other websites were built by the merchant themselves or developers they hired.
 
-== Installation ==
+## Installation
 
 Here is what you need to do:
 
 1. Install the app by Zaytech called “[Smart Online Order + Wordpress](https://www.clover.com/appmarket/apps/6MWGRRXJD5HMW?clientCountry=US )” to your Clover POS - Clover Station, Clover Mini, etc.
-1. Install this Plugin - From Wordpress Plugin - search "Clover" or "Smart Online Order"
-1. Enter the Api-Key in the Smart Online Order Plugin in Wordpress. The Api Key is found by going to Clover.com and opening Smart Online Order-Wordpress
-1. Then enter Api Key and press save. Import Your Inventory by pressing import inventory in the Smart Online Order Wordpress Plugin - You can also Search Youtube for "Smart Online Order" for tutorials
-1. A new page is automatically created for you. Just put /store after your domain name to see the Online Order page. For example: If your website name is mysushi.com enter mysushi.com/store to see the online order page
+2. Install this Plugin - From Wordpress Plugin - search "Clover" or "Smart Online Order"
+3. Enter the Api-Key in the Smart Online Order Plugin in Wordpress. The Api Key is found by going to Clover.com and opening Smart Online Order-Wordpress
+4. Then enter Api Key and press save. Import Your Inventory by pressing import inventory in the Smart Online Order Wordpress Plugin - You can also Search Youtube for "Smart Online Order" for tutorials
+5. A new page is automatically created for you. Just put /store after your domain name to see the Online Order page. For example: If your website name is mysushi.com enter mysushi.com/store to see the online order page
 
 
 You can also add your menu in a new post/page or an existing one using this shortcode
@@ -112,11 +133,11 @@ And to add only "add to cart button" useful if you want create new sections like
 
 `[moo_buy_button id='6PJNZJVEHF0XE']`
 
-= VIDEO =
+## VIDEO
 
 Search Youtube "Smart Online Order" for Tutorial Videos
 
-== Frequently Asked Questions ==
+## Frequently Asked Questions
 
 = What is a Clover POS =
 
@@ -142,7 +163,7 @@ No, this plug-in is not by Clover. It is from Zaytech. Both this plug-in and Sma
 
 Please let us know so we can implement additional features.support@zaytech.com
 
-== Changelog ==
+## Changelog
 
 = 1.4.4 =
 * Updated payment options
