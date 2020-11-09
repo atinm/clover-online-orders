@@ -41,7 +41,12 @@ if you don’t have a Wordpress website so we can create for you the Online Orde
 
 If you don’t have any kind of website and don’t know where to start give us a call or send us an email as we can make you a website with Online Ordering.
 
+
+
+## Other Examples
 Below are just a few websites currently using Smart Online Order with their Clover POS.
+
+[Vegan Mob - Oakland CA](https://veganmob.com/store/)
 
 [Burger Restaurant](https://chicknchuck.com/)
 
@@ -87,14 +92,15 @@ Below are just a few websites currently using Smart Online Order with their Clov
 
 [Connections cafe & catering](https://connectionscafecatering.com/)
 
+
 Some websites we built, other websites were built by the merchant themselves or developers they hired.
 
 ## Installation
 
 Here is what you need to do:
 
-1. Install the app by Zaytech called “[Smart Online Order + Wordpress](https://www.clover.com/appmarket/apps/6MWGRRXJD5HMW?clientCountry=US )” to your Clover POS - Clover Station, Clover Mini, etc.
-2. Install this Plugin - From Wordpress Plugin - search "Clover" or "Smart Online Order"
+1. Clone this repository on a local machine.
+2. Install this Plugin - Upload via FTP/File Editor into website /home/wp-content/plugins/ and add clover-online-orders
 3. Enter the Api-Key in the Smart Online Order Plugin in Wordpress. The Api Key is found by going to Clover.com and opening Smart Online Order-Wordpress
 4. Then enter Api Key and press save. Import Your Inventory by pressing import inventory in the Smart Online Order Wordpress Plugin - You can also Search Youtube for "Smart Online Order" for tutorials
 5. A new page is automatically created for you. Just put /store after your domain name to see the Online Order page. For example: If your website name is mysushi.com enter mysushi.com/store to see the online order page
@@ -164,6 +170,17 @@ No, this plug-in is not by Clover. It is from Zaytech. Both this plug-in and Sma
 Please let us know so we can implement additional features.support@zaytech.com
 
 ## Changelog
+
+= 1.4.5
+* Added verbose alerts to OnePage Theme to store/product page & checkout page
+* New Tip Calculator Style on OnePage Theme
+* Added Gift Card Option (Pay in store) labeling.
+* Updated checkout and add-to-cart screen styling.
+* Add lead time estimate to confirmation screen.
+An example of the updated with screenshots.
+![Vegan Mob Store](https://veganmob.biz/wp-content/uploads/2020/11/clover-online-order-store.jpg)
+![Vegan Mob Checkout](https://veganmob.biz/wp-content/uploads/2020/11/clover-online-order-checkout-1.jpg)
+![Vegan Mob Confirmation Screen](https://veganmob.biz/wp-content/uploads/2020/11/clover-online-order-confirmation.jpg)
 
 = 1.4.4 =
 * Updated payment options
@@ -340,6 +357,7 @@ Please let us know so we can implement additional features.support@zaytech.com
 * Improved delivery fee calculation
 * Improved layout so more description can be added
 * Fixed various bugs and made improvements
+
 = 1.2.4 =
 * Improved process to make adding descriptions easier
 * Ability to rearrange items
@@ -351,6 +369,7 @@ Please let us know so we can implement additional features.support@zaytech.com
 * Added the short-code [moo_all _items category='uuid'] for store interface 1. This allows to place categories on different pages by using the short code. Also possible for store interface 2
 * Fixed partial payment issue
 * Fixed other bugs and made improvements
+
 = 1.2.3 =
 * Improved and increased font size for required modifier
 * Updated email receipts with more information
@@ -360,6 +379,7 @@ Please let us know so we can implement additional features.support@zaytech.com
 = 1.2.2 =
 * Ability to rearrange modifiers & modifiers group
 * Ability to change modifiers names
+
 = 1.2.1 =
 * Prevent customer from ordering outside of business hours and days
 * Option to add image to any category
@@ -367,11 +387,13 @@ Please let us know so we can implement additional features.support@zaytech.com
 * Added multiple images for item
 * Improved order later
 * Improved manually sync
+
 = 1.2.0 =
 * Added Out of stock feature
 * Improved checkout feature
 * New design for plugin's dashboard
 * Improved the exiting styles
+
 = 1.1.9 =
 * Added Order for later
 * Added SMS notification for merchants and customers
@@ -379,34 +401,43 @@ Please let us know so we can implement additional features.support@zaytech.com
 * Pickup without paying
 * Manually Sync
 * Add to cart button
+
 = 1.1.7 =
 * Improved The CART CSS
 * remove qty limit
 * Removed Style 2
 * fixed empty map in checkout
+
 = 1.1.6 =
 * Added delivery area
 * Added tips
 * Added required modifiers
+
 = 1.1.4 =
 * Fixed Modifier issues
+
 = 1.1.3 =
 * Added image for products
 * Fixed more than one checkout page issue
 * The Cart in new page
 * Added order information in checkout page
+
 = 1.1.1 =
 * Display the items without category
 * Min and Max Modifier allowed in group modifier
+
 = 1.1.0 =
 * Fixed bulk show/hide items
 * Added show/hide category
 * Change category's name
+
 = 1.0.9 =
 * Fixed cart's color
 * Fixed the shortcode issue
+
 = 1.0.8 =
 * Added a video
+
 = 1.0.7 =
 = Added : =
 * Store's hours
@@ -417,17 +448,23 @@ Please let us know so we can implement additional features.support@zaytech.com
 = Fixed : =
 * Partially paid
 * Changing the quantify of an item in the cart
+
 = 1.0.6 =
 Fix issues
+
 = 1.0.5 =
 = Added : =
 * Change name of Modifier group
 * Show/hide Modifier group
 = 1.0.4 =
+
 Fix issues
+
 = 1.0.2 =
 Change the UI for Modifiers
+
 = 1.0.1 =
 Update Frequently Asked Questions
+
 = 1.0.0 =
 First Release
