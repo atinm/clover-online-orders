@@ -16,7 +16,7 @@
  * Plugin Name:       Smart Online Order for Clover
  * Plugin URI:        http://www.zaytechapps.com
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.4.4
+ * Version:           1.4.5
  * Author:            Zaytech
  * Author URI:        http://www.zaytechapps.com
  * License:           Clover app
