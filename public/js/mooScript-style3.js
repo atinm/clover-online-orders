@@ -261,7 +261,7 @@ function moo_buildOneCategoryHtmlLine(cat)
     if(cat.available === false ){
         html +='<div class="moo-panel-heading" id="moo_category_'+cat.uuid+'">';
         html +='<div class="moo-row">';
-        html +='<div class="moo-panel-title moo-col-md-9 moo-col-sm-9 moo-col-xs-8">'+cat.name+'  (Not Available Yet)</div>';
+        html +='<div class="moo-panel-title moo-col-md-9 moo-col-sm-9 moo-col-xs-8">'+cat.name+'</div>';
         html +='<div class="moo-col-md-3 moo-col-sm-3 moo-col-xs-4 moo-text-right">';
         html +='</div></div></div>';
         html +='</div>';

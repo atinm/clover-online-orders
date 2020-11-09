@@ -1,7 +1,6 @@
 jQuery( function( $ ) {
     'use strict';
     if(moo_clover_payment_form && moo_clover_payment_form === "on" && moo_clover_key) {
-
         try {
             window.clover = new Clover( moo_clover_key );
             var elements = window.clover.elements();
@@ -9,7 +8,6 @@ jQuery( function( $ ) {
             window.cloverCardErrorMsg = "";
 
         } catch( error ) {
-            console.log( error );
             return;
         }
 
@@ -200,20 +198,37 @@ jQuery( function( $ ) {
 
         $( document ).ready(function() {
             window.moo_clover_gateway.init();
-            moo_tips_select_changed();
-            //If there is only one order type select it
-            if(moo_OrderTypes.length === 1){
-                jQuery("#moo-checkout-form-ordertypes-"+moo_OrderTypes[0].ot_uuid).iCheck('check');
-                moo_OrderTypeChanged(moo_OrderTypes[0].ot_uuid);
-            } else {
-                if(moo_OrderTypes.length === 0){
-                    jQuery("#moo-checkout-form-orderdate").show();
-                    allowScOrders = true;
-                }
-            }
+            moo_tips_select_changed('#cash-tip');
         });
-    }
+    } 
+    //UPGRADE IT START
+    $( document ).ready(function() {
 
+        var paymentType = jQuery('input[name="payments"]:checked').val();
+        if(paymentType == '' || paymentType == undefined) {
+            var cloverPayment = jQuery('#moo-checkout-form-payments-clover');
+            var creditcardPayment = jQuery('#moo-checkout-form-payments-creditcard');
+            if(cloverPayment["0"] != '' && cloverPayment["0"] != undefined) {
+                cloverPayment.iCheck('check');
+                moo_changePaymentMethod('clover');
+            }else if(creditcardPayment["0"] != '' && creditcardPayment["0"] != undefined){
+                creditcardPayment.iCheck('check');
+                moo_changePaymentMethod('creditcard');
+            }
+
+        }
+        //If there is only one order type select it
+        if(moo_OrderTypes.length === 1){
+            jQuery("#moo-checkout-form-ordertypes-"+moo_OrderTypes[0].ot_uuid).iCheck('check');
+            moo_OrderTypeChanged(moo_OrderTypes[0].ot_uuid);
+        } else {
+            if(moo_OrderTypes.length === 0){
+                jQuery("#moo-checkout-form-orderdate").show();
+                allowScOrders = true;
+            }
+        }
+    });
+    //UPGRADE IT END
 
     try {
 
@@ -438,7 +453,7 @@ function moo_OrderTypeChanged(OrderTypeID)
                     else
                     {
                         jQuery("#moo-checkout-form-payments-cash").parent().parent().show();
-                        jQuery("#moo-checkout-form-payincash-label").text('Pay at location');
+                        jQuery("#moo-checkout-form-payincash-label").text('Pay by Gift Card');
                     }
                 }
 
@@ -477,14 +492,14 @@ function moo_OrderTypeChanged(OrderTypeID)
     }
 }
 
-function  moo_tips_select_changed() {
-    var tips_select_percent = jQuery('#moo_tips_select').val();
+function  moo_tips_select_changed(elem) {
+    var tips_select_percent = jQuery(elem).val();
     if(tips_select_percent != "cash" && tips_select_percent != 'other'){
         jQuery('#moo_tips').val((moo_Total.sub_total*tips_select_percent/100).toFixed(2))
     }
     else
         if(tips_select_percent == "cash")
-            jQuery('#moo_tips').val(0);
+            jQuery('#moo_tips').val("0.00");
         else
             jQuery('#moo_tips').select();
 
@@ -632,8 +647,8 @@ function moo_changePaymentMethod(type)
         jQuery('#MooTipsInTotalsSection').hide();
         jQuery('#moo-checkout-form-savecard').hide();
         if(document.getElementById('moo_tips') != null) {
-            jQuery('#moo_tips_select').val('cash');
-            jQuery('#moo_tips').val('0');
+            jQuery('#cash-tip').val('cash');
+            jQuery('#moo_tips').val('0.00');
         }
         if(MooCustomer != null) {
             if(MooCustomer[0].phone_verified == '0')
@@ -713,8 +728,15 @@ function moo_pickup_day_changed(element)
 
     if(!(typeof times === 'undefined'))
     {
-        for(i in times)
-            html += '<option value="'+times[i]+'">'+times[i]+'</option>'
+        // UPGRADE IT CHANGE TO SELECT ONE TIME
+        let i = 1;
+        
+        html += '<option value="'+times[i]+'">'+times[i]+'</option>';
+        // for(i in times)
+        //     if(times[i] == 'Select a time')
+        //         html += '<option value="'+times[i]+'">Select Time</option>';
+        //     else 
+        //         html += '<option value="'+times[i]+'">'+i+'-'+times[i]+'</option>';
     }
     else
         html = '';
@@ -730,25 +752,35 @@ function moo_ChangeOrderDate(type)
 
     if(type == 'pickup' )
     {
+        var nextAvailDay = ''
         if(!moo_pickup_time){
             return;
         }
-        var first = true;
-        for(var i in moo_pickup_time)
-        {
-            if(first) {
-                theDay = i;
-                first = false;
-            }
-            html_days += '<option value="'+i+'">'+i+'</option>';
-        }
-        var times = moo_pickup_time[theDay];
+        // console.log(moo_pickup_time)
+        //UPGRADE IT EDIT
+        nextAvailDay = Object.keys(moo_pickup_time)[0];
+        html_days = '<option value="'+nextAvailDay+'">'+nextAvailDay+'</option>';
+        var times = moo_pickup_time[nextAvailDay];
+        // console.log(times)
+        // console.log(i,times,html_days);
+        // var first = true;
+        // for(var i in moo_pickup_time)
+        // {
+        //     if(first) {
+        //         theDay = i;
+        //         first = false;
+        //     }
+        //     html_days += '<option value="'+i+'">'+i+'</option>';
+        // }
+        // var times = moo_pickup_time[theDay];
+        // UPGRADE IT EDIT END
 
     } else {
         if(!moo_pickup_time_for_delivery){
             return;
         }
         var first = true;
+        console.log( moo_pickup_time_for_delivery)
         for(var i in moo_pickup_time_for_delivery)
         {
             if(first)
@@ -764,8 +796,45 @@ function moo_ChangeOrderDate(type)
 
     if(!(typeof times === 'undefined'))
     {
-        for(i in times)
-            html_hours += '<option value="'+times[i]+'">'+times[i]+'</option>'
+        //UPGRADTE IT EDIT
+        let i = 1;
+        var timer = "ASAP"
+        var updatedTimeVal = times[i]
+        if(nextAvailDay != 'Today'){
+            timer = times[i];
+        }
+        //If before 11:30AM then dont allow selection
+        var targetDate = new Date();
+        targetDate.setHours(11,30,0,0)
+        for (var t = 0;t< times.length;t++){
+            var hour = 0
+            var min = 0
+            if(times[t].includes('pm')){
+                var tmp = times[t].replace('pm','')
+                hour = parseInt(tmp.split(":")[0])
+                if(hour - 12 !== 0){
+                    hour += 12
+                }
+                min = parseInt(tmp.split(":")[1])
+            } else if(times[t] !== "Select a time"){
+                var tmp = times[t].replace('am','')
+                hour = parseInt(tmp.split(":")[0])
+                min = parseInt(tmp.split(":")[1])
+            }
+            var thisDate = new Date();
+            thisDate.setHours(hour, min, 0, 0);
+            // console.log(hour,min,thisDate)
+            if(thisDate>=targetDate){
+                timer = times[t];
+                updatedTimeVal = times[t]
+                break;
+            }
+        }
+        // console.log(timer)
+        html_hours += '<option value="'+updatedTimeVal+'">'+timer+'</option>';
+        // for(i in times)
+        //     html_hours += '<option value="'+times[i]+'">'+times[i]+'</option>'
+        //UPGRADE IT EDIT END
     }
     else
         html_hours = '';
@@ -779,16 +848,38 @@ function moo_order_approved(orderId)
     if(moo_thanks_page != '' && moo_thanks_page != null ) {
         window.location.href = moo_thanks_page+'?order_id='+orderId;
     } else {
-        if(orderId == '')
-            html = '<div align="center" class="moo-alert moo-alert-success" role="alert" style="font-size: 20px;">Thank you for your order<br/>Your order is being prepared</div>';
-        else
-            html = '<div align="center" class="moo-alert moo-alert-success" role="alert"  style="font-size: 20px;" >Thank you for your order<br/>Your order is being prepared<br> You can see your receipt <a href="https://www.clover.com/r/'+orderId+'" target="_blank">here</a></a> </div>';
-
-        // console.log(html);
-        jQuery("#moo-checkout").html('');
-        if(moo_merchantAddress !== "") {
-            jQuery("#moo-checkout").parent().prepend("<div style='text-align: center'><p style='font-size: 21px;'>Our Address : </p>"+moo_merchantAddress+"</div>");
+        //UPGRADE IT START
+        var html = '<h1 align="center">THANK YOU!</h1><div align="center" class="moo-alert moo-alert-success" role="alert"  style="font-size: 20px;" >';
+        if(jQuery('#MooContactName') !== undefined && jQuery('#MooContactName') != ""){
+            let namer = jQuery('#MooContactName').val();
+            html += '<p style="text-transform:uppercase;font-size:25px;">'+namer+'</p>';
+        } 
+        let readyDate =  jQuery('#moo_pickup_day').val();
+        if(jQuery('#moo_pickup_hour') !== undefined && jQuery('#moo_pickup_hour') !== ''){
+            var readyTime =  jQuery('#moo_pickup_hour').val();
+            let leadTime = jQuery('#lead-time').text().split('-')[1];
+            if(!isNaN(leadTime) && readyDate == 'Today'){
+                var dt = new Date();
+                dt.setMinutes( dt.getMinutes() + (parseInt(leadTime)));
+                let dt_str = dt.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                if(dt_str !== undefined && dt_str != ''){
+                    readyTime = dt_str
+                } 
+            } 
+            html += "Your order will be ready by:<p style='font-size: 25px;'>" +readyTime+"</p> Please meet at the pickup window with your FIRST and LAST name. </div>";
+        } else if(readyDate !== 'Today') {
+            html += "Your order will be ready tomorrow <p style='font-size: 25px;'>11:30am</p> <br>Please meet at the pickup window with your FIRST and LAST name.</div>";
+        } else{
+            html += "Your order will be ready shortly! <br>Please meet at the pickup window with your FIRST and LAST name.</div>";
         }
+
+        if(moo_merchantAddress !== "") {
+            html += "<div style='text-align: center'><p style='font-size: 21px;padding-top:20px;'>Our Address : </p>"+moo_merchantAddress+"</div>";
+        }
+        if(orderId != '')
+            html += '<div align="center" style="padding-top:20px;">You can see your receipt <a href="https://www.clover.com/r/'+orderId+'" target="_blank">here</a></a> </div>';
+        // UPGRADE IT END
+        jQuery("#moo-checkout").html('');
         jQuery("#moo-checkout").parent().prepend(html);
         /*
         if(moo_merchantLat == "" || moo_merchantLng == "" || moo_merchantLat == null || moo_merchantLng == null) {
@@ -809,6 +900,7 @@ function moo_order_notApproved(message)
     //Hide Loading Icon and Show the button if there is an error
     jQuery('#moo_checkout_loading').hide();
     jQuery('#moo_btn_submit_order').show();
+    jQuery('#moo_btn_submit_order_cart').show();
     if(message && message !== '' && message !== undefined) {
         html = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>'+message+'</div>';
     } else {
@@ -1668,6 +1760,7 @@ function moo_SendForm(form)
 {
     jQuery('#moo_checkout_msg').remove();
     jQuery('#moo_btn_submit_order').hide();
+    jQuery('#moo_btn_submit_order_cart').hide();
     //Show loading Icon
     jQuery('#moo_checkout_loading').show();
 
@@ -1717,6 +1810,7 @@ function moo_get_form(callback)
     form.instructions           =  jQuery('#Mooinstructions').val();
     form.pickup_day             =  jQuery('#moo_pickup_day').val();
     form.pickup_hour            =  jQuery('#moo_pickup_hour').val();
+
 
     if(document.getElementById('moo-checkout-form-ordertypes'))
         form.ordertype  =  jQuery('input[name="ordertype"]:checked').val();
