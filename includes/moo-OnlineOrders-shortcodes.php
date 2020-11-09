@@ -1181,7 +1181,7 @@ class Moo_OnlineOrders_Shortcodes {
             if(isset($MooOptions["closing_msg"]) && $MooOptions["closing_msg"] !== '') {
                 $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$MooOptions["closing_msg"].'</div>';
             } else  {
-                $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">We are currently closed and will open again soon</div>';
+                $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">Online Orders are Temporarily Paused<br><br>In order to provide the best experience for our customers we\'re temporarily pausing online orders.<br>Please check back in 30-60 minutes.<br> </div>';
 
             }
             return '<div id="moo_OnlineStoreContainer" >'.$oppening_msg.'</div>';
@@ -1195,10 +1195,28 @@ class Moo_OnlineOrders_Shortcodes {
                 if($oppening_status->store_time == '')
                     $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on' && $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: #006b00'>Order in Advance Available</p>":"").'</div>';
                 else
-                    $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on'&& $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: #006b00'>Order in Advance Available</p>":"").'</div>';
+                    $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>'.(($MooOptions['hide_menu'] != 'on'&& $MooOptions['accept_orders_w_closed'] == 'on' )?"<p style='color: #006b00'>Order in Advance Available</p>":"").'</div>';
             }
 
+        } else {
+            // Upgrade IT Start
+            //If Open Display wait time
+            if(isset($MooOptions["order_later_minutes"])):
+                $leadTime = $MooOptions["order_later_minutes"];
+                if(is_numeric($leadTime)){
+                    $num = (int)$leadTime+15;
+                    $time_range = $leadTime.'-'.$num;
+                }
+                    ?>
+                <div class="moo-row">
+                    <div class="moo-alert moo-alert-success" role="alert" id="moo_checkout_msg">
+                        Please allow <?php echo $time_range; ?> minutes from order time till pickup.
+                    </div>
+                </div>
+            <?php endif; 
+            // ?upgrade it end 
         }
+        
 
         if(isset($MooOptions['hours']) && $MooOptions['hours'] != 'all' && $MooOptions['hide_menu'] == 'on' && $oppening_status->status == 'close') {
             return '<div id="moo_OnlineStoreContainer" >'.$oppening_msg.'</div>';
@@ -1615,6 +1633,7 @@ class Moo_OnlineOrders_Shortcodes {
                 <div class="moo-new-icon__count" id="moo-cartNbItems"><?php echo $nb_items_in_cart; ?></div>
                 <div class="moo-new-icon__cart"></div>
             </div>
+             
             <div class="moo-row">
                 <?php if(count($categories)==0) {
                     echo "<h3>You don't have any category please import your inventory</h3>";
