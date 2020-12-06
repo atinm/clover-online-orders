@@ -5,19 +5,25 @@ class Moo_OnlineOrders_CallAPI
 
     public $Token;
     public $url_api;
+    public $url_api_v2;
     public $hours_url_api;
     private $debugMode = false;
     private $isSandbox = false;
     private $session;
+    public $settings;
+    private $jwt_token;
 
     function __construct() {
-        $this->getApiKey();
         if ($this->isSandbox) {
             $this->url_api = "https://api-sandbox.smartonlineorders.com/";
+            $this->url_api_v2 = "https://api-v2.smartonlineorders.com/v2/";
         } else {
             $this->url_api = "https://api.smartonlineorders.com/";
+            $this->url_api_v2 = "https://api-v2.smartonlineorders.com/v2/";
         }
         $this->hours_url_api = "https://smh.smartonlineorder.com/v1/api/";
+
+        $this->getApiKey();
         $this->session = MOO_SESSION::instance();
 
     }
@@ -28,7 +34,64 @@ class Moo_OnlineOrders_CallAPI
         } else {
             $this->Token = '';
         }
+        if (isset($MooSettings['jwt_token'])) {
+            $this->jwt_token = $MooSettings['jwt_token'];
+        } else {
+            if($this->Token !== ""){
+                $this->getJwtToken();
+            } else {
+                $this->jwt_token = "";
+            }
+        }
+        $this->settings = $MooSettings;
+    }
+    public function getJwtToken(){
+        $mooSettings = (array)get_option("moo_settings");
+        $endPoint = $this->url_api_v2 . "auth/login";
+        $body = array(
+            'api_key' => $this->Token
+        );
+        $response = wp_remote_post( $endPoint, array(
+                'method'      => 'POST',
+                'timeout'     => 60,
+                'redirection' => 5,
+                'httpversion' => '1.0',
+                'blocking'    => true,
+                'headers'     => array(
+                    "Content-Type"=>"application/json"
+                ),
+                'body'        => json_encode($body),
+                'cookies'     => array()
+            )
+        );
 
+        if ( is_wp_error( $response ) ) {
+            $error_message = $response->get_error_message();
+            if($this->debugMode){
+                echo "Something went wrong: $error_message";
+            }
+        } else {
+            $http_code = wp_remote_retrieve_response_code( $response );
+            if( $http_code === 200 ) {
+                $responseContent =  json_decode(wp_remote_retrieve_body( $response ));
+                if(isset($responseContent->access_token)){
+                    $this->jwt_token =  $responseContent->access_token;
+                    $mooSetting["jwt-token"] =  $responseContent->access_token;
+                    update_option("moo_settings", $mooSettings);
+                }
+            } else {
+                if($this->debugMode){
+                    echo "Something went wrong when getting jwt-token: $http_code";
+                }
+            }
+        }
+        return null;
+    }
+    public function resetJwtToken(){
+        $mooSettings = (array)get_option("moo_settings");
+        $this->jwt_token = "";
+        $mooSetting["jwt-token"] =  "";
+        update_option("moo_settings", $mooSettings);
     }
 
     /*
@@ -36,8 +99,7 @@ class Moo_OnlineOrders_CallAPI
      * for example : getCategories get JSON object of categories from Clover POS and call the function save_categories
      * to save the this categories in Wordpress DB
      */
-    public function getCategories()
-    {
+    public function getCategories() {
         $res = $this->callApi("categories", $this->Token);
         if ($res) {
             $saved = $this->save_categories($res);
@@ -48,8 +110,7 @@ class Moo_OnlineOrders_CallAPI
 
     }
 
-    public function getItemGroups()
-    {
+    public function getItemGroups() {
         $res = $this->callApi("item_groups", $this->Token);
         if ($res) {
             $saved = $this->save_item_groups($res);
@@ -59,8 +120,7 @@ class Moo_OnlineOrders_CallAPI
         }
     }
 
-    public function getModifierGroups()
-    {
+    public function getModifierGroups() {
         $res = $this->callApi("modifier_groups", $this->Token);
         if ($res) {
             $saved = $this->save_modifier_groups($res);
@@ -70,8 +130,7 @@ class Moo_OnlineOrders_CallAPI
         }
     }
 
-    public function getOneModifierGroups($uuid)
-    {
+    public function getOneModifierGroups($uuid) {
         global $wpdb;
         $res = $this->callApi("modifier_groups/" . $uuid, $this->Token);
         $modifier_groups = json_decode($res);
@@ -92,8 +151,7 @@ class Moo_OnlineOrders_CallAPI
 
     }
 
-    public function getItems()
-    {
+    public function getItems() {
         $res = $this->callApi("items_expanded", $this->Token);
         if ($res) {
             $saved = $this->save_items($res);
@@ -103,8 +161,7 @@ class Moo_OnlineOrders_CallAPI
         }
     }
 
-    public function getModifiers()
-    {
+    public function getModifiers() {
         $res = json_decode($this->callApi("modifiers", $this->Token));
         if ($res) {
             $saved = $this->save_modifiers($res);
@@ -114,8 +171,7 @@ class Moo_OnlineOrders_CallAPI
         }
     }
 
-    public function getAttributes()
-    {
+    public function getAttributes() {
         $res = $this->callApi("attributes", $this->Token);
         if ($res) {
             $saved = $this->save_attributes($res);
@@ -182,6 +238,10 @@ class Moo_OnlineOrders_CallAPI
     {
         return $this->callApi("paykey", $this->Token);
     }
+    public function getPakmsKey()
+    {
+        return $this->callApi("pakms", $this->Token);
+    }
 
     //get themes
     public function getThemes()
@@ -229,9 +289,55 @@ class Moo_OnlineOrders_CallAPI
 
     }
 
-    public function getOpeningStatus($nb_days, $nb_minites)
-    {
+    public function getOpeningStatus($nb_days, $nb_minites) {
         return $this->callApi("is_open/" . intval($nb_days) . "/" . intval($nb_minites), $this->Token);
+    }
+
+    public function getBlackoutStatus($freshVersion  =  false){
+        $currentBo = get_transient( 'moo_blackout' );
+        if( ! empty( $currentBo ) && $currentBo !== false && $freshVersion === false) {
+            return $currentBo;
+        } else {
+            if(!$this->jwt_token){
+                $this->getJwtToken();
+            } else {
+                $endPoint = $this->url_api_v2 . "blackouts/status";
+                $response = wp_remote_get( $endPoint, array(
+                        'method'      => 'GET',
+                        'timeout'     => 60,
+                        'redirection' => 5,
+                        'httpversion' => '1.0',
+                        'blocking'    => true,
+                        'headers'     => array(
+                            "Content-Type"=>"application/json",
+                            "Authorization"=>"Bearer " . $this->jwt_token
+                        ),
+                        'cookies'     => array()
+                    )
+                );
+                if ( is_wp_error( $response ) ) {
+                    $error_message = $response->get_error_message();
+                    if($this->debugMode){
+                        echo "Something went wrong: $error_message";
+                    }
+                } else {
+                    $http_code = wp_remote_retrieve_response_code( $response );
+                    if( $http_code === 200 ) {
+                        $responseContent =  json_decode(wp_remote_retrieve_body( $response ));
+                        set_transient( 'moo_blackout', $responseContent, 300 );
+                        return $responseContent;
+                    } else {
+                        if($this->debugMode){
+                            echo "Something went wrong when getting jwt-token: $http_code";
+                        }
+                    }
+                }
+            }
+        }
+        return array(
+            "status"=>"open",
+            "hide_menu"=>"false"
+        );
     }
 
     public function getMerchantProprietes()
@@ -284,10 +390,18 @@ class Moo_OnlineOrders_CallAPI
         $res = $this->callApi("items_expanded/" . $page . "/50", $this->Token);
         return $res;
     }
+    public function getAllItemsWithoutSaving() {
+        $res = $this->callApi("items_expanded", $this->Token);
+        return $res;
+    }
 
     public function getCategoriesWithoutSaving()
     {
         return $this->callApi("categories", $this->Token);
+    }
+    public function getItemsPerCategoryWithoutSaving($cat_uuid)
+    {
+        return $this->callApi("categories/".$cat_uuid."/items", $this->Token);
     }
 
     public function getModifiersGroupsWithoutSaving()
@@ -304,8 +418,9 @@ class Moo_OnlineOrders_CallAPI
     public function getModifiersWithoutSavingPage2(){
         return $this->callApi("modifiers_page2", $this->Token);
     }
-    public function getModifiersWithoutSavingPage3(){
-        return $this->callApi("modifiers_page3", $this->Token);
+
+    public function getModifiersWithoutSavingByPage($page){
+        return $this->callApi("modifiers_by_page/".$page, $this->Token);
     }
 
     public function updateOrderNote($orderId, $note)
@@ -347,16 +462,139 @@ class Moo_OnlineOrders_CallAPI
     }
 
     //Pay the order
-    public function payOrder($oid, $taxAmount, $amount, $zip, $expMonth, $cvv, $last4, $expYear, $first6, $cardEncrypted, $tipAmount)
+    public function  payOrder($oid, $taxAmount, $amount, $zip, $expMonth, $cvv, $last4, $expYear, $first6, $cardEncrypted, $tipAmount)
     {
         return $this->callApi_Post("pay_order", $this->Token, 'orderId=' . $oid . '&taxAmount=' . $taxAmount . '&amount=' . $amount . '&zip=' . $zip . '&expMonth=' . $expMonth .
             '&cvv=' . $cvv . '&last4=' . $last4 . '&first6=' . $first6 . '&expYear=' . $expYear . '&cardEncrypted=' . $cardEncrypted . '&tipAmount=' . $tipAmount);
+    }
+    public function  payOrderWithOptions($options)
+    {
+        $string = $this->stringify($options);
+        return $this->callApi_Post("pay_order", $this->Token, $string);
     }
 
     //Pay the order using Spreedly token
     public function moo_PayOrderUsingSpreedly($token, $oid, $taxAmount, $amount, $tipAmount, $saveCard, $customerToken)
     {
         return $this->callApi_Post("pay_order_spreedly", $this->Token, 'orderId=' . $oid . '&taxAmount=' . $taxAmount . '&amount=' . $amount . '&token=' . $token . '&tipAmount=' . $tipAmount . '&saveCard=' . $saveCard . '&customerToken=' . $customerToken);
+    }
+    //Pay the order using clover token
+    public function payOrderUsingToken($payload)
+    {
+        if(!$this->jwt_token){
+            $this->getJwtToken();
+        }
+        if($this->jwt_token){
+            $endPoint = $this->url_api_v2 . "payments/clover_token";
+            $response = wp_remote_post( $endPoint, array(
+                    'method'      => 'POST',
+                    'timeout'     => 60,
+                    'redirection' => 5,
+                    'httpversion' => '1.0',
+                    'blocking'    => true,
+                    'headers'     => array(
+                        "Content-Type"=>"application/json",
+                        "Authorization"=>"Bearer " . $this->jwt_token
+                    ),
+                    'body'        => json_encode($payload),
+                    'cookies'     => array()
+                )
+            );
+
+            if ( is_wp_error( $response ) ) {
+                $error_message = $response->get_error_message();
+                if($this->debugMode){
+                    echo "Something went wrong: $error_message";
+                }
+            } else {
+                $http_code = wp_remote_retrieve_response_code( $response );
+                if( $http_code === 200 ) {
+                    $responseContent =  json_decode(wp_remote_retrieve_body( $response ));
+                    return $responseContent;
+                } else {
+                    if($this->debugMode){
+                        echo "Something went wrong when getting jwt-token: $http_code";
+                    }
+                }
+            }
+
+        }
+        return null;
+    }
+    //Remove open Order from Clover
+    public function removeOrderFromClover($uuid)
+    {
+        if(!$this->jwt_token){
+            $this->getJwtToken();
+        }
+        if($this->jwt_token){
+            $endPoint = $this->url_api_v2 . "orders/".$uuid;
+            $response = wp_remote_post( $endPoint, array(
+                    'method'      => 'DELETE',
+                    'timeout'     => 60,
+                    'redirection' => 5,
+                    'httpversion' => '1.0',
+                    'blocking'    => true,
+                    'headers'     => array(
+                        "Content-Type"=>"application/json",
+                        "Authorization"=>"Bearer " . $this->jwt_token
+                    ),
+                    'cookies'     => array()
+                )
+            );
+
+            if ( is_wp_error( $response ) ) {
+                $error_message = $response->get_error_message();
+                if($this->debugMode){
+                    echo "Something went wrong: $error_message";
+                }
+            } else {
+                $http_code = wp_remote_retrieve_response_code( $response );
+                if( $http_code === 200 ) {
+                    return true;
+                } else {
+                    if($this->debugMode){
+                        echo "Something went wrong when getting jwt-token: $http_code";
+                    }
+                }
+            }
+
+        }
+        return false;
+    }
+    public function createTicket($payload)
+    {
+        $endPoint = $this->url_api_v2 . "tickets";
+        $response = wp_remote_post( $endPoint, array(
+                'method'      => 'POST',
+                'timeout'     => 60,
+                'redirection' => 5,
+                'httpversion' => '1.0',
+                'blocking'    => true,
+                'headers'     => array(
+                    "Content-Type"=>"application/json"
+                ),
+                'body'        => json_encode($payload),
+                'cookies'     => array()
+            )
+        );
+        if ( is_wp_error( $response ) ) {
+            $error_message = $response->get_error_message();
+            if($this->debugMode){
+                echo "Something went wrong: $error_message";
+            }
+        } else {
+            $http_code = wp_remote_retrieve_response_code( $response );
+            if( $http_code === 200 ) {
+                $responseContent =  json_decode(wp_remote_retrieve_body( $response ));
+                return $responseContent;
+            } else {
+                if($this->debugMode){
+                    echo "Something went wrong when getting jwt-token: $http_code";
+                }
+            }
+        }
+        return null;
     }
 
     //Send Notification to the merchant when a new order is registered
@@ -410,10 +648,131 @@ class Moo_OnlineOrders_CallAPI
         return $this->callApi_Post("sendsms", $this->Token, 'to=' . $phone . '&body=' . $message);
     }
 
-    public function sendSmsTo($message, $phone)
-    {
-        $phone = str_replace('+', '%2B', $phone);
-        return $this->callApi_Post("sendsms", $this->Token, 'to=' . $phone . '&body=' . $message);
+    public function sendSmsTo($message, $phone) {
+        if(!$this->jwt_token){
+            $this->getJwtToken();
+        }
+       // $phone = str_replace('+', '00', $phone);
+        $payload = array(
+            "phone"=>$phone,
+            "content"=>$message,
+        );
+        $endPoint = $this->url_api_v2 . "sms";
+        $response = wp_remote_post( $endPoint, array(
+                'method'      => 'POST',
+                'timeout'     => 60,
+                'redirection' => 5,
+                'httpversion' => '1.0',
+                'blocking'    => true,
+                'headers'     => array(
+                    "Content-Type"=>"application/json",
+                    "Authorization"=>"Bearer " . $this->jwt_token
+                ),
+                'body'        => json_encode($payload),
+                'cookies'     => array()
+            )
+        );
+        if ( is_wp_error( $response ) ) {
+            $error_message = $response->get_error_message();
+            if($this->debugMode){
+                echo "Something went wrong: $error_message";
+            }
+        } else {
+            $http_code = wp_remote_retrieve_response_code( $response );
+            if( $http_code === 200 ) {
+                return array(
+                    "status"=>"success"
+                );
+            } else {
+                if($this->debugMode){
+                    echo "Something went wrong when getting jwt-token: $http_code";
+                }
+                if($http_code === 400){
+                    $responseContent =  json_decode(wp_remote_retrieve_body( $response ));
+                    if($this->debugMode){
+                        echo $responseContent;
+                    }
+                } else {
+                    if($http_code === 401){
+                        if($this->debugMode){
+                            echo "JWT token not valid";
+                        }
+                        $this->resetJwtToken();
+                    }
+                }
+            }
+        }
+        return array(
+            "status"=>"failed",
+            "message"=>"",
+        );
+    }
+    public function sendVerificationSms($code, $phone) {
+        if(!$this->jwt_token){
+            $this->getJwtToken();
+        }
+       // $phone = str_replace('+', '00', $phone);
+        $payload = array(
+            "phone"=>$phone,
+            "code"=>$code,
+        );
+        $endPoint = $this->url_api_v2 . "sms/verif_sms";
+        $response = wp_remote_post( $endPoint, array(
+                'method'      => 'POST',
+                'timeout'     => 60,
+                'redirection' => 5,
+                'httpversion' => '1.0',
+                'blocking'    => true,
+                'headers'     => array(
+                    "Content-Type"=>"application/json",
+                    "Authorization"=>"Bearer " . $this->jwt_token
+                ),
+                'body'        => json_encode($payload),
+                'cookies'     => array()
+            )
+        );
+        if ( is_wp_error( $response ) ) {
+            $error_message = $response->get_error_message();
+            if($this->debugMode){
+                echo "Something went wrong: $error_message";
+            }
+            return array(
+                "status"=>"failed",
+                "message"=>"We aren't able to send the verification code, please use a different number or contact the website owner",
+            );
+        } else {
+            $http_code = wp_remote_retrieve_response_code( $response );
+            if( $http_code === 200 ) {
+                return array(
+                    "status"=>"success"
+                );
+            } else {
+                if($this->debugMode){
+                    echo "Something went wrong when getting jwt-token: $http_code";
+                }
+                if($http_code === 400){
+                    $responseContent =  json_decode(wp_remote_retrieve_body( $response ));
+                    if($this->debugMode){
+                        echo $responseContent;
+                    }
+                    return array(
+                        "status"=>"failed",
+                        "message"=>(isset($responseContent->message))?$responseContent->message:"We aren't able to send the verification, please use a different number or contact the website owner",
+                    );
+                } else {
+                    if($http_code === 401){
+                        if($this->debugMode){
+                            echo "JWT token not valid";
+                        }
+                        $this->resetJwtToken();
+                    }
+                }
+            }
+        }
+        return array(
+            "status"=>"failed",
+            "message"=>"",
+        );
     }
 
     public function moo_CustomerVerifPhone($token, $phone)
@@ -949,7 +1308,6 @@ class Moo_OnlineOrders_CallAPI
                 ));
             }
         }
-
 
         //save modifierGroups
         if(isset($item->modifierGroups) && isset($item->modifierGroups->elements) && count($item->modifierGroups->elements)>0) {
@@ -1590,6 +1948,7 @@ class Moo_OnlineOrders_CallAPI
     private function save_modifier_groups($obj)
     {
         global $wpdb;
+        $wpdb->hide_errors();
         $count = 0;
         foreach (json_decode($obj)->elements as $modifier_groups) {
             $wpdb->insert("{$wpdb->prefix}moo_modifier_group", array(
@@ -1610,6 +1969,7 @@ class Moo_OnlineOrders_CallAPI
     private function save_item_groups($obj)
     {
         global $wpdb;
+        $wpdb->hide_errors();
         $count = 0;
         foreach (json_decode($obj)->elements as $item_group) {
             $wpdb->insert("{$wpdb->prefix}moo_item_group", array(
@@ -1625,10 +1985,17 @@ class Moo_OnlineOrders_CallAPI
     private function save_categories($obj)
     {
         global $wpdb;
+        $wpdb->hide_errors();
         $count = 0;
 
         // var_dump(json_decode($obj));
         foreach (json_decode($obj)->elements as $cat) {
+
+            if(isset($cat->items) && isset($cat->items->elements) && count($cat->items->elements)>=100){
+                $items = json_decode($this->getItemsPerCategoryWithoutSaving($cat->id));
+                $cat->items = $items;
+            }
+
             $items_ids = "";
             foreach ($cat->items->elements as $item)
                 $items_ids .= $item->id . ",";
@@ -1647,6 +2014,7 @@ class Moo_OnlineOrders_CallAPI
     private function save_order_types($obj)
     {
         global $wpdb;
+        $wpdb->hide_errors();
         $count = 0;
         foreach (json_decode($obj)->elements as $ot) {
             $res = $wpdb->insert("{$wpdb->prefix}moo_order_types", array(
@@ -1696,7 +2064,7 @@ class Moo_OnlineOrders_CallAPI
     public function goToReports()
     {
         $dashboard_url = admin_url('/admin.php?page=moo_index');
-        $newURL = "http://dashboard.smartonlineorder.com/#/login/" . $this->Token . "?redirectTo=" . $dashboard_url;
+        $newURL = "https://dashboard.smartonlineorder.com/#/login/" . $this->Token . "?redirectTo=" . $dashboard_url;
         header('Location: ' . $newURL);
         die();
     }

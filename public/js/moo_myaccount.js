@@ -110,28 +110,28 @@ function moo_loginAccountPage(e) {
     var password =  jQuery('#inputPassword').val();
     if(email === '') {
         swal({ title: "Please enter your email",text:"",  timer:5000, type: "error" });
-        jQuery(e.target).html('Login In').attr('onclick','moo_login(event)');
+        jQuery(e.target).html('Login In').attr('onclick','moo_loginAccountPage(event)');
         return;
     } else {
         if(password === '') {
             swal({ title: "Please enter your password",text:"",  timer:5000, type: "error"});
-            jQuery(e.target).html('Login In').attr('onclick','moo_login(event)');
+            jQuery(e.target).html('Login In').attr('onclick','moo_loginAccountPage(event)');
             return;
         } else {
             jQuery
                 .post(moo_params.ajaxurl,{'action':'moo_customer_login','email':email,"password":password}, function (data) {
-                    jQuery(e.target).html('Log In').attr('onclick','moo_login(event)');
+                    jQuery(e.target).html('Log In').attr('onclick','moo_loginAccountPage(event)');
                     if(data.status === 'success') {
                         moo_showCustomerPanel(e);
                     } else {
                         swal({ title: "Invalid User Name or Password",text:"Please click on forgot password or Please register as new user.",   type: "error",timer:5000,   confirmButtonText: "Try again" });
-                        jQuery(e.target).html('Login In').attr('onclick','moo_login(event)');
+                        jQuery(e.target).html('Login In').attr('onclick','moo_loginAccountPage(event)');
                     }
                 })
                 .fail(function(data) {
                     console.log(data.responseText);
                     swal({ title: "Invalid User Name or Password",text:"Please click on forgot password or Please register as new user.",   type: "error",timer:5000,   confirmButtonText: "Try again" });
-                    jQuery(e.target).html('Log In').attr('onclick','moo_login(event)');
+                    jQuery(e.target).html('Log In').attr('onclick','moo_loginAccountPage(event)');
 
                 });
         }
@@ -234,7 +234,7 @@ function moo_resetpassword(e)
 
         jQuery
             .post(moo_params.ajaxurl,{'action':'moo_customer_resetpassword','email':email}, function (data) {
-                if(data.status === 'success')
+                if(data && data.status === 'success')
                 {
                     jQuery(e.target).html('Reset').attr('onclick','moo_resetpassword(event)');
                     swal("If the e-mail you specified exists in our system, then you will receive an e-mail shortly to reset your password.");
@@ -287,16 +287,17 @@ function moo_updateMarkerPosition(newPosition)
 
 function moo_ConfirmAddressOnMap(e)
 {
-
+    console.log("Choose address from map");
     e.preventDefault();
     var address = moo_getAddressFromForm();
-    if( address.address === '' || address.city === '')
-    {
+    if( address.address === '' || address.city === '') {
         swal({ title: "Address missing",text:"Please enter your address",   type: "error",   confirmButtonText: "OK" });
         return;
     }
     var address_string = Object.keys(address).map(function(k){return address[k]}).join(" ");
-    jQuery.get('https://maps.googleapis.com/maps/api/geocode/json?&address='+address_string+'&key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc',function (data) {
+    var endpoint = 'https://maps.googleapis.com/maps/api/geocode/json?&address='+encodeURIComponent(address_string)+'&key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc'
+    console.log(endpoint);
+    jQuery.get(endpoint,function (data) {
         if(data.results.length>0)
         {
             var location = data.results[0].geometry.location;
@@ -578,7 +579,7 @@ function  moo_my_account_addresses(e) {
                                         if(data.status ==='success') {
                                             mooRenderAddresses(data.addresses);
                                         } else {
-                                            wal({ title: "Error",text:"An error has occurred please try again",   type: "error",   confirmButtonText: "Try again" });
+                                            swal({ title: "Error",text:"An error has occurred please try again",   type: "error",   confirmButtonText: "Try again" });
                                         }
                                     })
                                     .fail(function(data) {
@@ -700,7 +701,7 @@ function  moo_my_account_myorders_perPage(page) {
                         }
                     }
                 } else {
-                    cpContent.html("This feature was recently added or yout account is new. You don't have any previous orders yet.")
+                    cpContent.html("You don't have any previous orders yet.")
                 }
             } else {
                 swal({ title: "Error",text:"your session has expired",   type: "error",timer:5000 });
@@ -759,8 +760,12 @@ function moo_reOrder(order_uuid) {
                 } else {
                     if(result.dismiss === 'cancel') {
                         jQuery.post(moo_RestUrl+"moo-clover/v1/customers/orders/"+order_uuid+"/reorder",{'cart':'empty'},function(response){
-                            swal({ title: "Items added to your cart",text:'we are redirecting you to cart page, please wait',   type: "success" });
-                            window.location.href = response.cart_url;
+                            if(response.status === 'success'){
+                                swal({ title: "Items added to your cart",text:'we are redirecting you to cart page, please wait',   type: "success" });
+                                window.location.href = response.cart_url;
+                            } else {
+                                swal({ title: "Error",text:response.message,   type: "error" });
+                            }
                         }).fail(function(data) {
                             swal({ title: "Error",text:"An error has occurred please try again",   type: "error",   confirmButtonText: "Try again" });
                         });
@@ -961,7 +966,7 @@ function mooRenderItemsForMostPurchase(items) {
 
 }
 function mooRenderAddresses(addresses) {
-    var html  = '<div class="moo_cp_content_header"><h1>My Addresses</h1><span><a role="button" aria-label="add new address" class="osh-btn moo_pull_right" href="#" onclick="moo_add_new_address()">ADD NEW</a></span></div>';
+    var html  = '<div class="moo_cp_content_header"><h1>My Addresses</h1><span><a role="button" aria-label="add new address" class="button osh-btn moo_pull_right" href="#" onclick="moo_add_new_address()">ADD NEW</a></span></div>';
     html += '<div class="moo_cp_content_body">';
     if(addresses.length > 0) {
         for(i in addresses){
@@ -977,7 +982,7 @@ function mooRenderAddresses(addresses) {
             html += '<span class="moo_cp_orders_orderdate">'+address.city+', '+address.zipcode+'</span>';
             html +='</div>';
             html +='<div class="moo-col-md-3 moo_right_border moo_cp_content_oneOrderCol moo_cp_content_oneOrderTotal" tabindex="0">'+address.state+'</div>';
-            html +='<div class="moo-col-md-3 moo_cp_content_oneOrderCol moo_center_text  moo_cp_content_oneOrderButton"><a role="button" aria-label="remove this address" class="osh-btn" href="#" onclick="moo_delete_address(event,\''+address.id+'\')">REMOVE</a></div>';
+            html +='<div class="moo-col-md-3 moo_cp_content_oneOrderCol moo_center_text  moo_cp_content_oneOrderButton"><a role="button" aria-label="remove this address" class="button osh-btn" href="#" onclick="moo_delete_address(event,\''+address.id+'\')">REMOVE</a></div>';
             html +='</div>'; // fin address line
             html +='</div>'; // Fin principal div
         }

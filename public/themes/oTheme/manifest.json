@@ -48,6 +48,13 @@
             "default":"off"
         },
         {
+            "id":"allowspecialinstructionforitems",
+            "label":"Special instructions for individual items",
+            "type":"onoff",
+            "info":"Allow customers to leave special instructions for individual items",
+            "default":"on"
+        },
+        {
             "id":"color1",
             "label":"Color 1",
             "type":"color",
