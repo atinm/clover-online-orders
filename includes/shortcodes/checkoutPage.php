@@ -79,10 +79,10 @@ class checkoutPage
 
         //Get blackout status
         $blackoutStatusResponse = $this->api->getBlackoutStatus();
-        if(isset($blackoutStatusResponse->status) && $blackoutStatusResponse->status === "close"){
+        if(isset($blackoutStatusResponse["status"]) && $blackoutStatusResponse["status"] === "close"){
 
-            if(isset($blackoutStatusResponse->custom_message) && !empty($blackoutStatusResponse->custom_message)){
-                $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$blackoutStatusResponse->custom_message.'</div>';
+            if(isset($blackoutStatusResponse["custom_message"]) && !empty($blackoutStatusResponse["custom_message"])){
+                $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$blackoutStatusResponse["custom_message"].'</div>';
             } else {
                 $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">We are currently closed and will open again soon</div>';
 
@@ -92,14 +92,18 @@ class checkoutPage
 
        // $nbOfOrdersPerHour = $this->model->nbOfOrdersPerHour();
        // var_dump($nbOfOrdersPerHour);
+
         $orderTypes = $this->model->getVisibleOrderTypes();
+        if(!is_array($orderTypes)){
+            $orderTypes = array();
+        }
         // Get ordertypes times
         $counter = $this->model->getOrderTypesWithCustomHours();
         if(isset($counter->nb) && $counter->nb > 0 ) {
             $HoursResponse = $this->api->getMerchantCustomHoursStatus("ordertypes");
             if( $HoursResponse ){
-                $merchantCustomHoursStatus = json_decode($HoursResponse,true);
-                $merchantCustomHours = array_keys($merchantCustomHoursStatus);
+                $merchantCustomHoursStatus = $HoursResponse;
+                $merchantCustomHours = array_keys($HoursResponse);
             } else {
                 $merchantCustomHoursStatus = array();
                 $merchantCustomHours = array();
@@ -153,8 +157,6 @@ class checkoutPage
                 //localize clover code
                 $cloverCodeExist = true;
             } else {
-                // var_dump(print_r($cloverPakmsKey,TRUE));
-                // string(86) "stdClass Object ( [status] => failed [message] => Cannot get the public key ) "
                 $cloverCodeExist = false;
                 $cloverPakmsKey = null;
             }
@@ -179,13 +181,10 @@ class checkoutPage
         }
 
         //Include custom css
-        if($custom_css != null)
+        if($custom_css != null) {
             wp_add_inline_style( "custom-style-cart3", $custom_css );
+        }
 
-
-        if($total === false || !isset($total['nb_items']) || $total['nb_items'] < 1){
-            return $this->cartIsEmpty();
-        };
 
         if($this->pluginSettings["order_later"] == "on") {
             $inserted_nb_days = $this->pluginSettings["order_later_days"];
@@ -226,54 +225,69 @@ class checkoutPage
         }
 
 
-        $oppening_status = json_decode($this->api->getOpeningStatus($nb_days,$nb_minutes));
+        $oppening_status = json_decode($this->api->getOpeningStatus($nb_days,$nb_minutes),true);
+
         if($nb_days != $nb_days_d || $nb_minutes != $nb_minutes_d)
-            $oppening_status_d = json_decode($this->api->getOpeningStatus($nb_days_d,$nb_minutes_d));
+            $oppening_status_d = json_decode($this->api->getOpeningStatus($nb_days_d,$nb_minutes_d),true);
         else
             $oppening_status_d = $oppening_status;
 
         $oppening_msg = "";
 
-        if($this->pluginSettings['hours'] != 'all' && $oppening_status->status == 'close') {
+        if($this->pluginSettings['hours'] != 'all' && $oppening_status["status"] == 'close') {
             if(isset($this->pluginSettings["closing_msg"]) && $this->pluginSettings["closing_msg"] !== '') {
                 $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$this->pluginSettings["closing_msg"].'</div>';
             } else  {
-                if($oppening_status->store_time == '')
+                if($oppening_status["store_time"] == '')
                     $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">Online Ordering Currently Closed'.(($this->pluginSettings['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: #006b00'>Order in Advance Available</p>":"").'</div>';
                 else
-                    $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>'.(($this->pluginSettings['accept_orders_w_closed'] == 'on' )?"<p style='color: #006b00'>Order in Advance Available</p>":"").'</div>';
+                    $oppening_msg = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering Hours</strong> <br/> '.$oppening_status["store_time"].'<br/>Online Ordering Currently Closed'.(($this->pluginSettings['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: #006b00'>Order in Advance Available</p>":"").'</div>';
             }
         }
 
         //Adding asap to pickup time
-        if(isset($oppening_status->pickup_time)) {
-            if(isset($this->pluginSettings['order_later_asap_for_p']) && $this->pluginSettings['order_later_asap_for_p'] == 'on')
-            {
-                if(isset($oppening_status->pickup_time->Today))
-                    array_unshift($oppening_status->pickup_time->Today,'ASAP');
+        if(isset($oppening_status["pickup_time"])) {
+            if(isset($this->pluginSettings['order_later_asap_for_p']) && $this->pluginSettings['order_later_asap_for_p'] == 'on') {
+                if(isset($oppening_status["pickup_time"]["Today"]))
+                    array_unshift($oppening_status["pickup_time"]["Today"],'ASAP');
             }
-            if(isset($oppening_status->pickup_time->Today))
-                array_unshift($oppening_status->pickup_time->Today,'Select a time');
+            if(isset($oppening_status["pickup_time"]["Today"]))
+                array_unshift($oppening_status["pickup_time"]["Today"],'Select a time');
 
         }
 
-        if(isset($oppening_status_d->pickup_time))
-        {
+        if(isset($oppening_status_d["pickup_time"])) {
             if(isset($this->pluginSettings['order_later_asap_for_d']) && $this->pluginSettings['order_later_asap_for_d'] == 'on')
             {
-                if(isset($oppening_status_d->pickup_time->Today))
-                    array_unshift($oppening_status_d->pickup_time->Today,'ASAP');
+                if(isset($oppening_status_d["pickup_time"]["Today"]))
+                    array_unshift($oppening_status_d["pickup_time"]["Today"],'ASAP');
             }
-            if(isset($oppening_status_d->pickup_time->Today))
-                array_unshift($oppening_status_d->pickup_time->Today,'Select a time');
+            if(isset($oppening_status_d["pickup_time"]["Today"]))
+                array_unshift($oppening_status_d["pickup_time"]["Today"],'Select a time');
 
         }
 
-        if($this->pluginSettings['hours'] != 'all' && $this->pluginSettings['accept_orders_w_closed'] != 'on' && $oppening_msg != "")
-        {
+        if($this->pluginSettings['hours'] != 'all' && $this->pluginSettings['accept_orders_w_closed'] != 'on' && $oppening_msg != "") {
             echo '<div id="moo_OnlineStoreContainer">'.$oppening_msg.'</div>';
             return ob_get_clean();
         }
+
+        //show or hide the choose time section
+        if(isset($this->pluginSettings['order_later']) && $this->pluginSettings['order_later'] == 'on'){
+            if(is_array($oppening_status["pickup_time"]) && @count($oppening_status["pickup_time"])>0){
+                $showTimeSection = true;
+            } else {
+                if(isset($this->pluginSettings['order_later_mandatory']) && $this->pluginSettings['order_later_mandatory'] === "on"){
+                    $showTimeSection = true;
+                } else {
+                    $showTimeSection = false;
+                }
+            }
+        } else {
+            $showTimeSection = false;
+        }
+
+
 
         $merchant_address =  $this->api->getMerchantAddress();
         $store_page_id     = $this->pluginSettings['store_page'];
@@ -284,61 +298,62 @@ class checkoutPage
         $cart_page_url    =  get_page_link($cart_page_id);
         $checkout_page_url    =  get_page_link($checkout_page_id);
 
-        // Not localize empty params
-        // localize params
-        $localizeParams = array(
-            "thanks_page","payment_cash_delivery","payment_cash","payment_creditcard","lat","lng","zones_json",
-            "other_zones_delivery","free_delivery","fixed_delivery","fb_appid","scp","checkout_login",
-            "save_cards","save_cards_fees",'use_sms_verification','clover_payment_form'
-        );
-        foreach($this->pluginSettings as $key=>$value) {
-            if (in_array($key,$localizeParams)) {
-                if ($value == "") {
-                    $this->pluginSettings[$key] = null;
-                }
-            }
-        }
-        if(!isset($this->pluginSettings['save_cards_fees'])){
-            $this->pluginSettings['save_cards_fees'] = null;
-        }
-        if(!isset($this->pluginSettings['clover_payment_form'])){
-            $this->pluginSettings['clover_payment_form'] = null;
-        }
         if(isset($this->pluginSettings['thanks_page_wp']) && !empty($this->pluginSettings['thanks_page_wp'])){
             $this->pluginSettings['thanks_page'] = get_page_link($this->pluginSettings['thanks_page_wp']);
         }
 
-        wp_localize_script("custom-script-checkout", "moo_OrderTypes",$orderTypes);
-        wp_localize_script("custom-script-checkout", "moo_Total",$total);
-        wp_localize_script("custom-script-checkout", "moo_Key",(array)$cloverKey);
-        wp_localize_script("custom-script-checkout", "moo_thanks_page",$this->pluginSettings['thanks_page']);
-        wp_localize_script("custom-script-checkout", "moo_cash_upon_delivery",$this->pluginSettings['payment_cash_delivery']);
-        wp_localize_script("custom-script-checkout", "moo_cash_in_store",$this->pluginSettings['payment_cash']);
-        wp_localize_script("custom-script-checkout", "moo_pay_online",$this->pluginSettings['payment_creditcard']);
-        wp_localize_script("custom-script-checkout", "moo_pickup_time",$oppening_status->pickup_time);
-        wp_localize_script("custom-script-checkout", "moo_pickup_time_for_delivery",$oppening_status_d->pickup_time);
-        wp_localize_script("display-merchant-map", "moo_merchantLat",$this->pluginSettings['lat']);
-        wp_localize_script("display-merchant-map", "moo_merchantLng",$this->pluginSettings['lng']);
-        wp_localize_script("display-merchant-map", "moo_merchantAddress",$merchant_address);
-        wp_localize_script("display-merchant-map", "moo_delivery_zones",$this->pluginSettings['zones_json']);
-        wp_localize_script("display-merchant-map", "moo_delivery_other_zone_fee",$this->pluginSettings['other_zones_delivery']);
-        wp_localize_script("display-merchant-map", "moo_delivery_free_amount",$this->pluginSettings['free_delivery']);
-        wp_localize_script("display-merchant-map", "moo_delivery_fixed_amount",$this->pluginSettings['fixed_delivery']);
-        wp_localize_script("display-merchant-map", "moo_fb_app_id",$this->pluginSettings['fb_appid']);
-        wp_localize_script("display-merchant-map", "moo_scp",$this->pluginSettings['scp']);
-        wp_localize_script("display-merchant-map", "moo_use_sms_verification",$this->pluginSettings['use_sms_verification']);
-        wp_localize_script("display-merchant-map", "moo_checkout_login",$this->pluginSettings['checkout_login']);
-        wp_localize_script("display-merchant-map", "moo_save_cards",$this->pluginSettings['save_cards']);
-        wp_localize_script("display-merchant-map", "moo_save_cards_fees",$this->pluginSettings['save_cards_fees']);
-        wp_localize_script("display-merchant-map", "moo_clover_payment_form",$this->pluginSettings['clover_payment_form']);
-        wp_localize_script("display-merchant-map", "moo_clover_key",$cloverPakmsKey);
+        if(!isset($this->pluginSettings['save_cards'])){
+            $this->pluginSettings['save_cards'] = null;
+        }
+        if(!isset($this->pluginSettings['save_cards_fees'])){
+            $this->pluginSettings['save_cards_fees'] = null;
+        }
+        if(!isset($this->pluginSettings['delivery_errorMsg']) || empty($this->pluginSettings['delivery_errorMsg'])){
+            $this->pluginSettings['delivery_errorMsg'] = "Sorry, zone not supported. We do not deliver to this address at this time";
+        }
+        $mooCheckoutJsOptions = array(
+                "moo_OrderTypes"=>$orderTypes,
+                "moo_Total"=>$total,
+                "moo_Key"=>(array)$cloverKey,
+                "moo_thanks_page"=>$this->pluginSettings['thanks_page'],
+                "moo_cash_upon_delivery"=>$this->pluginSettings['payment_cash_delivery'],
+                "moo_cash_in_store"=>$this->pluginSettings['payment_cash'],
+                "moo_pay_online"=>$this->pluginSettings['payment_creditcard'],
+                "moo_pickup_time"=>$oppening_status["pickup_time"],
+                "moo_pickup_time_for_delivery"=>$oppening_status_d["pickup_time"],
+                "moo_fb_app_id"=>$this->pluginSettings['fb_appid'],
+                "moo_scp"=>$this->pluginSettings['scp'],
+                "moo_use_sms_verification"=>$this->pluginSettings['use_sms_verification'],
+                "moo_checkout_login"=>$this->pluginSettings['checkout_login'],
+                "moo_save_cards"=>$this->pluginSettings['save_cards'],
+                "moo_save_cards_fees"=>$this->pluginSettings['save_cards_fees'],
+                "moo_clover_payment_form"=>$this->pluginSettings['clover_payment_form'],
+                "moo_clover_key"=>$cloverPakmsKey,
+                "special_instructions_required"=>$this->pluginSettings['special_instructions_required'],
+        );
+        $mooDeliveryJsOptions = array(
+                "moo_merchantLat"=>$this->pluginSettings['lat'],
+                "moo_merchantLng"=>$this->pluginSettings['lng'],
+                "moo_merchantAddress"=>$merchant_address,
+                "zones"=>$this->pluginSettings['zones_json'],
+                "other_zone_fee"=>$this->pluginSettings['other_zones_delivery'],
+                "free_amount"=>$this->pluginSettings['free_delivery'],
+                "fixed_amount"=>$this->pluginSettings['fixed_delivery'],
+                "errorMsg"=>$this->pluginSettings['delivery_errorMsg']
+        );
+        wp_localize_script("custom-script-checkout", "mooCheckoutOptions",$mooCheckoutJsOptions);
+        wp_localize_script("custom-script-checkout", "mooDeliveryOptions",$mooDeliveryJsOptions);
 
-        if((isset($_GET['logout']) && $_GET['logout']==true))
-        {
+
+        if($total === false || !isset($total['nb_items']) || $total['nb_items'] < 1){
+            return $this->cartIsEmpty();
+        };
+
+        if((isset($_GET['logout']) && $_GET['logout'] == true)) {
             $session->delete("moo_customer_token");
             wp_redirect ( $checkout_page_url );
         }
-        if($this->pluginSettings['checkout_login']=="disabled") {
+        if($this->pluginSettings['checkout_login'] == "disabled") {
             $session->delete("moo_customer_token");
         }
         ?>
@@ -554,7 +569,7 @@ class checkoutPage
                                 <div class="moo-checkout-bloc-title moo-checkoutText-contact">
                                     contact
                                     <span class="moo-checkout-edit-icon" onclick="moo_checkout_edit_contact()">
-                                        <img src="//api.smartonlineorders.com/assets/images/if_edit_103539.png" alt="edit">
+                                        <img src="<?php echo  plugin_dir_url(dirname(__FILE__))."../public/img/edit-pen.png"?>" alt="edit">
                                     </span>
                                 </div>
                                 <div class="moo-checkout-bloc-content">
@@ -591,12 +606,11 @@ class checkoutPage
                                     </div>
                                     <div class="moo-checkout-bloc-content">
                                         <?php
-                                        $countOrderTypes = count($orderTypes);
                                         foreach ($orderTypes as $ot) {
                                             if(isset($ot->available) && $ot->available === false){
                                                 echo '<div class="moo-checkout-form-ordertypes-option">';
                                                 echo '<input class="moo-checkout-form-ordertypes-input" type="radio" name="ordertype" value="'.$ot->ot_uuid.'" id="moo-checkout-form-ordertypes-'.$ot->ot_uuid.'" disabled>';
-                                                echo '<label for="moo-checkout-form-ordertypes-'.$ot->ot_uuid.'" style="display: inline;margin-left:15px">'.stripslashes($ot->label).'</label></div>';
+                                                echo '<label for="moo-checkout-form-ordertypes-'.$ot->ot_uuid.'" style="display: inline;margin-left:15px">'.stripslashes($ot->label).' ( '.stripslashes($ot->custom_message).' )</label></div>';
 
                                             } else {
                                                 echo '<div class="moo-checkout-form-ordertypes-option">';
@@ -612,10 +626,10 @@ class checkoutPage
                                 <div class="moo_chekout_border_bottom"></div>
                             <?php  } ?>
                             <?php
-                            if(isset($this->pluginSettings['order_later']) && $this->pluginSettings['order_later'] == 'on' && @count($oppening_status->pickup_time)>0){ ?>
+                            if($showTimeSection){?>
                                 <div id="moo-checkout-form-orderdate" tabindex="0" aria-label="Choose a time if you want schedule the order">
                                     <div class="moo-checkout-bloc-title moo-checkoutText-ChooseATime">
-                                        CHOOSE A PICKUP TIME
+                                        CHOOSE A TIME
                                     </div>
                                     <div class="moo-checkout-bloc-content">
                                         <div class="moo-row">
@@ -623,7 +637,7 @@ class checkoutPage
                                                 <div class="moo-form-group">
                                                     <select class="moo-form-control" name="moo_pickup_day" id="moo_pickup_day" onchange="moo_pickup_day_changed(this)">
                                                         <?php
-                                                        foreach ($oppening_status->pickup_time as $key=>$val) {
+                                                        foreach ($oppening_status["pickup_time"] as $key=>$val) {
                                                             echo '<option value="'.$key.'">'.$key.'</option>';
                                                         }
                                                         ?>
@@ -632,15 +646,11 @@ class checkoutPage
                                             </div>
                                             <div class="moo-col-md-6">
                                                 <div class="moo-form-group">
-                                            
                                                     <select class="moo-form-control" name="moo_pickup_hour" id="moo_pickup_hour" >
                                                         <?php
-                                                        foreach ($oppening_status->pickup_time as $key=>$val) {
+                                                        foreach ($oppening_status["pickup_time"] as $key=>$val) {
                                                             foreach ($val as $h)
-                                                                if($h == 'Select a time')
-                                                                    echo '<option value="'.$h.'">Select time</option>';
-                                                                else 
-                                                                    echo '<option value="'.$h.'">'.$h.'</option>';
+                                                                echo '<option value="'.$h.'">'.$h.'</option>';
                                                             break;
                                                         }
                                                         ?>
@@ -648,23 +658,10 @@ class checkoutPage
                                                 </div>
                                             </div>
                                         </div>
-                                        <?php if($oppening_status->store_time != '') { ?>
+                                        <?php if($oppening_status["store_time"] != '') { ?>
                                             <div class="moo-row">
-                                            <!-- //UPGRADE IT START -->
-                                            <?php if(isset($this->pluginSettings["order_later_minutes"])): ?>
-                                                <?php $leadTime = $this->pluginSettings["order_later_minutes"];
-                                                if(is_numeric($leadTime)){
-                                                        $num = (int)$leadTime+15;
-                                                        $time_range = $leadTime.'-'.$num;
-                                                    }
-                                                ?>
                                                 <div class="moo-col-md-12">
-                                                    Please allow at least <span id="lead-time"><?php echo $time_range;  ?></span> minutes from order time till pickup.
-                                                </div>
-                                            <?php endif; ?>
-                                                <!-- // UPGRADE IT END  -->
-                                                <div class="moo-col-md-12">
-                                                    Today's Online Ordering Hours: <?php echo $oppening_status->store_time  ?>
+                                                    Today's Online Ordering Hours: <?php echo $oppening_status["store_time"]  ?>
                                                 </div>
                                             </div>
                                         <?php } ?>
@@ -682,20 +679,19 @@ class checkoutPage
                                     if (isset($cloverCodeExist) && $cloverCodeExist && isset($this->pluginSettings['clover_payment_form']) && $this->pluginSettings['clover_payment_form'] == 'on'){ ?>
                                         <div class="moo-checkout-form-payments-option">
                                             <input class="moo-checkout-form-payments-input" type="radio" name="payments" value="clover" id="moo-checkout-form-payments-clover">
-                                            <label for="moo-checkout-form-payments-clover" style="display: inline;margin-left:15px">Pay with Credit Card (Secured By Clover)</label>
+                                            <label for="moo-checkout-form-payments-clover" style="display: inline;margin-left:15px">Pay now with Credit Card (Secured By Clover)</label>
                                         </div>
-                                    <?php // UPGRADE IT START (clover elseif creditcard)
-                                    } elseif (isset($this->pluginSettings['payment_creditcard']) && $this->pluginSettings['payment_creditcard'] == 'on'){ 
-                                        //UPGRADE IT END ?>
+                                    <?php }
+                                    if (isset($this->pluginSettings['payment_creditcard']) && $this->pluginSettings['payment_creditcard'] == 'on'){ ?>
                                         <div class="moo-checkout-form-payments-option">
                                             <input class="moo-checkout-form-payments-input" type="radio" name="payments" value="creditcard" id="moo-checkout-form-payments-creditcard">
-                                            <label for="moo-checkout-form-payments-creditcard" style="display: inline;margin-left:15px">Pay with Credit Card</label>
+                                            <label for="moo-checkout-form-payments-creditcard" style="display: inline;margin-left:15px">Pay now with Credit Card</label>
                                         </div>
                                     <?php } ?>
                                     <?php if($this->pluginSettings['payment_cash'] == 'on' || $this->pluginSettings['payment_cash_delivery'] == 'on'){ ?>
                                         <div class="moo-checkout-form-payments-option">
                                             <input class="moo-checkout-form-payments-input" type="radio" name="payments" value="cash" id="moo-checkout-form-payments-cash">
-                                            <label for="moo-checkout-form-payments-cash" style="display: inline;margin-left:15px" id="moo-checkout-form-payincash-label">Pay with Gift Card</label>
+                                            <label for="moo-checkout-form-payments-cash" style="display: inline;margin-left:15px" id="moo-checkout-form-payincash-label">Pay at Location</label>
                                         </div>
                                     <?php } ?>
                                     <?php if(isset($this->pluginSettings['payment_creditcard']) && $this->pluginSettings['payment_creditcard'] == 'on' && $this->pluginSettings['scp'] !=="on"){ ?>
@@ -770,7 +766,6 @@ class checkoutPage
                                             </div>
                                             <div class="moo-row" id="moo_verifPhone_sending">
                                                 <div class="moo-form-group moo-form-inline">
-                                                    <p>Gift Card orders may be placed online, <br>but you must bring your gift card to cashier upon arrival.</p>
                                                     <label for="Moo_PhoneToVerify moo-checkoutText-yourPhone">Your phone</label>
                                                     <input class="moo-form-control" id="Moo_PhoneToVerify" style="margin-bottom: 10px" onchange="moo_phone_to_verif_changed()"/>
                                                     <a class="moo-btn moo-btn-primary" href="#" style="margin-bottom: 10px" onclick="moo_verifyPhone(event)">Verify via SMS</a>
@@ -786,7 +781,7 @@ class checkoutPage
                                                     <a href="#" onclick="moo_verifyCodeTryAgain(event)"> click here to try again</a>
                                                 </p>
                                                 <div class="moo-form-group moo-form-inline">
-                                                    <input class="moo-form-control" id="Moo_VerificationCode" style="margin-bottom: 10px"  />
+                                                    <input class="moo-form-control" id="Moo_VerificationCode" style="margin-bottom: 10px" autocomplete="off" />
                                                     <a class="moo-btn moo-btn-primary" href="#" style="margin-bottom: 10px" onclick="moo_verifyCode(event)">Submit</a>
                                                     <label for="Moo_VerificationCode" class="error" style="display: none;"></label>
                                                 </div>
@@ -808,23 +803,26 @@ class checkoutPage
                             <div class="moo_chekout_border_bottom"></div>
 
                             <?php
-                                if($this->pluginSettings['tips'] == 'enabled' && isset($merchant_proprites->tipsEnabled) && $merchant_proprites->tipsEnabled){
+                                if($this->pluginSettings['tips'] == 'enabled' && isset($merchant_proprites->tipsEnabled) && $merchant_proprites->tipsEnabled) {
                                         $this->tipsSection();
                                         $this->borderBottom();
                                 }
-                                if($this->pluginSettings['use_special_instructions']=="enabled")
-                                {
+                                if($this->pluginSettings['use_special_instructions']=="enabled") {
                                     ?>
                                     <div id="moo-checkout-form-instruction">
                                         <div class="moo-checkout-bloc-title moo-checkoutText-instructions">
                                             <label for="Mooinstructions">Special instructions</label>
                                         </div>
                                         <div class="moo-checkout-bloc-content">
-                                            <textarea class="moo-form-control" cols="100%" rows="5" id="Mooinstructions"></textarea>
                                             <?php
-                                            if(isset($this->pluginSettings['text_under_special_instructions']) && $this->pluginSettings['text_under_special_instructions']!=='') {
-                                                echo $this->pluginSettings['text_under_special_instructions'];
-                                            }
+                                                if(isset($this->pluginSettings['text_under_special_instructions']) && $this->pluginSettings['text_under_special_instructions']!=='') {
+                                                    echo '<div class="moo-special-instruction-title">'.$this->pluginSettings['text_under_special_instructions'].'</div>';
+                                                }
+                                                if(isset($this->pluginSettings['special_instructions_required']) && $this->pluginSettings['special_instructions_required']==='yes') {
+                                                    echo '<textarea class="moo-form-control" cols="100%" rows="5" id="Mooinstructions" required></textarea>';
+                                                } else {
+                                                    echo '<textarea class="moo-form-control" cols="100%" rows="5" id="Mooinstructions"></textarea>';
+                                                }
                                             ?>
                                         </div>
                                     </div>
@@ -865,9 +863,6 @@ class checkoutPage
                                     </div>
                                 </div>
                             <?php  }?>
-                            <button type="submit"  id="moo_btn_submit_order" onclick="moo_finalize_order(event)" class="moo-btn moo-btn-primary moo-finalize-order-btn moo-checkoutText-finalizeOrder">
-                                PLACE ORDER
-                            </button>
                         </div>
                         <!--            Checkout form - Cart scetion       -->
                         <div class="moo-col-md-5 moo-checkout-cart">
@@ -991,11 +986,8 @@ class checkoutPage
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit"  id="moo_btn_submit_order_cart" onclick="moo_finalize_order(event)" class="moo-btn moo-btn-primary moo-finalize-order-btn moo-checkoutText-finalizeOrder">
-                                PLACE ORDER
-                            </button>
-                        </div>
 
+                        </div>
                         <!--   Checkout form - Link section     -->
                         <div style="text-align: center;text-decoration: none;">
                             <a href="<?php echo $cart_page_url?>" class="moo-checkoutText-updateCart">Update cart</a> | <a href="<?php echo $store_page_url?>" class="moo-checkoutText-continueShopping">Continue shopping</a>
@@ -1068,9 +1060,9 @@ class checkoutPage
                                     </rect>
                                 </svg>
                             </div>
-                            <!-- <button type="submit"  id="moo_btn_submit_order" onclick="moo_finalize_order(event)" class="moo-btn moo-btn-primary moo-finalize-order-btn moo-checkoutText-finalizeOrder">
-                                PLACE ORDER
-                            </button> -->
+                            <button type="submit"  id="moo_btn_submit_order" onclick="moo_finalize_order(event)" class="moo-btn moo-btn-primary moo-finalize-order-btn moo-checkoutText-finalizeOrder">
+                                FINALIZE ORDER
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -1115,37 +1107,41 @@ class checkoutPage
             </div>
             <div class="moo-checkout-bloc-content">
                 <div class="moo-row"  style="margin-top: 13px;">
-                    <div class="moo-col-md-6 new-tip-selector">
+                    <div class="moo-col-md-6">
                         <div class="moo-form-group">
-                            <div>
-                                <input type="radio" id="cash-tip" name="moo_tips_select" value="cash"  onchange="moo_tips_select_changed(this)" checked>
-                                <label for="cash-tip">Cash</label>
-                            </div>
-                            <div>
-                                <input type="radio" id="10-tip" name="moo_tips_select" onchange="moo_tips_select_changed(this)" value="10">
-                                <label for="10-tip">10%</label>
-                            </div>
-                            <div>
-                                <input type="radio" id="15-tip" name="moo_tips_select" onchange="moo_tips_select_changed(this)" value="15">
-                                <label for="15-tip">15%</label>
-                            </div>
-                            <div>
-                                <input type="radio" id="20-tip" name="moo_tips_select" onchange="moo_tips_select_changed(this)" value="20">
-                                <label for="20-tip">20%</label>
-                            </div>
-                            <div>
-                                <input type="radio" id="25-tip" name="moo_tips_select" onchange="moo_tips_select_changed(this)" value="25">
-                                <label for="25-tip">25%</label>
-                            </div>
-                            <div>
-                                <input type="radio" id="other-tip" name="moo_tips_select" onchange="moo_tips_select_changed(this)" value="other">
-                                <label for="other-tip">Custom</label>
-                            </div>
+                            <select class="moo-form-control" name="moo_tips_select" id="moo_tips_select" onchange="moo_tips_select_changed()" aria-label="list of tips">
+                                <option value="cash">Add a tip to this order</option>
+HTML;
+        if(isset($this->pluginSettings["tips_default"]) && !empty($this->pluginSettings["tips_default"])){
+            $defaultTips = floatval(trim($this->pluginSettings["tips_default"]));
+        } else {
+            $defaultTips = null;
+        }
+        if(isset($this->pluginSettings["tips_selection"]) && !empty($this->pluginSettings["tips_selection"])){
+            $vals = explode(",", $this->pluginSettings["tips_selection"]);
+            if (is_array($vals) && count($vals) > 0){
+                foreach ($vals as $k=>$v){
+                    if(floatval(trim($v)) === $defaultTips)  {
+                        $html.= '<option value="'.floatval(trim($v)).'" selected>'. floatval(trim($v)) .'%</option>';
+                    } else {
+                        $html.= '<option value="'.floatval(trim($v)).'">'. floatval(trim($v)) .'%</option>';
+                    }
+                }
+            }
+        } else {
+            $html.= '<option value="10" '.(($defaultTips == 10)?"selected":"").'>10%</option>';
+            $html.= '<option value="15" '.(($defaultTips == 15)?"selected":"").'>15%</option>';
+            $html.= '<option value="20" '.(($defaultTips == 20)?"selected":"").'>20%</option>';
+            $html.= '<option value="25" '.(($defaultTips == 25)?"selected":"").'>25%</option>';
+        }
+        $html .= <<<HTML
+                            <option value="other">Custom $</option>
+                        </select>
                         </div>
                     </div>
                     <div class="moo-col-md-6">
                         <div class="moo-form-group">
-                            <input class="moo-form-control" name="tip" id="moo_tips" value="0.00" onchange="moo_tips_amount_changed()">
+                            <input class="moo-form-control" name="tip" id="moo_tips" value="0" onchange="moo_tips_amount_changed()">
                         </div>
                     </div>
                 </div>
@@ -1207,6 +1203,3 @@ HTML;
         echo '<div class="moo_chekout_border_bottom"></div>';
     }
 }
-           
-        
-        

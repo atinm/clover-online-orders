@@ -4,6 +4,7 @@
  */
 
 jQuery(document).ready(function() {
+    window.moo_RestUrl = moo_params.moo_RestUrl;
     window.moo_theme_setings = [];
     window.moo_mg_setings = {};
     window.moo_nbItemsPerLine = 4;

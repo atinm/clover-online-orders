@@ -87,7 +87,7 @@ class moo_OnlineOrders {
 	public function __construct() {
 
 		$this->plugin_name = 'moo_OnlineOrders';
-		$this->version = '1.4.4';
+		$this->version = '1.4.5';
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -213,7 +213,6 @@ class moo_OnlineOrders {
 		$this->loader->add_action( 'delete_blog', $plugin_admin, 'delete_plugin_in_network',10,1 );
 		$this->loader->add_action( 'admin_notices', $plugin_admin, 'displayUpdateNotice' );
 
-
 	}
 
 	/**
@@ -237,10 +236,11 @@ class moo_OnlineOrders {
 
         //init cron jobs
         $this->loader->add_action( 'init', $plugin_public, 'moo_register_daily_jwtTokenUpdate');
-        $this->loader->add_action( 'init', $plugin_public, 'moo_register_daily_inventoryImport');
+       // $this->loader->add_action( 'init', $plugin_public, 'moo_register_daily_inventoryImport');
 
         // Import inventory when hook fired
         $this->loader->add_action( 'smart_online_order_import_inventory', $plugin_public, 'moo_ImportInventory');
+
         // Update  jwt token
         $this->loader->add_action( 'smart_online_order_update_jwttoken', $plugin_public, 'moo_updateJwtToken');
 
@@ -491,12 +491,6 @@ class moo_OnlineOrders {
          */
         $this->loader->add_action( 'wp_ajax_moo_opening_hours', $plugin_public, 'moo_getOpeningHours');
         $this->loader->add_action( 'wp_ajax_nopriv_moo_opening_hours', $plugin_public, 'moo_getOpeningHours');
-
-		/*
-		 * Suncy handle
-		 */
-		$this->loader->add_action( 'admin_post_moo_sync', $plugin_public, 'moo_SyncHandle');
-		$this->loader->add_action( 'admin_post_nopriv_moo_sync', $plugin_public, 'moo_SyncHandle');
 
 		/**
          * Plugin upgrade wp_upe_upgrade_completed

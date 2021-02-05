@@ -1,9 +1,9 @@
-﻿# Smart Online Order for Clover
+﻿=== Smart Online Order for Clover ===
 Contributors: Zaytech
 Donate link: http://www.zaytechapps.com/
 Tags: clover,online orders for clover,zaytech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
 Requires at least: 4.7.1
-Tested up to: 5.4.2
+Tested up to: 5.6.0
 Requires PHP: 5.2.0
 Stable tag: 1.4.5
 License: GPLv2 or later
@@ -11,7 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Smart Online Order for Clover allows you to receive orders from your Wordpress website and have it sent directly to your Clover POS.
 
-## Description
+== Description ==
 
 With **Smart Online Order for Clover** you can easily integrate and import your Clover inventory to show on your website in real-time. This will allow you to accept Online Orders from your website.
 
@@ -23,7 +23,7 @@ All orders can either automatically print or you can have the orders manually pr
 
 It’s also easy to do it yourself, if you get stuck, there are step by step instructions on You Tube – Search “Smart Online Order” on YouTube.
 
-## How it works
+= How it works =
 
 After installing the Smart Online Order for Clover plugin, add the pages "Order Online", "Checkout" and "My Orders" by going to Appearance then Menu from the Wordpress Dashboard. Then sync your website with your Clover POS using “Import inventory”.
 
@@ -41,69 +41,40 @@ if you don’t have a Wordpress website so we can create for you the Online Orde
 
 If you don’t have any kind of website and don’t know where to start give us a call or send us an email as we can make you a website with Online Ordering.
 
-
-
-## Other Examples
 Below are just a few websites currently using Smart Online Order with their Clover POS.
 
-[Vegan Mob - Oakland CA](https://veganmob.com/store/)
-
 [Burger Restaurant](https://chicknchuck.com/)
-
 [Full Service Restaurant](https://www.theoriginalturkey.com)
-
 [Island Smoothie Cafe](https://www.islandsmoothiecafe.com)
-
-[HarissaToGo](https://HarissaToGo.com)
-
-[Pizza shop Example 1](https://pomodoropizzafl.com)
-
+[Pizza shop Example 1](https://pomodoropizzafl.com/store)
 [Pizza shop Example 2](http://www.fastpizzaonline.com)
-
 [Pizza shop Example 3](https://www.zifaros.com)
-
 [Oasis Grill ](https://oasisgrill.com)
-
 [Cake Shop](https://nolandscakes.com)
-
-[Multi locations example](http://oak2go.com/)
-
-[Breadologie bakery](https://breadologie.smartonlineorder.com/)
-
 [Pizza Shop Example 4](https://villaromarestaurant.net)
-
 [Pizza Shop Example 5](https://venuspizzeriafl.com)
-
 [Pizza Shop Example 6](https://www.tonyspizzaandgrinders.com)
-
 [Coffee Shop Example 2](https://www.teabocoffee.com)
-
 [Another Cafe Example](https://misskellyscafe.com)
-
 [Poke Food Example](https://www.bigfinpoke.com)
-
 [Indian Food Example](https://www.himalayanfusiononline.com)
-
 [Cookie Store Example](https://rucookiemunchers.com/)
-
-[Oakwells](http://oakwells.com/)
-
 [Minami](https://minamisushi.com/)
-
-[Connections cafe & catering](https://connectionscafecatering.com/)
-
+[HANA TEA](https://hanatea8088.smartonlineorder.com)
+[ROSE TEA LOUNGE](https://rosetealounge.smartonlineorder.com/)
+[ACME SMOKED FISH](https://acmesmokedfish.smartonlineorder.com/)
 
 Some websites we built, other websites were built by the merchant themselves or developers they hired.
 
-## Installation
+== Installation ==
 
 Here is what you need to do:
 
-1. Clone this repository on a local machine.
-2. Install this Plugin - Upload via FTP/File Editor into website /home/wp-content/plugins/ and add clover-online-orders
-3. Enter the Api-Key in the Smart Online Order Plugin in Wordpress. The Api Key is found by going to Clover.com and opening Smart Online Order-Wordpress
-4. Then enter Api Key and press save. Import Your Inventory by pressing import inventory in the Smart Online Order Wordpress Plugin - You can also Search Youtube for "Smart Online Order" for tutorials
-5. A new page is automatically created for you. Just put /store after your domain name to see the Online Order page. For example: If your website name is mysushi.com enter mysushi.com/store to see the online order page
+1. Install the app by Zaytech called “[Smart Online Order + Wordpress](https://www.clover.com/appmarket/apps/6MWGRRXJD5HMW?clientCountry=US )” to your Clover POS - Clover Station, Clover Mini, etc.
+1. Install this Plugin - From Wordpress Plugin - search "Clover" or "Smart Online Order"
+1. Enter the Api-Key in the Smart Online Order Plugin in Wordpress. The Api Key is found by going to Clover.com and opening Smart Online Order-Wordpress
+1. Then enter Api Key and press save. Import Your Inventory by pressing import inventory in the Smart Online Order Wordpress Plugin - You can also Search Youtube for "Smart Online Order" for tutorials
+1. A new page is automatically created for you. Just put /store after your domain name to see the Online Order page. For example: If your website name is mysushi.com enter mysushi.com/store to see the online order page
 
 
 You can also add your menu in a new post/page or an existing one using this shortcode
@@ -139,11 +110,11 @@ And to add only "add to cart button" useful if you want create new sections like
 
 `[moo_buy_button id='6PJNZJVEHF0XE']`
 
-## VIDEO
+= VIDEO =
 
 Search Youtube "Smart Online Order" for Tutorial Videos
 
-## Frequently Asked Questions
+== Frequently Asked Questions ==
 
 = What is a Clover POS =
 
@@ -169,18 +140,24 @@ No, this plug-in is not by Clover. It is from Zaytech. Both this plug-in and Sma
 
 Please let us know so we can implement additional features.support@zaytech.com
 
-## Changelog
+== Changelog ==
 
-= 1.4.5
-* Added verbose alerts to OnePage Theme to store/product page & checkout page
-* New Tip Calculator Style on OnePage Theme
-* Added Gift Card Option (Pay in store) labeling.
-* Updated checkout and add-to-cart screen styling.
-* Add lead time estimate to confirmation screen.
-An example of the updated with screenshots.
-![Vegan Mob Store](https://veganmob.biz/wp-content/uploads/2020/11/clover-online-order-store.jpg)
-![Vegan Mob Checkout](https://veganmob.biz/wp-content/uploads/2020/11/clover-online-order-checkout-1.jpg)
-![Vegan Mob Confirmation Screen](https://veganmob.biz/wp-content/uploads/2020/11/clover-online-order-confirmation.jpg)
+= 1.4.5 =
+* Fixed issue with display/hide show more in store interface 6
+* Improved Auto-Sync for items
+* Added ability to serve categories and items images using the CDN
+* Added ability to use coupons automatically using the query param "soocoupon"
+* Improved PHP 8 Compatibility
+* Changed Date format in Orders to local timezone instead of UTC
+* Improved Store interface 4 and added more customization options
+* Improved the ability to add images and descriptions easier to items
+* Added ability to see original modifier names after name change
+* Fixed issue to go back to same category after adding images
+* Add ability to require scheduled orders when the store is closed
+* Added announcement section inside Smart Online Order
+* Added ability to make “Special Instructions” Required
+* Added ability to use CDN for images
+* General updates and improvements
 
 = 1.4.4 =
 * Updated payment options
@@ -357,7 +334,6 @@ An example of the updated with screenshots.
 * Improved delivery fee calculation
 * Improved layout so more description can be added
 * Fixed various bugs and made improvements
-
 = 1.2.4 =
 * Improved process to make adding descriptions easier
 * Ability to rearrange items
@@ -369,7 +345,6 @@ An example of the updated with screenshots.
 * Added the short-code [moo_all _items category='uuid'] for store interface 1. This allows to place categories on different pages by using the short code. Also possible for store interface 2
 * Fixed partial payment issue
 * Fixed other bugs and made improvements
-
 = 1.2.3 =
 * Improved and increased font size for required modifier
 * Updated email receipts with more information
@@ -379,7 +354,6 @@ An example of the updated with screenshots.
 = 1.2.2 =
 * Ability to rearrange modifiers & modifiers group
 * Ability to change modifiers names
-
 = 1.2.1 =
 * Prevent customer from ordering outside of business hours and days
 * Option to add image to any category
@@ -387,13 +361,11 @@ An example of the updated with screenshots.
 * Added multiple images for item
 * Improved order later
 * Improved manually sync
-
 = 1.2.0 =
 * Added Out of stock feature
 * Improved checkout feature
 * New design for plugin's dashboard
 * Improved the exiting styles
-
 = 1.1.9 =
 * Added Order for later
 * Added SMS notification for merchants and customers
@@ -401,43 +373,34 @@ An example of the updated with screenshots.
 * Pickup without paying
 * Manually Sync
 * Add to cart button
-
 = 1.1.7 =
 * Improved The CART CSS
 * remove qty limit
 * Removed Style 2
 * fixed empty map in checkout
-
 = 1.1.6 =
 * Added delivery area
 * Added tips
 * Added required modifiers
-
 = 1.1.4 =
 * Fixed Modifier issues
-
 = 1.1.3 =
 * Added image for products
 * Fixed more than one checkout page issue
 * The Cart in new page
 * Added order information in checkout page
-
 = 1.1.1 =
 * Display the items without category
 * Min and Max Modifier allowed in group modifier
-
 = 1.1.0 =
 * Fixed bulk show/hide items
 * Added show/hide category
 * Change category's name
-
 = 1.0.9 =
 * Fixed cart's color
 * Fixed the shortcode issue
-
 = 1.0.8 =
 * Added a video
-
 = 1.0.7 =
 = Added : =
 * Store's hours
@@ -448,23 +411,17 @@ An example of the updated with screenshots.
 = Fixed : =
 * Partially paid
 * Changing the quantify of an item in the cart
-
 = 1.0.6 =
 Fix issues
-
 = 1.0.5 =
 = Added : =
 * Change name of Modifier group
 * Show/hide Modifier group
 = 1.0.4 =
-
 Fix issues
-
 = 1.0.2 =
 Change the UI for Modifiers
-
 = 1.0.1 =
 Update Frequently Asked Questions
-
 = 1.0.0 =
 First Release

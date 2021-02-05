@@ -2,17 +2,19 @@ window.moo_current_request = null;
 var hash = window.location.hash;
 
 jQuery(document).ready(function() {
-    if(moo_customer_logged === 'yes') {
+    window.moo_RestUrl = moo_params.moo_RestUrl;
+
+    if(mooOptions.moo_customer_logged === 'yes') {
         moo_my_account_myorders_perPage(1);
     }
 });
-if(typeof moo_fb_app_id !== undefined && moo_fb_app_id !== null)
+if(typeof mooOptions.moo_fb_app_id !== undefined && mooOptions.moo_fb_app_id !== null)
 {
-    if(moo_fb_app_id !== "")
+    if(mooOptionsmoo_fb_app_id !== "")
     {
         window.fbAsyncInit = function() {
             FB.init({
-                appId      : moo_fb_app_id,
+                appId      : mooOptions.moo_fb_app_id,
                 xfbml      : true,
                 version    : 'v2.8'
             });
