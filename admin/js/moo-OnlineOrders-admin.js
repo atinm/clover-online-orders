@@ -1,11 +1,10 @@
 jQuery(document).ready(function($){
-    window.addEventListener("message", handlePopupResult, false);
     window.moo_loading = '<svg xmlns="http://www.w3.org/2000/svg" width="44px" height="44px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="uil-default"><rect x="0" y="0" width="100" height="100" fill="none" class="bk"></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(0 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(30 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.08333333333333333s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(60 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.16666666666666666s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(90 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.25s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(120 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.3333333333333333s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(150 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.4166666666666667s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(180 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(210 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.5833333333333334s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(240 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.6666666666666666s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(270 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.75s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(300 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.8333333333333334s" repeatCount="indefinite"></animate></rect><rect x="46.5" y="40" width="7" height="20" rx="5" ry="5" fill="#00b2ff" transform="rotate(330 50 50) translate(0 -30)">  <animate attributeName="opacity" from="1" to="0" dur="1s" begin="0.9166666666666666s" repeatCount="indefinite"></animate></rect></svg>';
     window.moo_first_time = true;
     window.moo_nb_allItems =0;
     window.customHoursForCategoriesUpdated = false;
     window.customHoursForOrderTypesUpdated = false;
-
+    window.moo_RestUrl = moo_params.moo_RestUrl;
 
     $('.moo-edit-description-button').magnificPopup({
         type:'inline',
@@ -18,17 +17,17 @@ jQuery(document).ready(function($){
         closeBtnInside: true,
         midClick: true // Allow opening popup on middle mouse click. Always set it to true if you don't provide alternative source in href.
     });
-    $("#show_menu").click(function(e) {
+    $("#show_menu").on("click",function(e) {
         e.preventDefault();
         $("#MooPanel_main>#menu_for_mobile>ul").toggle();
     });
-    // check if we ae on settings page
+    // check if we are on settings page
     if(document.getElementById("MooPanel") !== null) {
         moo_Update_stats();
         Moo_GetOrderTypes();
         Moo_SetupCategoriesSection();
 
-        $("div.faq_question").click(function() {
+        $("div.faq_question").on("click",function() {
             var clicked = $(this);
             // Get next element to current element
             clicked = clicked.next();
@@ -44,7 +43,7 @@ jQuery(document).ready(function($){
         }
 
 
-        if($('#moo_progressbar_container').length == 1)
+        if($('#moo_progressbar_container').length == 1)  {
             window.bar = new ProgressBar.Line('#moo_progressbar_container', {
                 strokeWidth: 4,
                 easing: 'easeInOut',
@@ -70,76 +69,9 @@ jQuery(document).ready(function($){
                 from: {color: '#FFEA82'},
                 to: {color: '#ED6A5A'}
             });
-
-        $('div#MooPanel_tabContent4 input#MooDefaultStyle').each(function (i,val) {
-            var v = $(val).attr('value');
-            if($(val).prop('checked'))
-            {
-                $('div#MooPanel_tabContent4 input[value='+v+']').next().css('border', '2px solid rgb(34, 255, 79)');
-                $('#mooInterface-'+v).show();
-            }
-            else
-            {
-                $('div#MooPanel_tabContent4 input[value='+v+']').next().css('border', '1px solid #999');
-                $('#mooInterface-'+v).hide();
-            }
-        });
-
-        $('div#MooPanel_tabContent4 input#MooDefaultStyle').click(function(event) {
-            var elm = $(event.target);
-            var value = elm.attr('value');
-            $('div#MooPanel_tabContent4 input#MooDefaultStyle').each(function (i,val) {
-                var v = $(val).attr('value');
-                if(v == value)
-                {
-                    $('div#MooPanel_tabContent4 input[value='+value+']').next().css('border', '2px solid rgb(34, 255, 79)');
-                    $('#mooInterface-'+v).show();
-                }
-                else
-                {
-                    $('div#MooPanel_tabContent4 input[value='+v+']').next().css('border', '1px solid #999');
-                    $('#mooInterface-'+v).hide();
-                }
-            })
-        });
+        }
 
 
-
-
-
-        $('#orderCategory input').bind('click.sortable mousedown.sortable',function(ev){
-            ev.target.focus();
-        });
-        name_cat = "";
-        $(".table_category").on("click",".edit_name",function(event) {
-            event.preventDefault();
-            var idCat   = $(this).parent().parent().find("td:eq(0)").text();
-            var idCatStr   = '"'+idCat+'"';
-            var nameCat = $(this).parent().parent().find("td:eq(2)").text();
-            var id_name = $(this).parent().parent().find("td:eq(2)").attr("id");
-            name_cat = '"'+nameCat+'"';
-            var c_html = "";
-            c_html +="<div class='input-change-name'>";
-            c_html += "<div class='input-name'>";
-            c_html += "<input type='text' value='"+nameCat+"' id='newName"+idCat+"' class='newname'>";
-            c_html += "</div>";
-            // c_html += "<div class='button-name'>";
-            c_html += "<div class='bt-valider'>";
-            c_html +='<a href="#" class="vald-change-name" onclick=\'vald_change_name(event,'+idCatStr+',"D")\'>';
-            c_html +='<span id="moo_valide_change1" data-ot="valider_change_name" data-ot-target="#moo_valide_change1">';
-            c_html +="<img src='"+moo_params.plugin_url+"/public/img/valider.png' alt='Validate change'>";
-            c_html +="</span>";
-            c_html +="</a>";
-            c_html += "</div>";
-            c_html += "<div class='bt-annuler'>";
-            c_html +='<a href="#" class="annuler-change-name" onclick=\'annuler_change_name(event,'+idCatStr+',"D",'+name_cat+')\'>';
-            c_html += "<img src='"+moo_params.plugin_url+"/public/img/annuler.png' alt='Annuler change'>";
-            c_html +="</a>";
-            c_html += "</div>";
-            //c_html += "</div>";
-            c_html += "</div>";
-            $("#"+id_name).html(c_html);
-        });
         /* --- Modifier Group --- */
 
         $('.moo_ModifierGroup input').bind('click.sortable mousedown.sortable',function(ev){
@@ -148,16 +80,100 @@ jQuery(document).ready(function($){
         $('.sub-group input').bind('click.sortable mousedown.sortable',function(ev){
             ev.target.focus();
         });
+        //Drag and drop
+        $("#sortable").sortable({
+            stop: function(event, ui) {
+                var tabNew = new Array();
+                var i = 0;
+
+                jQuery("#sortable tr").each(function(i, el){
+                    tabNew[i] = jQuery(this).attr("data-cat-id");
+                    i++;
+                });
+                jQuery.post(moo_params.ajaxurl,{'action':'moo_new_order_categories','newtable':tabNew},function(data){
+                    //console.log(data);
+                })
+            }
+        });
+
+        $("#orderCategory").sortable({
+            stop: function(event, ui) {
+                var tabNew = new Array();
+                var i = 0;
+                jQuery("#orderCategory .category-item").each(function (i, el) {
+                    tabNew[i] = jQuery(this).attr("cat-id-mobil");
+                    i++;
+                });
+                jQuery.post(moo_params.ajaxurl,{'action':'moo_new_order_categories','newtable':tabNew},function(data){
+                    //console.log(data);
+                })
+            }
+        });
+
+        $(".moo_listItem").sortable({
+            stop: function(event, ui) {
+                var category = jQuery(this).attr("id-cat");
+                var tabNew = new Array();
+                var i = 0;
+                jQuery(".moo_listItem li.cat"+category).each(function(i, el){
+                    tabNew[i] = jQuery(this).attr("uuid_item");
+                    i++;
+                });
+                jQuery.post(moo_params.ajaxurl,{'action':'moo_reorder_items','newtable':tabNew},function(data){
+                    console.log(data);
+                });
+            }
+        });
+
+
+        $(".sub-group").sortable({
+            stop: function(event, ui) {
+                var group = jQuery(this).attr("GM");
+                var tabNew = new Array();
+                var i = 0;
+                jQuery(".moo_ModifierGroup .list-GModifier_"+group).each(function (i, el) {
+                    tabNew[i] = jQuery(this).attr("group-id");
+                    i++;
+                });
+                //var NB = tabNew.length;
+                jQuery.post(moo_params.ajaxurl,{'action':'moo_new_order_modifier','group_id':group,'newtable':tabNew},function(data){
+                    console.log(data);
+                })
+            }
+        });
+
+        $(".moo_ModifierGroup").sortable({
+            stop: function(event, ui) {
+                var tabNew = new Array();
+                var i = 0;
+                jQuery(".moo_ModifierGroup .list-group").each(function (i, el) {
+                    tabNew[i] = jQuery(this).attr("group-id");
+                    i++;
+                });
+                jQuery.post(moo_params.ajaxurl,{'action':'moo_new_order_group_modifier','newtable':tabNew},function(data){
+                    console.log(data);
+                })
+            }
+        });
+
     }
 
    /* Remove loader*/
     $('body').addClass('loaded');
     //Force removing loader after 10 seconds
-    setTimeout(function(){ $('body').addClass('loaded') }, 10000);
+    setTimeout(function(){ $('body').addClass('loaded') }, 3);
 
     if($('.moo-color-field')) {
         $('.moo-color-field').wpColorPicker();
     }
+
+    $('#CouponExpiryDate').datepicker({
+        dateFormat: 'mm-dd-yy'
+    });
+
+    $('#CouponStartDate').datepicker({
+        dateFormat: 'mm-dd-yy'
+    });
 
     if ( window.location.hash != "" ) {
         switch (window.location.hash) {
@@ -169,6 +185,9 @@ jQuery(document).ready(function($){
                 break;
             case "#ordertypes":
                 tab_clicked(3);
+                break;
+            case "#announcements":
+                tab_clicked(4);
                 break;
             case "#categories":
                 tab_clicked(5);
@@ -196,97 +215,21 @@ jQuery(document).ready(function($){
                 break;
         }
     }
+
+    //check the api key
+    if($("#moo-checking-section")){
+        if($("#moo-checking-section").css("display") === "block") {
+            mooCheckApiKeyOnLoading();
+        }
+    }
+    if($("#mooAutoSyncCheking")){
+        if($("#mooAutoSyncCheking").css("display") === "block"){
+            mooCheckAutoSyncStatus();
+        }
+    }
 });
 
-jQuery(document).ready(function() {
 
-    //Drag and drop
-    jQuery("#sortable").sortable({
-        stop: function(event, ui) {
-            var tabNew = new Array();
-            var i = 0;
-
-            jQuery("#sortable tr").each(function(i, el){
-                tabNew[i] = jQuery(this).attr("data-cat-id");
-                i++;
-            });
-            jQuery.post(moo_params.ajaxurl,{'action':'moo_new_order_categories','newtable':tabNew},function(data){
-                //console.log(data);
-            })
-        }
-    });
-
-    jQuery("#orderCategory").sortable({
-        stop: function(event, ui) {
-            var tabNew = new Array();
-            var i = 0;
-            jQuery("#orderCategory .category-item").each(function (i, el) {
-                tabNew[i] = jQuery(this).attr("cat-id-mobil");
-                i++;
-            });
-            jQuery.post(moo_params.ajaxurl,{'action':'moo_new_order_categories','newtable':tabNew},function(data){
-                //console.log(data);
-            })
-        }
-    });
-
-    jQuery(".moo_listItem").sortable({
-        stop: function(event, ui) {
-            var category = jQuery(this).attr("id-cat");
-            var tabNew = new Array();
-            var i = 0;
-            jQuery(".moo_listItem li.cat"+category).each(function(i, el){
-                tabNew[i] = jQuery(this).attr("uuid_item");
-                i++;
-            });
-            jQuery.post(moo_params.ajaxurl,{'action':'moo_reorder_items','newtable':tabNew},function(data){
-                console.log(data);
-            });
-        }
-    });
-
-
-    jQuery(".sub-group").sortable({
-        stop: function(event, ui) {
-            var group = jQuery(this).attr("GM");
-            var tabNew = new Array();
-            var i = 0;
-            jQuery(".moo_ModifierGroup .list-GModifier_"+group).each(function (i, el) {
-                tabNew[i] = jQuery(this).attr("group-id");
-                i++;
-            });
-            //var NB = tabNew.length;
-            jQuery.post(moo_params.ajaxurl,{'action':'moo_new_order_modifier','group_id':group,'newtable':tabNew},function(data){
-                console.log(data);
-            })
-        }
-    });
-
-    jQuery(".moo_ModifierGroup").sortable({
-        stop: function(event, ui) {
-            var tabNew = new Array();
-            var i = 0;
-            jQuery(".moo_ModifierGroup .list-group").each(function (i, el) {
-                tabNew[i] = jQuery(this).attr("group-id");
-                i++;
-            });
-            jQuery.post(moo_params.ajaxurl,{'action':'moo_new_order_group_modifier','newtable':tabNew},function(data){
-                console.log(data);
-            })
-        }
-    });
-
-    jQuery('.moo-color-field').wpColorPicker();
-
-    jQuery('#CouponExpiryDate').datepicker({
-        dateFormat: 'mm-dd-yy'
-    });
-
-    jQuery('#CouponStartDate').datepicker({
-        dateFormat: 'mm-dd-yy'
-    });
-
-});
 /* --- Modifier Group --- */
 function edit_name_GGroup(event,id){
     event.preventDefault();
@@ -307,10 +250,8 @@ function validerChangeNameGG(event,id){
 }
 function annulerChangeNameGG(event,id,name) {
     event.preventDefault();
-    var name = jQuery("#label_"+id+" .getname").text();
     jQuery("#label_"+id+" .getname").css("display","block");
     jQuery("#label_"+id+" .change-name").css("display","none");
-    jQuery("#label_"+id+" .change-name input").val(name);
 }
 
 function show_sub(event,id){
@@ -343,10 +284,8 @@ function validerChangeNameModifier(event,id){
 }
 function annulerChangeNameModifier(event,id,name){
     event.preventDefault();
-    var name = jQuery("#label_"+id+" .getname").text();
     jQuery("#label_"+id+" .getname").css("display","block");
     jQuery("#label_"+id+" .change-name-modifier").css("display","none");
-    jQuery("#label_"+id+" .change-name-modifier input").val(name);
 }
 /* --- Modifier Group --- */
 function vald_change_name(event,uuid,v) {
@@ -542,11 +481,11 @@ function tab_clicked(tab)
     jQuery('#MooPanel_tabContent'+tab).show();
     jQuery('#MooPanel_tab'+tab).addClass("MooPanel_Selected");
 
-    if(tab === 9 &&  window.moo_first_time === true)
-    {
+    if(tab === 9 &&  window.moo_first_time === true) {
         moo_getLatLongforMapDa();
-        window.moo_first_time = false;
-        moo_setup_existing_zones();
+        if(typeof moo_merchantAddress !== "undefined"){
+            window.moo_first_time = false;
+        }
     }
     //refresh when clicking on categories
     if(tab === 5){
@@ -583,53 +522,63 @@ function MooPanel_RefreshPage(event)
     event.preventDefault();
     window.location.reload();
 }
-var flag_key_noy_found = false;
+var flag_key_not_found = false;
 
 function Moo_ImportCategories() {
     jQuery.post(moo_params.ajaxurl,{'action':'moo_import_categories'}, function (data) {
-            if(data.status === 'Success')
-            {
+            if(data.status === 'Success') {
                 if(data.data === "Please verify your Key in page settings") {
-                    flag_key_noy_found = true;
+                    flag_key_not_found = true;
                     jQuery('#MooPanelSectionImport').html('Please verify your API Key<br/> ');
-                }
-                else
+                } else {
+                    flag_key_not_found = false;
                     jQuery('#MooPanelSectionImport').append('<br/> '+data.data);
-            }
-            else
+                }
+            } else {
                 jQuery('#MooPanelSectionImport').append('<br/> '+"Error when importing the categories, please try again");
-        }
-    ).done(function () {
+            }
+    }).done(function () {
             Moo_ImportLabels();
+    }).fail(function (response) {
+        console.log(response);
+        jQuery('#MooPanelSectionImport').html("An error has occurred, please re-import again or refresh the page and try again"+'<br/> ');
+        jQuery('#MooPanelSectionImportItems').html('');
+        jQuery('#MooPanelButtonImport').html('<a href="#" onclick="MooPanel_RefreshPage(event)" class="button button-secondary" style="margin-bottom: 35px;" >Refresh</a>  <a href="#" onclick="MooPanel_ImportItems(event)" class="button button-secondary" style="margin-bottom: 35px;">Re-Import</a>');
     });
 }
 
-function Moo_ImportLabels()
-{
-    if(!flag_key_noy_found) {
+function Moo_ImportLabels() {
+    if(!flag_key_not_found) {
         jQuery.post(moo_params.ajaxurl,{'action':'moo_import_labels'}, function (data) {
                 if(data.status === 'Success')
                     jQuery('#MooPanelSectionImport').append('<br/> '+data.data);
                 else
                     jQuery('#MooPanelSectionImport').append('<br/> '+"Error when importing the label, please try again");
-            }
-        ).done(function () {
+        }).done(function () {
             Moo_ImportTaxes();
+        }).fail(function (response) {
+            console.log(response);
+            jQuery('#MooPanelSectionImport').html("An error has occurred, please re-import again or refresh the page and try again"+'<br/> ');
+            jQuery('#MooPanelSectionImportItems').html('');
+            jQuery('#MooPanelButtonImport').html('<a href="#" onclick="MooPanel_RefreshPage(event)" class="button button-secondary" style="margin-bottom: 35px;" >Refresh</a>  <a href="#" onclick="MooPanel_ImportItems(event)" class="button button-secondary" style="margin-bottom: 35px;">Re-Import</a>');
         });
     }
 
 }
-function Moo_ImportTaxes()
-{
+function Moo_ImportTaxes() {
     jQuery.post(moo_params.ajaxurl,{'action':'moo_import_taxes'}, function (data) {
             if(data.status ==='Success')
                 jQuery('#MooPanelSectionImport').append('<br/> '+data.data);
             else
                 jQuery('#MooPanelSectionImport').append('<br/> '+"Error when importing the taxes rates, please try again");
-        }
-    ).done(function () {
+    }).done(function () {
             Moo_ImportItems();
-        });
+    }).fail(function (response) {
+        console.log(response);
+        jQuery('#MooPanelSectionImport').html("An error has occurred, please re-import again or refresh the page and try again"+'<br/> ');
+        jQuery('#MooPanelSectionImportItems').html('');
+        jQuery('#MooPanelButtonImport').html('<a href="#" onclick="MooPanel_RefreshPage(event)" class="button button-secondary" style="margin-bottom: 35px;" >Refresh</a>  <a href="#" onclick="MooPanel_ImportItems(event)" class="button button-secondary" style="margin-bottom: 35px;">Re-Import</a>');
+    });
 }
 function Moo_ImportItems() {
     Moo_ImportItemsV2(0);
@@ -640,8 +589,7 @@ function Moo_ImportItemsV2(page) {
     jQuery.post(moo_params.ajaxurl,{'action':'moo_import_items_v2','page':page}, function (data) {
             received = data.received;
             productsNb = data.currentNb;
-        }
-    ).done(function () {
+    }).done(function () {
         if(received > 0) {
             jQuery('#MooPanelSectionImportItems').html(productsNb + " Items imported"+'<br/> ');
             Moo_ImportItemsV2(page+1);
@@ -653,6 +601,11 @@ function Moo_ImportItemsV2(page) {
             Moo_GetOrderTypes();
             Moo_SetupCategoriesSection();
         }
+    }).fail(function (response) {
+        console.log(response);
+        jQuery('#MooPanelSectionImport').html("An error has occurred, please re-import again or refresh the page and try again"+'<br/> ');
+        jQuery('#MooPanelSectionImportItems').html('');
+        jQuery('#MooPanelButtonImport').html('<a href="#" onclick="MooPanel_RefreshPage(event)" class="button button-secondary" style="margin-bottom: 35px;" >Refresh</a>  <a href="#" onclick="MooPanel_ImportItems(event)" class="button button-secondary" style="margin-bottom: 35px;">Re-Import</a>');
     });
 }
 
@@ -778,7 +731,7 @@ function Moo_GetOrderTypes(uuid = null){
 
                         //Limit Availability time
                         html +='<div class="champ_order type_order"><span class="label_Torder">Ordering Hours</span>';
-                        html +='<select name="" id="availabilityCustomTime_'+$ot.ot_uuid+'" onchange="mooSelecetdTimeChanged(event,\'ordertypes\',\''+$ot.ot_uuid+'\')">' +
+                        html +='<select name="" id="availabilityCustomTime_'+$ot.ot_uuid+'" >' +
                             '<option value="">Default Clover Business Hours</option>'+
                             '<optgroup label="Choose Order Type Hours">' ;
 
@@ -873,6 +826,7 @@ function Moo_SetupCategoriesSection( uuid = null ){
         jQuery("#moo-categories-edit-section").hide().html('');
         jQuery("#moo-btn-backtocategories").hide();
         jQuery("#moo-btn-reordercategories").show();
+
         if(moo_RestUrl.indexOf("?rest_route") !== -1){
             var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories&_wpnonce='+ moo_params.nonce;
         } else {
@@ -1044,6 +998,9 @@ function Moo_SetupReorderCategoriesSection(event){
     }
 }
 function Moo_RefeshEditCategorySection(event,uuid) {
+    if(event){
+        event.preventDefault();
+    }
     if(moo_RestUrl.indexOf("?rest_route") !== -1 ){
         var endpoint = moo_RestUrl+'moo-clover/v2/dash/categories_hours/&_wpnonce='+ moo_params.nonce;
     } else {
@@ -1052,7 +1009,6 @@ function Moo_RefeshEditCategorySection(event,uuid) {
     jQuery.get(endpoint, function (data) {
         if(data.status === "success"){
             moo_custom_hours = data.data;
-            console.log(data.data);
         } else {
             console.log(moo_custom_hours);
         }
@@ -1063,8 +1019,7 @@ function Moo_RefeshEditCategorySection(event,uuid) {
     });
 }
 function Moo_CustomHoursForCategories() {
-    if( document.querySelector('.moo-categories-section') !== null )
-    {
+    if( document.querySelector('.moo-categories-section') !== null ) {
         jQuery(".moo-categories-section").show();
         jQuery("#moo-categories-edit-section").hide().html('');
         jQuery("#moo-btn-backtocategories").hide();
@@ -1150,12 +1105,14 @@ function moo_EditCategoryTimeAvailability(event, uuid) {
 }
 
 function Moo_SetupEditCategorySection(event, uuid) {
-    if(event)
+    if(event) {
         event.preventDefault();
-    //todo:show loading section
+    }
     if( document.querySelector('.moo-categories-section') !== null ) {
         jQuery(".moo-categories-section").hide();
         jQuery("#moo-categories-edit-section").show().html('');
+        document.querySelector('#MooPanel_tabContent5 #moo-categories-edit-section').innerHTML  ="<div>Loading the details please wait...<br/></div>";
+
         if(moo_RestUrl.indexOf("?rest_route") !== -1){
             var endpoint = moo_RestUrl+'moo-clover/v2/dash/category/'+uuid+'&_wpnonce='+ moo_params.nonce;
         } else {
@@ -1245,13 +1202,13 @@ function Moo_SetupEditCategorySection(event, uuid) {
                 html += '</div>';
                 html += '</div>';
                 // Choose hours
-
                 html += '<div class="moo-category-timing-content" id="moo-av-time-for-'+category.uuid+'">';
                 html += '<div class="moo-col-md-12  moo-category-timing-header"></div>';
                 html += '<div class="moo-col-md-8  moo-category-timing-body">' +
                     '<div class="moo-col-md-4">Choose hours</div> '  +
-                    '<div class="moo-col-md-8"> <select name="" id="moo-category-availability-time-'+category.uuid+'" onchange="mooSelecetdTimeChanged(event,\'standard\',\''+category.uuid+'\')">' +
+                    '<div class="moo-col-md-8"> <select name="" id="moo-category-availability-time-'+category.uuid+'" >' +
                     '<option value="">Select</option>';
+
                 //Add the Custom Hours to the select
                 if(moo_custom_hours){
                     Object.keys(moo_custom_hours).forEach(function (key) {
@@ -1280,6 +1237,7 @@ function Moo_SetupEditCategorySection(event, uuid) {
                 html += '</div>';
                 html += '<div class="moo-col-md-3 moo-category-sync-col2" onclick="mooImportOneCategory(\''+category.uuid+'\')"><div class="moo-category-sync-button-sync">Sync</div></div>';
                 html += '</div>';
+
                 // Reorder items section
                 html += '<div class="moo-row moo-reorder-category-items-row">';
                 if(category.items !== undefined && category.items.length>0) {
@@ -1360,7 +1318,7 @@ function Moo_EditCategory(event,uuid) {
         } else {
             swal({
                 title:"No changes detected",
-                text:"Please try again or contact us",
+                text:"Adding images does not require pressing save",
                 type:"error"
             });
         }
@@ -1700,6 +1658,8 @@ function MooChangeCategory_Status_Mobile(uuid)
 
 var media_uploader  = null;
 var moo_item_images = [];// {"image_url": "", "image_default": "", "image_enabled": ""}
+var moo_item_options = [];// {"name": "", "min": "", "max": "","modifiers":[]}
+
 var moo_category_images;
 
 function uploader_image_category(event,id,responsive){
@@ -1818,12 +1778,57 @@ function open_media_uploader_image() {
         var image_title = json.title;
         moo_item_images.push({"image_url": image_url, "image_default": "1", "image_enabled": "1"});
         moo_display_item_images();
+
     });
     media_uploader.open();
 }
+function show_itemOptions(event,id){
+    event.preventDefault();
+    jQuery('#itemChoices_'+id).slideToggle('fast', function() {
+        if (jQuery(this).is(':visible')) {
+            jQuery("#plus_itemOption_"+id).attr('src',moo_params.plugin_url+'/public/img/substract.png');
+        } else {
+            jQuery("#plus_itemOption_"+id).attr('src',moo_params.plugin_url+'/public/img/add.png');
+        }
+    });
+    //jQuery('#detail_group_'+id).slideToggle();
+}
+function moo_display_item_options() {
+    jQuery('#moo_item_options').html('');
+    if(moo_item_options.length>0){
+        var html = "<h1>Options</h1>";
+             html += "<ul class='moo_ModifierGroup ui-sortable'>";
+        for(i in moo_item_options){
+            var option = moo_item_options[i];
+            html += "<li class='list-group ui-sortable-handle' id='itemOption_"+i+"'>" +
+                "<span class='show-detail-group'>" +
+                '<a href="#" onclick="show_itemOptions(event,\''+i+'\')">' +
+                '<img src="'+ moo_params.plugin_url+'/public/img/substract.png" id="plus_itemOption_'+i+'" style="width: 20px;">'+
+                "</a>" +
+                "</span>"+
+                "<div class='label_name'><label>"+option.name+"</label></div>" +
+                "<ul class='sub-group ui-sortable' id='itemChoices_"+i+"'>";
+            for(j in option.modifiers){
+                html +="<li>"+option.modifiers[j].name;
+                if(option.modifiers[j].price !== 0){
+                    var p = option.modifiers[j].price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+                    html +=" (+$"+option.modifiers[j].price.toFixed(2)+") ";
+                }
+                html +="</li>";
+            }
 
+
+            html +="</ul>"+
+                "</li>";
+        }
+        html += '</ul>';
+        jQuery('#moo_item_options').append(html);
+        jQuery('#moo_item_options').show();
+    } else {
+
+    }
+}
 function moo_display_item_images() {
-    console.log('moo_display_item_images');
     jQuery('#moo_itemimagesection').html('');
     for(i in moo_item_images){
         var image = moo_item_images[i].image_url;
@@ -1837,9 +1842,9 @@ function moo_display_item_images() {
             tag = "<input id='image_default_id_"+i+"' onchange='moo_default_item_image("+i+")' type='radio' name='image_default' value='image_default'><label style='position: relative; top: -4px; right: -10px;' for='image_default_id_"+i+"'>Default Image</label>";
         }
         if (b1 === 1) {
-            tag1 = "<input id='image_enabled_id_"+i+"' onchange='moo_enable_item_image("+i+")' type='checkbox' name='image_enabled"+i+"' value='image_enabled' checked><label style='position: relative; top: -4px; right: -10px;' for='image_default_id_"+i+"'>Image Enabled</label>";
+            tag1 = "<input id='image_enabled_id_"+i+"' onchange='moo_enable_item_image("+i+")' type='checkbox' name='image_enabled"+i+"' value='image_enabled' checked><label style='position: relative; top: -4px; right: -10px;' for='image_enabled_id_"+i+"'>Image Enabled</label>";
         } else {
-            tag1 = "<input id='image_enabled_id_"+i+"' onchange='moo_enable_item_image("+i+")' type='checkbox' name='image_enabled"+i+"' value='image_enabled'><label style='position: relative; top: -4px; right: -10px;' for='image_default_id_"+i+"'>Image Enabled</label>";
+            tag1 = "<input id='image_enabled_id_"+i+"' onchange='moo_enable_item_image("+i+")' type='checkbox' name='image_enabled"+i+"' value='image_enabled'><label style='position: relative; top: -4px; right: -10px;' for='image_enabled_id_"+i+"'>Image Enabled</label>";
         }
         /*var html = '<table style="margin: 0 auto;">'+
                     '<tr><td rowspan="3"><img height="200" width="300" src="'+image+'" alt=""></td>'+
@@ -1880,6 +1885,7 @@ function moo_enable_item_image(id) {
 }
 
 function moo_save_item_images(uuid) {
+    mooShowWaitMessage();
     var description = jQuery('#moo_item_description').val();
     var flag = false;
     for(var i=0 in moo_item_images) {
@@ -1900,22 +1906,45 @@ function moo_save_item_images(uuid) {
     }
     jQuery.post(moo_params.ajaxurl,{'action':'moo_save_items_with_images',"item_uuid":uuid,"description":description,"images":images}, function (data) {
         if(data.status == 'Success') {
-            if(data.data==true) {
-                swal("Your changes were saved");
-                history.back();
-            }
-            else
+            if(data.data == true) {
+               var goBackLink = jQuery("#mooGoBackButton").attr("href");
+               if(goBackLink) {
+                   swal({
+                       title: 'Your changes were saved',
+                       type: 'success',
+                       showCancelButton: true,
+                       showLoaderOnConfirm: false,
+                       confirmButtonColor: '#3085d6',
+                       cancelButtonColor: '#d33',
+                       confirmButtonText: 'Ok',
+                       cancelButtonText: 'Go back to items'
+                   }).then(function (data) {
+                       if(data.dismiss) {
+                           swal.close();
+                           window.location.href = goBackLink;
+                       }
+                   });
+               } else {
+                   swal("Your changes were saved");
+               }
+
+            } else {
                 swal("Error","Error when saving your changes, maybe your description is too long  please try again","error");
-        } else
+            }
+        } else {
             swal("Error","Error when saving your changes, please try again","error");
+        }
     }
-    );
+    ).fail(function () {
+        swal("Error","Error when saving your changes, please try again","error");
+    });
 
 }
 
 function moo_get_item_with_images(uuid) {
     jQuery.post(moo_params.ajaxurl,{'action':'moo_get_items_with_images',"item_uuid":uuid}, function (data) {
         var items = data.data;
+        moo_item_options= data.modifier_groups;
         for(i in items ){
             var item = items[i];
             if(item._id) {
@@ -1926,6 +1955,7 @@ function moo_get_item_with_images(uuid) {
             }
         }
         moo_display_item_images();
+        moo_display_item_options();
     });
 }
 /*End upload Functions*/
@@ -2060,6 +2090,13 @@ function moo_trackStock_details(status) {
          jQuery('#moo_trackStock_details').addClass('moo_hidden');
 
 }
+function moo_showHideSection(id, show) {
+     if(show) {
+         jQuery(id).removeClass('moo_hidden');
+     } else {
+         jQuery(id).addClass('moo_hidden');
+     }
+}
 function moo_filtrer_by_category(e)
 {
     e.preventDefault();
@@ -2079,12 +2116,18 @@ function moo_editItemDescription(event,item_uuid)
             if(data.status === 'Success') {
                 if(data.data === true) {
                     swal("The description was updated");
+                    //update teh description in the Item Title
+                    if(new_description.length>255){
+                        new_description = new_description.substr(0,255);
+                        new_description = new_description + "...";
+                    }
+                    jQuery("#moo-itemTitleDesc-ItemUuid-"+item_uuid).text(new_description);
                 } else {
                     swal("Error when saving your changes, please try again","","error");
                 }
-            }
-            else
+            } else {
                 swal("Error when saving your changes, please try again","","error");
+            }
         }
     );
 
@@ -2194,17 +2237,10 @@ function mooDeleteCoupon(e)
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
         confirmButtonText: 'Yes, delete it!'
-
     }).then(function (data) {
-        if(data) {
+        if(!data.dismiss) {
             swal.close();
             window.location.href = url;
-        } else {
-            swal({
-                title:"Coupon not deleted, try again",
-                type:'error'
-
-            });
         }
     });
 }
@@ -2324,14 +2360,16 @@ function MooPanel_CleanInventory(e)
         }
     ];
 
-    swal.queue(steps).then(function () {
-        swal.resetDefaults();
-        swal({
-            title: 'All Done!',
-            html:
-            "The clean up process has been successfully completed. If you have added additional items to your Clover inventory, you will need to do a manual sync. Clean inventory feature only removes old items",
-            confirmButtonText: 'ok'
-        })
+    swal.queue(steps).then(function (result) {
+        if(!result.dismiss){
+            swal.resetDefaults();
+            swal({
+                title: 'All Done!',
+                html:
+                    "The clean up process has been successfully completed. If you have added additional items to your Clover inventory, you will need to do a manual sync. Clean inventory feature only removes old items",
+                confirmButtonText: 'ok'
+            })
+        }
     }, function () {
         swal.resetDefaults()
     })
@@ -2371,21 +2409,23 @@ function mooClean(event,typeOfDate)
     });
 
     pbar.animate(0.1);
+    //make the button grey
+    jQuery(".swal2-popup .swal2-styled.swal2-confirm").css("background-color","#aaa");
+
     jQuery.get(moo_RestUrl+'moo-clover/v1/clean/'+typeOfDate+'/10/0',function (data) {
         var nb = parseInt(data["nb_"+typeOfDate]);
         pbar.setText(nb +' '+typeOfDate.replace("_"," ")+' checked');
-        if(! data.last_page)
+        if(! data.last_page) {
             mooCleanByPage(1,pbar,typeOfDate);
-        else
-        {
-            jQuery(id).html(nb +' '+typeOfDate.replace("_"," ")+' Cleaned, You can click on Next')
+        } else {
+            jQuery(id).html(nb +' '+typeOfDate.replace("_"," ")+' Cleaned, You can click on Next');
+            jQuery(".swal2-popup .swal2-styled.swal2-confirm").css("background-color","#3085d6");
         }
     });
 
 
 }
-function mooCleanByPage(page,pbar,typeOfDate)
-{
+function mooCleanByPage(page,pbar,typeOfDate) {
     var id = "#mooClean_"+typeOfDate;
 
     if(page/10 <1)
@@ -2396,11 +2436,11 @@ function mooCleanByPage(page,pbar,typeOfDate)
     jQuery.get(moo_RestUrl+'moo-clover/v1/clean/'+typeOfDate+'/10/'+page,function (data) {
         var nb = (parseInt(data["nb_"+typeOfDate])+parseInt(page*10));
         pbar.setText( nb + ' ' + typeOfDate.replace("_"," ")+' checked');
-        if(! data.last_page)
+        if(! data.last_page) {
             mooCleanByPage(page+1,pbar,typeOfDate);
-        else
-        {
-            jQuery(id).html(nb + ' ' + typeOfDate.replace("_"," ") +' Cleaned, You can click on Next')
+        } else {
+            jQuery(id).html(nb + ' ' + typeOfDate.replace("_"," ") +' Cleaned, You can click on Next');
+            jQuery(".swal2-popup .swal2-styled.swal2-confirm").css("background-color","#3085d6");
         }
     });
 }
@@ -2452,6 +2492,41 @@ function mooUpdateOneCategory( cat_id ) {
                 title:"An error has occurred",
                 text:"try again",
                 type:"error"
+            });
+        }
+
+
+    });
+}
+function mooGetOpeningHours( event ) {
+    if(event){
+        event.preventDefault();
+    }
+    swal({
+        title: 'Getting your hours, Please wait...',
+        showConfirmButton: false
+    });
+
+    if(moo_RestUrl.indexOf("?rest_route") !== -1){
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/opening_hours&_wpnonce='+ moo_params.nonce;
+    } else {
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/opening_hours?_wpnonce='+ moo_params.nonce;
+    }
+    jQuery.get(endpoint, function (data) {
+        if(typeof data === "object") {
+            var html = "<div class='mooOpeningHoursDashSection'>";
+            Object.keys(data).forEach(key => {
+                html += "<div class='mooOpeningHoursDashSectionRow'><div class='mooOpeningHoursDashSection-day'>" +key + "</div><div class='mooOpeningHoursDashSection-hours'>" + data[key] + "</div></div>";
+            });
+            html += "<div class='mooOpeningHoursDashSmallText'>To change business hours, login to clover.com from computer, laptop, etc. Then go to account and setup then business information then find business hours.</div>";
+            html += "</div>";
+            swal({
+                title:"Your Business Hours :",
+                html: html,
+            });
+        } else {
+            swal({
+                title:data
             });
         }
 
@@ -2529,6 +2604,60 @@ function mooUpdateApiKey() {
     });
 
 }
+function mooSaveApikey() {
+    mooShowWaitMessage();
+    var newApiKey = jQuery("#new_api_key").val();
+    if(newApiKey === ""){
+        swal({
+            type:"error",
+            text:"Please enter your API KEY"
+        });
+        return;
+    }
+    if(moo_RestUrl.indexOf("?rest_route") !== -1){
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/save_apikey&_wpnonce='+ moo_params.nonce;
+    } else {
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/save_apikey?_wpnonce='+ moo_params.nonce;
+    }
+    var data = {
+      "api_key":newApiKey
+    };
+    jQuery.post(endpoint,data, function (response) {
+        if(response.status === "success"){
+            swal.close();
+            //Put name and place on their places
+            if(response.name){
+                jQuery("#moo-keyValid-section .moo-merchant-name").text(response.name);
+            }
+            if(response.address){
+                jQuery("#moo-keyValid-section .moo-merchant-address").text(response.address);
+                moo_merchantAddress = response.address;
+
+            }
+            //Hide loading section and key section
+            jQuery("#moo-checking-section").hide();
+            jQuery("#moo-enterKey-section").hide();
+            jQuery("#moo-error-section").hide();
+
+            //show the section
+            jQuery("#moo-keyValid-section").show();
+            //recheck the autosync
+            mooCheckAutoSyncStatus();
+        } else {
+            swal({
+                type:"error",
+                text:response.message
+            });
+        }
+
+    }).fail(function (response) {
+        swal({
+            type:"error",
+            text:"An error has occurred, please try again"
+        });
+    });
+
+}
 /* Scroll into div functions */
 
 function scrollToElm(container, elm, duration){
@@ -2593,49 +2722,322 @@ function  mooFilterModifiers(event) {
     }
 
 }
-function mooSelecetdTimeChanged(event,type,source) {
-    var elem = jQuery(event.target);
-    var choice = elem.val();
-    if(choice === "addNew") {
-        mooShowAddingNewTimeSection(type,source);
-        elem.val("");
+
+function mooCheckApiKeyOnLoading() {
+
+    if(moo_RestUrl.indexOf("?rest_route") !== -1){
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/check_apikey&_wpnonce='+ moo_params.nonce;
     } else {
-        if(choice === "ImportNew") {
-            mooShowAddingImportTimeSection(type,source);
-            elem.val("");
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/check_apikey?_wpnonce='+ moo_params.nonce;
+    }
+    jQuery.get(endpoint, function (response) {
+
+        if(response.status === "success") {
+            //Put name and place on their places
+            if(response.name){
+                jQuery("#moo-keyValid-section .moo-merchant-name").text(response.name);
+            }
+            if(response.address){
+                jQuery("#moo-keyValid-section .moo-merchant-address").text(response.address);
+                moo_merchantAddress = response.address;
+
+            }
+            //Hide loading section
+            jQuery("#moo-checking-section").hide();
+            //show the section
+            jQuery("#moo-keyValid-section").show();
+
+        } else {
+            if(response.status === "failed") {
+                if(response.message === "The API KEY isn't valid"){
+                    swal({
+                        title:"An error has occurred",
+                        text:"The API KEY isn't valid, please use a new one",
+                        type:"error"
+                    });
+                    //Hide loading section
+                    jQuery("#moo-checking-section").hide();
+                    //show the section
+                    jQuery("#moo-enterKey-section").show();
+
+                    return;
+                }
+                if(response.message){
+                    jQuery("#moo-error-section .moo-errorSection-message").text(response.message);
+                    //Hide loading section
+                    jQuery("#moo-checking-section").hide();
+                    //show the section
+                    jQuery("#moo-error-section").show();
+                } else {
+                    //Hide loading section
+                    jQuery("#moo-checking-section").hide();
+                    //show the section
+                    jQuery("#moo-error-section").show();
+                }
+            }
         }
+
+    }).fail(function (response) {
+        if(response.status === "failed") {
+            if(response.message){
+                jQuery("#moo-error-section .moo-errorSection-message").text(response.message);
+                //Hide loading section
+                jQuery("#moo-checking-section").hide();
+                //show the section
+                jQuery("#moo-error-section").show();
+            } else {
+                //Hide loading section
+                jQuery("#moo-checking-section").hide();
+                //show the section
+                jQuery("#moo-error-section").show();
+            }
+        }
+    });
+}
+function mooCheckAutoSyncStatus() {
+    if(moo_RestUrl.indexOf("?rest_route") !== -1){
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/autosync&_wpnonce='+ moo_params.nonce;
+    } else {
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/autosync?_wpnonce='+ moo_params.nonce;
+    }
+    jQuery.get(endpoint, function (response) {
+        //Hide loading section and key section
+        jQuery("#mooAutoSyncCheking").hide();
+        jQuery("#mooAutoSyncActivated").hide();
+        jQuery("#mooAutoSyncDeactivated").hide();
+
+        if(response.status === "enabled"){
+            //show the enabled section
+            jQuery("#mooAutoSyncActivated").show();
+        } else {
+            //show the disabled section
+            jQuery("#mooAutoSyncDeactivated").show();
+        }
+
+    }).fail(function (response) {
+        //Hide loading section and key section
+        jQuery("#mooAutoSyncCheking").hide();
+        jQuery("#mooAutoSyncActivated").hide();
+        jQuery("#mooAutoSyncDeactivated").show();
+    });
+}
+function mooChangeAutoSyncStatus(status) {
+    mooShowWaitMessage();
+    if(moo_RestUrl.indexOf("?rest_route") !== -1){
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/autosync&_wpnonce='+ moo_params.nonce;
+    } else {
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/autosync?_wpnonce='+ moo_params.nonce;
+    }
+    jQuery.post(endpoint,{"status":status}, function (response) {
+        mooHideWaitMessage();
+        //Hide loading section and key section
+        jQuery("#mooAutoSyncCheking").hide();
+        jQuery("#mooAutoSyncActivated").hide();
+        jQuery("#mooAutoSyncDeactivated").hide();
+
+        if(response.status === "success"){
+            if(status === "enabled"){
+                //show the enabled section
+                jQuery("#mooAutoSyncActivated").show();
+            } else {
+                //show the disabled section
+                jQuery("#mooAutoSyncDeactivated").show();
+            }
+        } else {
+            mooHideWaitMessage();
+            jQuery("#mooAutoSyncCheking").show();
+        }
+
+    }).fail(function (response) {
+        mooHideWaitMessage();
+    });
+}
+function mooSeeDetailOfAutoSync(e) {
+    if(e){
+        e.preventDefault()
+    }
+    jQuery("#mooInventorySection").hide();
+    jQuery("#mooAutoSyncDetailsSection").show();
+    //SetupSection
+    mooSetupAutoSyncDetailsSection(1);
+}
+function mooHideDetailOfAutoSync(e) {
+    if(e){
+        e.preventDefault()
+    }
+    jQuery("#mooInventorySection").show();
+    jQuery("#mooAutoSyncDetailsSection").hide();
+}
+function mooSetupAutoSyncDetailsSection(page) {
+    page  =  parseInt(page);
+    if(page<1){
+        page = 1;
+    }
+    var selector = "#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection";
+    jQuery(selector).html("Loading the details please wait..");
+    var html  = "";
+    var finalHtml  = "";
+    var htmlLines  = "";
+    var beforePaginationHtml  = "";
+    var paginationHtml  = "";
+    var afterPaginationHtml  = "";
+    var items = [];
+
+        html = '<div class="soo-body">';
+        html += '<div class="moo-row">';
+
+        htmlLines += '<div class="sync-header">';
+        htmlLines += '<div class="moo-row">';
+        htmlLines += '<div class="sync-header-row">';
+        htmlLines += '   <div class="moo-col-md-3"></div>';
+        htmlLines += '   <div class="moo-col-md-5"></div>';
+        htmlLines += '   <div class="moo-col-md-1"></div>';
+        htmlLines += '   <div class="moo-col-md-1"></div>';
+        htmlLines += '   <div class="moo-col-md-2"></div>';
+        htmlLines += '</div>';
+        htmlLines += '</div>';
+        htmlLines += '</div>';
+        htmlLines += '<div class="sync-body"><div class="moo-row">';
+
+        beforePaginationHtml += '<div class="moo-row">';
+        beforePaginationHtml += '<div class="sync-pagination">';
+        beforePaginationHtml += '<ul class="pagination">';
+
+        afterPaginationHtml += '</ul>';
+        afterPaginationHtml += '</div></div>';
+        finalHtml += '</div></div></div>';
+        finalHtml += '<p style="font-size: 11px">Any history older than 30 days will be gone</p>';
+
+    if(moo_RestUrl.indexOf("?rest_route") !== -1){
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/autosync_details&_wpnonce=' + moo_params.nonce + "&page="+page;
+    } else {
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/autosync_details?_wpnonce=' + moo_params.nonce + "&page="+page;
+    }
+    jQuery.get(endpoint, function (response) {
+       if(response.data){
+           if(response.data.length>0){
+               for (var i  =0; i < response.data.length; i++){
+                   var oneLine  = response.data[i];
+                   var htmlLine = '';
+                   htmlLine += '<div class="sync-body-row">';
+                   htmlLine += '<div class="moo-row">';
+                   htmlLine += '<div class="moo-col-md-3 mooSyncItemUuid">'+oneLine.object_id+'</div>';
+                   if (oneLine.response_code === "200"){
+                       htmlLine += '<div class="moo-col-md-5">';
+                       htmlLine += '<span class="sync-msg sync-msg-green">This item has been successfully updated.</span>';
+                       htmlLine += '</div>';
+                       htmlLine += '<div class="moo-col-md-1 status-alert">';
+                       htmlLine += ' <a href="#"><img src="'+moo_params.plugin_url+'/public/img/green.png"></a>';
+                       htmlLine += '<div class="alert">';
+                       htmlLine += '<p>'+oneLine.response_body +'</p>';
+                       htmlLine += ' </div>';
+                       htmlLine += '</div>';
+                   } else {
+                       htmlLine += '<div class="moo-col-md-5">';
+                       htmlLine += '<span class="sync-msg sync-msg-orange">An error has occurred when updating this item.</span>';
+                       htmlLine += '</div>';
+                       htmlLine += '<div class="moo-col-md-1 status-alert">';
+                       htmlLine += ' <a href="#"><img src="'+moo_params.plugin_url+'/public/img/red.png"></a>';
+                       htmlLine += '<div class="alert">';
+                       htmlLine += '<p>'+oneLine.response_body +'</p>';
+                       htmlLine += ' </div>';
+                       htmlLine += '</div>';
+                   }
+                   htmlLine += '<div class="moo-col-md-1">';
+                   htmlLine += '<a href="#" class="btn-refresh"  onclick="mooAutoSyncDetailsSectionRefreshOneLine(event,\''+oneLine.object_id+'\',\''+oneLine.object_type+'\')"><img src="'+moo_params.plugin_url+'/public/img/load.png"></a>';
+                   htmlLine += '</div>';
+                   htmlLine += '<div class="moo-col-md-2">';
+                   htmlLine += oneLine.created_at;
+                   htmlLine += '</div>';
+                   htmlLine += '</div>';
+                   htmlLine += '</div>';
+                   htmlLines  += htmlLine;
+                   if(oneLine.object_type === "ITEM") {
+                       if (!items[oneLine.object_id]) {
+                           items.push(oneLine.object_id);
+                       }
+                   }
+               }
+               if(response.last_page && response.last_page>1){
+
+                   if(page !== 1){
+                       paginationHtml += '<li><a href="#" onclick="mooSetupAutoSyncDetailsSection(1)"><img src="'+moo_params.plugin_url+'/public/img/first.png"> </a></li>';
+                       paginationHtml += '<li><a href="#" onclick="mooSetupAutoSyncDetailsSection('+(page-1)+')"><img src="'+moo_params.plugin_url+'/public/img/prev.png"> </a></li>';
+                   } else {
+                       paginationHtml += '<li><a href="#"><img style="background-color: #eaeaea" src="'+moo_params.plugin_url+'/public/img/first.png"></a></li>';
+                       paginationHtml += '<li><a href="#"><img style="background-color: #eaeaea" src="'+moo_params.plugin_url+'/public/img/prev.png"></a></li>';
+                   }
+
+                   for (var i = 1; i <= response.last_page; i++){
+                       if( i === page ){
+                           paginationHtml += '<li><a href="#" ><span style="background-color: #eff5fc">'+i+'</span></a></li>';
+                       } else {
+                           paginationHtml += '<li><a href="#" onclick="mooSetupAutoSyncDetailsSection('+ i +')"><span>'+i+'</span></a></li>';
+                       }
+                   }
+
+                   if(page !== response.last_page){
+                       paginationHtml += '<li><a href="#" onclick="mooSetupAutoSyncDetailsSection('+(page+1)+')"><img src="'+moo_params.plugin_url+'/public/img/next.png"> </a></li>';
+                       paginationHtml += '<li><a href="#" onclick="mooSetupAutoSyncDetailsSection('+(response.last_page)+')"><img src="'+moo_params.plugin_url+'/public/img/last.png"> </a></li>';
+                   } else {
+                       paginationHtml += '<li><a href="#"><img style="background-color: #eaeaea"  src="'+moo_params.plugin_url+'/public/img/next.png"> </a></li>';
+                       paginationHtml += '<li><a href="#"><img style="background-color: #eaeaea"  src="'+moo_params.plugin_url+'/public/img/last.png"> </a></li>';
+                   }
+
+                   paginationHtml = beforePaginationHtml + paginationHtml + afterPaginationHtml;
+               }
+
+               var fullHtml  = html +paginationHtml +htmlLines+paginationHtml+finalHtml;
+               jQuery(selector).html(fullHtml);
+               mooAutoSyncDetailsSectionChangeItemsUuidByNames(items);
+           } else {
+               jQuery(selector).html("There are currently no auto sync requests.");
+           }
+       } else {
+           jQuery(selector).html("There are currently no auto sync requests.");
+       }
+
+    }).fail(function (response) {
+        jQuery(selector).html("An error has occurred, please click on refresh or contact us.");
+    });
+}
+function mooAutoSyncDetailsSectionRefreshOneLine(event, uuid, type) {
+    if(type === "ITEM"){
+        jQuery(event.target).parent().addClass("refresh");
+        if(moo_RestUrl.indexOf("?rest_route") !== -1){
+            var endpoint = moo_RestUrl+'moo-clover/v2/sync/update_item/' + uuid ;
+        } else {
+            var endpoint = moo_RestUrl+'moo-clover/v2/sync/update_item/' + uuid ;
+        }
+        jQuery.get(endpoint, function (response) {
+            jQuery(event.target).parent().removeClass("refresh");
+            swal({"text":response})
+        }).fail(function (response) {
+            jQuery(event.target).parent().removeClass("refresh");
+            swal({"text":response})
+        });
     }
 }
-function mooShowAddingNewTimeSection(type,source) {
-    popupWindow = window.open(
-        'https://smh.smartonlineorder.com/hours/'+moo_api_key+"?type="+type+"&source="+source,
-        'popUpWindow',
-        'height=650,width=780,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,directories=no, status=yes'
-    );
-}
-function mooShowAddingImportTimeSection(type,source) {
-    popupWindow = window.open(
-        'https://smh.smartonlineorder.com/import/'+moo_api_key+"?type="+type+"&source="+source,
-        'popUpWindow',
-        'height=650,width=780,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,directories=no, status=yes'
-    );
-}
-function handlePopupResult(event) {
-    if (event.origin === "https://smh.smartonlineorder.com") {
-        //alert(event.data);
-        if(event.data.type === "ordertypes") {
-            swal({
-                title: 'Getting your changes, please wait ..',
-                showConfirmButton: false
-            });
-            Moo_RefreshOrderTypesSection(event.data.source);
-        }
-        if(event.data.type ==="standard") {
-            swal({
-                title: 'Getting your changes, please wait ..',
-                showConfirmButton: false
-            });
-            Moo_RefeshEditCategorySection(null,event.data.source);
-        }
+function mooAutoSyncDetailsSectionChangeItemsUuidByNames(items) {
+
+    if(moo_RestUrl.indexOf("?rest_route") !== -1){
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/autosync_items_names&_wpnonce=' + moo_params.nonce ;
+    } else {
+        var endpoint = moo_RestUrl+'moo-clover/v2/dash/autosync_items_names?_wpnonce=' + moo_params.nonce ;
     }
+    jQuery.post(endpoint,{"items":items}, function (response) {
+        if(response.status === "success"){
+            var itemsNames = response.data;
+            jQuery(".mooAutoSyncDetailsSection .mooSyncItemUuid").each(function (key, elm) {
+                elm = jQuery(elm);
+                if(elm){
+                    itemUuid = elm.html();
+                    if(itemsNames[itemUuid]){
+                        elm.html(itemsNames[itemUuid])
+                    }
+                }
+            })
+        }
+    });
+
 }

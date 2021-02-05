@@ -5,8 +5,7 @@ class Moo_OnlineOrders_Model {
     public $db;
 
 
-    function __construct()
-    {
+    function __construct() {
         global $wpdb;
         $this->db = $wpdb;
     }
@@ -33,8 +32,7 @@ class Moo_OnlineOrders_Model {
                                     WHERE i.uuid = '{$uuid}'
                                     ");
     }
-    function getVisibleItemsByCategory($string,$limit)
-    {
+    function getVisibleItemsByCategory($string,$limit){
         //$string = esc_sql($string);
         $sql = "SELECT *
                 FROM {$this->db->prefix}moo_item i
@@ -46,6 +44,14 @@ class Moo_OnlineOrders_Model {
         if($limit){
             $sql .= "LIMIT {$limit}";
         }
+        $result  = $this->db->get_results($sql);
+        return $result;
+    }
+    function getItemsNamesByUuids($string){
+       // $string = esc_sql($string);
+        $sql = "SELECT i.uuid,i.name
+                FROM {$this->db->prefix}moo_item i
+                WHERE i.uuid in {$string}";
         $result  = $this->db->get_results($sql);
         return $result;
     }
@@ -183,6 +189,18 @@ class Moo_OnlineOrders_Model {
                                     FROM `{$this->db->prefix}moo_item_modifier_group` img,  `{$this->db->prefix}moo_modifier_group` mg
                                     WHERE mg.uuid=img.group_id AND mg.show_by_default='1'
                                     AND img.item_id = '{$item}'
+                                    ORDER BY mg.sort_order
+                                    ");
+    }
+    function getModifiersGroupByItem($item_uuid){
+        //$this->db->show_errors();
+        $item_uuid = esc_sql($item_uuid);
+
+        return $this->db->get_results("SELECT mg.*
+                                    FROM `{$this->db->prefix}moo_item_modifier_group` img,  `{$this->db->prefix}moo_modifier_group` mg,`{$this->db->prefix}moo_item` items
+                                    WHERE mg.uuid=img.group_id
+                                    AND img.item_id = items.uuid
+                                    AND items.uuid = '{$item_uuid}'
                                     ORDER BY mg.sort_order
                                     ");
     }
@@ -499,8 +517,7 @@ class Moo_OnlineOrders_Model {
 
     }
 
-    function addOrder($uuid,$tax,$total,$name,$address, $city,$zipcode,$phone,$email,$instructions,$state,$country,$deliveryFee,$tipAmount,$shippingFee,$customer_lat,$customer_lng,$ordertype,$datetime)
-    {
+    function addOrder($uuid,$tax,$total,$name,$address, $city,$zipcode,$phone,$email,$instructions,$state,$country,$deliveryFee,$tipAmount,$shippingFee,$customer_lat,$customer_lng,$ordertype,$datetime){
         $uuid         = esc_sql($uuid);
         $tax          = esc_sql($tax);
         $total        = esc_sql($total);
@@ -550,8 +567,7 @@ class Moo_OnlineOrders_Model {
             ));
         return $this->db->insert_id;
     }
-    function addLinesOrder($order,$items)
-    {
+    function addLinesOrder($order,$items){
         $order    = esc_sql($order);
         foreach ($items as $uuid=>$item) {
             if($item['item']->uuid=="delivery_fees" || $item['item']->uuid=="service_fees")
@@ -589,8 +605,7 @@ class Moo_OnlineOrders_Model {
         }
        return true;
     }
-    function updateOrder($uuid,$ref)
-    {
+    function updateOrder($uuid,$ref){
         $uuid      = esc_sql($uuid);
         $ref       = esc_sql($ref);
         return $this->db->update(
@@ -602,8 +617,57 @@ class Moo_OnlineOrders_Model {
                         array( 'uuid' => $uuid )
                     );
     }
-    function NbCats()
-    {
+    function addOrderLocally($uuid, $body){
+        $uuid         = esc_sql($uuid);
+        $tax          = esc_sql($body["tax_amount"]);
+        $total        = esc_sql($body["amount"]);
+        $name         = esc_sql($body["customer"]["name"]);
+        $address      = esc_sql($body["customer"]["full_address"]);
+        $city         = esc_sql($body["customer"]["address"]["city"]);
+        $zipcode      = esc_sql($body["customer"]["address"]["zipcode"]);
+        $phone        = esc_sql($body["customer"]["phone"]);
+        $email        = esc_sql($body["customer"]["email"]);
+        $instructions = esc_sql($body["special_instructions"]);
+        $ordertype    = esc_sql($body["order_type"]);
+        $datetime     = esc_sql($datetime);
+        $state        = esc_sql($body["customer"]["address"]["state"]);
+        $country      = esc_sql($body["customer"]["address"]["country"]);
+
+        $deliveryFee     = esc_sql($body["delivery_fees"]);
+        $tipAmount       = esc_sql($body["tip_amount"]);
+        $shippingFee     = esc_sql($body["service_fees"]);
+        $customer_lat    = esc_sql($body["customer"]["address"]["lat"]);
+        $customer_lng    = esc_sql($body["customer"]["address"]["lng"]);
+
+        $date = date('Y/m/d H:i:s', $datetime);
+        $this->db->insert(
+            "{$this->db->prefix}moo_order",
+            array(
+                'uuid' => $uuid,
+                'taxAmount' => $tax,
+                'amount' => $total,
+                'paid' => 0,
+                'refpayment' => null,
+                'ordertype' => $ordertype,
+                'p_name' => $name,
+                'p_address' => $address,
+                'p_city' => $city,
+                'p_state' => $state,
+                'p_country' => $country,
+                'p_zipcode' => $zipcode,
+                'p_phone' => $phone,
+                'p_email' => $email,
+                'p_lat' => $customer_lat,
+                'p_lng' => $customer_lng,
+                'shippingfee' => $shippingFee,
+                'deliveryfee' => $deliveryFee,
+                'tipAmount' => $tipAmount,
+                'instructions' => $instructions,
+                'date' => $date,
+            ));
+        return $this->db->insert_id;
+    }
+    function NbCats() {
         return $this->db->get_results("SELECT count(*) as nb FROM {$this->db->prefix}moo_category");
     }
 
@@ -913,6 +977,112 @@ class Moo_OnlineOrders_Model {
         }
 
     }
+    public function updateOneCategory($category) {
+        $items_ids = "";
 
+        foreach ($category["items"]["elements"] as $item)
+            $items_ids .= $item["id"] . ",";
+
+        if ($this->db->get_var("SELECT COUNT(*) FROM {$this->db->prefix}moo_category where uuid='{$category["id"]}'") > 0) {
+            $res = $this->db->update("{$this->db->prefix}moo_category", array(
+                'name' => $category["name"],
+                'items' => $items_ids
+            ), array('uuid' => $category["id"]));
+        } else {
+            $res = $this->db->insert("{$this->db->prefix}moo_category", array(
+                'uuid' => $category["id"],
+                'name' => $category["name"],
+                'sort_order' => $category["sortOrder"],
+                'show_by_default' => 1,
+                'items' => $items_ids
+            ));
+        }
+
+        if ($res > 0)
+            return true;
+        return false;
+    }
+    public function updateOneOrderType($orderType) {
+        if ($this->db->get_var("SELECT COUNT(*) FROM {$this->db->prefix}moo_order_types where ot_uuid='{$orderType["id"]}'") > 0)
+            $res = $this->db->update("{$this->db->prefix}moo_order_types", array(
+                'label' => $orderType["label"],
+                'taxable' => $orderType["taxable"],
+            ), array('ot_uuid' => $orderType["id"]));
+        else
+            $res = $this->db->insert("{$this->db->prefix}moo_order_types", array(
+                'ot_uuid' => $orderType["id"],
+                'label' => $orderType["label"],
+                'taxable' => $orderType["taxable"],
+                'status' => 0,
+                'show_sa' => 0,
+                'sort_order' => 0,
+                'type' => 0,
+                'minAmount' => '0',
+            ));
+        if ($res > 0)
+            return true;
+        return false;
+    }
+    public function updateOneTaxRate($tax) {
+        if ($this->db->get_var("SELECT COUNT(*) FROM {$this->db->prefix}moo_tax_rate where uuid='{$tax["id"]}'") > 0)
+            $res = $this->db->update("{$this->db->prefix}moo_tax_rate", array(
+                'name' => $tax["name"],
+                'rate' => $tax["rate"],
+                'is_default' => $tax["isDefault"]
+            ), array('uuid' => $tax["id"]));
+        else
+            $res = $this->db->insert("{$this->db->prefix}moo_tax_rate", array(
+                'uuid' => $tax["id"],
+                'name' => $tax["name"],
+                'rate' => $tax["rate"],
+                'is_default' => $tax["isDefault"]
+            ));
+        if ($res > 0)
+            return true;
+        return false;
+    }
+    public function updateOneModifier($modifier) {
+        if ($this->db->get_var("SELECT COUNT(*) FROM {$this->db->prefix}moo_modifier where uuid='{$modifier["id"]}'") > 0) {
+            $res = $this->db->update("{$this->db->prefix}moo_modifier", array(
+                'name' => $modifier["name"],
+                'price' => $modifier["price"],
+                'group_id' => $modifier["modifierGroup"]["id"]
+            ), array('uuid' => $modifier["id"]));
+        } else {
+            $res = $this->db->insert("{$this->db->prefix}moo_modifier", array(
+                'uuid' => $modifier["id"],
+                'name' => $modifier["name"],
+                'alternate_name' => $modifier["alternateName"],
+                'price' => $modifier["price"],
+                'group_id' => $modifier["modifierGroup"]["id"]
+            ));
+        }
+        if ($res > 0)
+            return true;
+        return false;
+    }
+    public function updateOneModifierGroup($modifier_groups) {
+        if ($this->db->get_var("SELECT COUNT(*) FROM {$this->db->prefix}moo_modifier_group where uuid='{$modifier_groups["id"]}'") > 0) {
+            $res = $this->db->update("{$this->db->prefix}moo_modifier_group", array(
+                'name' => $modifier_groups["name"],
+                'min_required' => $modifier_groups["minRequired"],
+                'max_allowd' => $modifier_groups["maxAllowed"]
+            ), array('uuid' => $modifier_groups["id"]));
+        } else {
+            $res = $this->db->insert("{$this->db->prefix}moo_modifier_group", array(
+                'uuid' => $modifier_groups["id"],
+                'name' => $modifier_groups["minRequired"]->name,
+                'alternate_name' => $modifier_groups["alternateName"],
+                'show_by_default' => $modifier_groups["showByDefault"],
+                'min_required' => $modifier_groups["minRequired"],
+                'max_allowd' => $modifier_groups["maxAllowed"]
+            ));
+        }
+
+        if ($res > 0)
+            return true;
+
+        return false;
+    }
 
 }

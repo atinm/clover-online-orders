@@ -1,5 +1,5 @@
 jQuery(document).ready(function() {
-
+    window.moo_RestUrl = moo_params.moo_RestUrl;
 });
 function moo_change_api_key(event) {
     if(event !== undefined) {

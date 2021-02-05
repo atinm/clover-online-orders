@@ -41,7 +41,8 @@ class SyncRoutes extends BaseRoute
             // Here we register the readable endpoint for collections.
             array(
                 'methods' => 'GET',
-                'callback' => array($this, 'syncUpdateCategory')
+                'callback' => array($this, 'syncUpdateCategory'),
+                'permission_callback' => '__return_true'
             )
         ));
         // Update item route
@@ -49,7 +50,8 @@ class SyncRoutes extends BaseRoute
             // Here we register the readable endpoint for collections.
             array(
                 'methods' => 'GET',
-                'callback' => array($this, 'syncUpdateItem')
+                'callback' => array($this, 'syncUpdateItem'),
+                'permission_callback' => '__return_true'
             )
         ));
     }
@@ -59,15 +61,16 @@ class SyncRoutes extends BaseRoute
         } else {
             $category_id = sanitize_text_field($request["cat_id"]);
             $category = $this->api->getCategoryWithoutSaving($category_id);
-            if(isset($category->message)){
+            if(isset($category["message"])){
                     // catgeory not found in Clover
-                    if($category->message === 'Not Found') {
+                    if($category["message"] === 'Not Found') {
                         $this->model->hideCategory($category_id);
                         return 'category updated';
                     } else {
                         return 'category not updated';
                     }
             } else {
+                $category = json_decode(json_encode($category));
                 $this->model->update_category($category);
                 return 'Category Updated';
             }
@@ -79,26 +82,26 @@ class SyncRoutes extends BaseRoute
         } else {
             $item_id = sanitize_text_field($request["item_id"]);
             $cloverItem = $this->api->getItemWithoutSaving($item_id);
+            $cloverItem = json_decode(json_encode($cloverItem));
             $currentItem = $this->model->getItem($item_id);
             if(isset($cloverItem->message) && $cloverItem->message == 'Not Found') {
                 if(isset($currentItem)){
-                   //Item exist and removed from Clover,hide from local database
+                   //Item exist and removed from Clover,hide it from local database
                     $this->model->hideItem($item_id);
-                    return 'item updated';
+                    return 'The item '.$currentItem->name.' was hided successfully';
                 } else {
-                    return 'item not updated';
+                    return 'No item found or updated';
                 }
             } else {
                 if(isset($cloverItem->id)){
-                    if(isset($currentItem) && isset($currentItem->modified_time) && $currentItem->modified_time === $cloverItem->modifiedTime){
-                        return 'Item Updated';
+                    if(isset($currentItem) && isset($currentItem->modified_time) && intval($currentItem->modified_time) === $cloverItem->modifiedTime){
+                        return 'The item '.$cloverItem->name.' already up-to-date';
                     } else {
                         $this->api->update_item($cloverItem);
-                        return 'Item Updated';
+                        return 'The item '.$cloverItem->name.' was updated successfully';
                     }
-
                 } else {
-                    return "Item not found";
+                    return "Item not found on Clover";
                 }
             }
         }

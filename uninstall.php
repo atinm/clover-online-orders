@@ -47,6 +47,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
             if($cart_page_id) wp_delete_post($cart_page_id,true);
             if($my_account_page_id) wp_delete_post($my_account_page_id,true);
 
+
             /*-- Table `item_option`--*/
             $wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}moo_item_option` ;");
 

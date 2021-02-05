@@ -282,9 +282,9 @@
     height:350px;
     margin-top: 20px;
 }
-select
+.swal2-popup .swal2-select
 {
-    padding: 0px !important;
+    padding: 2px;
 }
 .moo_loading,#moo_cashPanel,#moo_verifPhone_verificatonCode
 {
@@ -493,8 +493,7 @@ select
     box-shadow: 0 0 8px #88D5E9;
     border: 1px solid #88D5E9;
 }
-.MooSimplButon
-{
+.MooSimplButon {
     background: #d5d5d5;
     padding: 8px 15px 8px 15px;
     border: none;
@@ -503,14 +502,15 @@ select
     font-size: 12px;
     display: inline-block;
     margin-bottom: 2px;
-    text-decoration: none;
+    text-decoration: none !important;
 }
-.MooUseAddressButton
-{
+.MooUseAddressButton {
     position: absolute;
     left: 20%;
     bottom: 15px;
+    text-decoration: none !important;
 }
+
 .MooAddressBtnActions {
     float: left;
     text-align: center;
@@ -580,6 +580,10 @@ select
 }
 .moo-checkout-form-rightside {
     border: 1px solid #0b0b0b;
+}
+#moo-checkout-form #moo-checkout-form-instruction  .moo-checkout-bloc-content .moo-special-instruction-title{
+    margin-top: -5px;
+    font-weight: 600;
 }
 #moo-checkout-form-btnActions {
     float: left;

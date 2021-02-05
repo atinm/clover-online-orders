@@ -16,7 +16,7 @@
  * Plugin Name:       Smart Online Order for Clover
  * Plugin URI:        http://www.zaytechapps.com
  * Description:       Start taking orders from your Wordpress website and have them sent to your Clover Station
- * Version:           1.4.4
+ * Version:           1.4.5
  * Author:            Zaytech
  * Author URI:        http://www.zaytechapps.com
  * License:           Clover app
@@ -193,7 +193,7 @@ function moo_deactivateAndClean() {
 }
 add_action( 'admin_init', 'moo_deactivateAndClean');
                  
-if(get_option('moo_onlineOrders_version') != '144') {
+if(get_option('moo_onlineOrders_version') != '145') {
     add_action('plugins_loaded', 'moo_onlineOrders_check_version');
 }
 
@@ -207,8 +207,7 @@ if(get_option('moo_onlineOrders_version') != '144') {
  *
  * @since v 1.1.2
  */
-function moo_onlineOrders_check_version()
-{
+function moo_onlineOrders_check_version() {
     global $wpdb;
     $wpdb->hide_errors();
     $version = get_option('moo_onlineOrders_version');
@@ -371,14 +370,15 @@ function moo_onlineOrders_check_version()
         case '141':
         case '142':
         case '143':
-            //temporary go back to standard checkout
-            if(isset($defaultOptions["clover_payment_form"]) &&  $defaultOptions["clover_payment_form"] === "on"){
-                $defaultOptions["payment_creditcard"] = "on";
-                $defaultOptions["clover_payment_form"] = "off";
-            }
-            update_option("moo_settings",$defaultOptions);
-            update_option('moo_onlineOrders_version','144');
         case '144':
+            set_transient( 'moo_blackout', false, 1 );
+            if( !isset($defaultOptions["delivery_errorMsg"]) || $defaultOptions["delivery_errorMsg"] == "") {
+                $defaultOptions["delivery_errorMsg"] = "Sorry, zone not supported. We do not deliver to this address at this time";
+            }
+            $defaultOptions["special_instructions_required"] = "no";
+            update_option("moo_settings",$defaultOptions);
+            update_option('moo_onlineOrders_version','145');
+        case '145':
             break;
     }
 }

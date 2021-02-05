@@ -15,39 +15,38 @@ document.addEventListener('keydown', function (e){
     }
 });
 
-function moo_getLatLongforMapDa()
-{
-    if(moo_merchantLat === "" || moo_merchantLng === "" || moo_merchantLat === null || moo_merchantLng === null)
-    {
-        if(moo_merchantAddress === '')
+function moo_getLatLongforMapDa() {
+    if(moo_merchantLatLng.lat === "" || moo_merchantLatLng.lng === "" || moo_merchantLatLng.lat === null || moo_merchantLatLng.lng === null) {
+        if(typeof moo_merchantAddress === 'undefined') {
             moo_merchantAddress ='united state';
+        }
 
         jQuery.get('https://maps.googleapis.com/maps/api/geocode/json?&address='+moo_merchantAddress+'&key=AIzaSyBv1TkdxvWkbFaDz2r0Yx7xvlNKe-2uyRc',function (data) {
-            if(data.results.length>0)
-            {
+            if(data.results.length>0) {
                 var location = data.results[0].geometry.location;
                 moo_initMapDa(location,14);
                 jQuery('#Moo_Lat').val(location.lat);
                 jQuery('#Moo_Lng').val(location.lng);
-            }
-            else
-            {
+                moo_setup_existing_zones();
+
+            } else {
                 var location = {};
                 location.lat = 40.748817 ;
                 location.lng = -73.985428;
                 moo_initMapDa(location,8);
                 jQuery('#Moo_Lat').val(location.lat);
                 jQuery('#Moo_Lng').val(location.lng);
+                moo_setup_existing_zones();
             }
         })
-    }
-    else
-    {
+    } else {
         var Merchantlocation = {};
-        Merchantlocation.lng = parseFloat(moo_merchantLng);
-        Merchantlocation.lat = parseFloat(moo_merchantLat);
+        Merchantlocation.lng = parseFloat(moo_merchantLatLng.lng);
+        Merchantlocation.lat = parseFloat(moo_merchantLatLng.lat);
         moo_initMapDa(Merchantlocation,10);
+        moo_setup_existing_zones();
     }
+
 
 }
 function moo_initMapDa(myLatLng,zoom)
@@ -494,8 +493,7 @@ function moo_setup_existing_zones() {
         var tmp_zone = zones[i];
         tmp_zone.shape = null;
 
-        if(tmp_zone.type=='circle')
-        {
+        if(tmp_zone.type=='circle') {
             tmp_zone.shape = new google.maps.Circle({
                 strokeColor: tmp_zone.color,
                 strokeOpacity: 0.8,

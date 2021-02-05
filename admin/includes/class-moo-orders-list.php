@@ -1,9 +1,13 @@
 <?php
 require_once 'class-wp-list-table-moo.php';
+
 class Orders_List_Moo extends WP_List_Table_MOO {
 
+    protected $timezone;
     /** Class constructor */
-    public function __construct() {
+    public function __construct($merchantTimeZone) {
+
+       $this->timezone = new DateTimeZone($merchantTimeZone);
 
         parent::__construct( array(
             'singular' => __( 'Order'), //singular name of the listed records
@@ -123,6 +127,9 @@ class Orders_List_Moo extends WP_List_Table_MOO {
      */
     public function column_default( $item, $column_name ) {
 
+        $dateTime = new DateTime($item['date']);
+        $dateTime->setTimezone($this->timezone);
+
         switch ( $column_name ) {
             case 'p_name':
             case 'p_email':
@@ -145,7 +152,7 @@ class Orders_List_Moo extends WP_List_Table_MOO {
             case 'orderID':
                 return $item['uuid'];
             case 'date':
-                return $item['date'].' UTC';
+                return $dateTime->format('m-d-Y h:i:s A');
             default:
                 return print_r( $item, true ); //Show the whole array for troubleshooting purposes
         }

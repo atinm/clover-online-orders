@@ -2,6 +2,9 @@
 require_once 'class-wp-list-table-moo.php';
 class Products_List_Moo extends WP_List_Table_MOO {
 
+    protected $allImages = array();
+    protected $placeholderImg;
+
     /** Class constructor */
     public function __construct() {
 
@@ -14,7 +17,8 @@ class Products_List_Moo extends WP_List_Table_MOO {
         //var_dump('creating an Object');
         /** Process bulk action */
         $this->process_bulk_action();
-
+        $this->getAllImages();
+        $this->placeholderImg= plugin_dir_url(dirname(__FILE__))."img/placeholder-150x150.png";
     }
     /**
      * Retrieve item’s data from the database
@@ -26,31 +30,32 @@ class Products_List_Moo extends WP_List_Table_MOO {
      */
     public static function get_items( $per_page = 20, $page_number = 1 ) {
         global $wpdb;
-        $category_id="";
+        $category_id = "";
         if(isset($_GET['category']) && !empty($_GET['category'])) {
             $category_id = esc_sql($_GET['category']);
             $category = $wpdb->get_row("SELECT items from {$wpdb->prefix}moo_category WHERE uuid='{$category_id}'",'ARRAY_A');
             $category_items = explode(',',$category['items']);
         }
         if(isset($_POST) && !empty($_POST['s'])) {
-            $sql = "SELECT * FROM {$wpdb->prefix}moo_item where name like '%".esc_sql($_POST['s'])."%'";
+            $sql = "SELECT items.* FROM {$wpdb->prefix}moo_item as items where items.name like '%".esc_sql($_POST['s'])."%' or items.uuid like '".esc_sql($_POST['s'])."'";
         } else {
-            if($category_id!="") {
-                if(count($category_items)>0)
-                {
+            if($category_id != "") {
+                if(count($category_items)>0) {
                     $items_txt = implode("','", $category_items);
                     $items_txt = "'".$items_txt;
-                    $items_txt =  substr($items_txt, 0, -2);;
-                    $sql = "SELECT * FROM {$wpdb->prefix}moo_item where uuid in ({$items_txt})";
-                }
-                else
-                {
-                    $sql = "SELECT * FROM {$wpdb->prefix}moo_item where 1=-1')";
+                    $items_txt =  substr($items_txt, 0, -2);
+                    if($items_txt){
+                        $sql = "SELECT items.* FROM {$wpdb->prefix}moo_item as items where items.uuid in ({$items_txt})";
+                    } else {
+                        $sql = "SELECT items.* FROM {$wpdb->prefix}moo_item as items where 1=-1 ";
+                    }
+                } else {
+                    $sql = "SELECT items.* FROM {$wpdb->prefix}moo_item as items where 1=-1  ";
                 }
 
+            } else {
+                $sql = "SELECT items.* FROM {$wpdb->prefix}moo_item as items";
             }
-            else
-                $sql = "SELECT * FROM {$wpdb->prefix}moo_item";
         }
 
 
@@ -65,6 +70,33 @@ class Products_List_Moo extends WP_List_Table_MOO {
 
         $result = $wpdb->get_results( $sql, 'ARRAY_A' );
         return $result;
+    }
+    private function getAllImages( ) {
+        global $wpdb;
+        $sql = "SELECT * FROM {$wpdb->prefix}moo_images";
+        $result = $wpdb->get_results( $sql, 'ARRAY_A' );
+        foreach ($result as $image){
+            if(isset($this->allImages[$image["item_uuid"]])){
+                array_push($this->allImages[$image["item_uuid"]],$image);
+            } else {
+                $this->allImages[$image["item_uuid"]] = array($image);
+            }
+        }
+    }
+    private function getOneImage($itemUuid) {
+        $link =  $this->placeholderImg;
+        if(isset($this->allImages[$itemUuid])){
+            foreach ($this->allImages[$itemUuid] as $item_uuid => $image){
+                if($image["is_enabled"]  === "1"){
+                    if($image["is_default"] === "1"){
+                        return $image["url"];
+                    } else {
+                        $link = $image["url"];
+                    }
+                }
+            }
+        }
+        return $link;
     }
     /**
      * Hide an item.
@@ -133,29 +165,26 @@ class Products_List_Moo extends WP_List_Table_MOO {
             $category_items = explode(',',$category['items']);
         }
 
-        if(isset($_POST) && !empty($_POST['s']))
-        {
+        if(isset($_POST) && !empty($_POST['s'])) {
             $sql = "SELECT count(*) FROM {$wpdb->prefix}moo_item where name like '%".esc_sql($_POST['s'])."%'";
-        }
-        else
-        {
-            if($category_id!="")
-            {
-                if(count($category_items)>0)
-                {
+        } else {
+            if($category_id!="") {
+                if(count($category_items)>0) {
                     $items_txt = implode("','", $category_items);
                     $items_txt = "'".$items_txt;
-                    $items_txt =  substr($items_txt, 0, -2);;
-                    $sql = "SELECT count(*) FROM {$wpdb->prefix}moo_item where uuid in ({$items_txt})";
-                }
-                else
-                {
-                    $sql = "SELECT count(*) FROM {$wpdb->prefix}moo_item where 1=-1')";
+                    $items_txt =  substr($items_txt, 0, -2);
+                    if($items_txt){
+                        $sql = "SELECT count(*) FROM {$wpdb->prefix}moo_item where uuid in ({$items_txt})";
+                    } else {
+                        $sql = "SELECT count(*) FROM {$wpdb->prefix}moo_item where 1=-1";
+                    }
+                } else {
+                    $sql = "SELECT count(*) FROM {$wpdb->prefix}moo_item where 1=-1";
                 }
 
-            }
-            else
+            } else {
                 $sql = "SELECT count(*) FROM {$wpdb->prefix}moo_item";
+            }
 
         }
 
@@ -182,34 +211,78 @@ class Products_List_Moo extends WP_List_Table_MOO {
         $enable_ot_nonce       = wp_create_nonce( 'moo_enable_ot' );
         $disable_ot_nonce       = wp_create_nonce( 'moo_disable_ot' );
 
-        $title = '<strong>' . $item['name'] . '</strong>';
+        $itemDescription = stripslashes($item['description']);
+
         if(isset($item[ "alternate_name" ]) && $item[ "alternate_name" ]!=""){
             $title = '<strong>' . $item['name'] ." (alternate name : ".$item[ "alternate_name" ].")". '</strong>';
         } else {
             $title = '<strong>' . $item['name'] . '</strong>';
         }
-        if($item['visible'])
-            $actions = array(
-                'hide' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Hide from the Website</a>',
-                                    'moo_items', 'hide',esc_attr($item['uuid']), $hide_nonce,$this->get_pagenum())
-            );
-        else
-            $actions = array(
-                'show' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Show in the Website</a>',
-                    'moo_items', 'show',esc_attr($item['uuid']), $show_nonce,$this->get_pagenum())
-            );
 
-        if($item['outofstock'])
-            $actions['disable_ot']  = sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Disable out of stock</a>',
+        if(strlen($itemDescription)>255){
+            $shortItemDesc  = substr($itemDescription,0,255);
+            $shortItemDesc  = $shortItemDesc . "...";
+            $title .= "<p style='font-size:11px' class='moo-itemTitle-desc' id='moo-itemTitleDesc-ItemUuid-".esc_attr($item['uuid'])."'>".$shortItemDesc."</p>";
+        } else {
+            $title .= "<p style='font-size:11px' class='moo-itemTitle-desc' id='moo-itemTitleDesc-ItemUuid-".esc_attr($item['uuid'])."'>".$itemDescription."</p>";
+        }
+
+
+
+        if(isset($_GET["category"])){
+            if($item['visible']) {
+                $actions = array(
+                    'id' =>"ID: ".esc_attr($item['uuid']),
+                    'hide' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&category=%s&paged=%s">Hide from the Website</a>',
+                        'moo_items', 'hide',esc_attr($item['uuid']), $hide_nonce,esc_attr($_GET["category"]),$this->get_pagenum())
+                );
+            } else {
+                $actions = array(
+                    'id' =>"ID: ".esc_attr($item['uuid']),
+                    'show' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&category=%s&paged=%s">Show in the Website</a>',
+                        'moo_items', 'show',esc_attr($item['uuid']), $show_nonce,esc_attr($_GET["category"]),$this->get_pagenum())
+                );
+            }
+            $actions['edit'] = sprintf( '<a href="?page=%s&action=%s&item_uuid=%s&category=%s&paged=%s">Add / Edit Images</a>',
+                'moo_items', 'update_item',esc_attr($item['uuid']),esc_attr($_GET["category"]),$this->get_pagenum());
+
+            if($item['outofstock']) {
+                $actions['disable_ot']  = sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s&category=%s">Disable out of stock</a>',
+                    'moo_items', 'disable_ot',esc_attr($item['uuid']), $disable_ot_nonce,$this->get_pagenum(),esc_attr($_GET["category"]));
+            } else {
+                $actions['enable_ot']  = sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s&category=%s">Enable out of stock</a>',
+                    'moo_items', 'enable_ot',esc_attr($item['uuid']), $enable_ot_nonce,$this->get_pagenum(),esc_attr($_GET["category"]));
+            }
+
+        } else {
+            if($item['visible']) {
+                $actions = array(
+                    'id' =>"ID: ".esc_attr($item['uuid']),
+                    'hide' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Hide from the Website</a>',
+                        'moo_items', 'hide',esc_attr($item['uuid']), $hide_nonce,$this->get_pagenum())
+                );
+            } else {
+                $actions = array(
+                    'id' =>"ID: ".esc_attr($item['uuid']),
+                    'show' => sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Show in the Website</a>',
+                        'moo_items', 'show',esc_attr($item['uuid']), $show_nonce,$this->get_pagenum())
+                );
+            }
+            $actions['edit'] = sprintf( '<a href="?page=%s&action=%s&item_uuid=%s&paged=%s">Add / Edit Images</a>',
+                'moo_items', 'update_item',esc_attr($item['uuid']),$this->get_pagenum());
+
+            if($item['outofstock']) {
+                $actions['disable_ot']  = sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Disable out of stock</a>',
                     'moo_items', 'disable_ot',esc_attr($item['uuid']), $disable_ot_nonce,$this->get_pagenum());
-        else
-            $actions['enable_ot']  = sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Enable out of stock</a>',
-                'moo_items', 'enable_ot',esc_attr($item['uuid']), $enable_ot_nonce,$this->get_pagenum());
+            } else {
+                $actions['enable_ot']  = sprintf( '<a href="?page=%s&action=%s&item=%s&_wpnonce=%s&paged=%s">Enable out of stock</a>',
+                    'moo_items', 'enable_ot',esc_attr($item['uuid']), $enable_ot_nonce,$this->get_pagenum());
+            }
 
-        $actions['edit'] = sprintf( '<a href="?page=%s&action=%s&item_uuid=%s">Add / Edit Images</a>',
-            'moo_items', 'update_item',esc_attr($item['uuid']));
-        $actions['edit_description'] = sprintf( '<a class="moo-edit-description-button" href="#edit-description-popup-%s">Add / Edit description</a><div id="edit-description-popup-%s" class="white-popup mfp-hide"><textarea id="edit-description-content-%s" style="width: 100&#37;"  rows="5">%s</textarea><button class="button" onclick="moo_editItemDescription(event,\'%s\')">Save</button></div>',
-            esc_attr($item['uuid']),esc_attr($item['uuid']),esc_attr($item['uuid']),stripslashes($item['description']),esc_attr($item['uuid']));
+
+        }
+        $actions['edit_description'] = sprintf( '<a class="moo-edit-description-button" href="#edit-description-popup-%s">Add / Edit description</a><div id="edit-description-popup-%s" class="white-popup mfp-hide"><textarea id="edit-description-content-%s" style="width: 100&#37; ; margin-top: 12px"  rows="8">%s</textarea><button class="button" onclick="moo_editItemDescription(event,\'%s\')">Save</button></div>',
+            esc_attr($item['uuid']),esc_attr($item['uuid']),esc_attr($item['uuid']),$itemDescription,esc_attr($item['uuid']));
 
         return $title . $this->row_actions( $actions );
     }
@@ -225,13 +298,16 @@ class Products_List_Moo extends WP_List_Table_MOO {
         switch ( $column_name ) {
             case 'sku':
             case 'code':
-            case 'price_type':
             case 'unit_name':
                 return $item[ $column_name ];
             case 'outofstock':
                 return $item[ $column_name ]=="1"?"Yes":"No";
+            case 'price_type':
+                return $item[ $column_name ]=="PER_UNIT"?"Per Unit<br>Unit Name:".$item[ "unit_name" ]:$item[ $column_name ];
             case 'price':
                 return '$'.round(($item['price']/100),2);
+            case 'image':
+                return $this->getOneImage($item['uuid']);
             default:
                 return print_r( $item, true ); //Show the whole array for troubleshooting purposes
         }
@@ -249,6 +325,39 @@ class Products_List_Moo extends WP_List_Table_MOO {
         );
     }
     /**
+     * Render the image column
+     *
+     * @param array $item
+     *
+     * @return string
+     */
+    function column_image( $item ) {
+
+        if(isset($_GET["category"])){
+            if(isset($_GET["paged"])){
+                $edit_link = sprintf( '?page=%s&action=%s&item_uuid=%s&category=%s&paged=%s',
+                    'moo_items', 'update_item',esc_attr($item['uuid']),esc_attr($_GET["category"]),esc_attr($_GET["paged"]));
+            } else {
+                $edit_link = sprintf( '?page=%s&action=%s&item_uuid=%s&category=%s',
+                    'moo_items', 'update_item',esc_attr($item['uuid']),esc_attr($_GET["category"]));
+            }
+        } else {
+            if(isset($_GET["paged"])){
+                $edit_link = sprintf( '?page=%s&action=%s&item_uuid=%s&paged=%s',
+                    'moo_items', 'update_item',esc_attr($item['uuid']),esc_attr($_GET['paged']));
+            } else {
+                $edit_link = sprintf( '?page=%s&action=%s&item_uuid=%s',
+                    'moo_items', 'update_item',esc_attr($item['uuid']));
+            }
+        }
+
+        $link = $this->getOneImage($item["uuid"]);
+        return sprintf(
+            '<a class="mooItemsList-placeholderImg" href="%s"><img width="40" height="40" src="%s" alt="placeholder" sizes="(max-width: 150px) 100vw, 150px"></a>',
+            $edit_link, $link
+        );
+    }
+    /**
      *  Associative array of columns
      *
      * @return array
@@ -256,11 +365,10 @@ class Products_List_Moo extends WP_List_Table_MOO {
     function get_columns() {
         $columns = array(
             'cb'      => '<input type="checkbox" />',
+            'image'      => "",
             'name'    => __( 'Name'),
             'price' => __( 'Price'),
             'price_type' => __( 'Price Type'),
-            'unit_name' => __( 'Unit'),
-            'sku' => __( 'SKU'),
             'outofstock' => __( 'Out Of Stock'),
 
         );
@@ -334,8 +442,13 @@ class Products_List_Moo extends WP_List_Table_MOO {
             }
             else {
                 self::hide_item($_GET['item']);
-                wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
-                //wp_redirect(add_query_arg('paged',$_REQUEST['paged']));
+
+                if(isset($_REQUEST['category'])){
+                    wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')."&category=".$_REQUEST['category']));
+                } else {
+                    wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
+                }
+
                 exit;
             }
 
@@ -349,35 +462,42 @@ class Products_List_Moo extends WP_List_Table_MOO {
                 }
                 else {
                     self::show_item($_GET['item']);
-                    wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
+                    if(isset($_REQUEST['category'])){
+                        wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')."&category=".$_REQUEST['category']));
+                    } else {
+                        wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
+                    }
                     exit;
                 }
             }
             else
-                if('enable_ot' === $this->current_action())
-                {
+                if('enable_ot' === $this->current_action()) {
                     $nonce = esc_attr( $_REQUEST['_wpnonce'] );
 
                     if ( ! wp_verify_nonce( $nonce, 'moo_enable_ot' ) ) {
                         die( 'Go get a life script kiddies' );
-                    }
-                    else {
+                    } else {
                         self::out_of_stock($_GET['item'],true);
-                        wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
+                        if(isset($_REQUEST['category'])){
+                            wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')."&category=".$_REQUEST['category']));
+                        } else {
+                            wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
+                        }
                         exit;
                     }
-                }
-                else
-                {
+                } else {
                     if('disable_ot' === $this->current_action())
                     {
                         $nonce = esc_attr( $_REQUEST['_wpnonce'] );
                         if ( ! wp_verify_nonce( $nonce, 'moo_disable_ot' ) ) {
                             die( 'Go get a life script kiddies' );
-                        }
-                        else {
+                        } else {
                             self::out_of_stock($_GET['item'],false);
-                            wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
+                            if(isset($_REQUEST['category'])){
+                                wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')."&category=".$_REQUEST['category']));
+                            } else {
+                                wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
+                            }
                             exit;
                         }
                     }
@@ -393,7 +513,12 @@ class Products_List_Moo extends WP_List_Table_MOO {
             foreach ( $hide_ids as $id ) {
                self::hide_item( esc_sql($id) );
             }
-            wp_redirect(add_query_arg('paged',((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
+            if(isset($_REQUEST['category'])){
+                wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')."&category=".$_REQUEST['category']));
+            } else {
+                wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
+            }
+
            exit;
          }
         else
@@ -409,7 +534,12 @@ class Products_List_Moo extends WP_List_Table_MOO {
                     self::show_item( esc_sql($id) );
                 }
 
-                wp_redirect(add_query_arg('paged',((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')) );
+                if(isset($_REQUEST['category'])){
+                    wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')."&category=".$_REQUEST['category']));
+                } else {
+                    wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
+                }
+
                 exit;
             }
             else
@@ -425,7 +555,12 @@ class Products_List_Moo extends WP_List_Table_MOO {
                         self::out_of_stock( esc_sql($id),true);
                     }
 
-                    wp_redirect(add_query_arg('paged',((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')) );
+                    if(isset($_REQUEST['category'])){
+                        wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')."&category=".$_REQUEST['category']));
+                    } else {
+                        wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
+                    }
+
                     exit;
                 }
                 else
@@ -441,7 +576,12 @@ class Products_List_Moo extends WP_List_Table_MOO {
                             self::out_of_stock( esc_sql($id),false );
                         }
 
-                        wp_redirect(add_query_arg('paged',((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')) );
+                        if(isset($_REQUEST['category'])){
+                            wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')."&category=".$_REQUEST['category']));
+                        } else {
+                            wp_redirect(admin_url('admin.php?page=moo_items&paged='.((isset($_REQUEST['paged']))?$_REQUEST['paged']:'')));
+                        }
+
                         exit;
                     }
                 }
@@ -459,7 +599,7 @@ class Products_List_Moo extends WP_List_Table_MOO {
     function extra_tablenav( $which ) {
         global $wpdb;
         $move_on_url = '&category=';
-        if ( $which == "top" ){
+        if ( $which == "top" || $which == "bottom" ){
             ?>
             <div class="alignleft actions bulkactions">
                 <?php

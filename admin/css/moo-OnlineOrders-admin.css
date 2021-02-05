@@ -396,6 +396,17 @@
 {
     width: 200px;
 }
+#image {
+     width: 55px;
+}
+.wp-list-table #the-list .column-image .mooItemsList-placeholderImg{
+    margin: 0;
+    width: auto;
+    height: auto;
+    max-width: 40px;
+    max-height: 40px;
+    vertical-align: middle;
+}
 /*
     Custom css for tab Settings
     expandable options
@@ -795,9 +806,9 @@
     margin: 0;
 }
 div.normal_text {
-    font-family: Roboto,"Helvetica Neue",Helvetica,sans-serif !important;
-    color: #63666A !important;
-    font-size: 15px !important;
+    font-family: Roboto,"Helvetica Neue",Helvetica,sans-serif;
+    color: #63666A;
+    font-size: 15px;
     margin-left: 10px;
 }
 #MooPanel_main .MooPanelItem .Moo_option-item {
@@ -857,7 +868,7 @@ div#MooPanel_tabContent4 div.MooPanelItem div.Moo_option-item div {
 }
 
 div#MooPanel_tabContent7 div.MooPanelItem div.Moo_option-item div{
-    margin-top: 0 !important;
+    margin-top: 0 ;
     color : black;
 }
 
@@ -1072,6 +1083,7 @@ div#MooPanel_tabContent5 div.MooPanelItem div#bloc_moo_ptions_item div.Moo_optio
 }
 .iwl_input_holder input{
     width: 100%;
+    border: 1px solid #ddd;
 }
 .iwl_input_holder textarea{
     width: 100%;
@@ -1111,9 +1123,8 @@ div#MooPanel_tabContent5 div.MooPanelItem div#bloc_moo_ptions_item div.Moo_optio
 {
     margin-left: 15px;
 }
-.moo_hidden
-{
-    display: none;
+.moo_hidden {
+    display: none !important;
 }
 /* --- table category --- */
 
@@ -1322,6 +1333,18 @@ ul.moo_ModifierGroup li{
     color: #293553;
     cursor: move;
 }
+#moo_item_options {
+    display: none;
+}
+.moo_items_options ul.moo_ModifierGroup li{
+    cursor: auto;
+}
+.moo_items_options ul.moo_ModifierGroup .label_name{
+    display: inline-block;
+}
+.moo_items_options ul.moo_ModifierGroup  .sub-group{
+    display: block;
+}
 li.list-group{
     background: #eee;
     cursor: pointer;
@@ -1367,7 +1390,7 @@ ul.sub-group > li{
     background-color: #FFFFFF;
 }
 ul.sub-group .moo_modifier_name{
-    width:50%;
+    width:70%;
     display: inline-block;
     font-size: 15px;
     position: relative;
@@ -1378,6 +1401,9 @@ ul.sub-group .edit_modifer_name{
     text-align: center;
     width: 20%;
     display: inline-block;
+}
+.moo-centred {
+    text-align: center;
 }
 /*============================================================
     Mobile (Portrait) Design for a width of 320px
@@ -2180,6 +2206,13 @@ table.main_table td {
     font-size: 15px;
     margin-top: 10px;
 }
+#MooPanel_tabContent2 .MooPanelItem .mooAutoSyncSection .mooAutoSyncSectionIcon {
+    text-align: center;
+    margin-top: 5px;
+}
+#MooPanel_tabContent2 .MooPanelItem .mooAutoSyncSection .mooAutoSyncSectionButtons>button {
+    margin-top: 10px;
+}
 /*fusion builder compatibilty*/
 #fusion_builder_layout *,#fusion_builder_layout *:before,#fusion_builder_layout *:after{
     -webkit-box-sizing: content-box;
@@ -2191,4 +2224,159 @@ table.main_table td {
     text-align: right;
     margin-top: -30px;
     margin-bottom: 15px;
+}
+
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection {
+    padding: 20px;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .sync-header {
+    padding: 17px 20px;
+    background-color: #eff5fc;
+    border: 1px solid #eee;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .sync-body {
+    border-radius: 4px;
+    border: 1px solid #eff5fc;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .sync-body .moo-row {
+    padding: 8px 15px;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .sync-body-row {
+    border-bottom: 1px solid #eff5fc;
+    padding-top: 8px;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .sync-body-row {
+    border-bottom: 1px solid #eff5fc;
+    padding-top: 8px;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .sync-msg {
+    padding: 3px 21px 2px 20px;
+    border-radius: 71px;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .sync-msg-red {
+    background-color: rgba(224, 32, 32, 0.29);
+    color: #e02020;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .sync-msg-orange {
+    background-color: #fff5cc;
+    color: #f7b500;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .sync-msg-green {
+    background-color: #e2fbd7;
+    color: #34b53a;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .sync-pagination {
+    float: right;
+    margin-right: 12px;
+    font-size: 12px;
+    height: 50px;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .sync-pagination .pagination {
+    display: inline-block;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .sync-pagination .pagination li {
+    color: black;
+    float: left;
+    text-decoration: none;
+    list-style: none;
+    padding: 8px 5px;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .pagination li a {
+    color: #4a4a4a;
+    text-decoration: none;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .pagination li a img {
+    padding: 7px 6px;
+    background-color: aliceblue;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .pagination li span {
+    padding: 3px 6px;
+    display: block;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .alert {
+    background-color: #eee;
+    font-size: 12px;
+    text-align: center;
+    padding: 4px;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 9;
+    left: -78px;
+    right: 50px;
+    top: 30px;
+    width: 200px;
+    display: none;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .alert:before {
+    content: "";
+    display: block;
+    border-top: 12px solid transparent;
+    border-bottom: 15px solid #eee;
+    border-right: 10px solid transparent;
+    border-left: 10px solid transparent;
+    position: absolute;
+    top: -27px;
+    left: 90px;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .status-alert:hover .alert {
+    display: block;
+}
+#MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .refresh img {
+    -webkit-animation: mooSyncSpin 1s linear infinite;
+    /* Safari */
+    animation: mooSyncSpin 1s linear infinite;
+}
+.mooOpeningHoursDashSection {
+    text-align: left;
+    padding: 10px 8px;
+}
+.mooOpeningHoursDashSection .mooOpeningHoursDashSmallText {
+    text-align: left;
+    padding: 2px;
+    font-size: 11px;
+}
+.mooOpeningHoursDashSection .mooOpeningHoursDashSectionRow {
+    padding: 10px 0;
+}
+.mooOpeningHoursDashSection .mooOpeningHoursDashSectionRow .mooOpeningHoursDashSection-day {
+    display: inline-block;
+    font-weight: 600;
+    color: #174394;
+    text-transform: uppercase;
+}
+.mooOpeningHoursDashSection .mooOpeningHoursDashSectionRow .mooOpeningHoursDashSection-hours {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    float: right;
+}
+@media only screen and (max-width: 768px) {
+    #MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .moo-sync .moo-col-md-2, #MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .moo-col-md-3, #MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .moo-col-md-5 {
+        display: table-cell;
+    }
+    #MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .sync-msg {
+        font-size: 12px;
+        padding: 5px;
+    }
+    #MooPanel_tabContent2 #mooAutoSyncDetailsSection .mooAutoSyncDetailsSection .sync-body-row {
+        padding-bottom: 6px;
+    }
+}
+
+@-webkit-keyframes mooSyncSpin {
+    0% {
+        -webkit-transform: rotate(360deg);
+    }
+    100% {
+        -webkit-transform: rotate(0deg);
+    }
+}
+@keyframes mooSyncSpin {
+    0% {
+        transform: rotate(360deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
 }

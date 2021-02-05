@@ -681,6 +681,7 @@ background-color: #2672af;
     word-wrap: break-word;
     max-width: 15em;
     margin: 0 auto;
+    line-height: 20px;
 }
 @media (max-width: 768px){
     .osnCardItem .osnContentItem h4{
@@ -1463,7 +1464,12 @@ background-color: #2672af;
     text-align: center;
     font-weight: bold;
 }
-#osnItemModalModifier .osnModifierPanel .osnModifierPanelFooter .osnModifierPanelPriceDetails h5,#osnChooseQuantity h5{font-weight: 700;text-transform: capitalize;color: #48515d;}
+#osnItemModalModifier .osnModifierPanel .osnModifierPanelFooter .osnModifierPanelPriceDetails h5,#osnChooseQuantity h5{
+    font-weight: 700;
+    text-transform: capitalize;
+    color: #48515d;
+    margin: 0;
+}
 #osnItemModalModifier .osnModifierPanel .osnModifierPanelFooter .osnModifierPanelPriceDetails p{
 
 /* font-size: 23px; */
@@ -1876,7 +1882,14 @@ color: #516278;
     text-align: center;
     font-weight: bold;
 }
-#osnItemModal .osnItemModelContainer .osnModifierPanelFooter .osnModifierPanelPriceDetails h5,#osnChooseQuantity h5{font-weight: 700;font-family: ITC Avant Garde Std Bold;text-transform: capitalize;font-style: normal;color: #48515d;}
+#osnItemModal .osnItemModelContainer .osnModifierPanelFooter .osnModifierPanelPriceDetails h5,#osnChooseQuantity h5{
+    font-weight: 700;
+    font-family: ITC Avant Garde Std Bold;
+    text-transform: capitalize;
+    font-style: normal;
+    color: #48515d;
+    margin: 0;
+}
 #osnItemModal .osnItemModelContainer .osnModifierPanelFooter .osnModifierPanelPriceDetails p{
     padding: 10px;
     font-family: "ITC Avant Garde Std Bold",arial;

@@ -1,3 +1,5 @@
+window.moo_RestUrl = moo_params.moo_RestUrl;
+
 jQuery(document).ready(function($) {
     //Load the content of the opened tab
     mooLoadInstalledThemes();

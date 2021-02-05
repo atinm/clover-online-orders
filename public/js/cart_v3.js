@@ -72,7 +72,7 @@ function moo_emptyCart(event)
     swal("please wait..");
     jQuery.post(moo_params.ajaxurl,{'action':'moo_emptycart'}, function (data) {
         if(data.status === "success"){
-            var cart = '<div class="moo_emptycart"><p>Your cart is empty</p><span><a class="moo-btn moo-btn-default" href="'+moo_StorePage+'" style="margin-top: 30px;">Back to Main Menu</a></span></div>';
+            var cart = '<div class="moo_emptycart"><p>Your cart is empty</p><span><a class="moo-btn moo-btn-default" href="'+moo_params.storePage+'" style="margin-top: 30px;">Back to Main Menu</a></span></div>';
             jQuery(".moo-shopping-cart").html(cart);
             swal.close()
         } else {
@@ -262,7 +262,7 @@ function moo_recalculateCart()
         }
         else
         {
-            var html = '<div class="moo_emptycart"><p>Your cart is empty</p><span><a class="moo-btn moo-btn-default" href="'+moo_StorePage+'" style="margin-top: 30px;">Back to Main Menu</a></span></div>';
+            var html = '<div class="moo_emptycart"><p>Your cart is empty</p><span><a class="moo-btn moo-btn-default" href="'+moo_params.storePage+'" style="margin-top: 30px;">Back to Main Menu</a></span></div>';
 
             jQuery('.moo-shopping-cart').html(html);
         }

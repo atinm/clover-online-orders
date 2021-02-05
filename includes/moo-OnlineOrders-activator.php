@@ -477,7 +477,7 @@ class Moo_OnlineOrders_Activator {
         }
 
         // Save the version of the plugin in the Database
-         update_option('moo_onlineOrders_version', '144');
+         update_option('moo_onlineOrders_version', '145');
 
         $defaultOptions = self::applyDefaultOptions($defaultOptions);
 
@@ -514,6 +514,7 @@ class Moo_OnlineOrders_Activator {
             array("name"=>"scp","value"=>"off"),
             array("name"=>"merchant_phone","value"=>""),
             array("name"=>"order_later","value"=>"on"),
+            array("name"=>"order_later_mandatory","value"=>"off"),
             array("name"=>"order_later_days","value"=>"4"),
             array("name"=>"order_later_minutes","value"=>"20"),
             array("name"=>"order_later_days_delivery","value"=>"4"),
@@ -524,8 +525,10 @@ class Moo_OnlineOrders_Activator {
             array("name"=>"fixed_delivery","value"=>""),
             array("name"=>"other_zones_delivery","value"=>""),
             array("name"=>"delivery_fees_name","value"=>"Delivery Charge"),
+            array("name"=>"delivery_errorMsg","value"=>"Sorry, zone not supported. We do not deliver to this address at this time"),
             array("name"=>"zones_json","value"=>""),
             array("name"=>"hide_menu","value"=>""),
+            array("name"=>"hide_menu_w_closed","value"=>"off"),
             array("name"=>"accept_orders_w_closed","value"=>"on"),
             array("name"=>"show_categories_images","value"=>false),
             array("name"=>"save_cards","value"=>"disabled"),
@@ -552,7 +555,9 @@ class Moo_OnlineOrders_Activator {
             array("name"=>"mg_settings_qty_for_all","value"=>"enabled"),
             array("name"=>"mg_settings_qty_for_zeroPrice","value"=>"disabled"),
             array("name"=>"text_under_special_instructions","value"=>"*additional charges may apply and not all changes are possible"),
+            array("name"=>"special_instructions_required","value"=>"no"),
             array("name"=>"use_couponsApp","value"=>"off"),
+            array("name"=>"special_instructions_required","value"=>"off"),
             array("name"=>"accept_orders","value"=>"enabled"),
             array("name"=>"onePage_askforspecialinstruction","value"=>"off"),
             array("name"=>"onePage_messageforspecialinstruction","value"=>"Type your instructions here, additional charges may apply and not all changes are possible"),
@@ -569,6 +574,8 @@ class Moo_OnlineOrders_Activator {
             array("name"=>"rollout_order_number","value"=>"on"),
             array("name"=>"rollout_order_number_max","value"=>"999"),
             array("name"=>"thanks_page_wp","value"=>""),
+            array("name"=>"cdn_for_images","value"=>"off"),
+            array("name"=>"cdn_url","value"=>""),
         );
 
         foreach ($default_options as $default_option) {

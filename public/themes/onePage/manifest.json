@@ -125,6 +125,17 @@
             }
         },
         {
+            "id":"categoriesTitlesColor",
+            "label":"Categories titles color",
+            "type":"color",
+            "info":"This will change the color of the categories titles",
+            "default":"#ffffff",
+            "css" :{
+                "cssSelector":".moo-menu-category .moo-menu-category-title .moo-title",
+                "cssProperty":"color"
+            }
+        },
+        {
             "id":"buttonsBorderColor",
             "label":"Buttons Border Color",
             "type":"color",

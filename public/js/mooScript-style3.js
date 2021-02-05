@@ -565,7 +565,7 @@ function mooUpdateCart()
                       '</div>';
               //Set checkout btn
               cart_html +='<div class="moo-row moo-cart-btns">'+
-                  '<a href="'+moo_CheckoutPage+'" class="moo-btn moo-btn-danger BtnCheckout">CHECKOUT</a>'+
+                  '<a href="'+moo_params.checkoutPage+'" class="moo-btn moo-btn-danger BtnCheckout">CHECKOUT</a>'+
                   '</div></div></div>';
               element.html(cart_html);
           }

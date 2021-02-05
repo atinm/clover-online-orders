@@ -3,15 +3,15 @@ Contributors: Zaytech
 Donate link: http://www.zaytechapps.com/
 Tags: clover,online orders for clover,zaytech online orders,Clover online orders, Online orders for Clover, Wordpress and Clover,Clover, online ordering for clover, online order for clover pos, Online ordering for Clover POS,clover POS
 Requires at least: 4.7.1
-Tested up to: 5.4.2
+Tested up to: 5.6.0
 Requires PHP: 5.2.0
-Stable tag: 1.4.4
+Stable tag: 1.4.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Smart Online Order for Clover allows you to receive orders from your Wordpress website and have it sent directly to your Clover POS.
 
-## Description
+## Description 
 
 With **Smart Online Order for Clover** you can easily integrate and import your Clover inventory to show on your website in real-time. This will allow you to accept Online Orders from your website.
 
@@ -23,7 +23,7 @@ All orders can either automatically print or you can have the orders manually pr
 
 It’s also easy to do it yourself, if you get stuck, there are step by step instructions on You Tube – Search “Smart Online Order” on YouTube.
 
-## How it works
+### How it works
 
 After installing the Smart Online Order for Clover plugin, add the pages "Order Online", "Checkout" and "My Orders" by going to Appearance then Menu from the Wordpress Dashboard. Then sync your website with your Clover POS using “Import inventory”.
 
@@ -44,48 +44,25 @@ If you don’t have any kind of website and don’t know where to start give us 
 Below are just a few websites currently using Smart Online Order with their Clover POS.
 
 [Burger Restaurant](https://chicknchuck.com/)
-
 [Full Service Restaurant](https://www.theoriginalturkey.com)
-
 [Island Smoothie Cafe](https://www.islandsmoothiecafe.com)
-
-[HarissaToGo](https://HarissaToGo.com)
-
-[Pizza shop Example 1](https://pomodoropizzafl.com)
-
+[Pizza shop Example 1](https://pomodoropizzafl.com/store)
 [Pizza shop Example 2](http://www.fastpizzaonline.com)
-
 [Pizza shop Example 3](https://www.zifaros.com)
-
 [Oasis Grill ](https://oasisgrill.com)
-
 [Cake Shop](https://nolandscakes.com)
-
-[Multi locations example](http://oak2go.com/)
-
-[Breadologie bakery](https://breadologie.smartonlineorder.com/)
-
 [Pizza Shop Example 4](https://villaromarestaurant.net)
-
 [Pizza Shop Example 5](https://venuspizzeriafl.com)
-
 [Pizza Shop Example 6](https://www.tonyspizzaandgrinders.com)
-
 [Coffee Shop Example 2](https://www.teabocoffee.com)
-
 [Another Cafe Example](https://misskellyscafe.com)
-
 [Poke Food Example](https://www.bigfinpoke.com)
-
 [Indian Food Example](https://www.himalayanfusiononline.com)
-
 [Cookie Store Example](https://rucookiemunchers.com/)
-
-[Oakwells](http://oakwells.com/)
-
 [Minami](https://minamisushi.com/)
-
-[Connections cafe & catering](https://connectionscafecatering.com/)
+[HANA TEA](https://hanatea8088.smartonlineorder.com)
+[ROSE TEA LOUNGE](https://rosetealounge.smartonlineorder.com/)
+[ACME SMOKED FISH](https://acmesmokedfish.smartonlineorder.com/)
 
 Some websites we built, other websites were built by the merchant themselves or developers they hired.
 
@@ -94,10 +71,10 @@ Some websites we built, other websites were built by the merchant themselves or 
 Here is what you need to do:
 
 1. Install the app by Zaytech called “[Smart Online Order + Wordpress](https://www.clover.com/appmarket/apps/6MWGRRXJD5HMW?clientCountry=US )” to your Clover POS - Clover Station, Clover Mini, etc.
-2. Install this Plugin - From Wordpress Plugin - search "Clover" or "Smart Online Order"
-3. Enter the Api-Key in the Smart Online Order Plugin in Wordpress. The Api Key is found by going to Clover.com and opening Smart Online Order-Wordpress
-4. Then enter Api Key and press save. Import Your Inventory by pressing import inventory in the Smart Online Order Wordpress Plugin - You can also Search Youtube for "Smart Online Order" for tutorials
-5. A new page is automatically created for you. Just put /store after your domain name to see the Online Order page. For example: If your website name is mysushi.com enter mysushi.com/store to see the online order page
+1. Install this Plugin - From Wordpress Plugin - search "Clover" or "Smart Online Order"
+1. Enter the Api-Key in the Smart Online Order Plugin in Wordpress. The Api Key is found by going to Clover.com and opening Smart Online Order-Wordpress
+1. Then enter Api Key and press save. Import Your Inventory by pressing import inventory in the Smart Online Order Wordpress Plugin - You can also Search Youtube for "Smart Online Order" for tutorials
+1. A new page is automatically created for you. Just put /store after your domain name to see the Online Order page. For example: If your website name is mysushi.com enter mysushi.com/store to see the online order page
 
 
 You can also add your menu in a new post/page or an existing one using this shortcode
@@ -139,44 +116,61 @@ Search Youtube "Smart Online Order" for Tutorial Videos
 
 ## Frequently Asked Questions
 
-= What is a Clover POS =
+#### What is a Clover POS
 
 Please visit Clover.com to learn more about the Clover POS.
 
-= Will this Plug-in work if I don’t have a Clover POS =
+#### Will this Plug-in work if I don’t have a Clover POS
 
 No, this plugin requires that you have an activated merchant account with a Clover POS.
 
-= Is there a fee associated with the Online Ordering for Wordpress App found in the App Market =
+#### Is there a fee associated with the Online Ordering for Wordpress App found in the App Market
 
 While this Plug-in is free. Yes, there is a fee associated with the Online Ordering for Wordpress App found in the App Market.
 
-= If i have difficulty installing this plug-in or the app, is there support or help =
+#### If i have difficulty installing this plug-in or the app, is there support or help 
 
 Yes, Please call 925-234-5554 for any questions you may have. You may also e-mail us at: support@zaytech.com or visit https://docs.zaytech.com or search Youtube for "Smart Online Order"
 
-= Did Clover make this plug-in =
+#### Did Clover make this plug-in
 
 No, this plug-in is not by Clover. It is from Zaytech. Both this plug-in and Smart Online Order for Wordpress is by Zaytech.
 
-= I like this plug-in but I need some additional features =
+#### I like this plug-in but I need some additional features 
 
 Please let us know so we can implement additional features.support@zaytech.com
 
-## Changelog
+##  Changelog ==
 
-= 1.4.4 =
+### 1.4.5 =
+* Fixed issue with display/hide show more in store interface 6
+* Improved Auto-Sync for items
+* Added ability to serve categories and items images using the CDN
+* Added ability to use coupons automatically using the query param "soocoupon"
+* Improved PHP 8 Compatibility
+* Changed Date format in Orders to local timezone instead of UTC
+* Improved Store interface 4 and added more customization options
+* Improved the ability to add images and descriptions easier to items
+* Added ability to see original modifier names after name change
+* Fixed issue to go back to same category after adding images
+* Add ability to require scheduled orders when the store is closed
+* Added announcement section inside Smart Online Order
+* Added ability to make “Special Instructions” Required
+* Added ability to use CDN for images
+* General updates and improvements
+
+### 1.4.4 =
 * Updated payment options
 * Minor improvements and updates
 
-= 1.4.2 =
+### 1.4.2 =
 * Improved the new payment method (secured by Clover)
 * Other Improvements
 
-= 1.4.1 =
+### 1.4.1 =
 * Improved the new payment method (secured by Clover)
 
-= 1.4.0 =
+### 1.4.0 =
 * Added option to choose either to display regular names or alternate names
 * Improved re-ordering items* Improved css of store interface 4 for iPad
 * Improved descriptions for items to accept HTML
@@ -200,7 +194,7 @@ Please let us know so we can implement additional features.support@zaytech.com
 * Improved a feature so hidden items cannot be re-ordered
 * Other Improvements
 
-= 1.3.9 =
+### 1.3.9 =
 * Fixed rounding float for percentage - for services fees
 * Improved ordering method with iPads and Apple Pencil
 * Improved the process of how an address is applied towards Delivery Orders
@@ -208,14 +202,14 @@ Please let us know so we can implement additional features.support@zaytech.com
 * Added link to helpful articles to search answers to common questions
 * Clarified how fixed delivery fees work by highlighting the text in red
 
-= 1.3.8 =
+### 1.3.8 =
 * Fixed Avada theme compatibility
 * Fixed issue when disable order types
 
-= 1.3.7 =
+### 1.3.7 =
 * Fixed issue when saving delivery settings
 
-= 1.3.6 =
+### 1.3.6 =
 * Added new Store Interface Six. This is a fun and interactive store interface with categories at the top
 * Added ability to have Custom Hours for Categories. For example, you can have specific hours that your lunch menu is available for Online Ordering
 * Added ability to have Custom Hours for Order Types. For example, you can have specific hours of when you would like to do delivery or pick-up order
@@ -230,7 +224,7 @@ Please let us know so we can implement additional features.support@zaytech.com
 * Added ability to sync inventory while searching through the categories
 * Added ability to search for modifiers by name
 
-= 1.3.5 =
+### 1.3.5 =
 * Full support of Wordpress Network (Subdomains & Subdirectories)
 * Integration with Perfect Coupons App by Zaytech. It's now possible to create and print coupons on your Clover POS device and then allow customers to redeem the the coupon online
 * Fixed an issue where a comma was converting to a forward slash for item descriptions
@@ -244,7 +238,7 @@ Please let us know so we can implement additional features.support@zaytech.com
 * Fixed import items issue when there are more than 1000 items
 * Other improvements and fixes
 
-= 1.3.2 =
+### 1.3.2 =
 * Fixed modifiers manual sync issue when there are more than 1000 modifiers
 * Fixed and Improved Categories and Items sync
 * Added Tax Sync Feature
@@ -260,13 +254,13 @@ Please let us know so we can implement additional features.support@zaytech.com
 * Added the ability to disable online payment and accept only pay at location/pay upon delivery
 * Improved ability to update order types by improving sync functionality with the clover account
 
-= 1.3.1 =
+### 1.3.1 =
 * Fixed printing issues
 * Fixed order note not changed
 * Added the receipt link to the text messages
 * Added 'PAID' to order title if the order was paid
 
-= 1.3.0 =
+### 1.3.0 =
 * Added new Store Interface “Store Interface 5”
 * Added reports feature
 * Fixed issue where the store interface wasn’t appearing correctly on Internet Explorer and Microsoft edge browsers
@@ -276,7 +270,7 @@ Please let us know so we can implement additional features.support@zaytech.com
 * Added the following shortcode to be used with Store Interface 4 so it can load on iPhone Apps [moo_all_items js_loading='false' interface="si4"]
 * Other various fixes and improvements
 
-= 1.2.80 =
+### 1.2.80 =
 * Added the clean inventory feature
 * Improved the store interface 4 to accept direct links to a specif category
 * Added the ability for customer to reply to the emails and get the response in their own inbox
@@ -292,7 +286,7 @@ Please let us know so we can implement additional features.support@zaytech.com
 * Ability to hide quantity selection from modifiers with prices or modifiers with no prices for store interface 4
 * Ability to show modifiers as a pop-up or directly underneath the item for store interface 4
 
-= 1.2.7 =
+### 1.2.7 =
 * Added two new store interfaces
 * Store interface 3 has a beautiful interface that allows images to be uploaded for items in a vertical format
 * Store interface 4 is an elegant interface that is great for restaurants or any business that wants a vertical format that may only want to upload images for categories. If the items you are uploading are very similar to the category images, then you can just upload a category image to cover all of the individual items. It also allows you to upload images for items in case the individual items are different from the category image
@@ -316,7 +310,7 @@ Please let us know so we can implement additional features.support@zaytech.com
 * Improved the add to cart button (shortcode) for individual items
 * Ability to choose different scheduled order times for delivery and pickup
 
-= 1.2.6 =
+### 1.2.6 =
 * Added a new feature called coupon codes
 * Fixed issue where duplicate cart pages were being created
 * Added a widget so it displays business hours during checkout
@@ -326,7 +320,7 @@ Please let us know so we can implement additional features.support@zaytech.com
 * Added script to send print command multiple times to merchants that experienced poor wifi connectivity
 * Improved the functionality of how delivery fees are registered on the receipt
 
-= 1.2.5 =
+### 1.2.5 =
 * Added login/signup feature
 * Ability to save customer address for future purchases
 * Improved the checkout process
@@ -340,7 +334,8 @@ Please let us know so we can implement additional features.support@zaytech.com
 * Improved delivery fee calculation
 * Improved layout so more description can be added
 * Fixed various bugs and made improvements
-= 1.2.4 =
+
+### 1.2.4 =
 * Improved process to make adding descriptions easier
 * Ability to rearrange items
 * In edit items page (filter by category)
@@ -351,83 +346,104 @@ Please let us know so we can implement additional features.support@zaytech.com
 * Added the short-code [moo_all _items category='uuid'] for store interface 1. This allows to place categories on different pages by using the short code. Also possible for store interface 2
 * Fixed partial payment issue
 * Fixed other bugs and made improvements
-= 1.2.3 =
+
+### 1.2.3 =
 * Improved and increased font size for required modifier
 * Updated email receipts with more information
 * Shows special instructions on checkout page and on email receipt
 * Ability to show item description for store interface 1
 * Fixed various bugs and other issues
-= 1.2.2 =
+
+### 1.2.2 =
 * Ability to rearrange modifiers & modifiers group
 * Ability to change modifiers names
-= 1.2.1 =
+
+### 1.2.1 =
 * Prevent customer from ordering outside of business hours and days
 * Option to add image to any category
 * Ability to rearrange categories
 * Added multiple images for item
 * Improved order later
 * Improved manually sync
-= 1.2.0 =
+
+### 1.2.0 =
 * Added Out of stock feature
 * Improved checkout feature
 * New design for plugin's dashboard
 * Improved the exiting styles
-= 1.1.9 =
+
+### 1.1.9 =
 * Added Order for later
 * Added SMS notification for merchants and customers
-= 1.1.8 =
+
+### 1.1.8 =
 * Pickup without paying
 * Manually Sync
 * Add to cart button
-= 1.1.7 =
+
+### 1.1.7 =
 * Improved The CART CSS
 * remove qty limit
 * Removed Style 2
 * fixed empty map in checkout
-= 1.1.6 =
+
+### 1.1.6 =
 * Added delivery area
 * Added tips
 * Added required modifiers
-= 1.1.4 =
+
+### 1.1.4 =
 * Fixed Modifier issues
-= 1.1.3 =
+
+### 1.1.3 =
 * Added image for products
 * Fixed more than one checkout page issue
 * The Cart in new page
 * Added order information in checkout page
-= 1.1.1 =
+
+### 1.1.1 =
 * Display the items without category
 * Min and Max Modifier allowed in group modifier
-= 1.1.0 =
+
+### 1.1.0 =
 * Fixed bulk show/hide items
 * Added show/hide category
 * Change category's name
-= 1.0.9 =
+
+### 1.0.9 =
 * Fixed cart's color
 * Fixed the shortcode issue
-= 1.0.8 =
+
+### 1.0.8 =
 * Added a video
-= 1.0.7 =
-= Added : =
+
+### 1.0.7 =
+#### Added : =
 * Store's hours
 * Business address
 * Show/Hide shipping address for an order type
 * Sync with your Clover POS
 * Item's notes
-= Fixed : =
+#### Fixed :
 * Partially paid
 * Changing the quantify of an item in the cart
-= 1.0.6 =
+
+### 1.0.6 =
 Fix issues
-= 1.0.5 =
-= Added : =
+
+### 1.0.5 =
+#### Added :
 * Change name of Modifier group
 * Show/hide Modifier group
-= 1.0.4 =
+
+### 1.0.4 =
 Fix issues
-= 1.0.2 =
+
+### 1.0.2 =
 Change the UI for Modifiers
-= 1.0.1 =
+
+### 1.0.1 =
 Update Frequently Asked Questions
-= 1.0.0 =
+
+### 1.0.0 =
 First Release

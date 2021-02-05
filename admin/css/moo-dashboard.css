@@ -310,6 +310,38 @@
     line-height: 50px;
 }
 /*
+ * Panel CSS
+ */
+#MooPanel #MooPanel_main #MooPanel_tabContent1 #moo-keyValid-section{
+    margin-top: 20px;
+
+}
+#MooPanel #MooPanel_main #MooPanel_tabContent1 #moo-keyValid-section .moo-subSection {
+    background-color: #ffffff;
+    padding: 16px 20px;
+    margin: 10px;
+    border: 1px solid #c8c8c8;
+    box-shadow: 0 0.063rem 0.125rem rgb(0 0 0 / 10%), 0 0.063rem 0.5rem rgb(0 0 0 / 10%);
+
+}
+#MooPanel #MooPanel_main #MooPanel_tabContent1 #moo-keyValid-section .moo-subSection h3 {
+    color: #000000;
+    font-weight: bold;
+    font-family: 'Eina03', Questrial, sans-serif;
+}
+#MooPanel #MooPanel_main #MooPanel_tabContent1 #moo-keyValid-section .moo-subSection img {
+   margin-top: 8px;
+
+}
+#MooPanel #MooPanel_main #MooPanel_tabContent1 #moo-error-section .moo-alert-icon img {
+   margin-top: 8px;
+   width: 222px;
+}
+#MooPanel #MooPanel_main #MooPanel_tabContent1 #moo-error-section .moo-errorSection-message {
+   margin-top: 8px;
+    font-size: 30px;
+}
+/*
     Mobile CSS
  */
 @media screen and (max-width: 600px) {

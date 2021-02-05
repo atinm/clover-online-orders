@@ -3,8 +3,8 @@
  */
 
 function moo_getLatLong() {
-    if(moo_merchantLat == "" || moo_merchantLng == "" ||moo_merchantLat == null || moo_merchantLng == null) {
-        jQuery.get('https://maps.googleapis.com/maps/api/geocode/json?&address='+encodeURI(moo_merchantAddress)+'&key=AIzaSyBwB0ahDw6k1CLf9mZxfXd7j5I7rq1bw70',function (data) {
+    if(mooDeliveryOptions == null || mooDeliveryOptions.moo_merchantLat == "" || mooDeliveryOptions.moo_merchantLng == "" || mooDeliveryOptions.moo_merchantLat == null || mooDeliveryOptions.moo_merchantLng == null) {
+        jQuery.get('https://maps.googleapis.com/maps/api/geocode/json?&address='+mooDeliveryOptions.moo_merchantAddress+'&key=AIzaSyBwB0ahDw6k1CLf9mZxfXd7j5I7rq1bw70',function (data) {
             if(data.results.length>0) {
                 var location = data.results[0].geometry.location;
                 moo_initMap(location,18);
@@ -21,8 +21,8 @@ function moo_getLatLong() {
         })
     } else {
         var Merchantlocation = {};
-        Merchantlocation.lng = parseFloat(moo_merchantLng);
-        Merchantlocation.lat = parseFloat(moo_merchantLat);
+        Merchantlocation.lng = parseFloat(mooDeliveryOptions.moo_merchantLng);
+        Merchantlocation.lat = parseFloat(mooDeliveryOptions.moo_merchantLat);
         moo_initMap(Merchantlocation,18);
         jQuery('#Moo_Lat').val(Merchantlocation.lat);
         jQuery('#Moo_Lng').val(Merchantlocation.lng);

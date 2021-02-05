@@ -2,6 +2,7 @@
  * Created by Mohammed EL BANYAOUI on 9/11/2017.
  */
 jQuery(document).ready(function(){
+    window.moo_RestUrl = moo_params.moo_RestUrl;
     window.moo_theme_setings = [];
     window.moo_mg_setings = {};
     window.nb_items_in_cart = 0;
@@ -26,7 +27,6 @@ jQuery(document).ready(function(){
                 window.categoriesTopMargin = window.phoneCategoriesTopMargin;
             }
             window.width  = 267;
-            
         }
     }).done(function () {
         MooLoadBaseStructure('#moo_OnlineStoreContainer',mooGetCategories);
@@ -167,7 +167,7 @@ function MooCLickOnCategory(event,elm)
 {
     event.preventDefault();
     var category = jQuery(elm).attr('href');
-    var categoryTop= jQuery(category).offset().top+87;
+    var categoryTop= jQuery(category).offset().top;
     var speed = 750;
     if( jQuery(window).width() < 992 ) {
         var menu_height   = jQuery('#moo-menu-navigation').height();
@@ -336,29 +336,21 @@ function moo_renderItems(category,withButton)
                 html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" aria-label="The item '+item.name+' is not available yet">Not Available Yet</button>';
             } else {
                 //Checking the Qty window show/hide and add add to cart button
-                if(window.moo_theme_setings.onePage_qtyWindow != null && window.moo_theme_setings.onePage_qtyWindow == "on")
-                {
-                    if(item.has_modifiers)
-                    {
+                if(window.moo_theme_setings.onePage_qtyWindow != null && window.moo_theme_setings.onePage_qtyWindow == "on") {
+                    if(item.has_modifiers) {
                         if(window.moo_theme_setings.onePage_qtyWindowForModifiers != null && window.moo_theme_setings.onePage_qtyWindowForModifiers == "on") {
                             html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtnFIWM)" aria-label="Choose Qty & Options for the item '+item.name+'">Choose Qty & Options</button>';
-                        }
-                        else
-                        {
+                        } else {
                             if(window.moo_mg_setings.qtyForAll)
                                 html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)" aria-label="Choose Options & Qty for the item '+item.name+'" >Choose Options & Qty</button>';
                             else
                                 html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)" aria-label="Choose Options for the item '+item.name+'">Choose Options</button>';
                         }
-                    }
-                    else
-                    {
+                    } else {
                         html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)" aria-label="Add to cart the item '+item.name+'">Add to cart</button>';
                     }
 
-                }
-                else
-                {
+                } else {
                     if(item.has_modifiers) {
                         if(window.moo_mg_setings.qtyForAll)
                             html += '<button class="moo-btn-sm moo-hvr-sweep-to-top" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)" aria-label="Choose Options & Qty for the item '+item.name+'">Choose Options & Qty </button>';
@@ -533,11 +525,9 @@ function mooOpenQtyWindow(event,item_id,stockCount,callback)
             var options = {};
             var QtyMax = (parseInt(stockCount)>10)?10:parseInt(stockCount);
             var count = QtyMax;
-            for(var $i = 1;$i<=QtyMax;$i++)
-            {
+            for(var $i = 1;$i<=QtyMax;$i++) {
                 options[$i.toString()] = $i.toString();
-                if(!--count)
-                {
+                if(!--count) {
                     options["custom"] = "Custom Quantity";
                     resolve(options)
                 }
@@ -664,24 +654,6 @@ function moo_clickOnOrderBtnFIWM(event,item_id,qty)
 
 }
 
-// Build the Quantity Html DIV"not_tracking_stock"
-function mooBuildItemQty(stockCount,item_uuid)
-{
-    var html = '';
-    if(stockCount == "not_tracking_stock" ||  stockCount == "tracking_stock" )
-    {
-        var QtyMax = 10;
-    } else {
-        var QtyMax = (parseInt(stockCount)>10)?10:parseInt(stockCount);
-    }
-    if(isNaN(QtyMax))
-        return '';
-    html +='        <select id="moo-itemQty-for-'+item_uuid+'" class="moo-form-control">';
-    for(var i=1;i<=QtyMax;i++)
-        html +='        <option value="'+i+'">'+i+'</option>';
-    html +='        </select>';
-    return html;
-}
 
 /* Cart functions */
 function mooShowCart(event)
@@ -785,10 +757,10 @@ function mooShowCart(event)
                     width: 700,
                     showCancelButton: true,
                     cancelButtonText : 'Close',
-                    confirmButtonText : '<a href="'+moo_CheckoutPage+'" style="color:#ffffff" tabindex="-1">CHECKOUT</a>'
+                    confirmButtonText : '<a href="'+moo_params.checkoutPage+'" style="color:#ffffff" tabindex="-1">CHECKOUT</a>'
                 }).then(function (result) {
                     if(result.value)
-                        window.location.href = moo_CheckoutPage;
+                        window.location.href = moo_params.checkoutPage;
                 });
             }
             else
