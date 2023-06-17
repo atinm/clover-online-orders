@@ -1,3 +1,6 @@
+/*
+ * Last upadate at 4:39pm
+ */
 window.modifiers_settings;
 window.modifiersHasImage = false;
 window.topPosition = 0;
@@ -318,7 +321,8 @@ function osnLoadCatItemData() {
                 data.items.forEach(function (item){
                     contentItems += '<div class="osnCardItem">'
                         +'<div class="osnImgItem" ';
-                        if(data.available && (item.stockCount != "out_of_stock") ) contentItems += 'onclick="osnItemDescriptionModal(\''+item.uuid+'\')"';
+                        if( (item.stockCount != "out_of_stock") )
+                            contentItems += 'onclick="osnItemDescriptionModal(\''+item.uuid+'\')"';
                         contentItems += ' style="'+((item.image)?'background-image:url('+item.image.url+')':'')+'">';
                         contentItems +='</div>'
                         +'<div class="osnContentItem">'
@@ -345,14 +349,14 @@ function osnLoadCatItemData() {
 function osnRenderItems(contentItems,content){
     if(moo_RestUrl.indexOf("?rest_route") !== -1){
         if(window.showMore)
-            var endpoint = moo_RestUrl+"moo-clover/v1/categories&expand=all_items";
-        else
             var endpoint = moo_RestUrl+"moo-clover/v1/categories&expand=five_items";
+        else
+            var endpoint = moo_RestUrl+"moo-clover/v1/categories&expand=all_items";
     } else {
         if(window.showMore)
-            var endpoint = moo_RestUrl+"moo-clover/v1/categories?expand=all_items";
-        else
             var endpoint = moo_RestUrl+"moo-clover/v1/categories?expand=five_items";
+        else
+            var endpoint = moo_RestUrl+"moo-clover/v1/categories?expand=all_items";
     }
     jQuery.get(endpoint,
         function (data) {
@@ -473,7 +477,6 @@ function osnAddItemToCart(uuid){
     if(osnItemQty>0){
         body.item_qty = osnItemQty
     }
-    osnItemQty = 1;
     let testModifiers = true;
     osn_Item_Modifers.forEach(function (group,index) {
         if(OsnQtyCheck(group.min_required,group.max_allowd,group.qty)){
@@ -493,23 +496,17 @@ function osnAddItemToCart(uuid){
         osnCloseModalModifier();
         /* Add to cart the item */
     jQuery.post(moo_RestUrl+"moo-clover/v1/cart", body,function (data) {
-        if(data != null)
-        {
-            if(data.status == "error")
-            {
+        if(data != null) {
+            if(data.status == "error") {
                 swal({
                     title:data.message,
                     type:"error"
                 });
-            }
-            else
-            {
+            } else {
                 jQuery(".btn-cart").addClass('bounce');
-               
+                osnItemQty = 1;
             }
-        }
-        else
-        {
+        } else {
             swal({
                 title:"Item not added, try again",
                 type:"error"
@@ -527,7 +524,7 @@ function osnAddItemToCart(uuid){
             GetItemsInCart();
     });
     } else {
-        
+        console.log("Modifiers not valid (maybe some required modifiers not selected)")
     }
     
 }
@@ -549,7 +546,7 @@ function osnShowHideCart() {
       html += '<div id="osnCartItems" class="cartItems"><div class="modalLoading"><i></i></div></div>';
       html += '<div id="osnCartTotal" class="cartTotal">';
       html += '<div id="osnCartTotalSubTax"><div id="osnCartTotalPrice"><h4>Total</h4><span>$ 0</span></div></div>';
-      html += '<a class="checkOutButton" href="'+moo_CheckoutPage+'">Checkout</a>';
+      html += '<a class="checkOutButton" href="'+moo_params.checkoutPage+'">Checkout</a>';
       html += '</div>';
       html += '</div>';
       html += '</div>';
@@ -832,14 +829,16 @@ function osnItemModalModifier(item_uuid,index) {
                 group.modifiers.forEach( modifier => {
                     if(uuids.indexOf(modifier.uuid)){
                         OsnSelectModifier(group.uuid,modifier.uuid);
-                        let modifierQty = osnCart.items[index].modifiers.find(function  (value){ return value.uuid === modifier.uuid}).qty;
-                        //let modifierQty = osnCart.items[index].modifiers.find(function  (value){ return value.uuid === modifier.uuid}).qty;
-                        if(modifierQty > 1) {
-                            modifier['qty'] = modifierQty;
-                            if(group['qty'])
-                            group['qty'] += modifierQty - 1;
-                            else
-                            group['qty'] = modifierQty - 1;
+                        let cartModifier = osnCart.items[index].modifiers.find(function  (value){ return value.uuid === modifier.uuid});
+                        if(cartModifier){
+                            let modifierQty = cartModifier.qty;
+                            if(modifierQty > 1) {
+                                modifier['qty'] = modifierQty;
+                                if(group['qty'])
+                                    group['qty'] += modifierQty - 1;
+                                else
+                                    group['qty'] = modifierQty - 1;
+                            }
                         }
                     }
                 } )
@@ -924,10 +923,12 @@ function osnUpdateItemInCart(uuid,index) {
 
 function osnSelectQuantity(e){
     op = jQuery(e).data("op");
-    if(op==='increment'){
+    if(op === 'increment'){
         osnItemQty++;
     }else{
-        if(osnItemQty>1)osnItemQty--;
+        if(osnItemQty>1){
+            osnItemQty--;
+        }
     }
     jQuery('#osnItemQuantity').html('<span class="product-quantity-times">x</span>'+osnItemQty);
     jQuery('.osnModifierPanelPriceDetails').find("p").html("$ "+parseFloat((finalPrice/100)*osnItemQty).toFixed(2));
@@ -1066,15 +1067,16 @@ function OsnQtyCheck(min,max,qty){
         else return false;
     else if(min === null && max === null)
         return true;
+    else if(min === null && max == 1)
+        if(qty <= 1 )return true;
+        else return false;
 }
 
 function OsnSelectModifier(Guuid,uuid){
-
-
     modifier_div = jQuery("#"+uuid);
-
     group = osn_Item_Modifers.filter(function (value){return value.uuid === Guuid})[0];
     modifier = group.modifiers.filter(function (value) { return value.uuid === uuid})[0];
+
     if(modifier["selected"] == true && modifier_div.hasClass("selected")){
         modifier["selected"] = false;
         jQuery("#"+uuid).find(".product-quantity-wrapper").html('<span class="product-quantity-times">x</span>'+1);
@@ -1084,43 +1086,48 @@ function OsnSelectModifier(Guuid,uuid){
         group["qty"] -= modifier["qty"];
         modifier["qty"] = 1;
         modifier_div.removeClass("selected");
-    }else{
-    if(!group.qty || group.qty < group.max_allowd || group.max_allowd == null){
-        if(group["qty"])
-        group["qty"]+=1;
-        else
-        group["qty"]=1;
-        modifier["selected"] = true;
-        modifier["qty"] = 1;
-        jQuery("#"+uuid).find(".product-quantity-wrapper").html('<span class="product-quantity-times">x</span>'+1);
-        finalPrice += (parseFloat(modifier["price"]));
-        if((group.max_allowd != 1 && group.min_required != 1 ) || (group.min_required != null && group.min_required == 1 && (group.max_allowd > 1 || group.max_allowd == null)  ) ){jQuery("#"+uuid).find(".modifier-quantity-controls").removeClass('osnHide');}
-        jQuery('.osnModifierPanelPriceDetails').find("p").html("$ "+parseFloat((finalPrice/100)*osnItemQty).toFixed(2));
-        modifier_div.addClass("selected");
-    }else if(group.max_allowd == 1 && group.min_required == 1){
-        group.modifiers.forEach(function (modif){
-            if(jQuery('#'+modif.uuid).hasClass("selected")){
-                modif["selected"] = false;
-                jQuery("#"+modif.uuid).find(".product-quantity-wrapper").html('<span class="product-quantity-times">x</span>'+1);
-                jQuery("#"+modif.uuid).find(".modifier-quantity-controls").addClass('osnHide');
-                finalPrice -= (parseFloat(modif["price"])*modif["qty"]);
-                jQuery('.osnModifierPanelPriceDetails').find("p").html("$ "+parseFloat((finalPrice/100)*osnItemQty).toFixed(2));
-                group["qty"]-=modif["qty"];
-                modif["qty"] = 1;
-                jQuery("#"+modif.uuid).removeClass("selected");
+    } else {
+        if(!group.qty || group.qty < group.max_allowd || group.max_allowd == null) {
+            if(group["qty"])
+            group["qty"]+=1;
+            else
+            group["qty"]=1;
+            modifier["selected"] = true;
+            modifier["qty"] = 1;
+            jQuery("#"+uuid).find(".product-quantity-wrapper").html('<span class="product-quantity-times">x</span>'+1);
+            finalPrice += (parseFloat(modifier["price"]));
+            if((parseInt(group.max_allowd) != 1 && parseInt(group.min_required) != 1 ) || (group.min_required != null && group.min_required == 1 && (group.max_allowd > 1 || group.max_allowd == null)  ) )
+            {
+                jQuery("#"+uuid).find(".modifier-quantity-controls").removeClass('osnHide');
             }
-        });
-        if(group["qty"])
-        group["qty"]+=1;
-        else
-        group["qty"]=1;
-        modifier["selected"] = true;
-        modifier["qty"] = 1;
-        finalPrice += (parseFloat(modifier["price"]));
-        jQuery('.osnModifierPanelPriceDetails').find("p").html("$ "+parseFloat((finalPrice/100)*osnItemQty).toFixed(2));
-        modifier_div.addClass("selected");
+            jQuery('.osnModifierPanelPriceDetails').find("p").html("$ "+parseFloat((finalPrice/100)*osnItemQty).toFixed(2));
+            modifier_div.addClass("selected");
+        } else {
+            if(parseInt(group.max_allowd) == 1 && (parseInt(group.min_required) == 1 || group.min_required == null)){
+                group.modifiers.forEach(function (modif){
+                    if(jQuery('#'+modif.uuid).hasClass("selected")){
+                        modif["selected"] = false;
+                        jQuery("#"+modif.uuid).find(".product-quantity-wrapper").html('<span class="product-quantity-times">x</span>'+1);
+                        jQuery("#"+modif.uuid).find(".modifier-quantity-controls").addClass('osnHide');
+                        finalPrice -= (parseFloat(modif["price"])*modif["qty"]);
+                        jQuery('.osnModifierPanelPriceDetails').find("p").html("$ "+parseFloat((finalPrice/100)*osnItemQty).toFixed(2));
+                        group["qty"]-=modif["qty"];
+                        modif["qty"] = 1;
+                        jQuery("#"+modif.uuid).removeClass("selected");
+                    }
+                });
+                if(group["qty"])
+                    group["qty"]+=1;
+                else
+                    group["qty"]=1;
+                modifier["selected"] = true;
+                modifier["qty"] = 1;
+                finalPrice += (parseFloat(modifier["price"]));
+                jQuery('.osnModifierPanelPriceDetails').find("p").html("$ "+parseFloat((finalPrice/100)*osnItemQty).toFixed(2));
+                modifier_div.addClass("selected");
+            }
+        }
     }
-}
 }
 
 function osnQuantitySelectedModifier(e) {

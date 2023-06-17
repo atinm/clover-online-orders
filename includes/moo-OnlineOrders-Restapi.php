@@ -8,6 +8,7 @@
 require_once plugin_dir_path( dirname( __FILE__ ) ) . "includes/restapi/SyncRoutes.php";
 require_once plugin_dir_path( dirname( __FILE__ ) ) . "includes/restapi/DashboardRoutes.php";
 require_once plugin_dir_path( dirname( __FILE__ ) ) . "includes/restapi/CustomersRoutes.php";
+require_once plugin_dir_path( dirname( __FILE__ ) ) . "includes/restapi/CheckoutRoutes.php";
 
 //require model and api only if they no exist
 if ( ! class_exists( 'moo_OnlineOrders_Model' ) ) {
@@ -82,6 +83,13 @@ class Moo_OnlineOrders_Restapi
      * @var CustomersRoutes
      */
     private $customersRoutes;
+    /**
+     * The class that will handle all checkout management routes
+     * @since    1.4.4
+     * @access   private
+     * @var CheckoutRoutes
+     */
+    private $checkoutRoutes;
 
     /**
      * use or not alternateNames
@@ -89,15 +97,27 @@ class Moo_OnlineOrders_Restapi
      */
     private $useAlternateNames;
 
+    /**
+     * Get the blog url for cdn purpose
+     * @var bool
+     */
+    private $blogUrl;
+    /**
+     * Get the blog url for cdn purpose
+     * @var bool
+     */
+    private $cdnLink;
+
     // Here initialize our namespace and resource name.
     public function __construct() {
 
-        $this->model    =     new moo_OnlineOrders_Model();
-        $this->api      =     new moo_OnlineOrders_CallAPI();
-        $this->session  =     MOO_SESSION::instance();
-        $this->syncRoutes = new SyncRoutes($this->model, $this->api);
-        $this->dashRoutes = new DashboardRoutes($this->model, $this->api);
-        $this->customersRoutes = new CustomersRoutes($this->model, $this->api);
+        $this->model            = new moo_OnlineOrders_Model();
+        $this->api              = new moo_OnlineOrders_CallAPI();
+        $this->session          = MOO_SESSION::instance();
+        $this->syncRoutes       = new SyncRoutes($this->model, $this->api);
+        $this->dashRoutes       = new DashboardRoutes($this->model, $this->api);
+        $this->customersRoutes  = new CustomersRoutes($this->model, $this->api);
+        $this->checkoutRoutes   = new CheckoutRoutes($this->model, $this->api);
 
         if($this->isProduction)
             error_reporting(0);
@@ -106,6 +126,14 @@ class Moo_OnlineOrders_Restapi
             $this->useAlternateNames = ($this->api->settings["useAlternateNames"] !== "disabled");
         } else {
             $this->useAlternateNames = true;
+        }
+
+        $this->blogUrl = get_option('home');
+
+        if(isset($this->api->settings["cdn_for_images"]) &&  isset($this->api->settings["cdn_url"]) && $this->api->settings["cdn_for_images"] ==="on" ) {
+            $this->cdnLink = $this->api->settings["cdn_url"];
+        } else {
+            $this->cdnLink = null;
         }
 
     }
@@ -117,12 +145,14 @@ class Moo_OnlineOrders_Restapi
         $this->syncRoutes->register_routes();
         $this->dashRoutes->register_routes();
         $this->customersRoutes->register_routes();
+        $this->checkoutRoutes->register_routes();
 
         //get categories route
         register_rest_route( $this->namespace, '/categories', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'getCategories' )
+                'callback'  => array( $this, 'getCategories' ),
+                'permission_callback' => '__return_true'
             )
         ) );
 
@@ -130,14 +160,16 @@ class Moo_OnlineOrders_Restapi
         register_rest_route( $this->namespace, '/categories/(?P<cat_id>[a-zA-Z0-9-]+)/items', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'getItemsPerCategory' )
+                'callback'  => array( $this, 'getItemsPerCategory' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         //get the most Purchased items
         register_rest_route( $this->namespace, '/items/most_purchase', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'getMostPurchasedItems' )
+                'callback'  => array( $this, 'getMostPurchasedItems' ),
+                'permission_callback' => '__return_true'
             )
         ) );
 
@@ -145,7 +177,8 @@ class Moo_OnlineOrders_Restapi
         register_rest_route( $this->namespace, '/items/(?P<item_id>[a-zA-Z0-9-]+)', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'getItemsDetail' )
+                'callback'  => array( $this, 'getItemsDetail' ),
+                'permission_callback' => '__return_true'
             )
         ) );
 
@@ -155,14 +188,16 @@ class Moo_OnlineOrders_Restapi
         register_rest_route( $this->namespace, '/cart', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'getCart' )
+                'callback'  => array( $this, 'getCart' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         //add item to cart
         register_rest_route( $this->namespace, '/cart', array(
             array(
                 'methods'   => 'POST',
-                'callback'  => array( $this, 'addItemToCart' )
+                'callback'  => array( $this, 'addItemToCart' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         //update item
@@ -171,21 +206,24 @@ class Moo_OnlineOrders_Restapi
         register_rest_route( $this->namespace, '/cart/remove', array(
             array(
                 'methods'   => 'POST',
-                'callback'  => array( $this, 'removeFromCart' )
+                'callback'  => array( $this, 'removeFromCart' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         //update special instruction
         register_rest_route( $this->namespace, '/cart/update', array(
             array(
                 'methods'   => 'POST',
-                'callback'  => array( $this, 'updateSpecialInstructionforItem' )
+                'callback'  => array( $this, 'updateSpecialInstructionforItem' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         //update quantity
         register_rest_route( $this->namespace, '/cart/qty_update', array(
             array(
                 'methods'   => 'POST',
-                'callback'  => array( $this, 'updateQtyforItem' )
+                'callback'  => array( $this, 'updateQtyforItem' ),
+                'permission_callback' => '__return_true'
             )
         ) );
 
@@ -195,37 +233,43 @@ class Moo_OnlineOrders_Restapi
         register_rest_route( $this->namespace, '/clean/items/(?P<per_page>[0-9]+)/(?P<page>[0-9]+)', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'cleanItems' )
+                'callback'  => array( $this, 'cleanItems' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         register_rest_route( $this->namespace, '/clean/categories/(?P<per_page>[0-9]+)/(?P<page>[0-9]+)', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'cleanCategories' )
+                'callback'  => array( $this, 'cleanCategories' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         register_rest_route( $this->namespace, '/clean/modifier_groups/(?P<per_page>[0-9]+)/(?P<page>[0-9]+)', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'cleanModifierGroups' )
+                'callback'  => array( $this, 'cleanModifierGroups' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         register_rest_route( $this->namespace, '/clean/modifiers/(?P<per_page>[0-9]+)/(?P<page>[0-9]+)', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'cleanModifiers' )
+                'callback'  => array( $this, 'cleanModifiers' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         register_rest_route( $this->namespace, '/clean/tax_rates/(?P<per_page>[0-9]+)/(?P<page>[0-9]+)', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'cleanTaxRates' )
+                'callback'  => array( $this, 'cleanTaxRates' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         register_rest_route( $this->namespace, '/clean/order_types/(?P<per_page>[0-9]+)/(?P<page>[0-9]+)', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'cleanOrderTypes' )
+                'callback'  => array( $this, 'cleanOrderTypes' ),
+                'permission_callback' => '__return_true'
             )
         ) );
 
@@ -237,14 +281,16 @@ class Moo_OnlineOrders_Restapi
         register_rest_route( $this->namespace, '/tools/https_for_images', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'httpsForImages' )
+                'callback'  => array( $this, 'httpsForImages' ),
+                'permission_callback' => '__return_true'
             )
         ) );
 
         register_rest_route( $this->namespace, '/tools/http_for_images', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'httpForImages' )
+                'callback'  => array( $this, 'httpForImages' ),
+                'permission_callback' => '__return_true'
             )
         ) );
 
@@ -252,7 +298,8 @@ class Moo_OnlineOrders_Restapi
         register_rest_route( $this->namespace, '/tools/update_blackouts', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'updateBlackouts' )
+                'callback'  => array( $this, 'updateBlackouts' ),
+                'permission_callback' => '__return_true'
             )
         ) );
 
@@ -262,7 +309,8 @@ class Moo_OnlineOrders_Restapi
         register_rest_route( $this->namespace, '/inventory/categories/(?P<cat_id>[a-zA-Z0-9-]+)', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'importCategory' )
+                'callback'  => array( $this, 'importCategory' ),
+                'permission_callback' => '__return_true'
             )
         ) );
 
@@ -272,14 +320,16 @@ class Moo_OnlineOrders_Restapi
         register_rest_route( $this->namespace, '/theme_settings/(?P<theme_name>[a-zA-Z0-9-]+)', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'getThemeSettings' )
+                'callback'  => array( $this, 'getThemeSettings' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         register_rest_route( $this->namespace, '/theme_settings/(?P<theme_name>[a-zA-Z0-9-]+)', array(
             array(
                 'methods'   => 'POST',
                 'callback'  => array( $this, 'saveThemeSettings' ),
-                'permission_callback' => array( $this, 'permissionCheck' )
+                'permission_callback' => array( $this, 'permissionCheck' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         // modifiers settings
@@ -287,7 +337,8 @@ class Moo_OnlineOrders_Restapi
         register_rest_route( $this->namespace, '/mg_settings', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'getModifierGroupsSettings' )
+                'callback'  => array( $this, 'getModifierGroupsSettings' ),
+                'permission_callback' => '__return_true'
             )
         ) );
 
@@ -297,7 +348,8 @@ class Moo_OnlineOrders_Restapi
         register_rest_route( $this->namespace, '/search/(?P<word>(.)+)', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'search' )
+                'callback'  => array( $this, 'search' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         /*
@@ -307,20 +359,23 @@ class Moo_OnlineOrders_Restapi
         register_rest_route( $this->namespace, '/dashboard/installed_themes', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'getInstalledThemes' )
+                'callback'  => array( $this, 'getInstalledThemes' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         register_rest_route( $this->namespace, '/dashboard/installed_themes', array(
             array(
                 'methods'   => 'POST',
                 'callback'  => array( $this, 'activeTheme' ),
-                'permission_callback' => array( $this, 'permissionCheck' )
+                'permission_callback' => array( $this, 'permissionCheck' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         register_rest_route( $this->namespace, '/dashboard/all_themes', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'getAllThemes' )
+                'callback'  => array( $this, 'getAllThemes' ),
+                'permission_callback' => '__return_true'
             )
         ) );
 
@@ -329,43 +384,50 @@ class Moo_OnlineOrders_Restapi
         register_rest_route( $this->namespace, '/customers', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'getCustomer' )
+                'callback'  => array( $this, 'getCustomer' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         register_rest_route( $this->namespace, '/customers', array(
             array(
                 'methods'   => 'POST',
-                'callback'  => array( $this, 'updateCustomer' )
+                'callback'  => array( $this, 'updateCustomer' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         register_rest_route( $this->namespace, '/customers/password', array(
             array(
                 'methods'   => 'POST',
-                'callback'  => array( $this, 'updateCustomerPassword' )
+                'callback'  => array( $this, 'updateCustomerPassword' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         register_rest_route( $this->namespace, '/customers/orders', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'getOrdersForCustomer' )
+                'callback'  => array( $this, 'getOrdersForCustomer' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         register_rest_route( $this->namespace, '/customers/favorites', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'getCustomerFavorites' )
+                'callback'  => array( $this, 'getCustomerFavorites' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         register_rest_route( $this->namespace, '/customers/addresses', array(
             array(
                 'methods'   => 'GET',
-                'callback'  => array( $this, 'getCustomerAddressess' )
+                'callback'  => array( $this, 'getCustomerAddressess' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         register_rest_route( $this->namespace, '/customers/orders/(?P<uuid>(.)+)/reorder', array(
             array(
                 'methods'   => 'POST',
-                'callback'  => array( $this, 'reOrder' )
+                'callback'  => array( $this, 'reOrder' ),
+                'permission_callback' => '__return_true'
             )
         ) );
         // Change your api key
@@ -387,14 +449,13 @@ class Moo_OnlineOrders_Restapi
         $response = array();
         $cats = $this->model->getCategories();
         $settings = (array) get_option("moo_settings");
-
         // Get categories times
         $counter = $this->model->getCategoriesWithCustomHours();
         if(isset($counter->nb) && $counter->nb > 0 ) {
             $HoursResponse = $this->api->getMerchantCustomHoursStatus("categories");
             if( $HoursResponse ){
-                $merchantCustomHoursStatus = json_decode($HoursResponse,true);
-                $merchantCustomHours = array_keys($merchantCustomHoursStatus);
+                $merchantCustomHoursStatus = $HoursResponse;
+                $merchantCustomHours = array_keys($HoursResponse);
             } else {
                 $merchantCustomHoursStatus = array();
                 $merchantCustomHours = array();
@@ -405,8 +466,16 @@ class Moo_OnlineOrders_Restapi
         }
 
         if($cats) {
-            foreach ($cats as $cat) {
+            if(isset($params["expand"])) {
+                $track_stock = $this->api->getTrackingStockStatus();
+                if($track_stock == true) {
+                    $itemStocks = $this->api->getItemStocks();
+                } else {
+                    $itemStocks = false;
+                }
+            }
 
+            foreach ($cats as $cat) {
                 if($cat->show_by_default == "1") {
                     $c = array(
                         "uuid"=>$cat->uuid,
@@ -414,7 +483,7 @@ class Moo_OnlineOrders_Restapi
                         "alternate_name" => stripslashes($cat->alternate_name),
                         "description"   => (isset($cat->description))?stripslashes($cat->description):"",
                         "custoum_hours"   => (isset($cat->custoum_hours))?stripslashes($cat->custoum_hours):"",
-                        "image_url"=>$cat->image_url
+                        "image_url"=>$this->applyCDN($cat->image_url, $this->cdnLink)
                     );
                     if($this->useAlternateNames && isset($cat->alternate_name) && $cat->alternate_name!==""){
                         $c["name"]=stripslashes($cat->alternate_name);
@@ -438,8 +507,6 @@ class Moo_OnlineOrders_Restapi
                     } else {
                         $catAvailable = true;
                     }
-                   // var_dump($catAvailable );
-
                     $c["available"] = $catAvailable;
                     if(isset($params["expand"])) {
                         $c['items'] = array();
@@ -467,12 +534,7 @@ class Moo_OnlineOrders_Restapi
                             } else {
                                 $items = array();
                             }
-
-                            $track_stock = $this->api->getTrackingStockStatus();
-                            if($track_stock == true)
-                                $itemStocks = $this->api->getItemStocks();
-                            else
-                                $itemStocks = false;
+                           // var_dump($cat->items);
                             foreach ($items as $item) {
                                 //if($items_uuid == "") continue;
                                 //$item = $this->model->getItem($items_uuid);
@@ -500,16 +562,23 @@ class Moo_OnlineOrders_Restapi
                                     else
                                         $final_item['stockCount'] = ($track_stock)?"tracking_stock":"not_tracking_stock";
                                 }
+                                $defaultImg  = $this->model->getDefaultItemImage($item->uuid);
                                 $final_item["uuid"]=$item->uuid;
                                 $final_item["name"]           =   stripslashes($item->name);
                                 $final_item["alternate_name"] =   stripslashes($item->alternate_name);
-                                $final_item["description"]    =   $item->description;
+                                $final_item["description"]    =   stripslashes($item->description);
                                 $final_item["price"]          =   $item->price;
                                 $final_item["price_type"]     =   $item->price_type;
                                 $final_item["unit_name"]      =   $item->unit_name;
                                 $final_item["sort_order"]     =   intval($item->sort_order);
                                 $final_item["has_modifiers"]  =   ($this->model->itemHasModifiers($item->uuid)->total>0)?true:false;
-                                $final_item["image"]= $this->model->getDefaultItemImage($item->uuid);
+                                $final_item["image_url"] = null;
+                                if($defaultImg){
+                                    $final_item["image"]= array("url"=>$this->applyCDN($defaultImg->url, $this->cdnLink));
+                                    $final_item["image_url"] =  $final_item["image"]["url"];
+                                } else {
+                                    $final_item["image"]= $defaultImg;
+                                }
 
                                 if($this->useAlternateNames  && isset($item->alternate_name) && $item->alternate_name!==""){
                                     $final_item["name"]=stripslashes($item->alternate_name);
@@ -539,7 +608,7 @@ class Moo_OnlineOrders_Restapi
     {
         $settings = (array) get_option("moo_settings");
         $response = array();
-        //var_dump($request["cat_id"]);
+
         if ( !isset($request["cat_id"]) || empty( $request["cat_id"] ) ) {
             return new WP_Error( 'category_id_required', 'Category id not found', array( 'status' => 404 ) );
         }
@@ -551,7 +620,7 @@ class Moo_OnlineOrders_Restapi
         $response["name"]           = stripslashes($category->name);
         $response["alternate_name"] = stripslashes($category->alternate_name);
         $response["description"]    = stripslashes($category->description);
-        $response["image_url"]      = $category->image_url;
+        $response["image_url"]      = $this->applyCDN($category->image_url,$this->cdnLink);
         $response["items"]= array();
 
         if($this->useAlternateNames && isset($category->alternate_name) && $category->alternate_name!==""){
@@ -565,7 +634,7 @@ class Moo_OnlineOrders_Restapi
             $catAvailable = true;
             $HoursResponse = $this->api->getMerchantCustomHoursStatus("categories");
             if( $HoursResponse ){
-                $merchantCustomHoursStatus = json_decode($HoursResponse,true);
+                $merchantCustomHoursStatus = $HoursResponse;
                 $merchantCustomHours = array_keys($merchantCustomHoursStatus);
                 if(isset($category->custom_hours) && !empty($category->custom_hours)) {
                     if(in_array($category->custom_hours, $merchantCustomHours)){
@@ -640,6 +709,7 @@ class Moo_OnlineOrders_Restapi
                     else
                         $final_item['stockCount'] = ($track_stock)?"tracking_stock":"not_tracking_stock";
                 }
+                $defaultImg = $this->model->getDefaultItemImage($item->uuid);
                 $final_item["uuid"]             =   $item->uuid;
                 $final_item["name"]             =   stripslashes($item->name);
                 $final_item["alternate_name"]   =   stripslashes($item->alternate_name);
@@ -649,7 +719,15 @@ class Moo_OnlineOrders_Restapi
                 $final_item["unit_name"]        =   $item->unit_name;
                 $final_item["sort_order"]       =   intval($item->sort_order);
                 $final_item["has_modifiers"]    =   ($this->model->itemHasModifiers($item->uuid)->total>0)?true:false;
-                $final_item["image"]            =   $this->model->getDefaultItemImage($item->uuid);
+                $final_item["image"]            =   $defaultImg;
+                $final_item["image_url"]        =   null;
+
+                if($defaultImg){
+                    $final_item["image"]            =   array(
+                        "url"=>$this->applyCDN($defaultImg->url,$this->cdnLink)
+                    );
+                    $final_item["image_url"]        =    $final_item["image"]["url"];
+                }
 
                 if($this->useAlternateNames && isset($item->alternate_name) && $item->alternate_name!==""){
                     $final_item["name"]=stripslashes($item->alternate_name);
@@ -669,6 +747,7 @@ class Moo_OnlineOrders_Restapi
     public function search( $request ) {
         $response = array();
         $settings = (array) get_option("moo_settings");
+
         if ( !isset($request["word"]) || empty( $request["word"] ) ) {
             return new WP_Error( 'keyword_required', 'Keyword not found', array( 'status' => 404 ) );
         }
@@ -710,6 +789,7 @@ class Moo_OnlineOrders_Restapi
                 else
                     $final_item['stockCount'] = ($track_stock)?"tracking_stock":"not_tracking_stock";
             }
+            $defaultImg = $this->model->getDefaultItemImage($item->uuid);
             $final_item["uuid"]=$item->uuid;
             $final_item["name"]             =   stripslashes($item->name);
             $final_item["alternate_name"]   =   stripslashes($item->alternate_name);
@@ -719,7 +799,14 @@ class Moo_OnlineOrders_Restapi
             $final_item["unit_name"]    =   $item->unit_name;
             $final_item["sort_order"]   =   intval($item->sort_order);
             $final_item["has_modifiers"]=   ($this->model->itemHasModifiers($item->uuid)->total>0)?true:false;
-            $final_item["image"]= $this->model->getDefaultItemImage($item->uuid);
+            $final_item["image"]        = $defaultImg;
+            $final_item["image_url"]    =   null;
+            if($defaultImg){
+                $final_item["image"]            =   array(
+                    "url"=>$this->applyCDN($defaultImg->url,$this->cdnLink)
+                );
+                $final_item["image_url"]        =    $final_item["image"]["url"];
+            }
 
             if($this->useAlternateNames && isset($item->alternate_name) && $item->alternate_name!==""){
                 $final_item["name"]=stripslashes($item->alternate_name);
@@ -737,6 +824,7 @@ class Moo_OnlineOrders_Restapi
         return $response;
     }
     public function getItemsDetail( $request ) {
+        $settings = (array) get_option("moo_settings");
         $response = array();
         //var_dump($request["cat_id"]);
         if ( !isset($request["item_id"]) || empty( $request["item_id"] ) ) {
@@ -780,6 +868,7 @@ class Moo_OnlineOrders_Restapi
         $response["price"]        =   $item->price;
         $response["price_type"]   =   $item->price_type;
         $response["unit_name"]    =   $item->unit_name;
+        $response["image_url"]        = null;
         $response["modifier_groups"] = array();
         $response["images"] = array();
 
@@ -834,8 +923,11 @@ class Moo_OnlineOrders_Restapi
                 if($image->is_enabled=="1")
                 {
                     $res = array();
-                    $res["image_url"]  = $image->url;
+                    $res["image_url"]  = $this->applyCDN($image->url,$this->cdnLink);
                     $res["is_default"] = $image->is_default;
+                    if($image->is_default ===  "1"){
+                        $response["image_url"] = $this->applyCDN($image->url,$this->cdnLink);
+                    }
                     array_push($response["images"],$res);
                 }
             }
@@ -847,6 +939,7 @@ class Moo_OnlineOrders_Restapi
     }
     public function getMostPurchasedItems( $request )
     {
+        $settings = (array) get_option("moo_settings");
         $response = array();
         $response['items'] = array();
         $track_stock = $this->api->getTrackingStockStatus();
@@ -886,6 +979,7 @@ class Moo_OnlineOrders_Restapi
             } else {
                 $final_item["name"]=stripslashes($item->name);
             }
+            $defaulImg = $this->model->getDefaultItemImage($item->uuid);
             $final_item["uuid"]=$item->uuid;
             $final_item["alternate_name"]   =   stripslashes($item->alternate_name);
             $final_item["description"]      =   stripslashes($item->description);
@@ -894,7 +988,13 @@ class Moo_OnlineOrders_Restapi
             $final_item["unit_name"]    =   $item->unit_name;
             $final_item["sort_order"]   =   intval($item->sort_order);
             $final_item["has_modifiers"]=   ($this->model->itemHasModifiers($item->uuid)->total>0)?true:false;
-            $final_item["image"]= $this->model->getDefaultItemImage($item->uuid);
+            $final_item["image"]        = $defaulImg;
+            $final_item["image_url"]        = null;
+
+            if($defaulImg){
+                $final_item["image"]        = array("url"=>$this->applyCDN($defaulImg->url,$this->cdnLink));
+                $final_item["image_url"]        = $final_item["image"]["url"];
+            }
 
             array_push($response['items'],$final_item);
         }
@@ -902,8 +1002,7 @@ class Moo_OnlineOrders_Restapi
         // Return all of our post response data.
         return $response;
     }
-    public function getCart( $request )
-    {
+    public function getCart( $request ) {
         $response = array();
 
         if(!$this->session->isEmpty("items")){
@@ -951,8 +1050,7 @@ class Moo_OnlineOrders_Restapi
         // Return all of our post response data.
         return $response;
     }
-    public function addItemToCart( $request )
-    {
+    public function addItemToCart( $request ) {
         $request_body = $request->get_body_params();
         $item_uuid      = sanitize_text_field($request_body['item_uuid']);
         $item_qty       = (intval($request_body['item_qty'])>1)?intval($request_body['item_qty']):1;
@@ -1063,8 +1161,7 @@ class Moo_OnlineOrders_Restapi
         }
         return $response;
     }
-    public function removeFromCart( $request )
-    {
+    public function removeFromCart( $request ) {
         $request_body   = $request->get_body_params();
 
         $line_id     = sanitize_text_field($request_body['line_id']);
@@ -1095,8 +1192,7 @@ class Moo_OnlineOrders_Restapi
         $this->moo_refresh_itemQte_cart();
         return $response;
     }
-    public function updateSpecialInstructionforItem( $request )
-    {
+    public function updateSpecialInstructionforItem( $request ) {
         $request_body   = $request->get_body_params();
 
         $line_id        = sanitize_text_field($request_body['line_id']);
@@ -1123,8 +1219,7 @@ class Moo_OnlineOrders_Restapi
 
         return $response;
     }
-    public function updateQtyforItem( $request )
-    {
+    public function updateQtyforItem( $request ) {
         $request_body   = $request->get_body_params();
         $line_id        = sanitize_text_field($request_body['line_id']);
         $qty            = inval($request_body['qty']);
@@ -1189,8 +1284,7 @@ class Moo_OnlineOrders_Restapi
         return $response;
     }
 
-    public static function getItemStock($items,$item_uuid)
-    {
+    public static function getItemStock($items,$item_uuid) {
         foreach ($items as $i)
         {
             if($i->item->id == $item_uuid)
@@ -1198,17 +1292,14 @@ class Moo_OnlineOrders_Restapi
         }
         return false;
     }
-    public static function moo_sort_items($a,$b)
-    {
+    public static function moo_sort_items($a,$b) {
         return $a["sort_order"]>$b["sort_order"];
     }
-    public static function moo_sort_installed_themes($a,$b)
-    {
+    public static function moo_sort_installed_themes($a,$b) {
         return $a->name<$b->name;
     }
     /* Clean's functions */
-    public function cleanItems( $request )
-    {
+    public function cleanItems( $request ) {
         $response = array();
         //var_dump($request["cat_id"]);
         if ( !isset($request["per_page"]) || !isset( $request["page"] ) ) {
@@ -1222,8 +1313,7 @@ class Moo_OnlineOrders_Restapi
         foreach ($items as $item) {
             if($item->uuid != ""){
                 $res = $this->api->getItemWithoutSaving($item->uuid);
-                if(isset($res->id) && $res->id == $item->uuid)
-                {
+                if(isset($res["id"]) && $res["id"] == $item->uuid) {
                     $count++;
                     continue;
                 } else {
@@ -1244,8 +1334,7 @@ class Moo_OnlineOrders_Restapi
 
         return $response;
     }
-    public function cleanCategories( $request )
-    {
+    public function cleanCategories( $request ) {
         $response = array();
         if ( !isset($request["per_page"]) || !isset( $request["page"] ) ) {
             return new WP_Error( 'pagination_params_required', 'Pagination params are required, the page number and number of items per page', array( 'status' => 404 ) );
@@ -1258,20 +1347,14 @@ class Moo_OnlineOrders_Restapi
         foreach ($cats as $cat) {
             if($cat->uuid != ""){
                 $res = $this->api->getCategoryWithoutSaving($cat->uuid);
-                if(isset($res->id) && $res->id == $cat->uuid)
-                {
+                if(isset($res["id"]) && $res["id"] == $cat->uuid) {
                     $count++;
                     continue;
-                }
-                else
-                {
+                } else {
                     $r = $this->model->deleteCategory($cat->uuid);
-                    if($r)
-                    {
+                    if($r) {
                         $removed++;
-                    }
-                    else
-                    {
+                    } else {
                         $hidden++;
                         $this->model->hideCategory($cat->uuid);
                     }
@@ -1286,8 +1369,7 @@ class Moo_OnlineOrders_Restapi
 
         return $response;
     }
-    public function cleanModifierGroups( $request )
-    {
+    public function cleanModifierGroups( $request ) {
         $response = array();
         if ( !isset($request["per_page"]) || !isset( $request["page"] ) ) {
             return new WP_Error( 'pagination_params_required', 'Pagination params are required, the page number and number of items per page', array( 'status' => 404 ) );
@@ -1299,21 +1381,15 @@ class Moo_OnlineOrders_Restapi
         $hidden = 0;
         foreach ($mGroups as $m) {
             if($m->uuid != ""){
-                $res = json_decode($this->api->getModifierGroupsWithoutSaving($m->uuid));
-                 if(isset($res->id) && $res->id == $m->uuid)
-                {
+                $res = $this->api->getModifierGroupsWithoutSaving($m->uuid);
+                if(isset($res["id"]) && $res["id"] == $m->uuid) {
                     $count++;
                     continue;
-                }
-                else
-                {
+                } else {
                     $r = $this->model->deleteModifierGroup($m->uuid);
-                    if($r)
-                    {
+                    if($r) {
                         $removed++;
-                    }
-                    else
-                    {
+                    } else {
                         $hidden++;
                         $this->model->UpdateModifierGroupStatus($m->uuid,'false');
                     }
@@ -1328,8 +1404,7 @@ class Moo_OnlineOrders_Restapi
 
         return $response;
     }
-    public function cleanModifiers( $request )
-    {
+    public function cleanModifiers( $request ) {
         $response = array();
         if ( !isset($request["per_page"]) || !isset( $request["page"] ) ) {
             return new WP_Error( 'pagination_params_required', 'Pagination params are required, the page number and number of items per page', array( 'status' => 404 ) );
@@ -1341,21 +1416,15 @@ class Moo_OnlineOrders_Restapi
         $hidden = 0;
         foreach ($modifiers as $m) {
             if($m->uuid != ""){
-                $res = json_decode($this->api->getModifierWithoutSaving($m->group_id,$m->uuid));
-                 if(isset($res->id) && $res->id == $m->uuid)
-                {
+                $res = $this->api->getModifierWithoutSaving($m->group_id,$m->uuid);
+                 if(isset($res["id"]) && $res["id"] == $m->uuid) {
                     $count++;
                     continue;
-                }
-                else
-                {
+                } else {
                     $r = $this->model->deleteModifier($m->uuid);
-                    if($r)
-                    {
+                    if($r) {
                         $removed++;
-                    }
-                    else
-                    {
+                    } else {
                         $hidden++;
                         $this->model->UpdateModifierStatus($m->uuid,'false');
                     }
@@ -1370,8 +1439,7 @@ class Moo_OnlineOrders_Restapi
 
         return $response;
     }
-    public function cleanTaxRates( $request )
-    {
+    public function cleanTaxRates( $request ) {
         $response = array();
         if ( !isset($request["per_page"]) || !isset( $request["page"] ) ) {
             return new WP_Error( 'pagination_params_required', 'Pagination params are required, the page number and number of items per page', array( 'status' => 404 ) );
@@ -1383,17 +1451,13 @@ class Moo_OnlineOrders_Restapi
         $hidden = 0;
         foreach ($tax_rates as $t) {
             if($t->uuid != ""){
-                $res = json_decode($this->api->getTaxRateWithoutSaving($t->uuid));
-                 if(isset($res->id) && $res->id == $t->uuid)
-                {
+                $res = $this->api->getTaxRateWithoutSaving($t->uuid);
+                if(isset($res["id"]) && $res["id"] == $t->uuid) {
                     $count++;
                     continue;
-                }
-                else
-                {
+                } else {
                     $r = $this->model->deleteTaxRate($t->uuid);
-                    if($r)
-                    {
+                    if($r) {
                         $removed++;
                     }
                 }
@@ -1419,21 +1483,15 @@ class Moo_OnlineOrders_Restapi
         $hidden = 0;
         foreach ($order_types as $o) {
             if($o->ot_uuid != ""){
-                $res = json_decode($this->api->GetOneOrdersTypes($o->ot_uuid));
-                if(isset($res->id) && $res->id == $o->ot_uuid)
-                {
+                $res = $this->api->GetOneOrdersTypes($o->ot_uuid);
+                if(isset($res["id"]) && $res["id"] == $o->ot_uuid) {
                     $count++;
                     continue;
-                }
-                else
-                {
+                } else {
                     $r = $this->model->moo_DeleteOrderType($o->ot_uuid);
-                    if($r)
-                    {
+                    if($r) {
                         $removed++;
-                    }
-                    else
-                    {
+                    } else {
                         $hidden++;
                         $this->model->updateOrderTypes($o->ot_uuid,'false');
                     }
@@ -1449,8 +1507,7 @@ class Moo_OnlineOrders_Restapi
         return $response;
     }
     /* Get the theme settings */
-    public function getThemeSettings( $request )
-    {
+    public function getThemeSettings( $request ) {
         $response = array();
         if ( !isset($request["theme_name"]) ) {
             return new WP_Error( 'theme_name_required', 'Please provide ethe theme name', array( 'status' => 404 ) );
@@ -1475,8 +1532,7 @@ class Moo_OnlineOrders_Restapi
         return $response;
     }
     /* Save the theme settings */
-    public function saveThemeSettings( $request )
-    {
+    public function saveThemeSettings( $request ){
         $response = array();
         if ( !isset($request["theme_name"]) ) {
             return new WP_Error( 'theme_name_required', 'Please provide ethe theme name', array( 'status' => 404 ) );
@@ -1522,6 +1578,24 @@ class Moo_OnlineOrders_Restapi
             $res["minimized"] = true;
         } else {
             $res["minimized"] = false;
+        }
+
+        //check if the store markes as closed from the settings
+        if(isset($settings['accept_orders']) && $settings['accept_orders'] === "disabled"){
+            $response["store_is_open"] = false;
+
+            if(isset($settings["closing_msg"]) && $settings["closing_msg"] !== '') {
+                $response["closing_msg"] = $settings["closing_msg"];
+            } else  {
+                $response["closing_msg"] = "We are currently closed and will open again soon";
+            }
+            if(isset($settings["hide_menu_w_closed"]) && $settings["hide_menu_w_closed"] === "on") {
+                $response["hide_menu"] = true;
+            } else {
+                $response["hide_menu"] = false;
+            }
+        } else {
+            $response["store_is_open"] = true;
         }
 
         $response["settings"]   =  $res;
@@ -1669,13 +1743,13 @@ class Moo_OnlineOrders_Restapi
         $category = $this->api->getOneCategory($category_uuid);
         $string_items_ids ="";
         //Save the items
-        if(isset($category->items) && isset($category->items->elements)) {
-            $cloverNbItems = @count($category->items->elements);
-            foreach ($category->items->elements as $item) {
-                if(isset($item->id)) {
-                    $string_items_ids .= $item->id.",";
-                    if($this->model->getItem($item->id) == null){
-                        $this->api->getItem($item->id);
+        if(isset($category["items"]) && isset($category["items"]["elements"])) {
+            $cloverNbItems = @count($category["items"]["elements"]);
+            foreach ($category["items"]["elements"] as $item) {
+                if(isset($item["id"])) {
+                    $string_items_ids .= $item["id"].",";
+                    if($this->model->getItem($item["id"]) == null){
+                        $this->api->getItem($item["id"]);
                     } else {
                         $nbItemsPerCategory++;
                     }
@@ -1761,22 +1835,18 @@ class Moo_OnlineOrders_Restapi
                 if($orderDetail === null)
                     continue;
                 $oneOrder = $this->api->getOrderDetails2($orderDetail,$order);
-                if(isset($oneOrder['payments']) && count($oneOrder['payments'])>0 )
-                {
+                if(isset($oneOrder['payments']) && count($oneOrder['payments'])>0 ) {
                     $orderPayments = $oneOrder['payments'];
                     foreach ($orderPayments as $p) {
-                        if ($p->result == "APPROVED")
-                        {
+                        if ($p->result == "APPROVED") {
                             $oneOrder['status'] = "Paid";
                         }
                     }
-                    if($oneOrder['status'] == "")
-                    {
+                    if($oneOrder['status'] == "") {
                         $oneOrder['status'] = "Not Paid";
                     }
                 } else {
-                    if($oneOrder['paymentMethode'] == 'cash')
-                    {
+                    if($oneOrder['paymentMethode'] == 'cash') {
                         $oneOrder['status'] ='Will Pay Cash';
                     } else {
                         $oneOrder['status'] = 'Not paid';
@@ -1869,9 +1939,7 @@ class Moo_OnlineOrders_Restapi
                     continue;
                 }
                 $final_item['stockCount'] = "out_of_stock";
-            }
-            else
-            {
+            } else {
                 if(isset($itemStock->stockCount))
                     $final_item['stockCount'] = $itemStock->stockCount;
                 else
@@ -2148,8 +2216,7 @@ class Moo_OnlineOrders_Restapi
     }
 
     /* Static functions for internal use */
-    public function moo_refresh_itemQte_cart()
-    {
+    public function moo_refresh_itemQte_cart() {
         $this->session->delete("itemsQte");
         foreach ($this->session->get("items") as $cartLine) {
             $item_uuid = $cartLine["item"]->uuid;
@@ -2163,13 +2230,18 @@ class Moo_OnlineOrders_Restapi
 
         }
     }
-    public function moo_get_nbItems_in_cart()
-    {
+    public function moo_get_nbItems_in_cart() {
         $res = 0;
         if($this->session->exist("items"))
             foreach ($this->session->get("items") as $item) {
                $res += $item["quantity"];
             }
         return $res ;
+    }
+    public function applyCDN($link, $cdnLink) {
+        if(isset($cdnLink) && !empty($cdnLink)) {
+            return str_replace($this->blogUrl,$cdnLink,$link);
+        }
+        return $link;
     }
 }

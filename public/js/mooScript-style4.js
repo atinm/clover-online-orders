@@ -3,7 +3,7 @@
  */
 jQuery(document).ready(function()
 {
-    window.moo_theme_setings = moo_themeSettings;
+    window.moo_theme_setings = moo_params.moo_themeSettings;
     window.moo_mg_setings = {};
     window.nb_items_in_cart = 0;
     window.header_height = window.moo_theme_setings.onePage_categoriesTopMargin;
@@ -457,10 +457,10 @@ function mooShowCart(event)
                     width: 700,
                     showCancelButton: true,
                     cancelButtonText : 'Close',
-                    confirmButtonText : '<a href="'+moo_CheckoutPage+'" style="color:#ffffff">CHECKOUT</a>'
+                    confirmButtonText : '<a href="'+moo_params.checkoutPage+'" style="color:#ffffff">CHECKOUT</a>'
                 }).then(function () {
-                    console.log("conformed");
-                    window.location.href = moo_CheckoutPage;
+                    console.log("confirmed");
+                    window.location.href = moo_params.checkoutPage;
                 },function () {
 
                 });

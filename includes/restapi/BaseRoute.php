@@ -13,6 +13,8 @@ class BaseRoute
      */
     protected $isProduction = true;
 
+    protected $version;
+
     /**
      * The namespace and the version of the api
      * @var string

@@ -388,12 +388,17 @@ class Moo_OnlineOrders_Shortcodes {
                 }
             }
         }
+
+        $mooOptions = array(
+            "moo_fb_app_id"=>$MooOptions['fb_appid']
+        );
         if(! $session->isEmpty("moo_customer_token")) {
-            wp_localize_script("custom-script-my-account", "moo_customer_logged","yes");
+            $mooOptions["moo_customer_logged"] = "yes";
         } else {
-            wp_localize_script("custom-script-my-account", "moo_customer_logged","no");
+            $mooOptions["moo_customer_logged"] = "no";
         }
-        wp_localize_script("custom-script-my-account", "moo_fb_app_id",($MooOptions['fb_appid']));
+
+        wp_localize_script("custom-script-my-account", "mooOptions",$mooOptions);
 
 
         if((isset($_GET['logout']) && $_GET['logout']==true))
@@ -1160,49 +1165,53 @@ class Moo_OnlineOrders_Shortcodes {
 
         //Get blackout status
         $blackoutStatusResponse = $api->getBlackoutStatus();
-        if(isset($blackoutStatusResponse->status) && $blackoutStatusResponse->status === "close"){
+        if(isset($blackoutStatusResponse["status"]) && $blackoutStatusResponse["status"] === "close"){
 
-            if(isset($blackoutStatusResponse->custom_message) && !empty($blackoutStatusResponse->custom_message)){
-                $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$blackoutStatusResponse->custom_message.'</div>';
+            if(isset($blackoutStatusResponse["custom_message"]) && !empty($blackoutStatusResponse["custom_message"])){
+                $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$blackoutStatusResponse["custom_message"].'</div>';
             } else {
                 $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">We are currently closed and will open again soon</div>';
 
             }
 
-            if(isset($blackoutStatusResponse->hide_menu) && $blackoutStatusResponse->hide_menu){
+            if(isset($blackoutStatusResponse["hide_menu"]) && $blackoutStatusResponse["hide_menu"]){
                 return $oppening_msg;
             }
         }
 
-        $oppening_status = json_decode($api->getOpeningStatus(4,30));
 
 
         if(isset($MooOptions['accept_orders']) && $MooOptions['accept_orders'] === "disabled"){
+
             if(isset($MooOptions["closing_msg"]) && $MooOptions["closing_msg"] !== '') {
                 $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$MooOptions["closing_msg"].'</div>';
             } else  {
                 $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">We are currently closed and will open again soon</div>';
 
             }
-            return '<div id="moo_OnlineStoreContainer" >'.$oppening_msg.'</div>';
-        }
-
-        if(isset($MooOptions['hours']) && $MooOptions['hours'] != 'all' && isset($oppening_status->status ) && $oppening_status->status == 'close')
-        {
-            if(isset($MooOptions["closing_msg"]) && $MooOptions["closing_msg"] !== '') {
-                $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$MooOptions["closing_msg"].'</div>';
-            } else  {
-                if($oppening_status->store_time == '')
-                    $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on' && $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: #006b00'>Order in Advance Available</p>":"").'</div>';
-                else
-                    $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering hours</strong> <br/> '.$oppening_status->store_time.'<br/>Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on'&& $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: #006b00'>Order in Advance Available</p>":"").'</div>';
+            if(isset($MooOptions["hide_menu_w_closed"]) && $MooOptions["hide_menu_w_closed"] === "on") {
+                return '<div id="moo_OnlineStoreContainer" >'.$oppening_msg.'</div>';
             }
+        } else {
+            $oppening_status = json_decode($api->getOpeningStatus(4,30));
+            if(isset($MooOptions['hours']) && $MooOptions['hours'] != 'all' && isset($oppening_status->status ) && $oppening_status->status == 'close')
+            {
+                if(isset($MooOptions["closing_msg"]) && $MooOptions["closing_msg"] !== '') {
+                    $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">'.$MooOptions["closing_msg"].'</div>';
+                } else  {
+                    if($oppening_status->store_time == '')
+                        $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg">Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on' && $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: #006b00'>Order in Advance Available</p>":"").'</div>';
+                    else
+                        $oppening_msg .= '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Today\'s Online Ordering Hours</strong> <br/> '.$oppening_status->store_time.'<br/>Online Ordering Currently Closed'.(($MooOptions['hide_menu'] != 'on'&& $MooOptions['accept_orders_w_closed'] == 'on' )?"<br/><p style='color: #006b00'>Order in Advance Available</p>":"").'</div>';
+                }
 
+            }
+            if(isset($MooOptions['hours']) && $MooOptions['hours'] != 'all' && $MooOptions['hide_menu'] == 'on' && $oppening_status->status == 'close') {
+                return '<div id="moo_OnlineStoreContainer" >'.$oppening_msg.'</div>';
+            }
         }
 
-        if(isset($MooOptions['hours']) && $MooOptions['hours'] != 'all' && $MooOptions['hide_menu'] == 'on' && $oppening_status->status == 'close') {
-            return '<div id="moo_OnlineStoreContainer" >'.$oppening_msg.'</div>';
-        }
+
 
         $html_code  = '';
         $theme_id = (isset($MooOptions["default_style"]))?$MooOptions["default_style"]:"onePage";
@@ -1289,6 +1298,7 @@ class Moo_OnlineOrders_Shortcodes {
 
             }
             return '<div id="moo_OnlineStoreContainer" >'.$oppening_msg.'</div>';
+
         }
 
         $total =   Moo_OnlineOrders_Public::moo_cart_getTotal(true);
@@ -1502,15 +1512,12 @@ class Moo_OnlineOrders_Shortcodes {
             if($item)
             {
 
-                if($model->itemHasModifiers($item_uuid)->total != '0')
-                {
+                if($model->itemHasModifiers($item_uuid)->total != '0') {
                     if($cssClass=="")
                         $html =  "<a style='background-color: #4CAF50;border: none;color: white;padding: 10px 24px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;' href='#' onclick='moo_openQty_Window(event,\"".$item->uuid."\",moo_btn_addToCartFIWM)'>ADD TO CART</a>";
                     else
                         $html =  "<a class='".$cssClass."' href='#' onclick='moo_openQty_Window(event,\"".$item->uuid."\",moo_btn_addToCartFIWM)'>ADD TO CART</a>";
-                }
-                else
-                {
+                } else {
                     if($cssClass=="")
                         $html =  "<a style='background-color: #4CAF50;border: none;color: white;padding: 10px 24px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;' href='#' onclick='moo_openQty_Window(event,\"".$item->uuid."\",moo_btn_addToCart)'>ADD TO CART</a>";
                     else
@@ -1557,12 +1564,19 @@ class Moo_OnlineOrders_Shortcodes {
         $checkout_page_url  =  get_page_link($checkout_page_id);
         $store_page_url     =  get_page_link($store_page_id);
 
-        wp_localize_script("mooScript-style3", "moo_CartPage",$cart_page_url);
-        wp_localize_script("mooScript-style3", "moo_CheckoutPage",$checkout_page_url);
-        wp_localize_script("mooScript-style3", "moo_StorePage",$store_page_url);
-        wp_localize_script("mooScript-style3", "moo_RestUrl",get_rest_url());
+        $params = array(
+            'plugin_img' =>  plugins_url( '/img', __FILE__ ),
+            'cartPage' =>  $cart_page_url,
+            'checkoutPage' =>  $checkout_page_url,
+            'storePage' =>  $store_page_url,
+            'moo_RestUrl' =>  get_rest_url(),
+            'custom_sa_title' =>  (isset($MooOptions["custom_sa_title"]) && trim($MooOptions["custom_sa_title"]) !== "")?trim($MooOptions["custom_sa_title"]):"",
+            'custom_sa_content' =>  (isset($MooOptions["custom_sa_content"]) && trim($MooOptions["custom_sa_content"]) !== "")?trim($MooOptions["custom_sa_content"]):"",
+            'custom_sa_onCheckoutPage' =>  (isset($MooOptions["custom_sa_onCheckoutPage"]))?trim($MooOptions["custom_sa_onCheckoutPage"]):"off"
+        );
+        wp_localize_script("mooScript-style3", "moo_params",$params);
 
-        if(count($categories) > 0) {
+        if(is_array($categories) && count($categories) > 0) {
             wp_localize_script("mooScript-style3", "attr_categories",$categories);
         }
 
@@ -1600,12 +1614,19 @@ class Moo_OnlineOrders_Shortcodes {
         $checkout_page_url =  get_page_link($checkout_page_id);
         $store_page_url =  get_page_link($store_page_id);
 
-
-        wp_localize_script("mooScript-style4", "moo_CartPage",$cart_page_url);
-        wp_localize_script("mooScript-style4", "moo_CheckoutPage",$checkout_page_url);
-        wp_localize_script("mooScript-style4", "moo_StorePage",$store_page_url);
-        wp_localize_script("mooScript-style4", "moo_RestUrl",get_rest_url());
-        wp_localize_script("mooScript-style4", "moo_themeSettings",$themeSettings["settings"]);
+        $params = array(
+            'ajaxurl' => admin_url( 'admin-ajax.php', isset( $_SERVER['HTTPS'] ) ? 'https://' : 'http://' ),
+            'plugin_img' =>  plugins_url( '/img', __FILE__ ),
+            'cartPage' =>  $cart_page_url,
+            'checkoutPage' =>  $checkout_page_url,
+            'storePage' =>  $store_page_url,
+            'moo_RestUrl' =>  get_rest_url(),
+            'moo_themeSettings' =>  $themeSettings["settings"],
+            'custom_sa_title' =>  (isset($MooOptions["custom_sa_title"]) && trim($MooOptions["custom_sa_title"]) !== "")?trim($MooOptions["custom_sa_title"]):"",
+            'custom_sa_content' =>  (isset($MooOptions["custom_sa_content"]) && trim($MooOptions["custom_sa_content"]) !== "")?trim($MooOptions["custom_sa_content"]):"",
+            'custom_sa_onCheckoutPage' =>  (isset($MooOptions["custom_sa_onCheckoutPage"]))?trim($MooOptions["custom_sa_onCheckoutPage"]):"off"
+        );
+        wp_localize_script("mooScript-style3", "moo_params",$params);
 
         ob_start();
         $nb_items_in_cart = ($themeSettings["nb_items"]>0)?$themeSettings["nb_items"]:'';
@@ -1777,7 +1798,7 @@ class Moo_OnlineOrders_Shortcodes {
                 }
             }
         }
-        if ($jsFileName !== '' && count($categories) > 0) {
+        if ($jsFileName !== '' && is_array($categories) && count($categories) > 0) {
             wp_localize_script($jsFileName,"attr_categories",$categories);
         }
 

@@ -1,9 +1,9 @@
 jQuery( function( $ ) {
     'use strict';
-    if(moo_clover_payment_form && moo_clover_payment_form === "on" && moo_clover_key) {
+    if(typeof mooCheckoutOptions.moo_clover_payment_form !== 'undefined' &&  typeof mooCheckoutOptions.moo_clover_key !== 'undefined' && mooCheckoutOptions.moo_clover_payment_form === "on" ) {
 
         try {
-            window.clover = new Clover( moo_clover_key );
+            window.clover = new Clover( mooCheckoutOptions.moo_clover_key );
             var elements = window.clover.elements();
             window.cloverCardIsValid = false;
             window.cloverCardErrorMsg = "";
@@ -34,7 +34,7 @@ jQuery( function( $ ) {
                 var elementStyles = {
                     input: {
                         color: '#31325F',
-                        height: '27px',
+                        height: '30px',
                         '::placeholder': {
                             color: '#CFD7E0',
                         },
@@ -200,19 +200,22 @@ jQuery( function( $ ) {
 
         $( document ).ready(function() {
             window.moo_clover_gateway.init();
-            moo_tips_select_changed();
-            //If there is only one order type select it
-            if(moo_OrderTypes.length === 1){
-                jQuery("#moo-checkout-form-ordertypes-"+moo_OrderTypes[0].ot_uuid).iCheck('check');
-                moo_OrderTypeChanged(moo_OrderTypes[0].ot_uuid);
-            } else {
-                if(moo_OrderTypes.length === 0){
-                    jQuery("#moo-checkout-form-orderdate").show();
-                    allowScOrders = true;
-                }
-            }
         });
     }
+
+    $( document ).ready(function() {
+        moo_tips_select_changed();
+        //If there is only one order type select it
+        if(mooCheckoutOptions.moo_OrderTypes.length === 1){
+            jQuery("#moo-checkout-form-ordertypes-"+mooCheckoutOptions.moo_OrderTypes[0].ot_uuid).iCheck('check');
+            moo_OrderTypeChanged(mooCheckoutOptions.moo_OrderTypes[0].ot_uuid);
+        } else {
+            if(mooCheckoutOptions.moo_OrderTypes.length === 0){
+                jQuery("#moo-checkout-form-orderdate").show();
+                allowScOrders = true;
+            }
+        }
+    });
 
 
     try {
@@ -253,6 +256,50 @@ jQuery( function( $ ) {
             var paymentType = jQuery(event.target).val();
             moo_changePaymentMethod(paymentType)
         });
+        console.log(e.message);
+    }
+
+    //apply coupons automatically
+    var sooCoupon = localStorage.getItem("soo-coupon");
+    if(sooCoupon){
+        jQuery
+            .post(moo_params.ajaxurl,{'action':'moo_coupon_apply','moo_coupon_code':sooCoupon}, function (data) {
+                if(data !== null) {
+                    if(data.status === "success"){
+                        mooCheckoutOptions.moo_Total = data.total;
+                        if(data.type.toUpperCase() === "AMOUNT")
+                            swal({ title: "Coupon applied", text: "Success! You have received a discount of $"+data.value,   type: "success",timer:5000, confirmButtonText: "Ok" });
+                        else
+                            swal({ title: "Coupon applied", text: "Success! You have received a discount of "+data.value+"%",   type: "success",timer:5000, confirmButtonText: "Ok" });
+
+                        jQuery("#moo_remove_coupon_code").html(sooCoupon);
+                        jQuery("#moo_enter_coupon").hide();
+                        jQuery("#moo_remove_coupon").show();
+
+                        moo_update_totals();
+                    } else {
+                        if(data.error && data.error === "min_failed"){
+
+                            swal({ title: "There is a coupon that can be applied to this order",
+                                    text: data.message,
+                                    type: "warning",
+                                    confirmButtonText: "Ok"
+                                });
+
+                        }
+                    }
+
+                } else {
+                    jQuery("#moo_remove_coupon").hide();
+                    jQuery("#moo_enter_coupon").show();
+                }
+
+            })
+            .fail(function(data) {
+                console.log('FAIL');
+                console.log(data.responseText);
+                swal({ title: "Error", text:"verify your connection and try again",   type: "error",timer:5000,   confirmButtonText: "Try again" });
+            });
     }
 
 });
@@ -272,27 +319,27 @@ var MooIsDeliveryOrder = false;
 var MooPhoneVerificationActivated = true;
 var allowScOrders  = false;
 
-if(moo_use_sms_verification === 'disabled') {
+if(typeof mooCheckoutOptions.moo_use_sms_verification !== 'undefined' && mooCheckoutOptions.moo_use_sms_verification === 'disabled') {
      MooPhoneVerificationActivated = false;
 }
 
-if(typeof moo_checkout_login !== undefined)
+if(typeof mooCheckoutOptions.moo_checkout_login !== undefined)
 {
-    MooIsDisabled =(moo_checkout_login === "disabled");
+    MooIsDisabled =(mooCheckoutOptions.moo_checkout_login === "disabled");
 } else {
     MooIsDisabled = true;
 }
 
-if(typeof moo_save_cards !== undefined)
+if(typeof mooCheckoutOptions.moo_save_cards !== undefined)
 {
-    MooSaveCards =(moo_save_cards === "enabled");
+    MooSaveCards =(mooCheckoutOptions.moo_save_cards === "enabled");
 } else {
     MooSaveCards = false;
 }
 
-if(typeof moo_save_cards_fees !== undefined)
+if(typeof mooCheckoutOptions.moo_save_cards_fees !== undefined)
 {
-    MooSaveCardsFees =(moo_save_cards_fees === "enabled");
+    MooSaveCardsFees =(mooCheckoutOptions.moo_save_cards_fees === "enabled");
 } else {
     MooSaveCardsFees = false;
 }
@@ -305,13 +352,12 @@ if(!MooIsDisabled && MooSaveCards && !MooIsGuest)
     });
 }
 
-if(typeof moo_fb_app_id !== undefined && moo_fb_app_id !== null)
+if(typeof mooCheckoutOptions.moo_fb_app_id !== undefined && mooCheckoutOptions.moo_fb_app_id !== null)
 {
-    if(moo_fb_app_id !== "")
-    {
+    if(mooCheckoutOptions.moo_fb_app_id !== "") {
         window.fbAsyncInit = function() {
             FB.init({
-                appId      : moo_fb_app_id,
+                appId      : mooCheckoutOptions.moo_fb_app_id,
                 xfbml      : true,
                 version    : 'v2.8'
             });
@@ -352,12 +398,11 @@ if(!MooPhoneVerificationActivated) {
 
 function moo_OrderTypeChanged(OrderTypeID)
 {
-    if(!(typeof moo_OrderTypes === 'undefined')) {
-        for(i in moo_OrderTypes)
-        {
-            if(OrderTypeID == moo_OrderTypes[i].ot_uuid)
+    if(!(typeof mooCheckoutOptions.moo_OrderTypes === 'undefined')) {
+        for(i in mooCheckoutOptions.moo_OrderTypes) {
+            if(OrderTypeID == mooCheckoutOptions.moo_OrderTypes[i].ot_uuid)
             {
-                var selectedOrderType = moo_OrderTypes[i];
+                var selectedOrderType = mooCheckoutOptions.moo_OrderTypes[i];
 
                 if(selectedOrderType.allow_sc_order == "0") {
                     jQuery("#moo-checkout-form-orderdate").hide();
@@ -401,9 +446,7 @@ function moo_OrderTypeChanged(OrderTypeID)
                         jQuery('#moo-checkout-form-ordertypes>.moo-checkout-bloc-message').html(html);
                         jQuery('#moo-checkout-form-ordertypes>.moo-checkout-bloc-message').show();
                         moo_calculate_delivery_fee(MooCustomerChoosenAddress.lat,MooCustomerChoosenAddress.lng,moo_update_delivery_amount);
-                    }
-                    else
-                    {
+                    } else {
                         var html ='<strong>No address selected</strong><br /><br />';
                         html += '<a href="#" role="button" tabindex="0" class="MooSimplButon" onclick="moo_show_chooseaddressform(event)">Add/Edit address</a>';
                         jQuery('#moo-checkout-form-ordertypes>.moo-checkout-bloc-message').html(html);
@@ -411,15 +454,14 @@ function moo_OrderTypeChanged(OrderTypeID)
                         MooDeliveryfees = 0.00;
                     }
 
-                    if(moo_cash_upon_delivery!="on")
-                    {
-                        jQuery("#moo-checkout-form-payments-cash").parent().parent().hide();
-                        jQuery('input[name="payments"]:checked').val('creditcard');
-                    }
-                    else
-                    {
+                    if(mooCheckoutOptions.moo_cash_upon_delivery === "on") {
                         jQuery("#moo-checkout-form-payments-cash").parent().parent().show();
                         jQuery("#moo-checkout-form-payincash-label").text('Pay upon Delivery');
+                    } else  {
+                        jQuery("#moo-checkout-form-payments-cash").val('');
+                        jQuery("#moo-checkout-form-payments-cash").parent().parent().hide();
+                        jQuery("#moo-checkout-form-payments #moo_cashPanel").hide();
+
                     }
                 } else {
                     MooIsDeliveryOrder = false;
@@ -429,16 +471,13 @@ function moo_OrderTypeChanged(OrderTypeID)
                     jQuery('#moo-checkout-form-ordertypes>.moo-checkout-bloc-message').hide();
                     jQuery('#MooDeliveryfeesInTotalsSection').hide();
                     MooDeliveryfees = 0;
-
-                    if(moo_cash_in_store != "on")
-                    {
-                        jQuery("#moo-checkout-form-payments-cash").parent().parent().hide();
-                        jQuery('input[name="payments"]:checked').val('creditcard');
-                    }
-                    else
-                    {
+                    if(mooCheckoutOptions.moo_cash_in_store === "on") {
                         jQuery("#moo-checkout-form-payments-cash").parent().parent().show();
                         jQuery("#moo-checkout-form-payincash-label").text('Pay at location');
+                    } else {
+                        jQuery("#moo-checkout-form-payments-cash").val('');
+                        jQuery("#moo-checkout-form-payments-cash").parent().parent().hide();
+                        jQuery("#moo-checkout-form-payments #moo_cashPanel").hide();
                     }
                 }
 
@@ -459,7 +498,7 @@ function moo_OrderTypeChanged(OrderTypeID)
                         .post(moo_params.ajaxurl,{'action':'moo_coupon_remove'}, function (data) {
                             if(data.status=="success")
                             {
-                                moo_Total = data.total;
+                                mooCheckoutOptions.moo_Total = data.total;
                                 jQuery("#moo_remove_coupon_code").html("");
                                 jQuery('#moo_coupon').val('');
                                 jQuery("#moo_enter_coupon").show();
@@ -480,7 +519,7 @@ function moo_OrderTypeChanged(OrderTypeID)
 function  moo_tips_select_changed() {
     var tips_select_percent = jQuery('#moo_tips_select').val();
     if(tips_select_percent != "cash" && tips_select_percent != 'other'){
-        jQuery('#moo_tips').val((moo_Total.sub_total*tips_select_percent/100).toFixed(2))
+        jQuery('#moo_tips').val((mooCheckoutOptions.moo_Total.sub_total*tips_select_percent/100).toFixed(2))
     }
     else
         if(tips_select_percent == "cash")
@@ -512,9 +551,9 @@ function cryptCardNumber(ccn)
 {
     var rsa = forge.pki.rsa;
 
-    var modulus = moo_Key.modulus;
-    var exponent = moo_Key.exponent;
-    var prefix = moo_Key.prefix;
+    var modulus = mooCheckoutOptions.moo_Key.modulus;
+    var exponent = mooCheckoutOptions.moo_Key.exponent;
+    var prefix = mooCheckoutOptions.moo_Key.prefix;
     var text = prefix + ccn;
     modulus = new forge.jsbn.BigInteger(modulus);
     exponent = new forge.jsbn.BigInteger(exponent);
@@ -705,14 +744,13 @@ function moo_pickup_day_changed(element)
     var theDay = jQuery(element).val();
 
     if(MooIsDeliveryOrder)
-        var times = moo_pickup_time_for_delivery[theDay];
+        var times = mooCheckoutOptions.moo_pickup_time_for_delivery[theDay];
     else
-        var times = moo_pickup_time[theDay];
+        var times = mooCheckoutOptions.moo_pickup_time[theDay];
 
     var html  = '';
 
-    if(!(typeof times === 'undefined'))
-    {
+    if(!(typeof times === 'undefined')) {
         for(i in times)
             html += '<option value="'+times[i]+'">'+times[i]+'</option>'
     }
@@ -728,28 +766,26 @@ function moo_ChangeOrderDate(type)
     var html_days = '';
     var html_hours  = '';
 
-    if(type == 'pickup' )
-    {
-        if(!moo_pickup_time){
+    if(type == 'pickup' ) {
+        if(!mooCheckoutOptions.moo_pickup_time){
             return;
         }
         var first = true;
-        for(var i in moo_pickup_time)
-        {
+        for(var i in mooCheckoutOptions.moo_pickup_time) {
             if(first) {
                 theDay = i;
                 first = false;
             }
             html_days += '<option value="'+i+'">'+i+'</option>';
         }
-        var times = moo_pickup_time[theDay];
+        var times = mooCheckoutOptions.moo_pickup_time[theDay];
 
     } else {
-        if(!moo_pickup_time_for_delivery){
+        if(!mooCheckoutOptions.moo_pickup_time_for_delivery){
             return;
         }
         var first = true;
-        for(var i in moo_pickup_time_for_delivery)
+        for(var i in mooCheckoutOptions.moo_pickup_time_for_delivery)
         {
             if(first)
             {
@@ -758,12 +794,11 @@ function moo_ChangeOrderDate(type)
             }
             html_days += '<option value="'+i+'">'+i+'</option>';
         }
-        var times = moo_pickup_time_for_delivery[theDay];
+        var times = mooCheckoutOptions.moo_pickup_time_for_delivery[theDay];
 
     }
 
-    if(!(typeof times === 'undefined'))
-    {
+    if(!(typeof times === 'undefined')) {
         for(i in times)
             html_hours += '<option value="'+times[i]+'">'+times[i]+'</option>'
     }
@@ -776,8 +811,8 @@ function moo_ChangeOrderDate(type)
 
 function moo_order_approved(orderId)
 {
-    if(moo_thanks_page != '' && moo_thanks_page != null ) {
-        window.location.href = moo_thanks_page+'?order_id='+orderId;
+    if(mooCheckoutOptions.moo_thanks_page != '' && mooCheckoutOptions.moo_thanks_page != null ) {
+        window.location.href = mooCheckoutOptions.moo_thanks_page+'?order_id='+orderId;
     } else {
         if(orderId == '')
             html = '<div align="center" class="moo-alert moo-alert-success" role="alert" style="font-size: 20px;">Thank you for your order<br/>Your order is being prepared</div>';
@@ -785,19 +820,12 @@ function moo_order_approved(orderId)
             html = '<div align="center" class="moo-alert moo-alert-success" role="alert"  style="font-size: 20px;" >Thank you for your order<br/>Your order is being prepared<br> You can see your receipt <a href="https://www.clover.com/r/'+orderId+'" target="_blank">here</a></a> </div>';
 
         // console.log(html);
+        jQuery('#moo_checkout_msg').remove();
         jQuery("#moo-checkout").html('');
-        if(moo_merchantAddress !== "") {
-            jQuery("#moo-checkout").parent().prepend("<div style='text-align: center'><p style='font-size: 21px;'>Our Address : </p>"+moo_merchantAddress+"</div>");
+        if(mooDeliveryOptions.moo_merchantAddress !== "") {
+            jQuery("#moo-checkout").parent().prepend("<div style='text-align: center'><p style='font-size: 21px;'>Our Address : </p>"+mooDeliveryOptions.moo_merchantAddress+"</div>");
         }
         jQuery("#moo-checkout").parent().prepend(html);
-        /*
-        if(moo_merchantLat == "" || moo_merchantLng == "" || moo_merchantLat == null || moo_merchantLng == null) {
-            console.log("can't show the map, must confirm the address form the backend");
-        } else {
-            jQuery("#moo_merchantmap").show();
-            moo_getLatLong();
-        }
-        */
         jQuery("html, body").animate({
             scrollTop: 0
         }, 600);
@@ -806,9 +834,8 @@ function moo_order_approved(orderId)
 
 function moo_order_notApproved(message)
 {
-    //Hide Loading Icon and Show the button if there is an error
-    jQuery('#moo_checkout_loading').hide();
-    jQuery('#moo_btn_submit_order').show();
+    mooStopLoading();
+
     if(message && message !== '' && message !== undefined) {
         html = '<div class="moo-alert moo-alert-danger" role="alert" id="moo_checkout_msg"><strong>Error : </strong>'+message+'</div>';
     } else {
@@ -818,6 +845,18 @@ function moo_order_notApproved(message)
     jQuery("html, body").animate({
         scrollTop: 0
     }, 600);
+}
+
+function mooStartLoading() {
+    //hide Submit button
+    jQuery('#moo_btn_submit_order').hide();
+    //Show loading Icon
+    jQuery('#moo_checkout_loading').show();
+}
+function mooStopLoading() {
+    //Hide Loading Icon and Show the button if there is an error
+    jQuery('#moo_checkout_loading').hide();
+    jQuery('#moo_btn_submit_order').show();
 }
 
 //moo_InitZones();
@@ -892,14 +931,11 @@ function moo_show_chooseaddressform(e)
 
     var addresses = null;
     var cards = null;
-    if(MooIsGuest || MooIsDisabled)
-    {
+    if(MooIsGuest || MooIsDisabled) {
         MooCustomerAddress = null;
         MooCustomer        = null;
         moo_show_form_adding_address();
-    }
-    else
-    {
+    } else {
         jQuery('#moo-chooseaddress-formContent').html('<p style="text-align:center">Loading your addresses</p>');
         jQuery('#moo-login-form').hide();
         jQuery('#moo-signing-form').hide();
@@ -911,8 +947,7 @@ function moo_show_chooseaddressform(e)
 
         jQuery
             .post(moo_params.ajaxurl,{'action':'moo_customer_getAddresses'}, function (data) {
-                if(data.status == 'success')
-                {
+                if(data.status == 'success') {
                     addresses =  data.addresses;
                     cards = data.cards;
                     MooCustomerAddress = addresses;
@@ -923,8 +958,7 @@ function moo_show_chooseaddressform(e)
 
                     if(addresses.length>0) {
                         var html="";
-                        if(addresses.length == 1)
-                        {
+                        if(addresses.length == 1) {
                             var OneAddress = addresses[0];
                             html +='<div class="moo-col-md-4 moo-col-md-offset-4">';
                             html +='<div class="moo-address-block">';
@@ -934,11 +968,8 @@ function moo_show_chooseaddressform(e)
                             html +=OneAddress.city+', '+OneAddress.state+' '+OneAddress.zipcode+'<br />';
                             html +='<a class="MooSimplButon MooUseAddressButton" href="#" onclick="moo_useAddress(event,'+OneAddress.id+')">USE THIS ADDRESS</a>';
                             html +='</div></div>';
-                        }
-                        else
-                        {
-                            for(i in addresses)
-                            {
+                        } else {
+                            for(i in addresses) {
                                 var OneAddress = addresses[i];
                                 html +='<div class="moo-col-md-4 ">';
                                 html +='<div class="moo-address-block">';
@@ -1340,11 +1371,11 @@ function moo_checkout_form()
 
     setTimeout(function () {
         //if there isone order type check it
-        if(moo_OrderTypes.length === 1){
-            jQuery("#moo-checkout-form-ordertypes-"+moo_OrderTypes[0].ot_uuid).iCheck('check');
-            moo_OrderTypeChanged(moo_OrderTypes[0].ot_uuid);
+        if(mooCheckoutOptions.moo_OrderTypes.length === 1){
+            jQuery("#moo-checkout-form-ordertypes-"+mooCheckoutOptions.moo_OrderTypes[0].ot_uuid).iCheck('check');
+            moo_OrderTypeChanged(mooCheckoutOptions.moo_OrderTypes[0].ot_uuid);
         } else {
-            if(moo_OrderTypes.length === 0){
+            if(mooCheckoutOptions.moo_OrderTypes.length === 0){
                 jQuery("#moo-checkout-form-orderdate").show();
                 allowScOrders = true;
             }
@@ -1408,8 +1439,7 @@ function moo_delete_address(event,address_id)
         });
 }
 
-function moo_verify_form(form)
-{
+function moo_verify_form(form) {
     var regex_exp      = {};
     var message_errors = {};
     var selectedOrderType=null;
@@ -1418,29 +1448,28 @@ function moo_verify_form(form)
     regex_exp.cvv = /^[0-9]*$/;
 
     //gte the selected ordertype
-    if(!(typeof moo_OrderTypes === 'undefined'))
-        for(i in moo_OrderTypes)
+    if(!(typeof mooCheckoutOptions.moo_OrderTypes === 'undefined'))
+        for(i in mooCheckoutOptions.moo_OrderTypes)
         {
-          if(form.ordertype == moo_OrderTypes[i].ot_uuid)
+          if(form.ordertype == mooCheckoutOptions.moo_OrderTypes[i].ot_uuid)
           {
-              selectedOrderType = moo_OrderTypes[i];
+              selectedOrderType = mooCheckoutOptions.moo_OrderTypes[i];
           }
 
         }
     //check the name
-    if(form.name == "")
-    {
+    if(form.name == "") {
+        mooStopLoading();
         swal('Please enter your name','','error').then(function() {
             setTimeout(function () {
                 jQuery('#MooContactName').focus();
             },500)
         });
-
         return false;
     }
     //check the email
-    if(form.email == "" || !regex_exp.email.test(form.email) )
-    {
+    if(form.email == "" || !regex_exp.email.test(form.email) ) {
+        mooStopLoading();
         swal('Please enter a valid email','We need a valid email to contact you and send to you the receipt','error').then(function() {
             setTimeout(function () {
                 jQuery('#MooContactEmail').focus();
@@ -1449,8 +1478,8 @@ function moo_verify_form(form)
         return false;
     }
     //check the phone
-    if(form.phone == "")
-    {
+    if(form.phone == "") {
+        mooStopLoading();
         swal('Please enter your phone','We need your phone to contact you if we have any question about your order','error').then(function() {
             setTimeout(function () {
                 jQuery('#MooContactPhone').focus();
@@ -1460,8 +1489,8 @@ function moo_verify_form(form)
     }
     //Check the ordering method
     if(document.getElementById('moo-checkout-form-ordertypes'))
-        if((typeof form.ordertype === 'undefined') || form.ordertype == "")
-        {
+        if((typeof form.ordertype === 'undefined') || form.ordertype == "") {
+            mooStopLoading();
             swal('Please choose the ordering method','How you want your order to be served ?','error').then(function() {
                 setTimeout(function () {
                     jQuery('#moo-checkout-form-ordertypes').focus();
@@ -1471,12 +1500,11 @@ function moo_verify_form(form)
         }
 
     //Check the delivery address and min amount per Order Type
-    if(selectedOrderType != null)
-    {
+    if(selectedOrderType != null) {
         if(selectedOrderType.minAmount !='0') {
-            if(parseFloat(selectedOrderType.minAmount) > parseFloat(moo_Total.sub_total))
+            if(parseFloat(selectedOrderType.minAmount) > parseFloat(mooCheckoutOptions.moo_Total.sub_total))
             {
-               // swal('You did not meet the minimum purchase requirement',"this ordering method requires a subtotal greater than $"+selectedOrderType.minAmount ,'error');
+                mooStopLoading();
                 swal({
                     title: 'You did not meet the minimum purchase requirement',
                     text:"this ordering method requires a subtotal greater than $"+selectedOrderType.minAmount,
@@ -1492,7 +1520,8 @@ function moo_verify_form(form)
             }
         }
         if(selectedOrderType.maxAmount && selectedOrderType.maxAmount !== "") {
-            if(parseFloat(selectedOrderType.maxAmount) < parseFloat(moo_Total.sub_total)) {
+            if(parseFloat(selectedOrderType.maxAmount) < parseFloat(mooCheckoutOptions.moo_Total.sub_total)) {
+                mooStopLoading();
                 swal({
                     title: 'You reached the maximum purchase amount',
                     text:"this ordering method requires a subtotal less than $"+selectedOrderType.maxAmount,
@@ -1505,18 +1534,17 @@ function moo_verify_form(form)
                     }).then(function (data) {
                         if(data.value) {
                             swal.close();
-                            window.location.href = moo_CartPage;
+                            window.location.href = moo_params.cartPage;
                         }
                     });
                 return false;}
 
         }
 
-        if(selectedOrderType.show_sa =='1')
-        {
-            if(MooCustomerChoosenAddress!==null)
-            {
+        if(selectedOrderType.show_sa =='1') {
+            if(MooCustomerChoosenAddress!==null) {
                 if(MooCustomerChoosenAddress.lat === '' || MooCustomerChoosenAddress.lng === '') {
+                    mooStopLoading();
                     swal('Please verify your address',"We can't found this address on the map, please choose an other address",'error').then(function() {
                         setTimeout(function () {
                             jQuery('#moo-checkout-form-ordertypes>.moo-checkout-bloc-message').focus();
@@ -1526,6 +1554,7 @@ function moo_verify_form(form)
                 } else {
                     if(MooIsDeliveryError === true) {
                         moo_OrderTypeChanged(selectedOrderType.ot_uuid);
+                        mooStopLoading();
                         swal('Please verify your address',"",'error').then(function() {
                             setTimeout(function () {
                                 jQuery('#moo-checkout-form-ordertypes').focus();
@@ -1534,10 +1563,9 @@ function moo_verify_form(form)
                         return false;
                     }
                 }
-            }
-            else
-            {
+            } else {
                 moo_OrderTypeChanged(selectedOrderType.ot_uuid);
+                mooStopLoading();
                 swal('Please add the delivery address','You have chosen a delivery method, we need your address','error').then(function() {
                     setTimeout(function () {
                         jQuery('#moo-checkout-form-ordertypes>.moo-checkout-bloc-message .MooSimplButon').focus();
@@ -1548,8 +1576,10 @@ function moo_verify_form(form)
         }
     }
 
-    //check Pickup hour
-    if(allowScOrders && form.pickup_hour === "Select a time") {
+    //check the Schedule time
+
+    if(allowScOrders && (form.pickup_hour === null ||form.pickup_hour === "Select a time"  ||  form.pickup_hour === "" )) {
+        mooStopLoading();
         swal('Please choose a time','','error').then(function() {
             setTimeout(function () {
                 jQuery('#moo-checkout-form-orderdate').focus();
@@ -1557,10 +1587,26 @@ function moo_verify_form(form)
         });
         return false;
     }
+    //check special instructions when they are required special_instructions_required
+    if( ! (typeof mooCheckoutOptions.special_instructions_required === 'undefined') ) {
+
+        if(mooCheckoutOptions.special_instructions_required === 'yes'){
+            if(typeof form.instructions === 'undefined' || form.instructions === '' ) {
+                mooStopLoading();
+                swal('Special instructions are required','','error').then(function() {
+                    setTimeout(function () {
+                        jQuery('#moo-checkout-form-instruction').focus();
+                    },500);
+                });
+                return false;
+            }
+        }
+
+    }
 
     //check the payment info with the phone verification
-    if(typeof form.payments === 'undefined')
-    {
+    if(typeof form.payments === 'undefined' || form.payments === '' ) {
+        mooStopLoading();
         swal('Please choose your payment method','','error').then(function() {
             setTimeout(function () {
                 jQuery('#moo-checkout-form-payments').focus();
@@ -1569,9 +1615,9 @@ function moo_verify_form(form)
         return false;
     } else {
         if(form.payments === "cash") {
-            if(MooCustomer !== null && MooCustomer[0].phone_verified === '0')
-            {
+            if(MooCustomer !== null && MooCustomer[0].phone_verified === '0') {
                 if(MooPhoneVerificationActivated) {
+                    mooStopLoading();
                     swal('Please verify your phone',"When you choose the cash payment you must verify your phone",'error').then(function() {
                         setTimeout(function () {
                             jQuery('#moo-checkout-form-payments').focus();
@@ -1586,8 +1632,8 @@ function moo_verify_form(form)
                 }
 
             } else {
-                if(MooPhoneIsVerified === false)
-                {
+                if(MooPhoneIsVerified === false) {
+                    mooStopLoading();
                     swal('Please verify your phone',"When you choose the cash payment you must verify your phone",'error').then(function() {
                         setTimeout(function () {
                             jQuery('#moo-checkout-form-payments').focus();
@@ -1613,12 +1659,14 @@ function moo_verify_form(form)
                                 form.card = response.card;
                                 moo_SendForm(form);
                             } else {
+                                mooStopLoading();
                                 swal('Please verify your card information',"",'error');
                                 return false;
                             }
                         });
 
                 } else {
+                    mooStopLoading();
                     swal('Please verify your card information',window.cloverCardErrorMsg,'error');
                     return false;
                 }
@@ -1637,14 +1685,17 @@ function moo_verify_form(form)
                     });
                 } else {
                     if(form.cardNumber === '' || !regex_exp.credicard.test(form.cardNumber) ) {
+                        mooStopLoading();
                         swal('Please enter a valid credit card number',"",'error');
                         return false;
                     }
                     if(form.cardcvv  === ''  ) {
+                        mooStopLoading();
                         swal('Please enter a valid Card CVV',"",'error');
                         return false;
                     }
                     if(form.zipcode  === ''  ){
+                        mooStopLoading();
                         swal('Please enter a valid Zip Code',"",'error');
                         return false;
                     }
@@ -1664,18 +1715,11 @@ function moo_verify_form(form)
     }
 }
 
-function moo_SendForm(form)
-{
-    jQuery('#moo_checkout_msg').remove();
-    jQuery('#moo_btn_submit_order').hide();
-    //Show loading Icon
-    jQuery('#moo_checkout_loading').show();
-
+function moo_SendForm(form) {
     //Send the form to server
     jQuery
         .post(moo_params.ajaxurl,{'action':'moo_checkout','form':form}, function (data) {
-            if(typeof data == 'object')
-            {
+            if(typeof data == 'object') {
                 if(data.status == 'APPROVED') {
                     moo_order_approved(data.order);
                 } else {
@@ -1718,8 +1762,9 @@ function moo_get_form(callback)
     form.pickup_day             =  jQuery('#moo_pickup_day').val();
     form.pickup_hour            =  jQuery('#moo_pickup_hour').val();
 
-    if(document.getElementById('moo-checkout-form-ordertypes'))
+    if(document.getElementById('moo-checkout-form-ordertypes')) {
         form.ordertype  =  jQuery('input[name="ordertype"]:checked').val();
+    }
 
     form.payments  =  jQuery('input[name="payments"]:checked').val();
     form.address = MooCustomerChoosenAddress;
@@ -1734,6 +1779,7 @@ function moo_get_form(callback)
 function moo_finalize_order(e)
 {
     e.preventDefault();
+    mooStartLoading();
     moo_get_form(moo_verify_form);
 }
 function moo_phone_changed()
@@ -1751,7 +1797,9 @@ function moo_phone_to_verif_changed()
 }
 function mooCouponApply(e)
 {
-    e.preventDefault();
+    if(e){
+        e.preventDefault();
+    }
     var coupon_code = jQuery('#moo_coupon').val();
     if(coupon_code == "") {
         swal({
@@ -1766,7 +1814,7 @@ function mooCouponApply(e)
         jQuery
             .post(moo_params.ajaxurl,{'action':'moo_coupon_apply','moo_coupon_code':coupon_code}, function (data) {
                 if(data!==null && data.status==="success") {
-                    moo_Total = data.total;
+                    mooCheckoutOptions.moo_Total = data.total;
                     if(data.type.toUpperCase() === "AMOUNT")
                         swal({ title: "Coupon applied", text: "Success! You have received a discount of $"+data.value,   type: "success",timer:5000, confirmButtonText: "Ok" });
                     else
@@ -1805,7 +1853,7 @@ function mooCouponRemove(e)
         .post(moo_params.ajaxurl,{'action':'moo_coupon_remove'}, function (data) {
             if(data.status=="success")
             {
-                moo_Total = data.total;
+                mooCheckoutOptions.moo_Total = data.total;
                 jQuery("#moo_remove_coupon_code").html("");
                 jQuery('#moo_coupon').val('');
                 jQuery("#moo_enter_coupon").show();
@@ -1863,12 +1911,10 @@ function MooRemoveCard(event,token)
             }
         });
 }
-function mooShowSavedCards(cards)
-{
+function mooShowSavedCards(cards) {
     //Not show saved cards until make this feature for public
     return false;
-    for(i in cards)
-    {
+    for(i in cards) {
         var creditCrad = cards[i];
 
         html ='<div class="moo-checkout-form-payment-option" style="margin-bottom: 15px;">';
@@ -1886,8 +1932,7 @@ function mooShowSavedCards(cards)
     jQuery('.moo-checkout-form-payment-input').on('ifClicked', function (event) {
         var paymentType = jQuery(event.target).val();
         //moo_changePaymentMethod(paymentType)
-        if(paymentType !="" && paymentType !="cash" && paymentType != "creditcard")
-        {
+        if(paymentType !="" && paymentType !="cash" && paymentType != "creditcard") {
             jQuery('#moo-checkout-form-savecard').hide();
             jQuery('#moo-checkout-form-tips').show();
             //If we will charge customers to pay using saved credir cards, add the service fees here
@@ -1896,9 +1941,7 @@ function mooShowSavedCards(cards)
             else
                 MooServicefees = 0;
             moo_update_totals();
-        }
-        else
-        {
+        } else {
             MooServicefees = 0;
             moo_update_totals();
         }

@@ -2,6 +2,7 @@
 * Created by Mohammed EL BANYAOUI on 12/13/2017.
 */
 jQuery(document).ready(function() {
+    window.moo_RestUrl = moo_params.moo_RestUrl;
     window.moo_theme_setings = [];
     window.moo_mg_setings = {};
     window.nb_items_in_cart = 0;
@@ -232,10 +233,10 @@ function moo_renderItems(data) {
 
             if(item.price > 0 && item.price_type === "PER_UNIT")
                 item_price += '/'+item.unit_name;
+
             if(item.image !== null && item.image.url !== null && item.image.url !== "") {
                 var itemimgUrl = item.image.url;
             } else {
-                var itemimgUrl = moo_params['plugin_img']+'/noImg3.png';
                 var itemimgUrl = moo_params['plugin_img']+'/moo_placeholder.png';
             }
 
@@ -245,7 +246,8 @@ function moo_renderItems(data) {
                     html +='<div class="moo-col-xs-12 moo-col-sm-6 moo-col-md-'+nbItemsPerRowCssCol+'">';
                 }
                 html +='<a class="link" href="#item-'+item.uuid.toLowerCase()+'" data-item-id="'+item.uuid.toLowerCase()+'" onclick="MooClickOnItem(event,this)">';
-                html += '<div class="image-wrapper" style="background: url('+itemimgUrl+') no-repeat center;background-size:100%;"></div>';
+
+                html += '<div class="image-wrapper" style="background: url('+itemimgUrl+') no-repeat center;background-size:100%;" onclick=""></div>';
 
 
 
@@ -255,18 +257,13 @@ function moo_renderItems(data) {
                 '<div class="price-container clearfix">'+
                 '<div class="price-box">'+
                 '<span class="price">';
-                // '<span>799</span>'+
-                if(parseFloat(item.price) === 0)
-                {
+
+                if(parseFloat(item.price) === 0) {
                     html += '<span></span>';
-                }
-                else
-                {
+                } else {
                     html += '<span>$'+item_price+'</span>';
                 }
-                 html += '</span>'+
-                '</div>'+
-                '</div>';
+                 html += '</span></div></div>';
                 if(window.moo_theme_setings.jTheme_showItemDescription !== undefined && window.moo_theme_setings.jTheme_showItemDescription !== null && window.moo_theme_setings.jTheme_showItemDescription === 'on' && item.description !== '' ) {
                     html += '<div class="moo_item_description">'+item.description+'</div>';
                 }
@@ -274,28 +271,21 @@ function moo_renderItems(data) {
             if(data.available === false) {
                 html += '<button class="osh-btn"><span class="label">Not Available Yet</span></button>';
             } else {
-                if(item.stockCount === "out_of_stock")
-                {
+                if(item.stockCount === "out_of_stock") {
                     html += '<button class="osh-btn"><span class="label">OUT OF STOCK</span></button>';
-                }
-                else
-                {
+                } else {
                     //Checking the Qty window show/hide and add add to cart button
-                    if(window.moo_theme_setings.onePage_qtyWindow !== null && window.moo_theme_setings.jTheme_qtyWindow === "on")
-                    {
-                        if(item.has_modifiers)
-                        {
+                    if(window.moo_theme_setings.onePage_qtyWindow !== null && window.moo_theme_setings.jTheme_qtyWindow === "on") {
+                        if(item.has_modifiers) {
                             if(window.moo_theme_setings.jTheme_qtyWindowForModifiers !== null && window.moo_theme_setings.jTheme_qtyWindowForModifiers === "on")
                                 html += '<button class="osh-btn" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtnFIWM)"><span class="label">Choose Qty & Options</span></button>';
                             else
                                 html += '<button class="osh-btn" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)"><span class="label">Choose Options & Qty</span></button>';
-                        }
-                        else
+                        } else {
                             html += '<button class="osh-btn" onclick="mooOpenQtyWindow(event,\''+item.uuid+'\',\''+item.stockCount+'\',moo_clickOnOrderBtn)"><span class="label">Add to cart</span></button>';
+                        }
 
-                    }
-                    else
-                    {
+                    } else {
                         if(item.has_modifiers)
                             html += '<button class="osh-btn" onclick="moo_clickOnOrderBtnFIWM(event,\''+item.uuid+'\',1)"><span class="label"> Choose Options & Qty </span></button>';
                         else
@@ -607,10 +597,10 @@ function mooShowCart(event) {
                     width: 700,
                     showCancelButton: true,
                     cancelButtonText : 'Close',
-                    confirmButtonText : '<a href="'+moo_CheckoutPage+'" style="color:#ffffff">CHECKOUT</a>'
+                    confirmButtonText : '<a href="'+ moo_params.checkoutPage +'" style="color:#ffffff">CHECKOUT</a>'
                 }).then(function (result) {
                     if(result.value){
-                        window.location.href = moo_CheckoutPage;
+                        window.location.href = moo_params.checkoutPage;
 
                     }
                 });

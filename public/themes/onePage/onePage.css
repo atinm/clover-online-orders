@@ -10,7 +10,7 @@
 }
 #moo_OnlineStoreContainer #moo-onlineStore-items .moo-menu-category .moo-menu-category-title {
     position: relative;
-    height: 20vh;
+    height: auto;
     min-height: 160px;
     color: #fff;
     padding: 2rem;
@@ -109,6 +109,12 @@
     text-transform: uppercase;
     border-bottom: solid;
     padding: 11px;
+}
+#moo_OnlineStoreContainer #moo-onlineStore-items .moo-menu-category .moo-menu-category-content .moo-item-name
+{
+    color: #000000;
+    font-size: 16px;
+    font-family: "Open Sans", Arial, sans-serif;
 }
 /* ---- Navigation ----- */
 .moo-bg-dark {

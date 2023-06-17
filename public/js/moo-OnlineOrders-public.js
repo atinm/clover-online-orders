@@ -1,5 +1,6 @@
 (function( $ ) {
 	'use strict';
+    window.moo_RestUrl = moo_params.moo_RestUrl;
     swal.setDefaults({ customClass: 'moo-custom-dialog-class' });
     jQuery( document ).ready(function($) {
         jQuery('#moo_OnlineStoreContainer').removeClass('moo_loading');
@@ -24,6 +25,12 @@
     setTimeout(function () {
         jQuery(".Moo_Copyright").show();
     }, 3000);
+
+    const queryVars = getUrlVars();
+    if(queryVars.soocoupon){
+        localStorage.setItem("soo-coupon",queryVars.soocoupon);
+        console.log(queryVars.soocoupon);
+    }
 
 })(jQuery);
 
@@ -80,7 +87,7 @@ function moo_btn_addToCart(event,item_uuid,qty)
                 confirmButtonText: 'Cart page',
                 type:"success"
             }).then(function () {
-                window.location.replace(moo_CartPage)
+                window.location.replace(moo_params.cartPage)
             });
         }
         else
@@ -153,4 +160,11 @@ function moo_OpenCustomQtyWindow(event,item_id,callback)
             })
         }
     }).then(function () {},function () {})
+}
+function getUrlVars() {
+    var vars = {};
+    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+        vars[key] = value;
+    });
+    return vars;
 }

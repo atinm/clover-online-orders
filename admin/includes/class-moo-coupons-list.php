@@ -97,7 +97,7 @@ class Coupons_List_Moo extends WP_List_Table_MOO {
             case 'value':
                 return ($item['type']=="amount")?"$".$item['value']:$item['value']."%";
             case 'isEnabled':
-                return ($item['isEnabled']=="1")?"Yes":"No";
+                return ($item['isEnabled']=="1")?"<span style='color: green'>Yes</span>":"<span style='color: red'>No</span>";
             default:
                 return print_r( $item, true ); //Show the whole array for troubleshooting purposes
         }

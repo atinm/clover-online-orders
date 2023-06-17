@@ -11,10 +11,10 @@ google.maps.Circle.prototype.contains = function(latLng,circle) {
 
 function moo_getLatLong()
 {
-    if(moo_merchantLat != "" && moo_merchantLng != "") {
+    if(mooDeliveryOptions.moo_merchantLat != "" && mooDeliveryOptions.moo_merchantLng!= "") {
         var Merchantlocation = {};
-        Merchantlocation.lng = parseFloat(moo_merchantLng);
-        Merchantlocation.lat = parseFloat(moo_merchantLat);
+        Merchantlocation.lng = parseFloat(mooDeliveryOptions.moo_merchantLat);
+        Merchantlocation.lat = parseFloat(mooDeliveryOptions.moo_merchantLng);
        moo_initMap(Merchantlocation);
     }
 }
@@ -32,16 +32,15 @@ function moo_initMap(myLatLng)
     });
 }
 
-function moo_InitZones()
-{
-    if(!(typeof moo_merchantLat === 'undefined'))
-        if(moo_merchantLat != "" && moo_merchantLng != "")
-        {
+function moo_InitZones() {
+    if(!(typeof mooDeliveryOptions.moo_merchantLat === 'undefined')) {
+        if(mooDeliveryOptions.moo_merchantLat != "" && mooDeliveryOptions.moo_merchantLng != "") {
             var Merchantlocation = {};
-            Merchantlocation.lng = parseFloat(moo_merchantLng);
-            Merchantlocation.lat = parseFloat(moo_merchantLat);
+            Merchantlocation.lng = parseFloat(mooDeliveryOptions.moo_merchantLng);
+            Merchantlocation.lat = parseFloat(mooDeliveryOptions.moo_merchantLat);
             moo_initMapDZ(Merchantlocation);
         }
+    }
 }
 
 function moo_initMapDZ(myLatLng) {
@@ -56,7 +55,7 @@ function moo_draw_zones()
 {
     var moo_delivery_areas = null;
     try {
-        moo_delivery_areas  = JSON.parse(moo_delivery_zones);
+        moo_delivery_areas  = JSON.parse(mooDeliveryOptions.zones);
     } catch (e) {
         console.log("Parsing error: moo_delivery_areas");
     }
@@ -95,10 +94,10 @@ function moo_draw_zones()
     else
     {
         jQuery('#moo-delivery-details').hide();
-        var order_total             = parseFloat(moo_Total.sub_total);
-        var delivery_free_after     = parseFloat(moo_delivery_free_amount)  ; //Free delivery after this amount
-        var delivery_fixed_amount   = parseFloat(moo_delivery_fixed_amount) ; //Fixed delivery amount
-        var delivery_for_other_zone = parseFloat(moo_delivery_other_zone_fee) ; //Amount of delivery for other zones
+        var order_total             = parseFloat(mooCheckoutOptions.moo_Total.sub_total);
+        var delivery_free_after     = parseFloat(mooDeliveryOptions.free_amount)  ; //Free delivery after this amount
+        var delivery_fixed_amount   = parseFloat(mooDeliveryOptions.fixed_amount) ; //Fixed delivery amount
+        var delivery_for_other_zone = parseFloat(mooDeliveryOptions.other_zone_fee) ; //Amount of delivery for other zones
 
 
         if(isNaN(delivery_free_after) || delivery_free_after > order_total ) {
@@ -135,14 +134,14 @@ function moo_address_changed()
 }
 function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
 {
-    var order_total             = parseFloat(moo_Total.sub_total);
-    var delivery_free_after     = parseFloat(moo_delivery_free_amount)  ; //Free delivery after this amount
-    var delivery_fixed_amount   = parseFloat(moo_delivery_fixed_amount) ; //Fixed delivery amount
-    var delivery_for_other_zone = parseFloat(moo_delivery_other_zone_fee) ; //Amount of delivery for other zones
+    var order_total             = parseFloat(mooCheckoutOptions.moo_Total.sub_total);
+    var delivery_free_after     = parseFloat(mooDeliveryOptions.free_amount)  ; //Free delivery after this amount
+    var delivery_fixed_amount   = parseFloat(mooDeliveryOptions.fixed_amount) ; //Fixed delivery amount
+    var delivery_for_other_zone = parseFloat(mooDeliveryOptions.other_zone_fee) ; //Amount of delivery for other zones
     var moo_delivery_areas = null;
 
     try {
-        moo_delivery_areas  = JSON.parse(moo_delivery_zones);
+        moo_delivery_areas  = JSON.parse(mooDeliveryOptions.zones);
     } catch (e) {
         console.log("Parsing error: moo_delivery_areas");
     }
@@ -157,8 +156,7 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
                 var el = moo_delivery_areas[i];
 
                 // Verify if the selected address is at any zone
-                if(el.type === 'polygon')
-                {
+                if(el.type === 'polygon') {
                     if(google.maps.geometry.poly.containsLocation( new google.maps.LatLng(parseFloat(customer_lat),parseFloat(customer_lng)), new google.maps.Polygon({paths:el.path})))
                     {
                         zones_contain_point.push({zone_id:el.id,zone_fee:el.fee,feeType:el.feeType});
@@ -167,8 +165,7 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
                     if(el.type === 'circle') {
                         var point  = new google.maps.LatLng(parseFloat(customer_lat),parseFloat(customer_lng));
                         var center = new google.maps.LatLng(parseFloat(el.center.lat),parseFloat(el.center.lng));
-                        if(google.maps.geometry.spherical.computeDistanceBetween(point, center) <= el.radius)
-                        {
+                        if(google.maps.geometry.spherical.computeDistanceBetween(point, center) <= el.radius) {
                             zones_contain_point.push({zone_id:el.id,zone_fee:el.fee,feeType:el.feeType});
                         }
                     }
@@ -178,15 +175,14 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
             // Then we we update the delivery amount by this zone fees
             // else we verify if the merchant allow other zones
             if(zones_contain_point.length >= 1 ) {
+                
                 // Customer address exist in at least one merchant's zone
                 var delivery_final_amount = (zones_contain_point[0].feeType === "percent")?(zones_contain_point[0].zone_fee*order_total/100):zones_contain_point[0].zone_fee;
                 var delivery_zone_id      =  zones_contain_point[0].zone_id;
 
-                for (i in zones_contain_point)
-                {
+                for (i in zones_contain_point) {
 
-                    if(zones_contain_point[i].feeType === "percent")
-                    {
+                    if(zones_contain_point[i].feeType === "percent") {
                         var amount = (zones_contain_point[i].zone_fee * order_total )/100;
                         if(parseFloat(delivery_final_amount) >= parseFloat(amount))
                         {
@@ -207,9 +203,8 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
                     for(i in moo_delivery_areas)
                     {
                         var el = moo_delivery_areas[i];
-                        if(delivery_zone_id == el.id)
-                        {
-                            if(parseFloat(el.minAmount) > parseFloat(moo_Total.sub_total) )
+                        if(delivery_zone_id == el.id) {
+                            if(parseFloat(el.minAmount) > parseFloat(mooCheckoutOptions.moo_Total.sub_total) )
                             {
                                 var res ={};
                                 res.type='min_error';
@@ -256,7 +251,7 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
                             var el = moo_delivery_areas[i];
                             if(delivery_zone_id == el.id)
                             {
-                                if(parseFloat(el.minAmount) > parseFloat(moo_Total.sub_total) )
+                                if(parseFloat(el.minAmount) > parseFloat(mooCheckoutOptions.moo_Total.sub_total) )
                                 {
                                     var res ={};
                                     res.type='min_error';
@@ -279,7 +274,6 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
 
             } else {
                 //Customer address not exist in any zone
-
                 /*
                     we will check the support other zones
                  */
@@ -313,8 +307,14 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
 
 }
 
-            function moo_update_delivery_amount(result)
-{
+function moo_update_delivery_amount(result)  {
+    if(typeof mooDeliveryOptions.errorMsg === "undefined"){
+        var errorText = 'Sorry, zone not supported. We do not deliver to this address at this time';
+
+    } else {
+        var errorText = mooDeliveryOptions.errorMsg;
+
+    }
     var html='<strong>Delivery amount :</strong><br/>';
     switch(result.type) {
         case 'other_zone':
@@ -323,8 +323,8 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
             MooIsDeliveryError = false;
             break;
         case 'zone_error':
-            html = 'Sorry, zone not supported. We do not deliver to this address at this time';
-            swal('Sorry, zone not supported. We do not deliver to this address at this time',"","error");
+            html = errorText;
+            swal(errorText,"","error");
             MooDeliveryfees = false;
             MooIsDeliveryError = true;
             break;
@@ -354,8 +354,6 @@ function moo_calculate_delivery_fee(customer_lat,customer_lng,callback)
 }
 function moo_update_totals()
 {
-   // console.log(moo_Total);
-   // console.log(moo_Total);
     if(document.getElementById('moo_tips') != null)
         var tips_amount     = parseFloat(document.getElementById('moo_tips').value);
     else
@@ -368,9 +366,9 @@ function moo_update_totals()
     }
 
     if(MooServicefees == null || isNaN(MooServicefees) || MooServicefees <= 0 || MooServicefees === false ) {
-        MooServicefeesD =  parseFloat(moo_Total.serviceCharges);
+        MooServicefeesD =  parseFloat(mooCheckoutOptions.moo_Total.serviceCharges);
     } else {
-        MooServicefeesD = parseFloat(MooServicefees) + parseFloat(moo_Total.serviceCharges);
+        MooServicefeesD = parseFloat(MooServicefees) + parseFloat(mooCheckoutOptions.moo_Total.serviceCharges);
     }
 
     if(isNaN(tips_amount) || tips_amount < 0) {
@@ -380,48 +378,48 @@ function moo_update_totals()
 
     //Calculate the new Total
     if(MooOrderTypeIsTaxable) {
-        var new_total = parseFloat(moo_Total.total) + tips_amount + MooDeliveryfees + MooServicefeesD;
+        var new_total = parseFloat(mooCheckoutOptions.moo_Total.total) + tips_amount + MooDeliveryfees + MooServicefeesD;
     } else {
-        var new_total = parseFloat(moo_Total.sub_total) + tips_amount + MooDeliveryfees + MooServicefeesD;
+        var new_total = parseFloat(mooCheckoutOptions.moo_Total.sub_total) + tips_amount + MooDeliveryfees + MooServicefeesD;
     }
 
     jQuery('.moo-totals-value').fadeOut(300, function() {
-        jQuery('#moo-cart-subtotal').html(formatPrice(moo_Total.sub_total));
+        jQuery('#moo-cart-subtotal').html(formatPrice(mooCheckoutOptions.moo_Total.sub_total));
         if(MooOrderTypeIsTaxable)
         {
-            if(moo_Total.coupon == null)
-                jQuery('#moo-cart-tax').html(formatPrice(moo_Total.total_of_taxes_without_discounts));
+            if(mooCheckoutOptions.moo_Total.coupon == null)
+                jQuery('#moo-cart-tax').html(formatPrice(mooCheckoutOptions.moo_Total.total_of_taxes_without_discounts));
             else
-                jQuery('#moo-cart-tax').html(formatPrice(moo_Total.total_of_taxes));
+                jQuery('#moo-cart-tax').html(formatPrice(mooCheckoutOptions.moo_Total.total_of_taxes));
 
         } else {
             jQuery('#moo-cart-tax').html("0.00");
         }
 
 
-        if(moo_Total.coupon == null) {
+        if(mooCheckoutOptions.moo_Total.coupon == null) {
             //Hide the coupon section in total
             jQuery('#MooCouponInTotalsSection').hide();
         } else {
             //Show coupon section in total
             jQuery('#MooCouponInTotalsSection').show();
-            jQuery('#mooCouponName').html(moo_Total.coupon.name);
+            jQuery('#mooCouponName').html(mooCheckoutOptions.moo_Total.coupon.name);
 
-            if(moo_Total.coupon.type.toUpperCase() == 'AMOUNT')
+            if(mooCheckoutOptions.moo_Total.coupon.type.toUpperCase() == 'AMOUNT')
             {
-                var t = parseFloat(moo_Total.coupon.value);
+                var t = parseFloat(mooCheckoutOptions.moo_Total.coupon.value);
                 jQuery('#mooCouponValue').html("- "+formatPrice(t.toFixed(2)));
             } else {
-                var t = parseFloat(moo_Total.coupon.value)*parseFloat(moo_Total.sub_total)/100;
+                var t = parseFloat(mooCheckoutOptions.moo_Total.coupon.value)*parseFloat(mooCheckoutOptions.moo_Total.sub_total)/100;
                 jQuery('#mooCouponValue').html("- "+formatPrice(t.toFixed(2)));
             }
 
             //update the total when the order is not taxable
             if(!MooOrderTypeIsTaxable) {
-                if(moo_Total.coupon.type.toUpperCase() == 'AMOUNT')
-                    new_total =  parseFloat(moo_Total.sub_total) + tips_amount + MooDeliveryfees + MooServicefeesD - moo_Total.coupon.value;
+                if(mooCheckoutOptions.moo_Total.coupon.type.toUpperCase() == 'AMOUNT')
+                    new_total =  parseFloat(mooCheckoutOptions.moo_Total.sub_total) + tips_amount + MooDeliveryfees + MooServicefeesD - mooCheckoutOptions.moo_Total.coupon.value;
                 else
-                    new_total =  parseFloat(moo_Total.sub_total) + tips_amount + MooDeliveryfees + MooServicefeesD - moo_Total.sub_total*moo_Total.coupon.value/100;
+                    new_total =  parseFloat(mooCheckoutOptions.moo_Total.sub_total) + tips_amount + MooDeliveryfees + MooServicefeesD - mooCheckoutOptions.moo_Total.sub_total*mooCheckoutOptions.moo_Total.coupon.value/100;
             }
         }
 

@@ -24,15 +24,10 @@ class DashboardRoutes extends BaseRoute {
     private $api;
 
     /**
-     * The link of the custom hours API.
-     * @access   private
-     * @var Moo_OnlineOrders_CallAPI
-     */
-    private $HoursApilink;
-    /**
      * @var array
      */
     private $pluginSettings;
+
     /**
      * @var bool
      */
@@ -43,6 +38,7 @@ class DashboardRoutes extends BaseRoute {
      *
      */
     public function __construct($model, $api){
+
         $this->model          = $model;
         $this->api            = $api;
         $this->pluginSettings = (array) get_option("moo_settings");
@@ -160,7 +156,6 @@ class DashboardRoutes extends BaseRoute {
 
         // import descriptions
         register_rest_route($this->namespace, '/dash/import/descriptions', array(
-            // Here we register the readable endpoint for collections.
             array(
                 'methods' => 'POST',
                 'callback' => array($this, 'dashImportItemsDescriptions'),
@@ -169,10 +164,65 @@ class DashboardRoutes extends BaseRoute {
         ));
         // import settings
         register_rest_route($this->namespace, '/dash/import/settings', array(
-            // Here we register the readable endpoint for collections.
             array(
                 'methods' => 'POST',
                 'callback' => array($this, 'dashImportSettings'),
+                'permission_callback' => array( $this, 'permissionCheck' )
+            )
+        ));
+        // Check the api key and send the website for sync
+        register_rest_route($this->namespace, '/dash/check_apikey', array(
+            array(
+                'methods' => 'GET',
+                'callback' => array($this, 'dashCheckApiKey'),
+                'permission_callback' => array( $this, 'permissionCheck' )
+            )
+        ));
+        // Save the api key
+        register_rest_route($this->namespace, '/dash/save_apikey', array(
+            array(
+                'methods' => 'POST',
+                'callback' => array($this, 'dashSaveApiKey'),
+                'permission_callback' => array( $this, 'permissionCheck' )
+            )
+        ));
+        // Get the opening hours (business Hours)
+        register_rest_route($this->namespace, '/dash/opening_hours', array(
+            array(
+                'methods' => 'GET',
+                'callback' => array($this, 'dashGetOpeningHours'),
+                'permission_callback' => array( $this, 'permissionCheck' )
+            )
+        ));
+        // Get the autosync status
+        register_rest_route($this->namespace, '/dash/autosync', array(
+            array(
+                'methods' => 'GET',
+                'callback' => array($this, 'dashGetAutoSyncStatus'),
+                'permission_callback' => array( $this, 'permissionCheck' )
+            )
+        ));
+        // Change the auto sync status
+        register_rest_route($this->namespace, '/dash/autosync', array(
+            array(
+                'methods' => 'POST',
+                'callback' => array($this, 'dashUpdateAutoSyncStatus'),
+                'permission_callback' => array( $this, 'permissionCheck' )
+            )
+        ));
+        // Get the detail of the auto sync status
+        register_rest_route($this->namespace, '/dash/autosync_details', array(
+            array(
+                'methods' => 'GET',
+                'callback' => array($this, 'dashGetAutoSyncDetails'),
+                'permission_callback' => array( $this, 'permissionCheck' )
+            )
+        ));
+        // Get the names of items based on their UUID
+        register_rest_route($this->namespace, '/dash/autosync_items_names', array(
+            array(
+                'methods' => 'POST',
+                'callback' => array($this, 'dashGetAutoSyncItemsNames'),
                 'permission_callback' => array( $this, 'permissionCheck' )
             )
         ));
@@ -445,6 +495,149 @@ class DashboardRoutes extends BaseRoute {
             );
         }
     }
+    function dashCheckApiKey( $request ){
+        $settings = (array) get_option("moo_settings");
+        if (isset($settings["api_key"])){
+            $body = array(
+                "api_key"=>$settings["api_key"],
+                "home_url"=>get_option("home"),
+                "restapi_url"=>get_rest_url(),
+                "version"=>$this->version
+            );
+            $response = $this->api->checkApiKey($body);
+            if($response && is_array($response)){
+                if($response["httpCode"] === 400 ||  $response["httpCode"] === 500 ){
+                    return array(
+                        "status"=>"failed",
+                        "message"=>"An error has occurred, please refresh the page"
+                    );
+                }
+                if($response["httpCode"] === 404 ){
+                    return array(
+                        "status"=>"failed",
+                        "message"=>"The API KEY isn't valid"
+                    );
+                }
+                if($response["httpCode"] === 401 ){
+                    return array(
+                        "status"=>"failed",
+                        "message"=>"The api key is valid but your website isn't connected to Clover. Please re-install the app Smart Online Order on your Clover account"
+                    );
+                }
+                if($response["httpCode"] === 200 ){
+                    $result = json_decode($response["responseContent"], true);
+
+                    //check blackout status
+                    $blackoutStatusResponse = $this->api->getBlackoutStatus();
+                    if(isset($blackoutStatusResponse["status"]) && $blackoutStatusResponse["status"] === "close"){
+                        $result["BlackoutStatus"] = "close";
+                        $result["BlackoutMessage"] = '<div class="">The store is currently closed. You can change this from your Clover Device. If you recently made changes on your Clover Device, <a href="admin.php?page=moo_index&syncBlackout=true">click here</a> to sync those changes.</div>';
+                    } else {
+                        $result["BlackoutStatus"] = "open";
+                    }
+                    return $result;
+                }
+            }
+            return array(
+                "status"=>"failed",
+                "message"=>"We couldn't check the api key right now, please try again"
+            );
+        } else {
+            return array(
+                "status"=>"failed",
+                "message"=>"The API KEY isn't valid"
+            );
+        }
+    }
+    function dashGetOpeningHours( $request ){
+        return $this->api->getOpeningHours();
+    }
+    function dashGetAutoSyncStatus( $request ){
+        $url = get_option("home");
+        $res = $this->api->getAutoSyncStatus($url);
+        if($res){
+            return array(
+                "status"=>($res["enabled"])?"enabled":"disabled"
+            );
+        }
+        return array(
+            "status"=>"disabled"
+        );
+    }
+    function dashUpdateAutoSyncStatus( $request ){
+        $request_body   = $request->get_body_params();
+        $url = get_option("home");
+        if (isset($request_body["status"])){
+            $status = $request_body["status"] === "enabled";
+            $res = $this->api->updateAutoSyncStatus($url,$status);
+            if($res){
+                return array(
+                    "status"=>"success"
+                );
+            }
+        }
+        return array(
+            "status"=>"failed"
+        );
+    }
+    /**
+     * @param $request
+     * @return array|WP_Error
+     */
+    function dashSaveApiKey( $request ) {
+        $request_body   = $request->get_body_params();
+        $settings = (array) get_option("moo_settings");
+        if ( !isset($request_body["api_key"]) || empty( $request_body["api_key"] ) ) {
+            return new WP_Error( 'api_key_required', 'API KEY is not found', array( 'status' => 404 ) );
+        }
+
+        if (isset($request_body["api_key"])){
+            $body = array(
+                "api_key"=>$request_body["api_key"],
+                "home_url"=>get_option("home"),
+                "restapi_url"=>get_rest_url(),
+                "version"=>$this->version
+            );
+            $response = $this->api->checkApiKey($body);
+            if($response && is_array($response)){
+                if($response["httpCode"] === 400 ||  $response["httpCode"] === 500 ){
+                    return array(
+                        "status"=>"failed",
+                        "message"=>"An error has occurred, please refresh the page"
+                    );
+                }
+                if($response["httpCode"] === 404 ){
+                    return array(
+                        "status"=>"failed",
+                        "message"=>"The API KEY isn't valid"
+                    );
+                }
+                if($response["httpCode"] === 401 ){
+                    $settings["api_key"] = $request_body["api_key"];
+                    update_option("moo_settings",$settings);
+                    return array(
+                        "status"=>"failed",
+                        "message"=>"The api key is valid but your website isn't connected to Clover. Please re-install the app Smart Online Order on your Clover account"
+                    );
+                }
+                if($response["httpCode"] === 200 ){
+                    $settings["api_key"] = $request_body["api_key"];
+                    update_option("moo_settings",$settings);
+                    $result = json_decode($response["responseContent"], true);
+                    return $result;
+                }
+            }
+            return array(
+                "status"=>"failed",
+                "message"=>"We couldn't check the api key right now, please try again"
+            );
+        } else {
+            return array(
+                "status"=>"failed",
+                "message"=>"The API KEY isn't valid"
+            );
+        }
+    }
     function dashExportSettings( $request ){
         $settings = (array) get_option("moo_settings");
         header('Content-Type: application/json');
@@ -503,45 +696,47 @@ class DashboardRoutes extends BaseRoute {
         $permittedExtension = 'json';
         $permittedTypes = ['application/json', 'text/plain'];
 
-        $files = $request->get_file_params();
-        $headers = $request->get_headers();
+        try  {
+            $files = $request->get_file_params();
 
-        if ( !isset( $files['file'] ) || empty( $files['file'] ) ) {
-            return new WP_Error( 'data_required', 'New Data not found', array( 'status' => 400 ) );
+            if ( !isset( $files['file'] ) || empty( $files['file'] ) ) {
+                return new WP_Error( 'data_required', 'New Data not found', array( 'status' => 400 ) );
+            }
+
+            $file = $files['file'];
+
+            // confirm no file errors
+            if (! $file['error'] === UPLOAD_ERR_OK ) {
+                return new WP_Error( 'Upload error: ' . $file['error'], array( 'status' => 400 ) );
+            }
+            // confirm extension meets requirements
+            $ext = pathinfo( $file['name'], PATHINFO_EXTENSION );
+            if ( $ext !== $permittedExtension ) {
+                return new WP_Error( 'Invalid extension. ', array( 'status' => 400 ));
+            }
+            // check type
+            /*
+            $mimeType = mime_content_type($file['tmp_name']);
+            if ( !in_array( $file['type'], $permittedTypes )
+                || !in_array( $mimeType, $permittedTypes ) ) {
+                return new WP_Error( 'Invalid mime type' , array( 'status' => 400 ));
+            }
+            */
+            $handle = fopen( $file['tmp_name'], 'r' );
+            $filecontent =  fread($handle,filesize($file['tmp_name']));
+
+            $data = json_decode($filecontent,true);
+            update_option("moo_settings",$data);
+            return array(
+                "status"=>true,
+                "message"=>"imported"
+            );
+        } catch (Exception $e){
+            return array(
+                "status"=>false,
+                "message"=>$e->getMessage()
+            );
         }
-
-
-        $file = $files['file'];
-        // confirm file uploaded via POST
-        if (! is_uploaded_file( $file ) && false ) {
-            return new WP_Error( 'File upload check failed ', array( 'status' => 400 ));
-        }
-
-        // confirm no file errors
-        if (! $file['error'] === UPLOAD_ERR_OK ) {
-            return new WP_Error( 'Upload error: ' . $file['error'], array( 'status' => 400 ) );
-        }
-        // confirm extension meets requirements
-        $ext = pathinfo( $file['name'], PATHINFO_EXTENSION );
-        if ( $ext !== $permittedExtension ) {
-            return new WP_Error( 'Invalid extension. ', array( 'status' => 400 ));
-        }
-        // check type
-        $mimeType = mime_content_type($file['tmp_name']);
-        if ( !in_array( $file['type'], $permittedTypes )
-            || !in_array( $mimeType, $permittedTypes ) ) {
-            return new WP_Error( 'Invalid mime type' , array( 'status' => 400 ));
-        }
-        $handle = fopen( $file['tmp_name'], 'r' );
-        $filecontent =  fread($handle,filesize($file['tmp_name']));
-
-        $data = json_decode($filecontent,true);
-        update_option("moo_settings",$data);
-        return array(
-            "status"=>true,
-            "message"=>"imported"
-        );
-
     }
     function dashImportItemsDescriptions( $request ){
         global $wpdb;
@@ -559,10 +754,6 @@ class DashboardRoutes extends BaseRoute {
 
 
         $file = $files['file'];
-        // confirm file uploaded via POST
-        if (! is_uploaded_file( $file ) && false ) {
-            return new WP_Error( 'File upload check failed ', array( 'status' => 400 ));
-        }
 
         // confirm no file errors
         if (! $file['error'] === UPLOAD_ERR_OK ) {
@@ -574,11 +765,13 @@ class DashboardRoutes extends BaseRoute {
             return new WP_Error( 'Invalid extension. ', array( 'status' => 400 ));
         }
         // check type
+        /*
         $mimeType = mime_content_type($file['tmp_name']);
         if ( !in_array( $file['type'], $permittedTypes )
             || !in_array( $mimeType, $permittedTypes ) ) {
             return new WP_Error( 'Invalid mime type' , array( 'status' => 400 ));
         }
+        */
         $handle = fopen( $file['tmp_name'], 'r' );
         $filecontent =  fread($handle,filesize($file['tmp_name']));
 
@@ -614,8 +807,11 @@ class DashboardRoutes extends BaseRoute {
     function dashImportImages( $request ){
         require_once( ABSPATH . 'wp-admin/includes/image.php' );
         global $wpdb;
-        $cloneImages = true;
-        $body = $request->get_file_params();
+        if ( isset( $request["cloneImages"] ) ) {
+            $cloneImages = $request["cloneImages"];
+        } else {
+            $cloneImages = true;
+        }
 
         $permittedExtension = 'json';
         $permittedTypes = ['application/json', 'text/plain'];
@@ -629,11 +825,6 @@ class DashboardRoutes extends BaseRoute {
 
 
         $file = $files['file'];
-        // confirm file uploaded via POST
-        if (! is_uploaded_file( $file ) && false ) {
-            return new WP_Error( 'File upload check failed ', array( 'status' => 400 ));
-        }
-
         // confirm no file errors
         if (! $file['error'] === UPLOAD_ERR_OK ) {
             return new WP_Error( 'Upload error: ' . $file['error'], array( 'status' => 400 ) );
@@ -644,11 +835,13 @@ class DashboardRoutes extends BaseRoute {
             return new WP_Error( 'Invalid extension. ', array( 'status' => 400 ));
         }
         // check type
+        /*
         $mimeType = mime_content_type($file['tmp_name']);
         if ( !in_array( $file['type'], $permittedTypes )
             || !in_array( $mimeType, $permittedTypes ) ) {
             return new WP_Error( 'Invalid mime type' , array( 'status' => 400 ));
         }
+        */
         $handle = fopen( $file['tmp_name'], 'r' );
         $filecontent =  fread($handle,filesize($file['tmp_name']));
 
@@ -659,7 +852,11 @@ class DashboardRoutes extends BaseRoute {
             foreach ($data["items"] as $item) {
                 if(isset($item["url"])){
                     if($cloneImages){
-                        $image_data = file_get_contents( $item["url"] );
+                        try{
+                            $image_data = file_get_contents( $item["url"] );
+                        } catch (Exception  $e){
+                            continue;
+                        }
                         $filename = basename( $item["url"] );
                         $filetype = wp_check_filetype( $filename, null );
 
@@ -680,7 +877,7 @@ class DashboardRoutes extends BaseRoute {
 
                     $name = esc_sql($item["name"]);
                     $sql = "SELECT * FROM `{$wpdb->prefix}moo_item` 
-                        WHERE name like '%{$name}%'
+                        WHERE name like '{$name}'
                         OR uuid = '{$item["uuid"]}';";
                     $oneItem = $wpdb->get_row($sql);
                     if ($oneItem){
@@ -717,7 +914,11 @@ class DashboardRoutes extends BaseRoute {
             foreach ($data["categories"] as $category) {
                 if(isset($category["image_url"]) && (isset($category["uuid"]) || isset($category["name"]))){
                     if($cloneImages){
-                        $image_data = file_get_contents( $category["image_url"] );
+                        try{
+                            $image_data = file_get_contents( $category["image_url"] );
+                        } catch (Exception  $e){
+                            continue;
+                        }
                         $filename = basename( $category["image_url"] );
                         if ( wp_mkdir_p( $upload_dir['path'] ) ) {
                             $file = $upload_dir['path'] . '/' . $filename;
@@ -765,7 +966,7 @@ class DashboardRoutes extends BaseRoute {
                        $sql = "UPDATE `{$wpdb->prefix}moo_category` 
                         SET image_url = '{$link_image}',
                           description = '{$cat_desc}'
-                        WHERE name like '%{$name}%';";
+                        WHERE name like '{$name}';";
                         $wpdb->query($sql);
                    }
                 }
@@ -774,6 +975,48 @@ class DashboardRoutes extends BaseRoute {
         return array(
             "status"=>true,
             "message"=>"imported"
+        );
+    }
+    function dashGetAutoSyncDetails( $request ){
+        $url = get_option("home");
+        if (isset($request["page"])){
+            $page = intval($request["page"]);
+        } else {
+            $page = 1;
+        }
+        $res = $this->api->getAutoSyncDetails($url,$page);
+        if($res){
+            return $res;
+        }
+
+        return array(
+            "status"=>"failed"
+        );
+    }
+    function dashGetAutoSyncItemsNames( $request ){
+        $request_body   = $request->get_body_params();
+        if (isset($request_body["items"]) && is_array($request_body["items"])){
+            $itemsString = "(";
+            foreach($request_body["items"] as $item) {
+                $itemsString .= "'".$item."',";
+            }
+            $itemsString = substr($itemsString, 0, strlen($itemsString)-1);
+            $itemsString .= ")";
+            if (strlen($itemsString)>1) {
+                $items = $this->model->getItemsNamesByUuids($itemsString);
+                $finalResult = array();
+                foreach ($items as  $i){
+                    $finalResult[$i->uuid] = $i->name;
+                }
+                return array(
+                    "status"=>"success",
+                    "data"=>$finalResult
+                );
+            }
+        }
+
+        return array(
+            "status"=>"failed"
         );
     }
 }
